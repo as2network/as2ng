@@ -43,7 +43,7 @@ dependencyManagement {
     // Serialisation
     // ------------------------------------------------------------------
 
-    dependency 'com.google.flatbuffers:flatbuffers-java:1.12.0'
+    dependency 'com.google.flatbuffers:flatbuffers-java:1.11.0'
     dependency 'javax.xml.bind:jaxb-api:2.3.1'
 
     // ------------------------------------------------------------------
