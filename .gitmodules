@@ -1,0 +1,3 @@
+[submodule "docker-utils"]
+	path = docker-utils
+	url = git@github.com:41north/docker-utils.git
