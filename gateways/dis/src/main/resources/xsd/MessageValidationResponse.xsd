@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2010 rel. 3 (x64) (http://www.altova.com) by Shailesh Sardesai (IBM CORPORATION) -->
+<!-- Authored with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by CBP TASPO - POCs: Shailesh Sardesai and Ed Jenkins  (CUSTOMS & BORDER PROTECTION) -->
+<xs:schema xmlns="http://cbp.dhs.gov/DIS" xmlns:DIS="http://cbp.dhs.gov/DIS" xmlns:TradeData="http://cbp.dhs.gov/TradeData" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cbp.dhs.gov/DIS" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="CommonData.xsd"/>
+	<xs:include schemaLocation="MessageEnvelope.xsd"/>
+	<xs:complexType name="MessageValidationResponse">
+		<xs:sequence>
+			<xs:element name="MessageLevelResult" type="MessageLevelResult"/>
+			<xs:element name="DocumentLevelResult" type="DocumentLevelResult" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="MessageLevelResult">
+		<xs:sequence>
+			<xs:element name="ProcessedMessageHeader" type="MessageHeader"/>
+			<xs:element name="MessageProcessingResult" type="ProcessingResult"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DocumentLevelResult">
+		<xs:sequence>
+			<xs:element name="ProcessedDocumentHeader" type="DocumentHeader" minOccurs="0"/>
+			<xs:element name="PackageIdentifier" type="PackageIdentifierType" minOccurs="0"/>
+			<xs:element name="TradeTransaction" type="TradeTransaction" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Trade Transactions such as Entries, Bills etc that this document is associated with in the Submission</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentProcessingResult" type="ProcessingResult" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ProcessingResult">
+		<xs:sequence>
+			<xs:element name="ProcessingEvent" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Processing Event</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ProcessingStatus" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Used to Request Document Information by a specified CBP RequestID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ProcessingStatusSummaryText" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Processing Status Summary Text</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ProcessingLogText" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Processing Status Summary Text</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

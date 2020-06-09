@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2016 (x64) (http://www.altova.com) by US Customs and Border Protection (US Customs and Border Protection) -->
+<!-- CBP TASPO - POCs: Shailesh Sardesai and Nick Shastri  (CUSTOMS & BORDER PROTECTION) -->
+<!--  Defines common data used across all services. Note: The entire MessageEnvelope is the payload -->
+<!--  IWS Spec version: 2.0 -->
+<xs:schema xmlns="http://iws.cbp.dhs.gov/ITDSServices/IWS" xmlns:IWS="http://iws.cbp.dhs.gov/ITDSServices/IWS" xmlns:ITDS="http://iws.cbp.dhs.gov/ITDS" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://iws.cbp.dhs.gov/ITDSServices/IWS" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="ResponseMessage" type="ResponseMessage"/>
+	<xs:complexType name="ResponseMessage">
+		<xs:annotation>
+			<xs:documentation>A message response is received synchronously upon a making web service call</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ReturnCode" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>SUCCESS or FAILURE</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ReturnRemark" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>A remark that describes the result of the web service call</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ErrorDetailsList" type="IWS:ErrorDetailsList" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Any details of errors encountered. Populated only if ReturnCode is FAILURE.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ErrorDetailsList">
+		<xs:annotation>
+			<xs:documentation>List of Error Detail elements</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ErrorDetails" type="IWS:ErrorDetails" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Error Detail Element</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ErrorDetails">
+		<xs:annotation>
+			<xs:documentation>Details or any errors or exceptions encountered</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ErrorCode" type="IWS:enumErrorCode">
+				<xs:annotation>
+					<xs:documentation>enumErrorCode to facilitate automated error processing and routing if needed. Note that ErrorCode 1010 indicates Authentication Failure.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ErrorDescription" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>A remark that describes the result of the web service call</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="enumMessageType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="IWSMessage"/>
+			<xs:enumeration value="Other"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="enumErrorCode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="1000"/>
+			<xs:enumeration value="1001"/>
+			<xs:enumeration value="1002"/>
+			<xs:enumeration value="1003"/>
+			<xs:enumeration value="1004"/>
+			<xs:enumeration value="1005"/>
+			<xs:enumeration value="1006"/>
+			<xs:enumeration value="1007"/>
+			<xs:enumeration value="1008"/>
+			<xs:enumeration value="1009"/>
+			<xs:enumeration value="1010"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="enumTradePartyType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="MANUFACTURER"/>
+			<xs:enumeration value="EXPORTER"/>
+			<xs:enumeration value="IMPORTER"/>
+			<xs:enumeration value="SHIPPER"/>
+			<xs:enumeration value="CARRIER"/>
+			<xs:enumeration value="BROKER"/>
+			<xs:enumeration value="FILER"/>
+			<xs:enumeration value="CONSIGNEE"/>
+			<xs:enumeration value="AGENT"/>
+			<xs:enumeration value="BUYER"/>
+			<xs:enumeration value="SELLER"/>
+			<xs:enumeration value="FACILITATOR"/>
+			<xs:enumeration value="OTHER"/>
+			<xs:enumeration value="UNKNOWN"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

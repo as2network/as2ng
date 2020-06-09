@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by CBP User (CUSTOMS & BORDER PROTECTION) -->
+<!-- Authored with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by CBP TASPO - POCs: Shailesh Sardesai and Ed Jenkins  (CUSTOMS & BORDER PROTECTION) -->
+<xs:schema xmlns="http://cbp.dhs.gov/DIS" xmlns:DIS="http://cbp.dhs.gov/DIS" xmlns:TradeData="http://cbp.dhs.gov/TradeData" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cbp.dhs.gov/DIS" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="CommonData.xsd"/>
+	<xs:complexType name="DocumentWithdrawal">
+		<xs:sequence>
+			<xs:element name="DocumentHeader" type="DocumentHeader"/>
+			<xs:element name="SubmittedToPortCode" type="SubmittedToPortCode" minOccurs="0"/>
+			<xs:element name="ActionCode" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>
+					    Please see DIS Implementation Guide.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TradeTransaction" type="TradeTransaction"/>
+			<xs:element name="DocumentWithdrawalReason" type="xs:string"/>
+			<xs:element name="Comment" type="xs:string" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

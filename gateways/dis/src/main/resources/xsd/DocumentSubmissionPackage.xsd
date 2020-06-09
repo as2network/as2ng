@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2018 rel. 2 sp1 (x64) (http://www.altova.com) by Nityanand Shastri (US Customs & Border Protection) -->
+<!-- Authored with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by CBP TASPO - POCs: Shailesh Sardesai and Ed Jenkins  (CUSTOMS & BORDER PROTECTION) DIS XML SCHEMA version 1.2-->
+<xs:schema xmlns="http://cbp.dhs.gov/DIS" xmlns:DIS="http://cbp.dhs.gov/DIS" xmlns:TradeData="http://cbp.dhs.gov/TradeData" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cbp.dhs.gov/DIS" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="CommonData.xsd"/>
+	<xs:complexType name="DocumentSubmissionPackage">
+		<xs:sequence>
+			<xs:element name="PackageIdentifier" type="PackageIdentifierType" minOccurs="0"/>
+			<xs:element name="SubmittedToPortCode" type="SubmittedToPortCode" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Schedule D Port Code that this document is intended for. (In general, all Ports have access to all documents)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ActionCode" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Please see DIS Implemenation Guide</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TradeTransaction" type="TradeTransaction" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Trade Transactions such as Entries, Bills etc that this document is associated with</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="CBPRequest" type="CBPRequest" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Required. Specify 'UNSOLICITED'; 'UNKNOWN' or the actual CBP Request ID that this submission is associated with</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentData" type="DocumentData" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Document specific data such as Document ID, Label, etc</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

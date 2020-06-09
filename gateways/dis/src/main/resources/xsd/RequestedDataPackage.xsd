@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2016 (x64) (http://www.altova.com) by US Customs and Border Protection (US Customs and Border Protection) -->
+<!-- Authored with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by CBP TASPO - POCs: Shailesh Sardesai and Ed Jenkins  (CUSTOMS & BORDER PROTECTION) -->
+<xs:schema xmlns="http://cbp.dhs.gov/DIS" xmlns:TradeData="http://cbp.dhs.gov/TradeData" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cbp.dhs.gov/DIS" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="CommonData.xsd"/>
+	<xs:include schemaLocation="DataRequestPackage.xsd"/>
+	<xs:complexType name="RequestedDataPackage">
+		<xs:sequence>
+			<xs:element name="DataRequestPackage" type="DataRequestPackage">
+				<xs:annotation>
+					<xs:documentation>The request for which data is being sent </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="RequestedData" type="RequestedData">
+				<xs:annotation>
+					<xs:documentation>Requested Data</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RequestedData">
+		<xs:annotation>
+			<xs:documentation>Requested Data</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="RequestedDataRecord" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RequestedDataRecord">
+		<xs:sequence>
+			<xs:element name="DocumentID" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Required - ID of the sent Document</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentLabel" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Required - Form Label of the sent Document. Ex CBP Form 301 </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentName" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Required - Specific Name of the sent document ex. 2009 Fish Import License</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentType" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Required - Type of Document Sent </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentTrackingID" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Descriptive ID of the sent document transmission to facilitate tracking etc. ex. ACE Email 29901010</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentSentDate" type="xs:dateTime" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Date the document was sent to CBP</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentValidationStatus" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Status of the Document Transmission to CBP</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentReviewStatus" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Status of the Document Review by CBP and PGAs</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentRejectReason" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Reason For Rejection if Document Review Status = 'REJECTED'</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

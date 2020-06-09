@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2015 sp1 (x64) (http://www.altova.com) by TASPD (US Customs & Border Protection) -->
+<!-- Authored by CBP TASPO - POCs: Shailesh Sardesai and Ed Jenkins  (CUSTOMS & BORDER PROTECTION) -->
+<!-- 
+NOTE: ONLY DOCUMENTS THAT ARE EXPLICITLY LISTED IN THE FEDERAL REGISTER NOTICE (FRN) 
+            FOR TRANSMISSION BY TRADE SHOULD BE SUBMITTED TO CBP VIA DIS. THE DOCUMENT LABEL 
+            LIST IN THE DIS XSD IS ONLY A REFERENCE TO THE TECHNICAL ABILITY TO SUPPORT EACH DOCUMENT TYPE TO 
+            FACILITATE TESTING. THE FRN IS THE SOLE, FORMAL AUTHORITY WHICH DICTATES THE SPECIFIED ALLOWABLE FORMS TO
+            BE TRANSIMITTED TO CBP IN THE OPERATIONAL PRODUCTION ENVIRONMENT.
+
+        MOST ENUMERATED VALUES HAVE DELIBERATELY BEEN DEFINED AS XS:STRING TO AVOID CHANGE IMPACT. 
+        ENUMERATIONS (i.e. LIST OF POSSIBLE VALUES) ARE INSTEAD SPECIFIED IN THE DIS IMPLEMENTATION GUIDE.
+
+         NOTE: Please see the DIS Implementation guide published on CBP.GOV for supporting documentation regarding this XSD.
+        specifically, please use the guide to identify all enumerated values for elements in this XSD and for the list of documents supported by DIS at any given time.
+-->
+<xs:schema xmlns="http://cbp.dhs.gov/DIS" xmlns:TradeData="http://cbp.dhs.gov/TradeData" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cbp.dhs.gov/DIS" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="DocumentSubmissionPackage.xsd"/>
+	<xs:include schemaLocation="DocumentWithdrawal.xsd"/>
+	<xs:include schemaLocation="MessageValidationResponse.xsd"/>
+	<xs:include schemaLocation="DocumentReviewResponse.xsd"/>
+	<xs:include schemaLocation="DataRequestPackage.xsd"/>
+	<xs:include schemaLocation="RequestedDataPackage.xsd"/>
+	<xs:element name="MessageEnvelope">
+		<xs:annotation>
+			<xs:documentation>MessageEnvelope</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="MessageHeader" type="MessageHeader"/>
+				<xs:element name="MessageBody" type="MessageBody"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="MessageHeader">
+		<xs:annotation>
+			<xs:documentation>One Message Header should be included on every message from a Trade Party to CBP. It contains logistical header Information about the message. </xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="MessageID" type="xs:string" nillable="false">
+				<xs:annotation>
+					<xs:documentation>Unique Message Identifier to relate specific message back to sending system for audit and troubleshooting. Uniqueness is within each sending system</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="MessageType" type="xs:string" nillable="false">
+				<xs:annotation>
+					<xs:documentation>Enumerated List of all possible message types</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="SentDateTime" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Date and Time recorded by the sender when this message was sent, for audit and troubleshooting. EST Format 2010-05-25T00:34:47.0Z </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TransmitterID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Unique CBP approved ID of the sender (ABI 'A' Record ID). Used to decide whom to send responses back to.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TransmitterSiteCode" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Unique CBP approved Site Code of the sender (ABI 'A' Record SiteCode)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="PreparerID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Unique CBP approved ID of the Preparer (ABI 'B' Record ID). Used to decide whom to send responses back to.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="PreparerSiteCode" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Unique CBP approved Site Code of the Preparer (ABI 'B' Record SiteCode)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Comment" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Any Informative Comment</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="MessageBody">
+		<xs:annotation>
+			<xs:documentation>The Message Body should be included on every message from a Trade Party to CBP. It contains a single 'Payload'. The choices of Payloads are below </xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="DocumentSubmissionPackage" type="DocumentSubmissionPackage">
+				<xs:annotation>
+					<xs:documentation>To be used by Trade when submitting a document to CBP</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentWithdrawal" type="DocumentWithdrawal">
+				<xs:annotation>
+					<xs:documentation>To be used by Trade when withdrawing a prior submitted a document</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DataRequestPackage" type="DataRequestPackage">
+				<xs:annotation>
+					<xs:documentation>To be used by CBP when Trade asks CBP for Data</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="RequestedDataPackage" type="RequestedDataPackage">
+				<xs:annotation>
+					<xs:documentation>To be used when sending a response to a query from Trade</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="MessageValidationResponse" type="MessageValidationResponse">
+				<xs:annotation>
+					<xs:documentation>To be used when transmitting a Message Validation status from CBP to Trade</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentReviewResponse" type="DocumentReviewResponse">
+				<xs:annotation>
+					<xs:documentation>To be used when transmitting a Document Review status from CBP to Trade</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+</xs:schema>

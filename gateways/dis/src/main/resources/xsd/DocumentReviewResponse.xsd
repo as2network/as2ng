@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by shailesh sardesai (CUSTOMS & BORDER PROTECTION) -->
+<!-- Authored with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by CBP TASPO - POCs: Shailesh Sardesai and Ed Jenkins  (CUSTOMS & BORDER PROTECTION) -->
+<xs:schema xmlns="http://cbp.dhs.gov/DIS" xmlns:DIS="http://cbp.dhs.gov/DIS" xmlns:TradeData="http://cbp.dhs.gov/TradeData" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cbp.dhs.gov/DIS" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="CommonData.xsd"/>
+	<xs:complexType name="DocumentReviewResponse">
+		<xs:sequence>
+			<xs:element name="DocumentHeader" type="DocumentHeader"/>
+			<xs:element name="SubmittedToPortCode" type="SubmittedToPortCode" minOccurs="0"/>
+			<xs:element name="TradeTransaction" type="TradeTransaction"/>
+			<xs:element name="DocumentReviewResult" type="DocumentReviewResult"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DocumentReviewResult">
+		<xs:sequence>
+			<xs:element name="ProcessingEvent" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Name of Event</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentReviewStatus" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Status of the Document Review by CBP and PGAs</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentReviewComment" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Officer Comment entered during the Review Event</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="DocumentRejectReason" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Reason For Rejection if Document Review Status = 'REJECTED'</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

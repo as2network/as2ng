@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSpy v2016 (x64) (http://www.altova.com) by US Customs and Border Protection (US Customs and Border Protection) -->
+<!-- Authored with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by CBP TASPO - POCs: Shailesh Sardesai and Ed Jenkins  (CUSTOMS & BORDER PROTECTION) -->
+<xs:schema xmlns="http://cbp.dhs.gov/DIS" xmlns:DIS="http://cbp.dhs.gov/DIS" xmlns:TradeData="http://cbp.dhs.gov/TradeData" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://cbp.dhs.gov/DIS" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="CommonData.xsd"/>
+	<xs:complexType name="DataRequestPackage">
+		<xs:annotation>
+			<xs:documentation>To be used when Trade asks CBP for Data</xs:documentation>
+		</xs:annotation>
+		<xs:choice>
+			<xs:element name="RequestDocInfoByDocumentID" type="RequestDocumentInfoByDocumentID" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Used to Request Document Information by a specified Date Range</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="RequestDocInfoByDateRange" type="RequestDocumentInfoByDateRange" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Used to Request Document Information by a specified Date Range</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="RequestDocInfoByCBPRequest" type="RequestDocumentInfoByCBPRequestID" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Used to Request Document Information by a specified CBP RequestID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="RequestDocInfoByTradeTxn" type="RequestDocumentInfoByTradeTxnID" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Used to Request Document Information by a specified Trade Txn such as an Entry Number, Bill Number etc. </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="RequestDocumentInfoByDocumentID">
+		<xs:annotation>
+			<xs:documentation>Used to Request Document Information by a specified CBP Request ID</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="DocumentID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>CBP Request ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RequestDocumentInfoByDateRange">
+		<xs:annotation>
+			<xs:documentation>Used to Request Document Information by a specified Date Range</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="FromDate" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Lower limit of Data range. EST Format 2010-05-25T00:34:47.0Z </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="ToDate" type="xs:dateTime">
+				<xs:annotation>
+					<xs:documentation>Upper limit of Data range. EST Format 2010-05-25T00:34:47.0Z </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RequestDocumentInfoByCBPRequestID">
+		<xs:annotation>
+			<xs:documentation>Used to Request Document Information by a specified CBP Request ID</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="CBPRequestID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>CBP Request ID</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RequestDocumentInfoByTradeTxnID">
+		<xs:annotation>
+			<xs:documentation>Used to Request Document Information by a specified Trade Transaction ID</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="RequestID" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Required - ID of the Request for Audit and Traceability</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="TradeTransactionID" type="TradeTransaction">
+				<xs:annotation>
+					<xs:documentation>Supply Chain Trade Transactions such as Entries, Bills etc that this document is associated with</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
