@@ -37,8 +37,8 @@ dependencies {
 
 flatbuffers {
   language.set(Language.JAVA)
-  inputSources.set(listOf("customs.fbs"))
-  extraFlatcArgs.set("flatc --java -o /output/ -I /input --gen-all /input/customs.fbs")
+  inputSources.set(listOf("domain.fbs"))
+  extraFlatcArgs.set("flatc --java -o /output/ -I /input --gen-all /input/domain.fbs")
 }
 
 tasks {

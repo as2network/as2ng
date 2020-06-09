@@ -1,5 +1,0 @@
-namespace com.freighttrust.customs.fb;
-
-table Test {
-  number: uint64;
-}
