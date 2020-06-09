@@ -26,6 +26,8 @@ dependencies {
 
   api("com.helger:as2-lib")
 
+  implementation(project(":domain"))
+
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 

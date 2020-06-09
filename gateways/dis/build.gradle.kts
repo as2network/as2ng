@@ -29,7 +29,7 @@ dependencies {
 
   api(kotlin("stdlib"))
 
-  implementation("javax.xml.bind:jaxb-api")
+  implementation(project(":domain"))
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }

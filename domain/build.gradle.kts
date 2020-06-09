@@ -21,6 +21,7 @@ import dev.north.fortyone.gradle.flatbuffers.Language
 plugins {
   kotlin("jvm")
   id("dev.north.fortyone.flatbuffers") version "0.1.0"
+  id("com.github.bjornvester.xjc") version "1.3"
 }
 
 dependencies {
@@ -28,6 +29,8 @@ dependencies {
   api(kotlin("stdlib"))
 
   api("com.google.flatbuffers:flatbuffers-java")
+
+  implementation("javax.xml.bind:jaxb-api")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
