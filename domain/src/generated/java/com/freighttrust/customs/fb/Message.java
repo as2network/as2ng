@@ -14,8 +14,8 @@ public final class Message extends Table {
   public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; vtable_start = bb_pos - bb.getInt(bb_pos); vtable_size = bb.getShort(vtable_start); }
   public Message __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public SourceMetadata sourceInfo() { return sourceInfo(new SourceMetadata()); }
-  public SourceMetadata sourceInfo(SourceMetadata obj) { int o = __offset(4); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
+  public OriginMetadata origin() { return origin(new OriginMetadata()); }
+  public OriginMetadata origin(OriginMetadata obj) { int o = __offset(4); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
   public MessageHeader header() { return header(new MessageHeader()); }
   public MessageHeader header(MessageHeader obj) { int o = __offset(6); return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null; }
   public byte payload(int j) { int o = __offset(8); return o != 0 ? bb.get(__vector(o) + j * 1) : 0; }
@@ -24,18 +24,18 @@ public final class Message extends Table {
   public ByteBuffer payloadInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 8, 1); }
 
   public static int createMessage(FlatBufferBuilder builder,
-      int sourceInfoOffset,
+      int originOffset,
       int headerOffset,
       int payloadOffset) {
     builder.startObject(3);
     Message.addPayload(builder, payloadOffset);
     Message.addHeader(builder, headerOffset);
-    Message.addSourceInfo(builder, sourceInfoOffset);
+    Message.addOrigin(builder, originOffset);
     return Message.endMessage(builder);
   }
 
   public static void startMessage(FlatBufferBuilder builder) { builder.startObject(3); }
-  public static void addSourceInfo(FlatBufferBuilder builder, int sourceInfoOffset) { builder.addOffset(0, sourceInfoOffset, 0); }
+  public static void addOrigin(FlatBufferBuilder builder, int originOffset) { builder.addOffset(0, originOffset, 0); }
   public static void addHeader(FlatBufferBuilder builder, int headerOffset) { builder.addOffset(1, headerOffset, 0); }
   public static void addPayload(FlatBufferBuilder builder, int payloadOffset) { builder.addOffset(2, payloadOffset, 0); }
   public static int createPayloadVector(FlatBufferBuilder builder, byte[] data) { builder.startVector(1, data.length, 1); for (int i = data.length - 1; i >= 0; i--) builder.addByte(data[i]); return builder.endVector(); }

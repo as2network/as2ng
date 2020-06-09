@@ -5,6 +5,9 @@ package com.freighttrust.customs.jooq;
 
 
 import com.freighttrust.customs.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.customs.jooq.tables.Message;
+import com.freighttrust.customs.jooq.tables.MessageHeader;
+import com.freighttrust.customs.jooq.tables.MessageOrigin;
 
 import javax.annotation.processing.Generated;
 
@@ -26,4 +29,19 @@ public class Tables {
      * The table <code>public.flyway_schema_history</code>.
      */
     public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
+
+    /**
+     * The table <code>public.message</code>.
+     */
+    public static final Message MESSAGE = Message.MESSAGE;
+
+    /**
+     * The table <code>public.message_header</code>.
+     */
+    public static final MessageHeader MESSAGE_HEADER = MessageHeader.MESSAGE_HEADER;
+
+    /**
+     * The table <code>public.message_origin</code>.
+     */
+    public static final MessageOrigin MESSAGE_ORIGIN = MessageOrigin.MESSAGE_ORIGIN;
 }

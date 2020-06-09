@@ -2,8 +2,8 @@
 
 package com.freighttrust.customs.fb;
 
-public final class SourceEntity {
-  private SourceEntity() { }
+public final class Entity {
+  private Entity() { }
   public static final byte TradingPartner = 0;
   public static final byte DIS = 1;
 

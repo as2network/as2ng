@@ -8,11 +8,11 @@ import java.util.*;
 import com.google.flatbuffers.*;
 
 @SuppressWarnings("unused")
-public final class SourceMetadata extends Table {
-  public static SourceMetadata getRootAsSourceMetadata(ByteBuffer _bb) { return getRootAsSourceMetadata(_bb, new SourceMetadata()); }
-  public static SourceMetadata getRootAsSourceMetadata(ByteBuffer _bb, SourceMetadata obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
+public final class OriginMetadata extends Table {
+  public static OriginMetadata getRootAsOriginMetadata(ByteBuffer _bb) { return getRootAsOriginMetadata(_bb, new OriginMetadata()); }
+  public static OriginMetadata getRootAsOriginMetadata(ByteBuffer _bb, OriginMetadata obj) { _bb.order(ByteOrder.LITTLE_ENDIAN); return (obj.__assign(_bb.getInt(_bb.position()) + _bb.position(), _bb)); }
   public void __init(int _i, ByteBuffer _bb) { bb_pos = _i; bb = _bb; vtable_start = bb_pos - bb.getInt(bb_pos); vtable_size = bb.getShort(vtable_start); }
-  public SourceMetadata __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
+  public OriginMetadata __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
   public byte entity() { int o = __offset(4); return o != 0 ? bb.get(o + bb_pos) : 0; }
   public byte transport() { int o = __offset(6); return o != 0 ? bb.get(o + bb_pos) : 0; }
@@ -21,25 +21,25 @@ public final class SourceMetadata extends Table {
   public ByteBuffer ipAddressInByteBuffer(ByteBuffer _bb) { return __vector_in_bytebuffer(_bb, 8, 1); }
   public long receivedAt() { int o = __offset(10); return o != 0 ? bb.getLong(o + bb_pos) : 0L; }
 
-  public static int createSourceMetadata(FlatBufferBuilder builder,
+  public static int createOriginMetadata(FlatBufferBuilder builder,
       byte entity,
       byte transport,
       int ipAddressOffset,
       long receivedAt) {
     builder.startObject(4);
-    SourceMetadata.addReceivedAt(builder, receivedAt);
-    SourceMetadata.addIpAddress(builder, ipAddressOffset);
-    SourceMetadata.addTransport(builder, transport);
-    SourceMetadata.addEntity(builder, entity);
-    return SourceMetadata.endSourceMetadata(builder);
+    OriginMetadata.addReceivedAt(builder, receivedAt);
+    OriginMetadata.addIpAddress(builder, ipAddressOffset);
+    OriginMetadata.addTransport(builder, transport);
+    OriginMetadata.addEntity(builder, entity);
+    return OriginMetadata.endOriginMetadata(builder);
   }
 
-  public static void startSourceMetadata(FlatBufferBuilder builder) { builder.startObject(4); }
+  public static void startOriginMetadata(FlatBufferBuilder builder) { builder.startObject(4); }
   public static void addEntity(FlatBufferBuilder builder, byte entity) { builder.addByte(0, entity, 0); }
   public static void addTransport(FlatBufferBuilder builder, byte transport) { builder.addByte(1, transport, 0); }
   public static void addIpAddress(FlatBufferBuilder builder, int ipAddressOffset) { builder.addOffset(2, ipAddressOffset, 0); }
   public static void addReceivedAt(FlatBufferBuilder builder, long receivedAt) { builder.addLong(3, receivedAt, 0L); }
-  public static int endSourceMetadata(FlatBufferBuilder builder) {
+  public static int endOriginMetadata(FlatBufferBuilder builder) {
     int o = builder.endObject();
     return o;
   }

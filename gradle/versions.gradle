@@ -31,13 +31,15 @@ dependencyManagement {
     }
 
     // ------------------------------------------------------------------
-    // Dependency injections
+    // Dependency injection & config
     // ------------------------------------------------------------------
 
     dependencySet(group: 'org.koin', version: '2.1.5') {
       entry 'koin-core'
       entry 'koin-test'
     }
+
+    dependency 'com.typesafe:config:1.4.0'
 
     // ------------------------------------------------------------------
     // Serialisation

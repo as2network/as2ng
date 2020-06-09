@@ -5,6 +5,9 @@ package com.freighttrust.customs.jooq;
 
 
 import com.freighttrust.customs.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.customs.jooq.tables.Message;
+import com.freighttrust.customs.jooq.tables.MessageHeader;
+import com.freighttrust.customs.jooq.tables.MessageOrigin;
 
 import javax.annotation.processing.Generated;
 
@@ -32,6 +35,9 @@ public class Indexes {
 
     public static final Index FLYWAY_SCHEMA_HISTORY_PK = Indexes0.FLYWAY_SCHEMA_HISTORY_PK;
     public static final Index FLYWAY_SCHEMA_HISTORY_S_IDX = Indexes0.FLYWAY_SCHEMA_HISTORY_S_IDX;
+    public static final Index MESSAGE_PKEY = Indexes0.MESSAGE_PKEY;
+    public static final Index MESSAGE_HEADER_PKEY = Indexes0.MESSAGE_HEADER_PKEY;
+    public static final Index MESSAGE_ORIGIN_PKEY = Indexes0.MESSAGE_ORIGIN_PKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -40,5 +46,8 @@ public class Indexes {
     private static class Indexes0 {
         public static Index FLYWAY_SCHEMA_HISTORY_PK = Internal.createIndex("flyway_schema_history_pk", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
         public static Index FLYWAY_SCHEMA_HISTORY_S_IDX = Internal.createIndex("flyway_schema_history_s_idx", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.SUCCESS }, false);
+        public static Index MESSAGE_PKEY = Internal.createIndex("message_pkey", Message.MESSAGE, new OrderField[] { Message.MESSAGE.ID }, true);
+        public static Index MESSAGE_HEADER_PKEY = Internal.createIndex("message_header_pkey", MessageHeader.MESSAGE_HEADER, new OrderField[] { MessageHeader.MESSAGE_HEADER.ID }, true);
+        public static Index MESSAGE_ORIGIN_PKEY = Internal.createIndex("message_origin_pkey", MessageOrigin.MESSAGE_ORIGIN, new OrderField[] { MessageOrigin.MESSAGE_ORIGIN.ID }, true);
     }
 }

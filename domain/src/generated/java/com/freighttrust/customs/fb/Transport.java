@@ -2,8 +2,8 @@
 
 package com.freighttrust.customs.fb;
 
-public final class SourceTransport {
-  private SourceTransport() { }
+public final class Transport {
+  private Transport() { }
   public static final byte AS2 = 0;
   public static final byte MQ = 1;
 

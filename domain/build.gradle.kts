@@ -30,6 +30,8 @@ dependencies {
 
   api("com.google.flatbuffers:flatbuffers-java")
 
+  api("org.koin:koin-core")
+
   implementation("javax.xml.bind:jaxb-api")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")

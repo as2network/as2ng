@@ -5,6 +5,9 @@ package com.freighttrust.customs.jooq;
 
 
 import com.freighttrust.customs.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.customs.jooq.tables.Message;
+import com.freighttrust.customs.jooq.tables.MessageHeader;
+import com.freighttrust.customs.jooq.tables.MessageOrigin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +33,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -59300108;
+    private static final long serialVersionUID = 1353887206;
 
     /**
      * The reference instance of <code>public</code>
@@ -41,6 +44,21 @@ public class Public extends SchemaImpl {
      * The table <code>public.flyway_schema_history</code>.
      */
     public final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = com.freighttrust.customs.jooq.tables.FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
+
+    /**
+     * The table <code>public.message</code>.
+     */
+    public final Message MESSAGE = com.freighttrust.customs.jooq.tables.Message.MESSAGE;
+
+    /**
+     * The table <code>public.message_header</code>.
+     */
+    public final MessageHeader MESSAGE_HEADER = com.freighttrust.customs.jooq.tables.MessageHeader.MESSAGE_HEADER;
+
+    /**
+     * The table <code>public.message_origin</code>.
+     */
+    public final MessageOrigin MESSAGE_ORIGIN = com.freighttrust.customs.jooq.tables.MessageOrigin.MESSAGE_ORIGIN;
 
     /**
      * No further instances allowed
@@ -64,6 +82,9 @@ public class Public extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
-            FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY);
+            FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
+            Message.MESSAGE,
+            MessageHeader.MESSAGE_HEADER,
+            MessageOrigin.MESSAGE_ORIGIN);
     }
 }
