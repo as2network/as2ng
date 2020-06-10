@@ -6,7 +6,7 @@
   "scripts": {
     "docsify": "docsify",
     "mermaid": "mermaid",
-    "docs:serve": "docsify serve ./docs"
+    "docs:serve": "docsify serve docs"
   },
   "dependencies": {
     "docsify-cli": "^4.4.1"
