@@ -23,7 +23,12 @@
 <script src="//unpkg.com/mermaid/dist/mermaid.js"></script>
 <script src="//unpkg.com/docsify-mermaid@latest/dist/docsify-mermaid.js"></script>
 <script type="application/javascript">
-  mermaid.initialize({ startOnLoad: true });
+  mermaid.initialize({
+    startOnLoad: true,
+    sequence: {
+      showSequenceNumbers: true
+    }
+  });
 </script>
 
 </body>
