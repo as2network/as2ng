@@ -1,4 +1,20 @@
 
+create table trading_partner (
+    id serial primary key,
+    name varchar(128) unique,
+    filer_code char(3) unique
+);
+
+create table port (
+    id smallint primary key,
+    name varchar(64) unique,
+    supports_vessel boolean,
+    supports_air boolean,
+    supports_rail boolean,
+    supports_road boolean,
+    supports_fixed boolean
+);
+
 create type entity as enum (
     'TradingPartner',
     'DIS'
@@ -10,32 +26,33 @@ create type transport as enum (
 );
 
 create type message_type as enum (
-    'DocumentSubmission',
+    'DocumentSubmissionPackage',
     'DocumentValidationResponse',
     'DocumentReviewResponse'
 );
 
-create table message (
+create table document_message (
     id varchar(50) primary key,
-    payload bytea
-);
-
-create table message_origin (
-    id varchar(50) primary key references message on delete cascade,
-    entity entity,
-    transport transport,
-    received_at timestamp,
-    ip_address cidr null
-);
-
-create table message_header (
-    id varchar(50) primary key references message on delete cascade,
     type message_type,
     sent_date_time timestamp,
-    transmitter_id char(3),
-    transmitter_site_code smallint,
+    transmitter_id char(3) references trading_partner(filer_code),
+    transmitter_site_code smallint reference port(id),
     preparer_id char(3),
-    preparer_site_code smallint,
-    comment varchar(50) null
+    preparer_site_code smallint references port(id),
+    payload_url varchar(128),
+    comment varchar(50) null,
+    received_at timestamp;
+    received_via transport;
+    received_from entity;
 );
+
+create table document_submission () inherits (document_message);
+
+create table document_validation_response (
+    document_submission_id varchar(50) references document_submission(id)
+) inherits (document_message);
+
+create table document_review_response (
+    document_submission_id varchar(50) references document_submission(id)
+) inherits (document_message);
 
