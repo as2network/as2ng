@@ -16,8 +16,8 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    DIS MQ ->>+ DIS Gateway: Offer message from queue://ATS.DIS.<PORT_CODE><FILER_CODE>.Outbound    
-    DIS Gateway ->>+ ActiveMQ: Publish message into queue://inbound.dis.validation.<PORT_CODE><FILER_CODE>
+    DIS MQ ->>+ DIS Gateway: Offer message from queue://ATS.DIS.<PORT_CODE>.<FILER_CODE>.Outbound    
+    DIS Gateway ->>+ ActiveMQ: Publish message into queue://inbound.dis.validation.<PORT_CODE>.<FILER_CODE>
     ActiveMQ -->>- DIS Gateway: Ack message   
     DIS Gateway -->> DIS MQ: Ack message from queue://ATS.DIS.<PORT_CODE><FILER_CODE>.Outbound    
     deactivate DIS Gateway        
