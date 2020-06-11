@@ -7,8 +7,8 @@ sequenceDiagram
     ActiveMQ ->>+ DIS Gateway: Offer message from queue://outbound.dis.submission
     DIS Gateway ->>+ DIS MQ: Publish message into queue://ATS.DIS.MSG.INBOUND
     DIS MQ -->>- DIS Gateway: Ack message    
-    DIS Gateway ->>+ ActiveMQ: Publish message into topic://submitted
-    ActiveMQ -->>- DIS Gateway: Ack message from topic://submitted
+    DIS Gateway ->>+ ActiveMQ: Publish message into queue://internal.submitted
+    ActiveMQ -->>- DIS Gateway: Ack message from queue://internal.submitted
     DIS Gateway -->>- ActiveMQ: Ack message from queue://outbound.dis.submission                        
 ```
 

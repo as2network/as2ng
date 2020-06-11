@@ -11,7 +11,7 @@ sequenceDiagram
         ActiveMQ -->>- AS2 Gateway: Ack message      
     else is invalid
         Note left of AS2 Gateway: Mimic validation response as would be received from DIS?
-        AS2 Gateway ->> AS2 Gateway: Place a ValidationResponse in TradingPartner outbox
+        AS2 Gateway ->> AS2 Gateway: Place a ValidationResponse in TradingPartner inbox
     end                 
     AS2 Gateway -->>- TradingPartner: Message Disposition Notification    
 ```
