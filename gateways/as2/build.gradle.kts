@@ -16,15 +16,29 @@
  *
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
   kotlin("jvm")
+  id("com.github.johnrengelman.shadow")
+}
+
+val build: DefaultTask by project.tasks
+build.dependsOn(tasks.shadowJar)
+
+tasks {
+  withType<ShadowJar> {
+    archiveBaseName.set(project.name)
+    archiveClassifier.set("")
+  }
 }
 
 dependencies {
 
-  api(kotlin("stdlib"))
+  implementation(kotlin("stdlib"))
+  implementation("org.jetbrains.kotlinx:kotlinx-cli:0.2.1")
 
-  api("com.helger:as2-lib")
+  implementation("com.helger:as2-server")
 
   implementation(project(":domain"))
 

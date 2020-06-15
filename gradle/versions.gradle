@@ -52,11 +52,10 @@ dependencyManagement {
     // Transports
     // ------------------------------------------------------------------
 
-    dependency 'com.helger:as2-lib:4.5.5'
+    dependency 'com.helger:as2-server:4.5.5'
 
     dependency 'javax.jms:jms:1.1'
     dependency 'org.apache.activemq:activemq-client:5.15.13'
-
 
     // ------------------------------------------------------------------
     // Postgres
