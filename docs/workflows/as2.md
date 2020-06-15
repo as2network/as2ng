@@ -6,10 +6,10 @@
 
 ## Configuration
 
-There are three important files we need to tweak and configure in order to have a sucessfully running instance of `AS2-lib`. Those are:
+There are three important files we need to tweak and configure in order to have a successfully running instance of `AS2-lib`. Those are:
 
 - `config.xml`: Configures the application such as the types of modules that are started, the logging systems, command processors and global properties.
-- `partnerships.xml`: Configures the partners and partnerships. Provides the ability to specify different signing and encryption algorithms, message compression, MDN handling, etc
+- `partnerships.xml`: Configures the partners and partnerships. Provides the ability to specify different signing and encryption algorithms, message compression, MDN handling, etc.
 - `commands.xml`: The application provides a way to enter commands to control and configure the system whilst it is running either via the console or a remote tool (configured in the `config.xml` file above). This file stores the commands that the application will support. This file should not be modified.
 - `certs.p12`: A PKCS12 keystore that stores the SSL certificates used to secure the messages for all partners. It contains the primary key for your own company as well as the public keys for all your trading partners.
 
@@ -17,7 +17,7 @@ There are three important files we need to tweak and configure in order to have 
 
 ## Application Configuration (`config.xml`)
 
-The general structure of the file is the following:
+The general structure of the file is the following (the comments explains each section accordingly):
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -71,12 +71,15 @@ The general structure of the file is the following:
     <commandProcessors>
         <commandProcessor classname="com.helger.as2.cmdprocessor.StreamCommandProcessor"/>
         <commandProcessor classname="com.helger.as2.cmdprocessor.SocketCommandProcessor"  
-            portId="4321" userid="userID" password="pWd"/>
+            portId="4321" userid="userid" password="pwd"/>
   </commandProcessors>
 
   <!-- 
       List of modules in charge of processing each incoming message.
       The list is order dependent.
+
+      DefaultMessageProcessor will run each module in a for loop and apply and ask to 
+      each one if the message applies to them if the rules defined matches or not.
   -->
   <processor classname="com.helger.as2lib.processor.DefaultMessageProcessor"
              pendingMDN="data/pendingMDN3"
@@ -127,104 +130,104 @@ The configuration is stored into `partnerships.xml` and the generic format is th
 </partnerships>
 ```
 
-We can update dynamically the configuration with the following messages to the socket server (replace `userid` and `password` with appropiate values):
+We can update dynamically the configuration with the following messages to the socket server (replace `userid` and `password` with appropriate values, default values are used):
 
 **Add partner**:
 
 ```xml
-<command userid="${userid}" password="${passs}">add name <attribute 1=value 1> <attribute 2=value 2> ... <attribute n=value n></command>
+<command userid="user" password="pwd">partner add name <attribute 1=value 1> <attribute 2=value 2> ... <attribute n=value n></command>
 ```
 
 **Add partnership**:
 
 ```xml
-<command userid="${userid}" password="${passs}">add name senderId receiverId <attribute 1=value 1> <attribute 2=value 2> ...</command>
+<command userid="user" password="pwd">partner add name senderId receiverId <attribute 1=value 1> <attribute 2=value 2> ...</command>
 ```
 
 **Delete partner**:
 
 ```xml
-<command userid="${userid}" password="${passs}">delete <name></command>
+<command userid="user" password="pwd">partner delete <name></command>
 ```
 
 **Delete partnership**:
 
 ```xml
-<command userid="${userid}" password="${passs}">delete <name></command>
+<command userid="user" password="pwd">partner delete <name></command>
 ```
 
 **List partners**:
 
 ```xml
-<command userid="${userid}" password="${passs}">list</command>
+<command userid="user" password="pwd">partner list</command>
 ```
 
 **List partnerships**:
 
 ```xml
-<command userid="${userid}" password="${passs}">list</command>
+<command userid="user" password="pwd">partnership list</command>
 ```
 
 **Refresh partnerships**:
 
 ```xml
-<command userid="${userid}" password="${passs}">refresh</command>
+<command userid="user" password="pwd">partnership refresh</command>
 ```
 
 **Store partnerships**:
 
 ```xml
-<command userid="${userid}" password="${passs}">store</command>
+<command userid="user" password="pwd">partnership store</command>
 ```
 
 **View partner**:
 
 ```xml
-<command userid="${userid}" password="${passs}">view <name></command>
+<command userid="user" password="pwd">partnership view <name></command>
 ```
 
 **View partnership**:
 
 ```xml
-<command userid="${userid}" password="${passs}">view <name></command>
+<command userid="user" password="pwd">partnership view <name></command>
 ```
 
 ## Certificates Configuration
 
-The certificates are being loaded from the `.p12` file specified in `config.xml`. But also we can send the following commands to the socket server:
+The certificates are loaded from the `.p12` file specified in `config.xml`. But also we can send the following commands to the socket server:
 
 **Clear certificate**:
 
 ```xml
-<command userid="${userid}" password="${passs}">clear</command>
+<command userid="user" password="pwd">cert clear</command>
 ```
 
 **Delete certificate**:
 
 ```xml
-<command userid="${userid}" password="${passs}">delete <alias></command>
+<command userid="user" password="pwd">cert delete <alias></command>
 ```
 
 **Import certificate**:
 
 ```xml
-<command userid="${userid}" password="${passs}">import <alias> <filename> [<password>]</command>
+<command userid="user" password="pwd">cert import <alias> <filename> [<password>]</command>
 ```
 
 **Import certificate encoded**:
 
 ```xml
-<command userid="${userid}" password="${passs}">importbybstream <alias> <encodedCertificateStream></command>
+<command userid="user" password="pwd">cert importbybstream <alias> <encodedCertificateStream></command>
 ```
 
 **List certificate**:
 
 ```xml
-<command userid="${userid}" password="${passs}">list</command>
+<command userid="user" password="pwd">cert list</command>
 ```
 
 **View certificate**:
 
 ```xml
-<command userid="${userid}" password="${passs}">view <alias></command>
+<command userid="user" password="pwd">cert view <alias></command>
 ```
