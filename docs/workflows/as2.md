@@ -189,5 +189,42 @@ We can update dynamically the configuration with the following messages to the s
 <command userid="${userid}" password="${passs}">view <name></command>
 ```
 
-## Commands Configuration
+## Certificates Configuration
 
+The certificates are being loaded from the `.p12` file specified in `config.xml`. But also we can send the following commands to the socket server:
+
+**Clear certificate**:
+
+```xml
+<command userid="${userid}" password="${passs}">clear</command>
+```
+
+**Delete certificate**:
+
+```xml
+<command userid="${userid}" password="${passs}">delete <alias></command>
+```
+
+**Import certificate**:
+
+```xml
+<command userid="${userid}" password="${passs}">import <alias> <filename> [<password>]</command>
+```
+
+**Import certificate encoded**:
+
+```xml
+<command userid="${userid}" password="${passs}">importbybstream <alias> <encodedCertificateStream></command>
+```
+
+**List certificate**:
+
+```xml
+<command userid="${userid}" password="${passs}">list</command>
+```
+
+**View certificate**:
+
+```xml
+<command userid="${userid}" password="${passs}">view <alias></command>
+```
