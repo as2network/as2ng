@@ -10,14 +10,6 @@
   <partnerships classname="com.helger.as2.app.partner.ServerXMLPartnershipFactory"
                 filename="%home%/partnerships.xml"/>
 
-  <commands classname="com.helger.as2.cmd.XMLCommandRegistry"
-            filename="%home%/commands.xml"/>
-
-  <commandProcessors>
-    <commandProcessor classname="com.freighttrust.as2.cmdprocessor.NonSSLSocketCommandProcessor"
-                      portId="4321"/>
-  </commandProcessors>
-
   <processor classname="com.helger.as2lib.processor.DefaultMessageProcessor"
              pendingMDN="data/pendingMDN3"
              pendingMDNinfo="data/pendinginfoMDN3">

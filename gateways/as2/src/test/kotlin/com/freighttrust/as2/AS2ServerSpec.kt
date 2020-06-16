@@ -2,7 +2,10 @@ package com.freighttrust.as2
 
 import com.freighttrust.as2.utils.KoinTestModules
 import com.helger.as2.app.MainOpenAS2Server
-import com.helger.commons.io.stream.StreamHelper
+import com.helger.as2lib.client.AS2Client
+import com.helger.as2lib.client.AS2ClientRequest
+import com.helger.as2lib.client.AS2ClientSettings
+import com.helger.commons.io.resource.ClassPathResource
 import io.kotlintest.Spec
 import io.kotlintest.TestCase
 import io.kotlintest.TestResult
@@ -14,14 +17,16 @@ import org.koin.core.context.stopKoin
 import org.koin.core.qualifier.named
 import org.koin.test.KoinTest
 import org.koin.test.inject
-import java.net.Socket
-import java.nio.charset.StandardCharsets
+import java.nio.charset.Charset
 import java.util.concurrent.Executors
 
 class AS2ServerSpec : FunSpec(), KoinTest {
 
   private val server: MainOpenAS2Server by inject()
   private val serverConfigPath: String by inject(named("config-path"))
+
+  private val as2Client: AS2Client by inject()
+  private val aS2ClientSettings: AS2ClientSettings by inject()
 
   private val executor = Executors.newSingleThreadExecutor()
 
@@ -37,20 +42,13 @@ class AS2ServerSpec : FunSpec(), KoinTest {
 
   init {
     test("a basic server should be running") {
-      val socket = Socket("localhost", 4321)
+      val request = AS2ClientRequest("Test message")
+        .apply {
+          setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
+        }
 
-      // Write message to server
-      val out = socket.getOutputStream()
-      out.write("<command>partner list</command>".toByteArray())
-      out.flush()
+      val response = as2Client.sendSynchronous(aS2ClientSettings, request)
 
-      // Wait for response
-      val response = StreamHelper.getAllBytesAsString(socket.getInputStream(), StandardCharsets.ISO_8859_1)
-
-      // Close socket
-      socket.close()
-
-      // Assert
       response shouldNotBe null
     }
   }
