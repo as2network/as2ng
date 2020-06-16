@@ -1,23 +1,38 @@
-# AS2-lib
+# AS2 Workflows
 
-- [Reference documentation of OpenAS2 (original source of which AS2-lib is based)](http://openas2.sourceforge.net/)
+## AS2-lib
 
-## Running
+We are using [AS2-lib](https://github.com/phax/as2-lib/) as starting library for handling AS2 interactions.
+You can have a look at this [reference documentation of OpenAS2 (original source on which `AS2-lib` is based)](http://openas2.sourceforge.net/).
 
-## Configuration
+### Running AS2-lib
+
+Configure IntelliJ as follows (adapt accordingly the path pointing to `config.xml` file):
+
+![](./../assets/intellij-run-configuration.png)
+
+Make sure you have downloaded Socket client to test properly:
+
+- Windows: [Download this client](https://sourceforge.net/projects/sockettest/)
+- Linux: [Use netcat as described here](https://unix.stackexchange.com/a/336919)
+
+By default, if you have used our provided `config.xml` that can be found inside `gateways/as2/src/main/resources` a 
+`SocketCommandProcessor` is enabled and ready to receive commands.
+
+## AS2-lib generic configuration overview
 
 There are three important files we need to tweak and configure in order to have a successfully running instance of `AS2-lib`. Those are:
 
 - `config.xml`: Configures the application such as the types of modules that are started, the logging systems, command processors and global properties.
 - `partnerships.xml`: Configures the partners and partnerships. Provides the ability to specify different signing and encryption algorithms, message compression, MDN handling, etc.
-- `commands.xml`: The application provides a way to enter commands to control and configure the system whilst it is running either via the console or a remote tool (configured in the `config.xml` file above). This file stores the commands that the application will support. This file should not be modified.
+- `commands.xml`: The application provides a way to enter commands to control and configure the system whilst it is running either via the console, or a remote tool (configured in the `config.xml` file above). This file stores the commands that the application will support. This file should not be modified.
 - `certs.p12`: A PKCS12 keystore that stores the SSL certificates used to secure the messages for all partners. It contains the primary key for your own company as well as the public keys for all your trading partners.
 
-**NOTE**: A restart of the application is required to load any configuration changes!
+> Note: A restart of the application is required to load any configuration changes!
 
-## Application Configuration (`config.xml`)
+### AS2-lib application configuration (`config.xml`)
 
-The general structure of the file is the following (the comments explains each section accordingly):
+The general structure of the `config.xml` file is the following (the comments explains each section accordingly):
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -93,7 +108,38 @@ The general structure of the file is the following (the comments explains each s
 </openas2>
 ```
 
-## Partnerships Configuration
+### AS2-lib commands configuration (`commands.xml`)
+
+This file lists the all the possible commands available to manage the server within the `SocketCommandProcessor`.
+
+```xml
+<commands>
+  <multicommand name="cert" description="Certificate commands">
+    <command classname="com.helger.as2.cmd.cert.ImportCertCommand" />
+    <command classname="com.helger.as2.cmd.cert.ImportCertInEncodedStreamCommand" />
+    <command classname="com.helger.as2.cmd.cert.ListCertCommand" />
+    <command classname="com.helger.as2.cmd.cert.DeleteCertCommand" />
+    <command classname="com.helger.as2.cmd.cert.ClearCertsCommand" />
+    <command classname="com.helger.as2.cmd.cert.ViewCertCommand" />
+  </multicommand>
+  <multicommand name="partner" description="Partner commands">
+    <command classname="com.helger.as2.cmd.partner.ListPartnersCommand" />
+    <command classname="com.helger.as2.cmd.partner.AddPartnerCommand" />
+    <command classname="com.helger.as2.cmd.partner.DeletePartnerCommand" />
+    <command classname="com.helger.as2.cmd.partner.ViewPartnerCommand" />
+  </multicommand>
+  <multicommand name="partnership" description="Partnership commands">
+    <command classname="com.helger.as2.cmd.partner.RefreshPartnershipsCommand" />
+    <command classname="com.helger.as2.cmd.partner.ListPartnershipsCommand" />
+    <command classname="com.helger.as2.cmd.partner.AddPartnershipCommand" />
+    <command classname="com.helger.as2.cmd.partner.DeletePartnershipCommand" />
+    <command classname="com.helger.as2.cmd.partner.StorePartnershipsCommand" />
+    <command classname="com.helger.as2.cmd.partner.ViewPartnershipCommand" />
+  </multicommand>
+</commands>
+```
+
+### AS2-lib partnerships configuration (`partnerships.xml`)
 
 The configuration is stored into `partnerships.xml` and the generic format is the following:
 
@@ -192,7 +238,7 @@ We can update dynamically the configuration with the following messages to the s
 <command userid="user" password="pwd">partnership view <name></command>
 ```
 
-## Certificates Configuration
+## AS2-lib certificates configuration (`certs.p12`)
 
 The certificates are loaded from the `.p12` file specified in `config.xml`. But also we can send the following commands to the socket server:
 
