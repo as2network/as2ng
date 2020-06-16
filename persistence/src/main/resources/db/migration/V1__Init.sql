@@ -27,7 +27,10 @@ create type transport as enum (
 
 create type message_type as enum (
     'DocumentSubmissionPackage',
+    'DocumentWithdrawal',
     'DocumentValidationResponse',
+    'DateRequestPackage',
+    'RequestedDataPackage',
     'DocumentReviewResponse'
 );
 
@@ -51,6 +54,14 @@ create table document_submission () inherits (document_message);
 create table document_validation_response (
     document_submission_id varchar(50) references document_submission(id)
 ) inherits (document_message);
+
+create table document_withdrawal () inherits (document_message);
+
+create table data_request_package () inherits (document_message);
+
+create table requested_data_package (
+    data_request_package_id varchar(50) references data_request_package(id)
+) inherits (document_message)
 
 create table document_review_response (
     document_submission_id varchar(50) references document_submission(id)
