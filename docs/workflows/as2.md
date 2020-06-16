@@ -1,4 +1,23 @@
-# AS2 Workflows
+# AS2 Gateway
+
+The AS2 Gateway is responsible for communications to and from Trading Partners via the AS2 protocol.
+
+## Basic Workflow
+
+**Note:**
+
+- `<MESSAGE_TYPE>` represents the message body payload type e.g. `DocumentSubmissionPackage` or `MessageValidationResponse`.
+- `<PORT_CODE>` represents the 4 digit transmitter port code in the message header.
+- `<FILER_CODE>` represents the 3 character transmitter filer code in the message header. 
+
+
+### Inbound from AS2
+
+TBD
+
+### Outbound to DIS
+
+TBD
 
 ## AS2-lib
 

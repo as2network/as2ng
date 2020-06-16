@@ -1,22 +1,36 @@
 # DIS - Overview
 
+## Message Flow
+
 There are three distinct messages types that are used when submitting documents to DIS:
 
 - DocumentSubmissionPackage
 - DocumentValidationResponse
 - DocumentReviewResponse
 
+From examining the XSD files available [here](https://www.cbp.gov/document/guidance/ace-dis-xml-schema)
+we can see three additional message types that are *undocumented* in the DIS Implementation Guide:
 
+- DocumentWithdrawal
+- DataRequestPackage
+- RequestedDataPackage
+
+> For the undocumented message types we will infer their behaviour for now, and verify during
+> integration testing with DIS 
 
 ```mermaid
 sequenceDiagram
-    Trading Partner ->> DIS: DocumentSubmissionPackage        
-    activate DIS  
-    DIS -->> Trading Partner: DocumentValidationResponse: indicating the submission was well-formed                  
-    deactivate DIS
-    Note over DIS,Trading Partner: A CBP employee reviews the document submission     
+    Trading Partner ->>+ DIS: DocumentSubmissionPackage        
+    DIS -->>- Trading Partner: DocumentValidationResponse: indicating the submission was well-formed                        
+    Note over DIS,Trading Partner: A CBP employee reviews the document submission
+    loop During review     
+        DIS ->>+ Trading Partner: DataRequestPackage
+        Trading Partner -->>- DIS: RequestedDataPackage
+    end
     DIS ->> Trading Partner: DocumentReviewResponse: only if the submission is being rejected    
 ```
+
+## Transports & Encoding
 
 Messages are encoded as XML, and document submissions can be made via one of three transports:
 
@@ -26,7 +40,7 @@ Messages are encoded as XML, and document submissions can be made via one of thr
 
 Regardless of the transport used for submission, all responses from DIS will be sent via the MQ interface. 
 
-## MQ
+### MQ
 
 There are two sets of connection details for the DIS MQ, one for certification/testing and one for production:
 
@@ -42,7 +56,7 @@ Validation and review responses will be received via the `ATS.DIS.<PORT_CODE>.<F
 - `<PORT_CODE>` is a four-digit port code
 - `<FILER_CODE>` is a three-character filer code
 
-## XML Format
+### XML Format
 
 > Note: a full specification of the XML format for submission to DIS can be found in the `domain/src/main/resources/xsd` 
 folder.
@@ -62,7 +76,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 </DIS:MessageEnvelope>
 ``` 
 
-### Message Header
+#### Message Header
 
 All the information that is required to determine how to forward messages between Trading Partners and DIS is contained 
 within the `MessageHeader`.
@@ -79,7 +93,7 @@ within the `MessageHeader`.
 </DIS:MessageHeader>
 ```
 
-### Message Body
+#### Message Body
 
 We are only interested in the `MessageBody` when processing responses to a document submission. 
 
