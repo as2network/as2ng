@@ -30,6 +30,8 @@ dependencyManagement {
       entry 'kotlinx-coroutines-test'
     }
 
+    dependency 'org.jetbrains.kotlinx:kotlinx-cli:0.2.1'
+
     // ------------------------------------------------------------------
     // Dependency injection & config
     // ------------------------------------------------------------------

@@ -36,13 +36,14 @@ tasks {
 dependencies {
 
   implementation(kotlin("stdlib"))
-  implementation("org.jetbrains.kotlinx:kotlinx-cli:0.2.1")
-
-  implementation("com.helger:as2-server")
+  implementation("org.jetbrains.kotlinx:kotlinx-cli")
 
   implementation(project(":domain"))
 
+  implementation("com.helger:as2-server")
+
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
+  testImplementation("org.koin:koin-test")
 }
 
 tasks {

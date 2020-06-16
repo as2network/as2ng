@@ -37,6 +37,14 @@ dependencies {
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
+xjc {
+  outputJavaDir.set(File("$projectDir/src/xjc/java"))
+}
+
+sourceSets.create("xjc") {
+  java.srcDir("src/xjc")
+}
+
 flatbuffers {
   language.set(Language.JAVA)
   inputSources.set(listOf("domain.fbs"))

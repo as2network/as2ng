@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openas2>
+
+  <certificates classname="com.helger.as2.app.cert.ServerCertificateFactory"
+                type="pkcs12"
+                filename="%home%/certs.p12"
+                password="test"
+                interval="300"/>
+
+  <partnerships classname="com.helger.as2.app.partner.ServerXMLPartnershipFactory"
+                filename="%home%/partnerships.xml"/>
+
+  <commands classname="com.helger.as2.cmd.XMLCommandRegistry"
+            filename="%home%/commands.xml"/>
+
+  <commandProcessors>
+    <commandProcessor classname="com.freighttrust.as2.cmdprocessor.NonSSLSocketCommandProcessor"
+                      portId="4321"/>
+  </commandProcessors>
+
+  <processor classname="com.helger.as2lib.processor.DefaultMessageProcessor"
+             pendingMDN="data/pendingMDN3"
+             pendingMDNinfo="data/pendinginfoMDN3">
+    <module classname="com.helger.as2lib.processor.sender.AS2SenderModule"/>
+
+    <module classname="com.helger.as2lib.processor.storage.MDNFileModule"
+            filename="data/mdn/$date.uuuu$/$date.MM$/$mdn.msg.sender.as2_id$-$mdn.msg.receiver.as2_id$-$mdn.msg.headers.message-id$"
+            protocol="as2"
+            tempdir="data/temp"
+            charset="utf-8"/>
+
+    <module classname="com.helger.as2lib.processor.storage.MessageFileModule"
+            filename="data/inbox/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
+            header="data/inbox/msgheaders/$date.uuuu$/$date.MM$/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
+            protocol="as2"
+            tempdir="data/temp"
+            charset="utf-8"/>
+
+    <module classname="com.helger.as2lib.processor.receiver.AS2ReceiverModule"
+            port="10080"
+            errordir="data/inbox/error"
+            errorformat="$msg.sender.as2_id$, $msg.receiver.as2_id$, $msg.headers.message-id$"/>
+
+    <module classname="com.helger.as2lib.processor.receiver.AS2MDNReceiverModule"
+            port="10081"/>
+
+    <module classname="com.helger.as2lib.processor.resender.DirectoryResenderModule"
+            resenddir="data/resend"
+            errordir="data/resend/error"
+            resenddelay="60"/>
+  </processor>
+</openas2>
