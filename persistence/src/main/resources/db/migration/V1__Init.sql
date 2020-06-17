@@ -7,7 +7,7 @@ create table trading_partner (
     email varchar(128)
 );
 
-create table partnership (
+create table trading_partnership (
     sender_id integer references trading_partner(id),
     recipient_id integer references trading_partner(id),
     protocol varchar(16),
