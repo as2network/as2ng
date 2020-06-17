@@ -4,20 +4,47 @@ The AS2 Gateway is responsible for communications to and from Trading Partners v
 
 ## Basic Workflow
 
-**Note:**
+### Receiving a message
 
-- `<MESSAGE_TYPE>` represents the message body payload type e.g. `DocumentSubmissionPackage` or `MessageValidationResponse`.
-- `<PORT_CODE>` represents the 4 digit transmitter port code in the message header.
-- `<FILER_CODE>` represents the 3 character transmitter filer code in the message header. 
+```mermaid
+sequenceDiagram
+    Partner A ->>+ AS2 Gateway: Upload a file
+    AS2 Gateway ->>+ Postgres: Lookup sender and recipient metadata based on AS2 id's
+    Postgres -->>- AS2 Gateway: Return info such as X509 certificate and name
+    AS2 Gateway ->> AS2 Gateway: Request is decrypted & signature is verified    
+    AS2 Gateway ->>+ ActiveMQ: Publish message representing the request into queue://as2.inbound.<RECIPIENT_ID>.<SENDER_ID>
+    ActiveMQ -->>- AS2 Gateway: Ack message    
+    AS2 Gateway -->>- Partner A: Respond with MDN
+    AS2 Gateway ->>+ ActiveMQ: Publish a copy of the MDN into queue://as2.mdn.sent.<SENDER_ID>
+    ActiveMQ -->>- AS2 Gateway: Ack message                  
+```
+
+### Processing a message
+
+```mermaid
+sequenceDiagram    
+    ActiveMQ ->>+ Core Processing: Offer message from queue://as2.inbound.>
+    Core Processing ->>+ Postgres: Persist message
+    Postgres -->>- Core Processing: Ack 
+    Core Processing ->>+ ActiveMQ: Publish message into queue://as2.outbound.<RECIPIENT_ID>.<SENDER_ID>
+    ActiveMQ -->>- Core Processing: Ack message
+    Core Processing -->>- ActiveMQ: Ack message from queue://as2.inbound.>                     
+```
+
+### Forwarding a message
 
 
-### Inbound from AS2
-
-TBD
-
-### Outbound to DIS
-
-TBD
+```mermaid
+sequenceDiagram    
+    ActiveMQ ->>+ AS2 Gateway: Offer message from queue://as2.outbound.>
+    AS2 Gateway ->>+ Postgres: Lookup receipient AS2 server config
+    Postgres -->>- AS2 Gateway: Return info such as AS2 url and certificates
+    AS2 Gateway ->>+ Partner B: AS2 call with forwarded message info
+    Partner B -->>- AS2 Gateway: MDN response 
+    AS2 Gateway ->>+ ActiveMQ: Publish MDN response into queue://as2.mdn.received.<RECIPIENT_ID>
+    ActiveMQ -->>- AS2 Gateway: Ack message
+                  
+```
 
 ## AS2-lib
 
