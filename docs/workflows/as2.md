@@ -31,6 +31,16 @@ sequenceDiagram
     Core Processing -->>- ActiveMQ: Ack message from queue://as2.inbound.>                     
 ```
 
+### Processing MDN's
+
+```mermaid
+sequenceDiagram    
+    ActiveMQ ->>+ Core Processing: Offer message from queue://as2.mdn.>
+    Core Processing ->>+ Postgres: Persist MDN
+    Postgres -->>- Core Processing: Ack     
+    Core Processing -->>- ActiveMQ: Ack message from queue://as2.mdn.>                     
+```
+
 ### Forwarding a message
 
 
