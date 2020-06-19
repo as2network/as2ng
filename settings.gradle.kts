@@ -9,6 +9,7 @@ pluginManagement {
 
 rootProject.name = "customs-gateway"
 
+include(":common")
 include(":domain")
 include(":messaging")
 include(":persistence")

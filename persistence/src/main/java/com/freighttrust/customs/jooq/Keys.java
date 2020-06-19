@@ -5,13 +5,11 @@ package com.freighttrust.customs.jooq;
 
 
 import com.freighttrust.customs.jooq.tables.FlywaySchemaHistory;
-import com.freighttrust.customs.jooq.tables.Message;
-import com.freighttrust.customs.jooq.tables.MessageHeader;
-import com.freighttrust.customs.jooq.tables.MessageOrigin;
+import com.freighttrust.customs.jooq.tables.TradingPartner;
+import com.freighttrust.customs.jooq.tables.TradingPartnership;
 import com.freighttrust.customs.jooq.tables.records.FlywaySchemaHistoryRecord;
-import com.freighttrust.customs.jooq.tables.records.MessageHeaderRecord;
-import com.freighttrust.customs.jooq.tables.records.MessageOriginRecord;
-import com.freighttrust.customs.jooq.tables.records.MessageRecord;
+import com.freighttrust.customs.jooq.tables.records.TradingPartnerRecord;
+import com.freighttrust.customs.jooq.tables.records.TradingPartnershipRecord;
 
 import javax.annotation.processing.Generated;
 
@@ -44,16 +42,16 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = UniqueKeys0.FLYWAY_SCHEMA_HISTORY_PK;
-    public static final UniqueKey<MessageRecord> MESSAGE_PKEY = UniqueKeys0.MESSAGE_PKEY;
-    public static final UniqueKey<MessageHeaderRecord> MESSAGE_HEADER_PKEY = UniqueKeys0.MESSAGE_HEADER_PKEY;
-    public static final UniqueKey<MessageOriginRecord> MESSAGE_ORIGIN_PKEY = UniqueKeys0.MESSAGE_ORIGIN_PKEY;
+    public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_PKEY = UniqueKeys0.TRADING_PARTNER_PKEY;
+    public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_NAME_KEY = UniqueKeys0.TRADING_PARTNER_NAME_KEY;
+    public static final UniqueKey<TradingPartnershipRecord> TRADING_PARTNERSHIP_PKEY = UniqueKeys0.TRADING_PARTNERSHIP_PKEY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final ForeignKey<MessageHeaderRecord, MessageRecord> MESSAGE_HEADER__MESSAGE_HEADER_ID_FKEY = ForeignKeys0.MESSAGE_HEADER__MESSAGE_HEADER_ID_FKEY;
-    public static final ForeignKey<MessageOriginRecord, MessageRecord> MESSAGE_ORIGIN__MESSAGE_ORIGIN_ID_FKEY = ForeignKeys0.MESSAGE_ORIGIN__MESSAGE_ORIGIN_ID_FKEY;
+    public static final ForeignKey<TradingPartnershipRecord, TradingPartnerRecord> TRADING_PARTNERSHIP__TRADING_PARTNERSHIP_SENDER_ID_FKEY = ForeignKeys0.TRADING_PARTNERSHIP__TRADING_PARTNERSHIP_SENDER_ID_FKEY;
+    public static final ForeignKey<TradingPartnershipRecord, TradingPartnerRecord> TRADING_PARTNERSHIP__TRADING_PARTNERSHIP_RECIPIENT_ID_FKEY = ForeignKeys0.TRADING_PARTNERSHIP__TRADING_PARTNERSHIP_RECIPIENT_ID_FKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -61,13 +59,13 @@ public class Keys {
 
     private static class UniqueKeys0 {
         public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = Internal.createUniqueKey(FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, "flyway_schema_history_pk", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK);
-        public static final UniqueKey<MessageRecord> MESSAGE_PKEY = Internal.createUniqueKey(Message.MESSAGE, "message_pkey", Message.MESSAGE.ID);
-        public static final UniqueKey<MessageHeaderRecord> MESSAGE_HEADER_PKEY = Internal.createUniqueKey(MessageHeader.MESSAGE_HEADER, "message_header_pkey", MessageHeader.MESSAGE_HEADER.ID);
-        public static final UniqueKey<MessageOriginRecord> MESSAGE_ORIGIN_PKEY = Internal.createUniqueKey(MessageOrigin.MESSAGE_ORIGIN, "message_origin_pkey", MessageOrigin.MESSAGE_ORIGIN.ID);
+        public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_PKEY = Internal.createUniqueKey(TradingPartner.TRADING_PARTNER, "trading_partner_pkey", TradingPartner.TRADING_PARTNER.ID);
+        public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_NAME_KEY = Internal.createUniqueKey(TradingPartner.TRADING_PARTNER, "trading_partner_name_key", TradingPartner.TRADING_PARTNER.NAME);
+        public static final UniqueKey<TradingPartnershipRecord> TRADING_PARTNERSHIP_PKEY = Internal.createUniqueKey(TradingPartnership.TRADING_PARTNERSHIP, "trading_partnership_pkey", TradingPartnership.TRADING_PARTNERSHIP.SENDER_ID, TradingPartnership.TRADING_PARTNERSHIP.RECIPIENT_ID);
     }
 
     private static class ForeignKeys0 {
-        public static final ForeignKey<MessageHeaderRecord, MessageRecord> MESSAGE_HEADER__MESSAGE_HEADER_ID_FKEY = Internal.createForeignKey(com.freighttrust.customs.jooq.Keys.MESSAGE_PKEY, MessageHeader.MESSAGE_HEADER, "message_header__message_header_id_fkey", MessageHeader.MESSAGE_HEADER.ID);
-        public static final ForeignKey<MessageOriginRecord, MessageRecord> MESSAGE_ORIGIN__MESSAGE_ORIGIN_ID_FKEY = Internal.createForeignKey(com.freighttrust.customs.jooq.Keys.MESSAGE_PKEY, MessageOrigin.MESSAGE_ORIGIN, "message_origin__message_origin_id_fkey", MessageOrigin.MESSAGE_ORIGIN.ID);
+        public static final ForeignKey<TradingPartnershipRecord, TradingPartnerRecord> TRADING_PARTNERSHIP__TRADING_PARTNERSHIP_SENDER_ID_FKEY = Internal.createForeignKey(com.freighttrust.customs.jooq.Keys.TRADING_PARTNER_PKEY, TradingPartnership.TRADING_PARTNERSHIP, "trading_partnership__trading_partnership_sender_id_fkey", TradingPartnership.TRADING_PARTNERSHIP.SENDER_ID);
+        public static final ForeignKey<TradingPartnershipRecord, TradingPartnerRecord> TRADING_PARTNERSHIP__TRADING_PARTNERSHIP_RECIPIENT_ID_FKEY = Internal.createForeignKey(com.freighttrust.customs.jooq.Keys.TRADING_PARTNER_PKEY, TradingPartnership.TRADING_PARTNERSHIP, "trading_partnership__trading_partnership_recipient_id_fkey", TradingPartnership.TRADING_PARTNERSHIP.RECIPIENT_ID);
     }
 }

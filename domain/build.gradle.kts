@@ -28,18 +28,19 @@ dependencies {
 
   api(kotlin("stdlib"))
 
+  api(project(":common"))
+
   api("com.google.flatbuffers:flatbuffers-java")
 
-  api("org.koin:koin-core")
-
+  implementation("com.google.guava:guava")
   implementation("javax.xml.bind:jaxb-api")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
-xjc {
-  outputJavaDir.set(File("$projectDir/src/xjc/java"))
-}
+//xjc {
+//  outputJavaDir.set(File("$projectDir/src/xjc/java"))
+//}
 
 sourceSets.create("xjc") {
   java.srcDir("src/xjc")

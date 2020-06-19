@@ -5,9 +5,8 @@ package com.freighttrust.customs.jooq;
 
 
 import com.freighttrust.customs.jooq.tables.FlywaySchemaHistory;
-import com.freighttrust.customs.jooq.tables.Message;
-import com.freighttrust.customs.jooq.tables.MessageHeader;
-import com.freighttrust.customs.jooq.tables.MessageOrigin;
+import com.freighttrust.customs.jooq.tables.TradingPartner;
+import com.freighttrust.customs.jooq.tables.TradingPartnership;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +32,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 1353887206;
+    private static final long serialVersionUID = 33625496;
 
     /**
      * The reference instance of <code>public</code>
@@ -46,19 +45,14 @@ public class Public extends SchemaImpl {
     public final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = com.freighttrust.customs.jooq.tables.FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
-     * The table <code>public.message</code>.
+     * The table <code>public.trading_partner</code>.
      */
-    public final Message MESSAGE = com.freighttrust.customs.jooq.tables.Message.MESSAGE;
+    public final TradingPartner TRADING_PARTNER = com.freighttrust.customs.jooq.tables.TradingPartner.TRADING_PARTNER;
 
     /**
-     * The table <code>public.message_header</code>.
+     * The table <code>public.trading_partnership</code>.
      */
-    public final MessageHeader MESSAGE_HEADER = com.freighttrust.customs.jooq.tables.MessageHeader.MESSAGE_HEADER;
-
-    /**
-     * The table <code>public.message_origin</code>.
-     */
-    public final MessageOrigin MESSAGE_ORIGIN = com.freighttrust.customs.jooq.tables.MessageOrigin.MESSAGE_ORIGIN;
+    public final TradingPartnership TRADING_PARTNERSHIP = com.freighttrust.customs.jooq.tables.TradingPartnership.TRADING_PARTNERSHIP;
 
     /**
      * No further instances allowed
@@ -83,8 +77,7 @@ public class Public extends SchemaImpl {
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
-            Message.MESSAGE,
-            MessageHeader.MESSAGE_HEADER,
-            MessageOrigin.MESSAGE_ORIGIN);
+            TradingPartner.TRADING_PARTNER,
+            TradingPartnership.TRADING_PARTNERSHIP);
     }
 }

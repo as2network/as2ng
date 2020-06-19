@@ -5,9 +5,8 @@ package com.freighttrust.customs.jooq;
 
 
 import com.freighttrust.customs.jooq.tables.FlywaySchemaHistory;
-import com.freighttrust.customs.jooq.tables.Message;
-import com.freighttrust.customs.jooq.tables.MessageHeader;
-import com.freighttrust.customs.jooq.tables.MessageOrigin;
+import com.freighttrust.customs.jooq.tables.TradingPartner;
+import com.freighttrust.customs.jooq.tables.TradingPartnership;
 
 import javax.annotation.processing.Generated;
 
@@ -35,9 +34,9 @@ public class Indexes {
 
     public static final Index FLYWAY_SCHEMA_HISTORY_PK = Indexes0.FLYWAY_SCHEMA_HISTORY_PK;
     public static final Index FLYWAY_SCHEMA_HISTORY_S_IDX = Indexes0.FLYWAY_SCHEMA_HISTORY_S_IDX;
-    public static final Index MESSAGE_PKEY = Indexes0.MESSAGE_PKEY;
-    public static final Index MESSAGE_HEADER_PKEY = Indexes0.MESSAGE_HEADER_PKEY;
-    public static final Index MESSAGE_ORIGIN_PKEY = Indexes0.MESSAGE_ORIGIN_PKEY;
+    public static final Index TRADING_PARTNER_NAME_KEY = Indexes0.TRADING_PARTNER_NAME_KEY;
+    public static final Index TRADING_PARTNER_PKEY = Indexes0.TRADING_PARTNER_PKEY;
+    public static final Index TRADING_PARTNERSHIP_PKEY = Indexes0.TRADING_PARTNERSHIP_PKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -46,8 +45,8 @@ public class Indexes {
     private static class Indexes0 {
         public static Index FLYWAY_SCHEMA_HISTORY_PK = Internal.createIndex("flyway_schema_history_pk", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
         public static Index FLYWAY_SCHEMA_HISTORY_S_IDX = Internal.createIndex("flyway_schema_history_s_idx", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.SUCCESS }, false);
-        public static Index MESSAGE_PKEY = Internal.createIndex("message_pkey", Message.MESSAGE, new OrderField[] { Message.MESSAGE.ID }, true);
-        public static Index MESSAGE_HEADER_PKEY = Internal.createIndex("message_header_pkey", MessageHeader.MESSAGE_HEADER, new OrderField[] { MessageHeader.MESSAGE_HEADER.ID }, true);
-        public static Index MESSAGE_ORIGIN_PKEY = Internal.createIndex("message_origin_pkey", MessageOrigin.MESSAGE_ORIGIN, new OrderField[] { MessageOrigin.MESSAGE_ORIGIN.ID }, true);
+        public static Index TRADING_PARTNER_NAME_KEY = Internal.createIndex("trading_partner_name_key", TradingPartner.TRADING_PARTNER, new OrderField[] { TradingPartner.TRADING_PARTNER.NAME }, true);
+        public static Index TRADING_PARTNER_PKEY = Internal.createIndex("trading_partner_pkey", TradingPartner.TRADING_PARTNER, new OrderField[] { TradingPartner.TRADING_PARTNER.ID }, true);
+        public static Index TRADING_PARTNERSHIP_PKEY = Internal.createIndex("trading_partnership_pkey", TradingPartnership.TRADING_PARTNERSHIP, new OrderField[] { TradingPartnership.TRADING_PARTNERSHIP.SENDER_ID, TradingPartnership.TRADING_PARTNERSHIP.RECIPIENT_ID }, true);
     }
 }

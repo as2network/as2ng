@@ -1,15 +1,15 @@
 
 
 create table trading_partner (
-    id serial primary key,
+    id varchar(64) primary key,
     name varchar(128) unique,
     x509_certificate bytea,
     email varchar(128)
 );
 
 create table trading_partnership (
-    sender_id integer references trading_partner(id),
-    recipient_id integer references trading_partner(id),
+    sender_id varchar(64) references trading_partner(id),
+    recipient_id varchar(64) references trading_partner(id),
     protocol varchar(16),
     subject varchar(128),
     as2_url varchar(128),

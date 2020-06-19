@@ -43,10 +43,12 @@ dependencyManagement {
 
     dependency 'com.typesafe:config:1.4.0'
 
+
     // ------------------------------------------------------------------
     // Serialisation
     // ------------------------------------------------------------------
 
+    dependency 'com.google.guava:guava:29.0-jre'
     dependency 'com.google.flatbuffers:flatbuffers-java:1.11.0'
     dependency 'javax.xml.bind:jaxb-api:2.3.1'
 

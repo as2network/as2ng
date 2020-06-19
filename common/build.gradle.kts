@@ -16,41 +16,18 @@
  *
  */
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
   kotlin("jvm")
-  id("com.github.johnrengelman.shadow")
-}
-
-val build: DefaultTask by project.tasks
-build.dependsOn(tasks.shadowJar)
-
-tasks {
-  withType<ShadowJar> {
-    archiveBaseName.set(project.name)
-    archiveClassifier.set("")
-  }
 }
 
 dependencies {
 
-  implementation(kotlin("stdlib"))
-  implementation("org.jetbrains.kotlinx:kotlinx-cli")
+  api(kotlin("stdlib"))
 
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
-
-  implementation(project(":common"))
-  implementation(project(":domain"))
-  implementation(project(":messaging"))
-  implementation(project(":persistence"))
-
-  implementation("com.helger:as2-server")
-  implementation("com.google.guava:guava")
+  api("org.koin:koin-core")
+  api("com.typesafe:config")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
-  testImplementation("org.koin:koin-test")
 }
 
 tasks {
