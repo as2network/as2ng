@@ -30,32 +30,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import dev.north.fortyone.gradle.flatbuffers.Language
-
 plugins {
   kotlin("jvm")
-  id("dev.north.fortyone.flatbuffers") version "0.1.0"
 }
 
 dependencies {
 
-  api(kotlin("stdlib"))
+  implementation(kotlin("stdlib"))
+  implementation("org.jetbrains.kotlinx:kotlinx-cli")
 
-  api(project(":messaging"))
-  api(project(":persistence"))
+  implementation(project(":messaging"))
+  implementation(project(":persistence"))
 
-  api("org.jetbrains.kotlinx:kotlinx-coroutines-core")
-  api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
 
-  api("org.koin:koin-core")
+  implementation("org.koin:koin-core")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
-}
-
-flatbuffers {
-  language.set(Language.JAVA)
-  inputSources.set(listOf("block.fbs"))
-  extraFlatcArgs.set("flatc --kotlin -o /output/ -I /input --gen-all /input/block.fbs")
 }
 
 tasks {

@@ -30,29 +30,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.db.repositories
+package com.freighttrust.db.modules
 
-import com.freighttrust.jooq.Tables
-import com.freighttrust.jooq.tables.records.As2MdnRecord
-import org.jooq.DSLContext
+import com.typesafe.config.Config
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
+import org.postgresql.Driver
+import javax.sql.DataSource
 
-class As2MdnRepository(
-  private val dbCtx: DSLContext
-) {
+val Postgres = module {
 
-  fun findOne(id: String): As2MdnRecord? =
-    dbCtx
-      .selectFrom(Tables.AS2_MDN)
-      .where(Tables.AS2_MDN.ID.eq(id))
-      .fetchOne()
-
-  fun insert(record: As2MdnRecord): As2MdnRecord {
-    dbCtx.executeInsert(record)
-    return record
+  single(named("postgres")) {
+    val config = get<Config>()
+    config.getConfig("postgres")
   }
 
-  fun insert(records: List<As2MdnRecord>): List<As2MdnRecord> {
-    dbCtx.batchInsert(records).execute()
-    return records
+  single<DataSource> {
+    val config = get<Config>(named("postgres"))
+
+    val dataSourceConfig = HikariConfig()
+      .apply {
+        driverClassName = Driver::class.java.name
+        jdbcUrl = config.getString("jdbcUrl")
+        isAutoCommit = false
+        maximumPoolSize = 30
+        addDataSourceProperty("cachePrepStmts", "true")
+        addDataSourceProperty("prepStmtCacheSize", "250")
+        addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
+      }
+
+    HikariDataSource(dataSourceConfig)
   }
+
 }

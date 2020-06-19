@@ -30,29 +30,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.db.repositories
+package com.freighttrust.processing.extensions
 
-import com.freighttrust.jooq.Tables
+import com.freighttrust.as2.fb.As2Mdn
+import com.freighttrust.as2.fb.As2Message
 import com.freighttrust.jooq.tables.records.As2MdnRecord
-import org.jooq.DSLContext
+import com.freighttrust.jooq.tables.records.As2MessageRecord
 
-class As2MdnRepository(
-  private val dbCtx: DSLContext
-) {
+fun As2Message.toAs2MessageRecord(): As2MessageRecord {
+  val self = this
+  return As2MessageRecord()
+    .apply {
+      id = self.id()
+      from = self.from()
+      to = self.to()
+      subject = self.subject()
+//      protocol = self.protocol()
+      contenttype = self.contentType()
+      contentdisposition = self.contentDisposition()
 
-  fun findOne(id: String): As2MdnRecord? =
-    dbCtx
-      .selectFrom(Tables.AS2_MDN)
-      .where(Tables.AS2_MDN.ID.eq(id))
-      .fetchOne()
+    }
+}
 
-  fun insert(record: As2MdnRecord): As2MdnRecord {
-    dbCtx.executeInsert(record)
-    return record
-  }
-
-  fun insert(records: List<As2MdnRecord>): List<As2MdnRecord> {
-    dbCtx.batchInsert(records).execute()
-    return records
-  }
+fun As2Mdn.toAs2MdnRecord(): As2MdnRecord {
+  val self = this
+  return As2MdnRecord()
+    .apply {
+      id = self.id()
+      messageId = self.messageId()
+      text = self.text()
+    }
 }
