@@ -30,8 +30,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 create table trading_partner (
     id varchar(64) primary key,
     name varchar(128) unique,
@@ -43,7 +41,7 @@ create table trading_partner_certificate (
     alias varchar(64),
     x509_certificate bytea,
     primary key (trading_partner_id, alias)
-)
+);
 
 create table trading_partnership (
     sender_id varchar(64) references trading_partner(id),
