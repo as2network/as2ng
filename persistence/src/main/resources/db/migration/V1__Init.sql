@@ -51,3 +51,26 @@ create table trading_partnership (
     signing_algorithm varchar(16),
     primary key (sender_id, recipient_id)
 );
+
+create table as2_message (
+    id varchar(64) primary key,
+    "from" varchar(64) references trading_partner(id),
+    "to" varchar(64) references trading_partner(id),
+    subject varchar(128),
+    contentType varchar(128),
+    contentDisposition varchar(128),
+    /* store header and attributes as jsonb to allow for free form data but make it queryable */
+    headers jsonb,
+    attributes jsonb,
+    data bytea
+);
+
+create table as2_mdn (
+    id varchar(64) primary key,
+    message_id varchar(64) references as2_message(id),
+    "text" text,
+    /* store header and attributes as jsonb to allow for free form data but make it queryable */
+    headers jsonb,
+    attributes jsonb
+);
+

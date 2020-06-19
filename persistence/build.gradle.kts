@@ -103,7 +103,7 @@ jooqGenerator {
           )
           .withTarget(
             org.jooq.meta.jaxb.Target()
-              .withPackageName("com.freighttrust.customs.jooq")
+              .withPackageName("com.freighttrust.jooq")
               .withDirectory("src/main/java/")
           )
       }
