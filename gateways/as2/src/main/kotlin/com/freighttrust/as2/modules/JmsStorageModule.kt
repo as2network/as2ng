@@ -61,7 +61,7 @@ class JmsStorageModule() : AbstractProcessorModule(), IProcessorStorageModule {
     val ATTR_BASE_QUEUE = "baseQueue"
 
     val DEFAULT_BROKER_URL = "tcp://localhost:61616"
-    val DEFAULT_BASE_QUEUE = "as2.inbound.mdn"
+    val DEFAULT_BASE_QUEUE = "as2.inbound"
 
   }
 
@@ -94,9 +94,13 @@ class JmsStorageModule() : AbstractProcessorModule(), IProcessorStorageModule {
     return supportedActions.contains(action)
   }
 
-  private fun destinationFor(message: IMessage): Destination {
+  private fun destinationFor(action: String, message: IMessage): Destination {
 
-    val messageType = if (message is IMessageMDN) "mdn" else "message"
+    val messageType = when(action) {
+      DO_STORE -> "message"
+      DO_STOREMDN -> "mdn"
+      else -> throw IllegalStateException("Unhandled action type: $action")
+    }
 
     // TODO review if there are concurrency issues here
     val id = "${baseQueue}.${messageType}.${message.aS2To}.${message.aS2From}"
@@ -132,7 +136,7 @@ class JmsStorageModule() : AbstractProcessorModule(), IProcessorStorageModule {
       }
       .apply {
         // send
-        messageProducer.send(destinationFor(message), this)
+        messageProducer.send(destinationFor(action, message), this)
       }
 
   }
