@@ -1,3 +1,20 @@
+import com.freighttrust.as2.utils.As2MessageSender
+import com.freighttrust.as2.utils.KoinTestModules
+import com.helger.as2lib.client.AS2ClientRequest
+import com.helger.commons.io.resource.ClassPathResource
+import io.kotlintest.Spec
+import io.kotlintest.TestCase
+import io.kotlintest.TestResult
+import io.kotlintest.extensions.TopLevelTest
+import io.kotlintest.shouldBe
+import io.kotlintest.shouldNotBe
+import io.kotlintest.specs.FunSpec
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.test.KoinTest
+import org.koin.test.inject
+import java.nio.charset.Charset
+
 /*
  * BSD 3-Clause License
  *
@@ -30,46 +47,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.as2.utils
+class As2MessageSenderSpec : FunSpec(), KoinTest {
 
-import com.helger.as2.app.MainOpenAS2Server
-import com.helger.as2lib.client.AS2Client
-import com.helger.as2lib.client.AS2ClientSettings
-import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
-import com.helger.as2lib.crypto.ECryptoAlgorithmSign
-import com.helger.commons.io.resource.ClassPathResource
-import com.helger.security.keystore.EKeyStoreType
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
+  private val as2MessageSender by inject<As2MessageSender>()
 
-object KoinTestModules {
-
-  private val server = module {
-
-    single { MainOpenAS2Server() }
-
-    single(named("config-path")) { ClassPathResource.getAsFile("/config/config.xml")!!.absolutePath }
+  override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
+    startKoin { modules(KoinTestModules()) }
   }
 
-  private val client = module {
+  override fun afterSpecClass(spec: Spec, results: Map<TestCase, TestResult>) {
+    stopKoin()
+  }
 
-    single {
-      AS2ClientSettings()
+  init {
+    test("it should send an AS2 message") {
+      // Prepare AS2 request
+      val request = AS2ClientRequest("Test request")
         .apply {
-          setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/config/certs.p12")!!, "test")
-          setSenderData("OpenAS2A", "email@example.org", "OpenAS2A_alias")
-          setReceiverData("OpenAS2B", "OpenAS2B_alias", "http://localhost:10080/HttpReceiver")
-          setPartnershipName("Partnership name")
-          setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
+          setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
         }
+
+      // Fire request
+      val response = as2MessageSender.send(request)
+
+      // Assert
+      response shouldNotBe null
+      response.exception shouldBe null
     }
-
-    single { AS2Client() }
-
-    single { As2MessageSender(get(), get()) }
   }
-
-  private val modules = listOf(server, client)
-
-  operator fun invoke() = modules
 }
