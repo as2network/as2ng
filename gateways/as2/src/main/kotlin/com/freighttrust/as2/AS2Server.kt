@@ -54,41 +54,8 @@ object AS2Server {
 
     if (!File(configPath).exists()) throw IllegalArgumentException("AS2 config.xml not found! Current path: $configPath")
 
-    val listenerThread = Thread({
-
-      val connection = ActiveMQConnectionFactory("tcp://localhost:61616")
-        .let { factory -> factory.createConnection() }
-        .apply { start() }
-
-      val session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
-
-      val consumer = session.createConsumer(session.createQueue("as2.inbound.>"))
-
-      while (true) {
-
-        val message = consumer.receive() as BytesMessage
-
-        val byteArray = ByteArray(message.bodyLength.toInt())
-        message.readBytes(byteArray)
-
-        val buffer = ByteBuffer.wrap(byteArray)
-
-        val messageStr = when (message.jmsType) {
-          As2Message::class.qualifiedName -> As2Message.getRootAsAs2Message(buffer).toNiceString()
-          As2Mdn::class.qualifiedName -> As2Mdn.getRootAsAs2Mdn(buffer).toNiceString()
-          else -> "Unhandled message type"
-        }
-
-        println("Message received\n$messageStr")
-
-      }
-
-    })
-
-    listenerThread.start()
-
     MainOpenAS2Server().start(configPath)
-
-    println()
   }
 }
+
+fun main(args: Array<String>) = AS2Server.start(args)
