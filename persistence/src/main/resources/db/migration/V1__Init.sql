@@ -35,9 +35,15 @@
 create table trading_partner (
     id varchar(64) primary key,
     name varchar(128) unique,
-    x509_certificate bytea,
     email varchar(128)
 );
+
+create table trading_partner_certificate (
+    trading_partner_id varchar(64) references trading_partner,
+    alias varchar(64),
+    x509_certificate bytea,
+    primary key (trading_partner_id, alias)
+)
 
 create table trading_partnership (
     sender_id varchar(64) references trading_partner(id),
