@@ -43,7 +43,6 @@ import com.helger.commons.collection.impl.ICommonsSet
 import com.helger.commons.state.EChange
 import org.jooq.DSLContext
 
-
 class DbPartnershipFactory(
   private val dbContext: DSLContext
 ) : IPartnershipFactory {

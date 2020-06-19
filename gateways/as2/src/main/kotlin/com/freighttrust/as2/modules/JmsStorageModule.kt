@@ -36,9 +36,7 @@ import com.freighttrust.as2.ext.toFlatBuffer
 import com.freighttrust.as2.fb.As2Mdn
 import com.freighttrust.as2.fb.As2Message
 import com.google.flatbuffers.FlatBufferBuilder
-import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.message.IMessage
-import com.helger.as2lib.message.IMessageMDN
 import com.helger.as2lib.processor.module.AbstractProcessorModule
 import com.helger.as2lib.processor.storage.IProcessorStorageModule
 import com.helger.as2lib.processor.storage.IProcessorStorageModule.DO_STORE
@@ -46,11 +44,14 @@ import com.helger.as2lib.processor.storage.IProcessorStorageModule.DO_STOREMDN
 import com.helger.as2lib.session.IAS2Session
 import com.helger.commons.collection.attr.IStringMap
 import org.apache.activemq.ActiveMQConnectionFactory
-import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
-import javax.jms.*
+import javax.jms.Connection
+import javax.jms.DeliveryMode
+import javax.jms.Destination
+import javax.jms.MessageProducer
+import javax.jms.Session
 
-class JmsStorageModule() : AbstractProcessorModule(), IProcessorStorageModule {
+class JmsStorageModule : AbstractProcessorModule(), IProcessorStorageModule {
 
   companion object {
 
@@ -79,7 +80,7 @@ class JmsStorageModule() : AbstractProcessorModule(), IProcessorStorageModule {
 
     jmsConnection =
       ActiveMQConnectionFactory(brokerUrl)
-        .let { factory -> factory.createConnection() }
+        .createConnection()
         .apply { start() }
 
     jmsSession = jmsConnection.createSession(false, Session.AUTO_ACKNOWLEDGE)
@@ -96,7 +97,7 @@ class JmsStorageModule() : AbstractProcessorModule(), IProcessorStorageModule {
 
   private fun destinationFor(action: String, message: IMessage): Destination {
 
-    val messageType = when(action) {
+    val messageType = when (action) {
       DO_STORE -> "message"
       DO_STOREMDN -> "mdn"
       else -> throw IllegalStateException("Unhandled action type: $action")
