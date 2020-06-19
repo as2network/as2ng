@@ -60,7 +60,7 @@ object ProcessingServer {
       .apply {
         driverClassName = Driver::class.java.name
         jdbcUrl = "jdbc:postgresql://localhost/customs_gateway?user=customs_gateway&password=customs_gateway"
-        isAutoCommit = false
+        isAutoCommit = true
         maximumPoolSize = 30
         addDataSourceProperty("cachePrepStmts", "true")
         addDataSourceProperty("prepStmtCacheSize", "250")

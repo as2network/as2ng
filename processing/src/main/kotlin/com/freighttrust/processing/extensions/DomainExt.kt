@@ -45,10 +45,12 @@ fun As2Message.toAs2MessageRecord(): As2MessageRecord {
       from = self.from()
       to = self.to()
       subject = self.subject()
-//      protocol = self.protocol()
       contenttype = self.contentType()
       contentdisposition = self.contentDisposition()
-
+      // TODO: Map this correctly
+      //headers = self.headers()
+      //attributes = self.attributes()
+      //data = self.dataAsByteBuffer()
     }
 }
 
@@ -59,5 +61,9 @@ fun As2Mdn.toAs2MdnRecord(): As2MdnRecord {
       id = self.id()
       messageId = self.messageId()
       text = self.text()
+      // TODO: Map this correctly
+      //headers = self.headers()
+      //attributes = self.attributes()
+      //data = self.dataAsByteBuffer()
     }
 }

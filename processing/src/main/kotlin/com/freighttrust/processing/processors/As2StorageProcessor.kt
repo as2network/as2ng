@@ -84,13 +84,6 @@ class As2StorageProcessor(
         }
       }
 
-//      val messageStr = when (message.jmsType) {
-//        As2Message::class.qualifiedName -> As2Message.getRootAsAs2Message(buffer).toNiceString()
-//        As2Mdn::class.qualifiedName -> As2Mdn.getRootAsAs2Mdn(buffer).toNiceString()
-//        else -> "Unhandled message type"
-//      }
-//
-//      println("Message received\n$messageStr")
     }
   }
 
