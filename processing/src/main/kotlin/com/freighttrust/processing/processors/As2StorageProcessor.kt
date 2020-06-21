@@ -39,48 +39,56 @@ import com.freighttrust.db.repositories.As2MessageRepository
 import com.freighttrust.processing.extensions.toAs2MdnRecord
 import com.freighttrust.processing.extensions.toAs2MessageRecord
 import java.nio.ByteBuffer
-import javax.jms.*
+import javax.jms.BytesMessage
+import javax.jms.Connection
+import javax.jms.MessageConsumer
+import javax.jms.Session
 
 class As2StorageProcessor(
-  private val mqConnectionFactory: ConnectionFactory,
+  private val jmsConnection: Connection,
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository
 ) {
 
-  private lateinit var connection: Connection
   private lateinit var session: Session
   private lateinit var consumer: MessageConsumer
 
   fun listen() {
 
-    connection = mqConnectionFactory
-      .createConnection()
-      .apply { start() }
 
-    session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE)
+    session = jmsConnection.createSession(false, Session.CLIENT_ACKNOWLEDGE)
     consumer = session.createConsumer(session.createQueue("as2.inbound.>"))
 
-    while (true) {
+    try {
 
-      val message = consumer.receive() as BytesMessage
+      while (true) {
 
-      val byteArray = ByteArray(message.bodyLength.toInt())
-      message.readBytes(byteArray)
+        val message = consumer.receive() as BytesMessage
 
-      val buffer = ByteBuffer.wrap(byteArray)
+        val byteArray = ByteArray(message.bodyLength.toInt())
+        message.readBytes(byteArray)
 
-      when (message.jmsType) {
-        As2Message::class.qualifiedName -> {
-          val record = As2Message.getRootAsAs2Message(buffer).toAs2MessageRecord()
-          as2MessageRepository.insert(record)
+        val buffer = ByteBuffer.wrap(byteArray)
+
+        when (message.jmsType) {
+          As2Message::class.qualifiedName -> {
+            val record = As2Message.getRootAsAs2Message(buffer).toAs2MessageRecord()
+            as2MessageRepository.insert(record)
+          }
+          As2Mdn::class.qualifiedName -> {
+            val record = As2Mdn.getRootAsAs2Mdn(buffer).toAs2MdnRecord()
+            as2MdnRepository.insert(record)
+          }
         }
-        As2Mdn::class.qualifiedName -> {
-          val record = As2Mdn.getRootAsAs2Mdn(buffer).toAs2MdnRecord()
-          as2MdnRepository.insert(record)
-        }
+
+        message.acknowledge()
       }
 
+    } finally {
+      session.close()
+      jmsConnection.close()
     }
+
   }
 
 }
