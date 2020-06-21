@@ -90,6 +90,14 @@ dependencyManagement {
 
     dependency 'org.slf4j:slf4j-api:1.7.30'
 
+    dependency 'com.google.flogger:flogger:0.5.1'
+    dependency 'com.google.flogger:flogger-slf4j-backend:0.5.1'
+
+    dependency 'org.apache.logging.log4j:log4j:2.13.3'
+    dependency 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.3'
+
+
+
     // ------------------------------------------------------------------
     // Testing
     // ------------------------------------------------------------------

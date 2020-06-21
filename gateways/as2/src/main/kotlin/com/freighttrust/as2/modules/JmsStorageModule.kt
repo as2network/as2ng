@@ -45,11 +45,17 @@ import com.helger.as2lib.session.IAS2Session
 import com.helger.commons.collection.attr.IStringMap
 import org.apache.activemq.ActiveMQConnectionFactory
 import java.util.concurrent.ConcurrentHashMap
-import javax.jms.Connection
-import javax.jms.DeliveryMode
-import javax.jms.Destination
-import javax.jms.MessageProducer
-import javax.jms.Session
+import javax.jms.*
+import kotlin.Any
+import kotlin.Boolean
+import kotlin.IllegalStateException
+import kotlin.Pair
+import kotlin.String
+import kotlin.also
+import kotlin.apply
+import kotlin.getValue
+import kotlin.lazy
+import kotlin.let
 
 class JmsStorageModule : AbstractProcessorModule(), IProcessorStorageModule {
 
@@ -124,8 +130,10 @@ class JmsStorageModule : AbstractProcessorModule(), IProcessorStorageModule {
               else -> throw IllegalStateException("Unhandled action received: $action")
             }
 
-            // provide an indication of the message payload
+            // provide an indication of the message payload and other metadata
+            bytesMessage.jmsCorrelationID = message.messageID
             bytesMessage.jmsType = jmsType
+
 
             // finish serialisation
             bb.finish(rootOffset)

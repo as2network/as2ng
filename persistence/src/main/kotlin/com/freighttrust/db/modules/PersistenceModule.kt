@@ -47,6 +47,9 @@ import javax.sql.DataSource
 
 val PersistenceModule = module {
 
+  // configure slf4j backend for flogger framework
+  System.setProperty("flogger.backend_factory", "com.google.common.flogger.backend.slf4j.Slf4jBackendFactory#getInstance")
+
   single(named("postgres")) {
     val config = get<Config>(named("app"))
     config.getConfig("postgres")

@@ -38,6 +38,7 @@ import com.freighttrust.db.repositories.As2MdnRepository
 import com.freighttrust.db.repositories.As2MessageRepository
 import com.freighttrust.processing.extensions.toAs2MdnRecord
 import com.freighttrust.processing.extensions.toAs2MessageRecord
+import com.google.common.flogger.FluentLogger
 import java.nio.ByteBuffer
 import javax.jms.BytesMessage
 import javax.jms.Connection
@@ -49,6 +50,8 @@ class As2StorageProcessor(
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository
 ) {
+
+  private val logger = FluentLogger.forEnclosingClass()
 
   private lateinit var session: Session
   private lateinit var consumer: MessageConsumer
@@ -63,7 +66,14 @@ class As2StorageProcessor(
 
       while (true) {
 
+        // TODO determine how pathological messages are handled
+
         val message = consumer.receive() as BytesMessage
+
+        message.apply {
+          logger.atInfo()
+            .log("Processing message from destination: %s, correlation id: %s", jmsDestination, jmsCorrelationID)
+        }
 
         val byteArray = ByteArray(message.bodyLength.toInt())
         message.readBytes(byteArray)
@@ -82,6 +92,8 @@ class As2StorageProcessor(
         }
 
         message.acknowledge()
+
+        logger.atInfo().log("Finished processing message, correlation id: %s", message.jmsCorrelationID)
       }
 
     } finally {
