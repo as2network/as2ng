@@ -38,15 +38,11 @@ import com.freighttrust.db.repositories.As2MdnRepository
 import com.freighttrust.db.repositories.As2MessageRepository
 import com.freighttrust.processing.extensions.toAs2MdnRecord
 import com.freighttrust.processing.extensions.toAs2MessageRecord
-import org.apache.activemq.ActiveMQConnectionFactory
 import java.nio.ByteBuffer
-import javax.jms.BytesMessage
-import javax.jms.Connection
-import javax.jms.MessageConsumer
-import javax.jms.Session
+import javax.jms.*
 
 class As2StorageProcessor(
-  private val mqConnectionFactory: ActiveMQConnectionFactory,
+  private val mqConnectionFactory: ConnectionFactory,
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository
 ) {

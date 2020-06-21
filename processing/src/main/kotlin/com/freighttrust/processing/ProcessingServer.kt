@@ -32,48 +32,36 @@
 
 package com.freighttrust.processing
 
-import com.freighttrust.db.repositories.As2MdnRepository
-import com.freighttrust.db.repositories.As2MessageRepository
+import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.db.modules.PersistenceModule
+import com.freighttrust.messaging.modules.ActiveMQModule
+import com.freighttrust.processing.modules.ProcessingModule
 import com.freighttrust.processing.processors.As2StorageProcessor
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import kotlinx.cli.ArgParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.apache.activemq.ActiveMQConnectionFactory
-import org.jooq.SQLDialect
-import org.jooq.impl.DSL
-import org.postgresql.Driver
+import org.koin.core.context.startKoin
 
 object ProcessingServer {
 
   fun start(args: Array<String>) {
+
     val parser = ArgParser("processor")
     parser.parse(args)
 
-    // TODO: Replace this with messaging ActiveMQ DI module
-    val factory = ActiveMQConnectionFactory("tcp://localhost:61616")
+    val koinApp = startKoin {
+      printLogger()
 
-    // TODO: Replace this with Postgres DI module
-    val dataSource = HikariDataSource(HikariConfig()
-      .apply {
-        driverClassName = Driver::class.java.name
-        jdbcUrl = "jdbc:postgresql://localhost/customs_gateway?user=customs_gateway&password=customs_gateway"
-        isAutoCommit = true
-        maximumPoolSize = 30
-        addDataSourceProperty("cachePrepStmts", "true")
-        addDataSourceProperty("prepStmtCacheSize", "250")
-        addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
-      })
+      modules(
+        AppConfigModule,
+        ActiveMQModule,
+        PersistenceModule,
+        ProcessingModule
+      )
+    }
 
-    val dbCtx = DSL.using(dataSource, SQLDialect.POSTGRES)
-
-    val as2MessageRepository = As2MessageRepository(dbCtx)
-    val as2MdnRepository = As2MdnRepository(dbCtx)
-
-    // Create storage processor to listen from AS2 messages
-    val storageProcessor = As2StorageProcessor(factory, as2MessageRepository, as2MdnRepository)
+    val storageProcessor = koinApp.koin.get<As2StorageProcessor>()
 
     runBlocking {
       launch(Dispatchers.IO) {

@@ -30,8 +30,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.db
+package com.freighttrust.db.modules
 
+import com.freighttrust.db.repositories.As2MdnRepository
+import com.freighttrust.db.repositories.As2MessageRepository
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -43,35 +45,36 @@ import org.koin.dsl.module
 import org.postgresql.Driver
 import javax.sql.DataSource
 
-val DbConfigModule = module {
+val PersistenceModule = module {
 
-  single<Config>(named("db")) {
-    get<Config>(named("app"))
-      .let { it.getConfig("db") }
+  single(named("postgres")) {
+    val config = get<Config>(named("app"))
+    config.getConfig("postgres")
   }
 
   single<DataSource> {
-    get<Config>(named("db"))
-      .let { config ->
+    val config = get<Config>(named("postgres"))
 
-        HikariConfig()
-          .apply {
-            driverClassName = Driver::class.java.name
-            jdbcUrl = config.getString("jdbcUrl")
-            isAutoCommit = false
-            maximumPoolSize = 30
-            addDataSourceProperty("cachePrepStmts", "true")
-            addDataSourceProperty("prepStmtCacheSize", "250")
-            addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
-          }
-
+    val dataSourceConfig = HikariConfig()
+      .apply {
+        driverClassName = Driver::class.java.name
+        jdbcUrl = config.getString("jdbcUrl")
+        isAutoCommit = config.getBoolean("isAutoCommit")
+        maximumPoolSize = config.getInt("maximumPoolSize")
+        addDataSourceProperty("cachePrepStmts", config.getBoolean("cachePrepStmts"))
+        addDataSourceProperty("prepStmtCacheSize", config.getInt("prepStmtCacheSize"))
+        addDataSourceProperty("prepStmtCacheSqlLimit", config.getInt("prepStmtCacheSqlLimit"))
       }
-      .let { hikariConfig -> HikariDataSource(hikariConfig) }
+
+    HikariDataSource(dataSourceConfig)
   }
 
-  single<DSLContext> {
+  factory<DSLContext> {
     val dataSource = get<DataSource>()
     DSL.using(dataSource, SQLDialect.POSTGRES)
   }
 
+  factory { As2MessageRepository(get()) }
+
+  factory { As2MdnRepository(get()) }
 }
