@@ -1,20 +1,3 @@
-import com.freighttrust.as2.utils.As2MessageSender
-import com.freighttrust.as2.utils.KoinTestModules
-import com.helger.as2lib.client.AS2ClientRequest
-import com.helger.commons.io.resource.ClassPathResource
-import io.kotlintest.Spec
-import io.kotlintest.TestCase
-import io.kotlintest.TestResult
-import io.kotlintest.extensions.TopLevelTest
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
-import io.kotlintest.specs.FunSpec
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.test.KoinTest
-import org.koin.test.inject
-import java.nio.charset.Charset
-
 /*
  * BSD 3-Clause License
  *
@@ -46,6 +29,23 @@ import java.nio.charset.Charset
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import com.freighttrust.as2.utils.As2MessageSender
+import com.freighttrust.as2.utils.KoinTestModules
+import com.helger.as2lib.client.AS2ClientRequest
+import com.helger.commons.io.resource.ClassPathResource
+import io.kotlintest.Spec
+import io.kotlintest.TestCase
+import io.kotlintest.TestResult
+import io.kotlintest.extensions.TopLevelTest
+import io.kotlintest.shouldBe
+import io.kotlintest.shouldNotBe
+import io.kotlintest.specs.FunSpec
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.test.KoinTest
+import org.koin.test.inject
+import java.nio.charset.Charset
 
 class As2MessageSenderSpec : FunSpec(), KoinTest {
 

@@ -66,7 +66,7 @@ fun As2Message.toAs2MessageRecord(): As2MessageRecord {
           }
           .toMap()
       ).toJSONB()
-      setData(*(self.dataAsByteBuffer().array()))
+      setData(*(if (self.dataLength() > 0) self.dataAsByteBuffer().array() else byteArrayOf()))
     }
 }
 
