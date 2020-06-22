@@ -30,12 +30,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.processing.extensions
+package com.freighttrust.db.extensions
 
 import com.freighttrust.as2.fb.As2Mdn
 import com.freighttrust.as2.fb.As2Message
 import com.freighttrust.jooq.tables.records.As2MdnRecord
 import com.freighttrust.jooq.tables.records.As2MessageRecord
+import org.jooq.tools.json.JSONObject
 
 fun As2Message.toAs2MessageRecord(): As2MessageRecord {
   val self = this
@@ -47,10 +48,25 @@ fun As2Message.toAs2MessageRecord(): As2MessageRecord {
       subject = self.subject()
       contenttype = self.contentType()
       contentdisposition = self.contentDisposition()
-      // TODO: Map this correctly
-      //headers = self.headers()
-      //attributes = self.attributes()
-      //data = self.dataAsByteBuffer()
+      headers = JSONObject(
+        (0 until self.headersLength())
+          .map { i ->
+            val key = self.headers(i).key()
+            val values = (0 until self.headers(i).valueLength()).map { j -> self.headers(i).value(j) }
+            key to values
+          }
+          .toMap()
+      ).toJSONB()
+      attributes = JSONObject(
+        (0 until self.attributesLength())
+          .map { i ->
+            val key = self.attributes(i).key()
+            val values = (0 until self.attributes(i).valueLength()).map { j -> self.attributes(i).value(j) }
+            key to values
+          }
+          .toMap()
+      ).toJSONB()
+      setData(*(self.dataAsByteBuffer().array()))
     }
 }
 
@@ -61,9 +77,24 @@ fun As2Mdn.toAs2MdnRecord(): As2MdnRecord {
       id = self.id()
       messageId = self.messageId()
       text = self.text()
-      // TODO: Map this correctly
-      //headers = self.headers()
-      //attributes = self.attributes()
-      //data = self.dataAsByteBuffer()
+      headers = JSONObject(
+        (0 until self.headersLength())
+          .map { i ->
+            val key = self.headers(i).key()
+            val values = (0 until self.headers(i).valueLength()).map { j -> self.headers(i).value(j) }
+            key to values
+          }
+          .toMap()
+      ).toJSONB()
+      attributes = JSONObject(
+        (0 until self.attributesLength())
+          .map { i ->
+            val key = self.attributes(i).key()
+            val values = (0 until self.attributes(i).valueLength()).map { j -> self.attributes(i).value(j) }
+            key to values
+          }
+          .toMap()
+      ).toJSONB()
     }
 }
+

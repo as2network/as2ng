@@ -36,8 +36,8 @@ import com.freighttrust.as2.fb.As2Mdn
 import com.freighttrust.as2.fb.As2Message
 import com.freighttrust.db.repositories.As2MdnRepository
 import com.freighttrust.db.repositories.As2MessageRepository
-import com.freighttrust.processing.extensions.toAs2MdnRecord
-import com.freighttrust.processing.extensions.toAs2MessageRecord
+import com.freighttrust.db.extensions.toAs2MdnRecord
+import com.freighttrust.db.extensions.toAs2MessageRecord
 import com.google.common.flogger.FluentLogger
 import java.nio.ByteBuffer
 import javax.jms.BytesMessage
@@ -57,7 +57,6 @@ class As2StorageProcessor(
   private lateinit var consumer: MessageConsumer
 
   fun listen() {
-
 
     session = jmsConnection.createSession(false, Session.CLIENT_ACKNOWLEDGE)
     consumer = session.createConsumer(session.createQueue("as2.inbound.>"))
