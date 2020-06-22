@@ -57,8 +57,7 @@
     <module classname="com.helger.as2lib.processor.receiver.AS2MDNReceiverModule"
             port="10081"/>
 
-    <module classname="com.freighttrust.as2.modules.JmsStorageModule"/>
-
+    <module classname="com.freighttrust.as2.modules.JmsStorageProcessorModule"/>
 
   </processor>
 </openas2>

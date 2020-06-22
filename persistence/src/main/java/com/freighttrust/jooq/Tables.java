@@ -7,9 +7,9 @@ package com.freighttrust.jooq;
 import com.freighttrust.jooq.tables.As2Mdn;
 import com.freighttrust.jooq.tables.As2Message;
 import com.freighttrust.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.jooq.tables.TradingChannel;
 import com.freighttrust.jooq.tables.TradingPartner;
 import com.freighttrust.jooq.tables.TradingPartnerCertificate;
-import com.freighttrust.jooq.tables.TradingPartnership;
 
 import javax.annotation.processing.Generated;
 
@@ -43,6 +43,11 @@ public class Tables {
     public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
+     * The table <code>public.trading_channel</code>.
+     */
+    public static final TradingChannel TRADING_CHANNEL = TradingChannel.TRADING_CHANNEL;
+
+    /**
      * The table <code>public.trading_partner</code>.
      */
     public static final TradingPartner TRADING_PARTNER = TradingPartner.TRADING_PARTNER;
@@ -51,9 +56,4 @@ public class Tables {
      * The table <code>public.trading_partner_certificate</code>.
      */
     public static final TradingPartnerCertificate TRADING_PARTNER_CERTIFICATE = TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE;
-
-    /**
-     * The table <code>public.trading_partnership</code>.
-     */
-    public static final TradingPartnership TRADING_PARTNERSHIP = TradingPartnership.TRADING_PARTNERSHIP;
 }

@@ -30,51 +30,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-create table trading_partner (
-    id varchar(64) primary key,
-    name varchar(128) unique,
-    email varchar(128)
-);
+package com.freighttrust.as2.modules
 
-create table trading_partner_certificate (
-    trading_partner_id varchar(64) references trading_partner,
-    alias varchar(64),
-    x509_certificate bytea,
-    primary key (trading_partner_id, alias)
-);
+import com.freighttrust.as2.factories.AS2SessionFactory
+import com.typesafe.config.Config
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
 
-create table trading_channel (
-    sender_id varchar(64) references trading_partner(id),
-    recipient_id varchar(64) references trading_partner(id),
-    protocol varchar(16),
-    subject varchar(128),
-    as2_url varchar(128),
-    as2_mdn_to varchar(128) null,
-    as2_mdn_options varchar(64)[],
-    encryption_algorithm varchar(16) null,
-    signing_algorithm varchar(16),
-    primary key (sender_id, recipient_id)
-);
+val As2Module = module {
 
-create table as2_message (
-    id varchar(64) primary key,
-    "from" varchar(64),
-    "to" varchar(64),
-    subject varchar(128),
-    contentType varchar(128),
-    contentDisposition varchar(128),
-    /* store header and attributes as jsonb to allow for free form data but make it queryable */
-    headers jsonb,
-    attributes jsonb,
-    data bytea
-);
+  single(named("as2")) {
+    val config = get<Config>(named("app"))
+    config.getConfig("as2")
+  }
 
-create table as2_mdn (
-    id varchar(64) primary key,
-    message_id varchar(64),
-    "text" text,
-    /* store header and attributes as jsonb to allow for free form data but make it queryable */
-    headers jsonb,
-    attributes jsonb
-);
-
+  factory {
+    AS2SessionFactory.create(get(named("as2")))
+  }
+}

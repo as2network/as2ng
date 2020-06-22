@@ -32,29 +32,40 @@
 
 package com.freighttrust.as2
 
-import com.freighttrust.as2.fb.As2Mdn
-import com.freighttrust.as2.fb.As2Message
-import com.freighttrust.as2.fb.toNiceString
-import com.google.common.base.MoreObjects
-import com.helger.as2.app.MainOpenAS2Server
-import kotlinx.cli.*
-import org.apache.activemq.ActiveMQConnectionFactory
-import java.io.File
-import java.nio.ByteBuffer
-import javax.jms.BytesMessage
-import javax.jms.DeliveryMode
-import javax.jms.Session
+import com.freighttrust.as2.modules.As2Module
+import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.db.modules.PersistenceModule
+import com.helger.as2lib.session.AS2Session
+import kotlinx.cli.ArgParser
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.koin.core.context.startKoin
 
 object AS2Server {
+
   fun start(args: Array<String>) {
     val parser = ArgParser("as2")
-    val configPath: String by parser.option(ArgType.String, shortName = "c", description = "AS2 config file path").default("src/main/resources/config/config.xml")
-
     parser.parse(args)
 
-    if (!File(configPath).exists()) throw IllegalArgumentException("AS2 config.xml not found! Current path: $configPath")
+    val koinApp = startKoin {
+      printLogger()
 
-    MainOpenAS2Server().start(configPath)
+      modules(
+        AppConfigModule,
+        PersistenceModule,
+        As2Module
+      )
+    }
+
+    val session = koinApp.koin.get<AS2Session>()
+
+    // TODO: Improve concurrency on this and set a ThreadDefaultHandler
+    runBlocking {
+      launch { session.messageProcessor.startActiveModules() }
+      val channel = Channel<Int>()
+      channel.receive()
+    }
   }
 }
 

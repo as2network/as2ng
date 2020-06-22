@@ -32,6 +32,8 @@
 
 package com.freighttrust.as2.factories
 
+import com.freighttrust.db.repositories.TradingChannelRepository
+import com.helger.as2lib.AbstractDynamicComponent
 import com.helger.as2lib.message.IMessage
 import com.helger.as2lib.message.IMessageMDN
 import com.helger.as2lib.partner.IPartnershipFactory
@@ -41,21 +43,12 @@ import com.helger.commons.collection.attr.IStringMap
 import com.helger.commons.collection.impl.ICommonsList
 import com.helger.commons.collection.impl.ICommonsSet
 import com.helger.commons.state.EChange
-import org.jooq.DSLContext
 
-class DbPartnershipFactory(
-  private val dbContext: DSLContext
-) : IPartnershipFactory {
+class DbTradingChannelFactory(
+  private val repository: TradingChannelRepository
+) : AbstractDynamicComponent(), IPartnershipFactory {
 
-  override fun attrs(): IStringMap {
-    TODO("Not yet implemented")
-  }
-
-  override fun getName(): String? {
-    TODO("Not yet implemented")
-  }
-
-  override fun addPartnership(aPartnership: Partnership): EChange {
+  override fun addPartnership(partnership: Partnership): EChange {
     TODO("Not yet implemented")
   }
 
@@ -67,31 +60,27 @@ class DbPartnershipFactory(
     TODO("Not yet implemented")
   }
 
-  override fun removePartnership(aPartnership: Partnership): EChange {
+  override fun removePartnership(partnership: Partnership): EChange {
     TODO("Not yet implemented")
   }
 
-  override fun getPartnershipByName(sName: String?): Partnership? {
+  override fun getPartnershipByName(name: String?): Partnership? {
     TODO("Not yet implemented")
   }
 
-  override fun initDynamicComponent(aSession: IAS2Session, aParameters: IStringMap?) {
+  override fun initDynamicComponent(aSession: IAS2Session, params: IStringMap?) {
     TODO("Not yet implemented")
   }
 
-  override fun updatePartnership(aMsg: IMessage, bOverwrite: Boolean) {
+  override fun updatePartnership(aMsg: IMessage, overwrite: Boolean) {
     TODO("Not yet implemented")
   }
 
-  override fun updatePartnership(aMdn: IMessageMDN, bOverwrite: Boolean) {
+  override fun updatePartnership(aMdn: IMessageMDN, overwrite: Boolean) {
     TODO("Not yet implemented")
   }
 
-  override fun getSession(): IAS2Session {
-    TODO("Not yet implemented")
-  }
-
-  override fun getPartnership(aPartnership: Partnership): Partnership {
+  override fun getPartnership(partnership: Partnership): Partnership {
     TODO("Not yet implemented")
   }
 

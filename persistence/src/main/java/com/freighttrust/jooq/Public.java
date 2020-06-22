@@ -7,9 +7,9 @@ package com.freighttrust.jooq;
 import com.freighttrust.jooq.tables.As2Mdn;
 import com.freighttrust.jooq.tables.As2Message;
 import com.freighttrust.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.jooq.tables.TradingChannel;
 import com.freighttrust.jooq.tables.TradingPartner;
 import com.freighttrust.jooq.tables.TradingPartnerCertificate;
-import com.freighttrust.jooq.tables.TradingPartnership;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 77586850;
+    private static final long serialVersionUID = 60398564;
 
     /**
      * The reference instance of <code>public</code>
@@ -58,6 +58,11 @@ public class Public extends SchemaImpl {
     public final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = com.freighttrust.jooq.tables.FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
+     * The table <code>public.trading_channel</code>.
+     */
+    public final TradingChannel TRADING_CHANNEL = com.freighttrust.jooq.tables.TradingChannel.TRADING_CHANNEL;
+
+    /**
      * The table <code>public.trading_partner</code>.
      */
     public final TradingPartner TRADING_PARTNER = com.freighttrust.jooq.tables.TradingPartner.TRADING_PARTNER;
@@ -66,11 +71,6 @@ public class Public extends SchemaImpl {
      * The table <code>public.trading_partner_certificate</code>.
      */
     public final TradingPartnerCertificate TRADING_PARTNER_CERTIFICATE = com.freighttrust.jooq.tables.TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE;
-
-    /**
-     * The table <code>public.trading_partnership</code>.
-     */
-    public final TradingPartnership TRADING_PARTNERSHIP = com.freighttrust.jooq.tables.TradingPartnership.TRADING_PARTNERSHIP;
 
     /**
      * No further instances allowed
@@ -97,8 +97,8 @@ public class Public extends SchemaImpl {
             As2Mdn.AS2_MDN,
             As2Message.AS2_MESSAGE,
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
+            TradingChannel.TRADING_CHANNEL,
             TradingPartner.TRADING_PARTNER,
-            TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE,
-            TradingPartnership.TRADING_PARTNERSHIP);
+            TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE);
     }
 }

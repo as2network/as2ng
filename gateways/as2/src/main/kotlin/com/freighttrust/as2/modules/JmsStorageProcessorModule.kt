@@ -57,7 +57,7 @@ import kotlin.getValue
 import kotlin.lazy
 import kotlin.let
 
-class JmsStorageModule : AbstractProcessorModule(), IProcessorStorageModule {
+class JmsStorageProcessorModule : AbstractProcessorModule(), IProcessorStorageModule {
 
   companion object {
 
