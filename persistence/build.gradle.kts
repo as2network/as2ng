@@ -41,17 +41,17 @@ plugins {
 
 dependencies {
 
-  api(kotlin("stdlib"))
+  implementation(kotlin("stdlib"))
 
-  api(project(":common"))
-  api(project(":domain"))
+  implementation(project(":common"))
+  implementation(project(":domain"))
 
   jooqGeneratorRuntime("org.postgresql:postgresql")
 
-  api("org.postgresql:postgresql")
-  api("org.jooq:jooq")
-  api("com.zaxxer:HikariCP")
-  api("org.flywaydb:flyway-core")
+  implementation("org.postgresql:postgresql")
+  implementation("org.jooq:jooq")
+  implementation("com.zaxxer:HikariCP")
+  implementation("org.flywaydb:flyway-core")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
