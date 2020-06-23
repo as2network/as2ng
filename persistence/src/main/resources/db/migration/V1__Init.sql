@@ -58,8 +58,8 @@ create table trading_channel (
 
 create table as2_message (
     id varchar(64) primary key,
-    "from" varchar(64),
-    "to" varchar(64),
+    "from" varchar(64) references trading_partner(id),
+    "to" varchar(64) references trading_partner(id),
     subject varchar(128),
     contentType varchar(128),
     contentDisposition varchar(128),
