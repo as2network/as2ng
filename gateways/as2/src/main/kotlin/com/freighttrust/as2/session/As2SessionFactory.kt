@@ -1,6 +1,6 @@
-package com.freighttrust.as2.factories
+package com.freighttrust.as2.session
 
-import com.freighttrust.as2.modules.JmsStorageProcessorModule
+import com.freighttrust.as2.processor.module.JmsStorageProcessorModule
 import com.helger.as2.app.cert.ServerCertificateFactory
 import com.helger.as2.app.partner.ServerXMLPartnershipFactory
 import com.helger.as2lib.partner.xml.XMLPartnershipFactory
@@ -12,7 +12,7 @@ import com.helger.as2lib.session.AS2Session
 import com.typesafe.config.Config
 import java.io.File
 
-object AS2SessionFactory {
+object As2SessionFactory {
 
   fun create(config: Config): AS2Session =
     object : AS2Session() {

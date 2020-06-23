@@ -32,7 +32,7 @@
 
 package com.freighttrust.as2.modules
 
-import com.freighttrust.as2.factories.AS2SessionFactory
+import com.freighttrust.as2.session.As2SessionFactory
 import com.typesafe.config.Config
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -45,6 +45,6 @@ val As2Module = module {
   }
 
   factory {
-    AS2SessionFactory.create(get(named("as2")))
+    As2SessionFactory.create(get(named("as2")))
   }
 }

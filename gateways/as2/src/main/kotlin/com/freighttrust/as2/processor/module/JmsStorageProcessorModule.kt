@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.as2.modules
+package com.freighttrust.as2.processor.module
 
 import com.freighttrust.as2.ext.toFlatBuffer
 import com.freighttrust.as2.fb.As2Mdn

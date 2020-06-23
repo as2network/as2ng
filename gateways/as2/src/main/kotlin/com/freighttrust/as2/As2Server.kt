@@ -35,6 +35,7 @@ package com.freighttrust.as2
 import com.freighttrust.as2.modules.As2Module
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.db.modules.PersistenceModule
+import com.helger.as2lib.exception.AS2Exception
 import com.helger.as2lib.session.AS2Session
 import kotlinx.cli.ArgParser
 import kotlinx.coroutines.channels.Channel
@@ -42,7 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 
-object AS2Server {
+object As2Server {
 
   fun start(args: Array<String>) {
     val parser = ArgParser("as2")
@@ -59,14 +60,24 @@ object AS2Server {
     }
 
     val session = koinApp.koin.get<AS2Session>()
+    val channel = Channel<Int>()
 
     // TODO: Improve concurrency on this and set a ThreadDefaultHandler
     runBlocking {
-      launch { session.messageProcessor.startActiveModules() }
-      val channel = Channel<Int>()
+      try {
+        for (module in session.messageProcessor.allActiveModules) {
+          launch { module.start() }
+        }
+      } catch (e: Exception) {
+        try {
+          session.messageProcessor.stopActiveModules()
+        } catch (same: AS2Exception) {
+          same.terminate()
+        }
+      }
       channel.receive()
     }
   }
 }
 
-fun main(args: Array<String>) = AS2Server.start(args)
+fun main(args: Array<String>) = As2Server.start(args)
