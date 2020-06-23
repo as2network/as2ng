@@ -35,6 +35,7 @@ package com.freighttrust.as2
 import com.freighttrust.as2.modules.As2Module
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.db.modules.PersistenceModule
+import com.freighttrust.messaging.modules.ActiveMQModule
 import com.helger.as2lib.exception.AS2Exception
 import com.helger.as2lib.session.AS2Session
 import kotlinx.cli.ArgParser
@@ -54,6 +55,7 @@ object As2Server {
 
       modules(
         AppConfigModule,
+        ActiveMQModule,
         PersistenceModule,
         As2Module
       )

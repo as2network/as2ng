@@ -20,32 +20,32 @@ object As2SessionFactory {
         val self = this
 
         // Global attributes
-        isCryptoVerifyUseCertificateInBodyPart = config.getBoolean("CryptoVerifyUseCertificateInBodyPartEnabled")
-        isCryptoSignIncludeCertificateInBodyPart = config.getBoolean("CryptoSignIncludeCertificateInBodyPartEnabled")
+        isCryptoVerifyUseCertificateInBodyPart = config.getBoolean("as2.CryptoVerifyUseCertificateInBodyPartEnabled")
+        isCryptoSignIncludeCertificateInBodyPart = config.getBoolean("as2.CryptoSignIncludeCertificateInBodyPartEnabled")
 
         // Certificates
         certificateFactory = ServerCertificateFactory()
           .apply {
-            attrs()[ServerCertificateFactory.ATTR_FILENAME] = File(config.getString("KeyStoreFilename")).absolutePath
-            attrs()[ServerCertificateFactory.ATTR_TYPE] = config.getString("KeystoreType")
-            attrs()[ServerCertificateFactory.ATTR_PASSWORD] = config.getString("KeyStorePassword")
-            attrs()[ServerCertificateFactory.ATTR_INTERVAL] = config.getInt("KeyStoreMonitoringInterval").toString()
+            attrs()[ServerCertificateFactory.ATTR_FILENAME] = File(config.getString("as2.KeyStoreFilename")).absolutePath
+            attrs()[ServerCertificateFactory.ATTR_TYPE] = config.getString("as2.KeystoreType")
+            attrs()[ServerCertificateFactory.ATTR_PASSWORD] = config.getString("as2.KeyStorePassword")
+            attrs()[ServerCertificateFactory.ATTR_INTERVAL] = config.getInt("as2.KeyStoreMonitoringInterval").toString()
             initDynamicComponent(self, attrs())
           }
 
         // Processors
         messageProcessor = DefaultMessageProcessor()
           .apply {
-            attrs()[DefaultMessageProcessor.ATTR_PENDINGMDN] = config.getString("MessageProcessorPendingMdn")
-            attrs()[DefaultMessageProcessor.ATTR_PENDINGMDNINFO] = config.getString("MessageProcessorPendingMdnInfo")
+            attrs()[DefaultMessageProcessor.ATTR_PENDINGMDN] = config.getString("as2.MessageProcessorPendingMdn")
+            attrs()[DefaultMessageProcessor.ATTR_PENDINGMDNINFO] = config.getString("as2.MessageProcessorPendingMdnInfo")
             initDynamicComponent(self, attrs())
 
             addModule(
               AS2ReceiverModule()
                 .apply {
-                  attrs()[AbstractActiveNetModule.ATTR_PORT] = config.getInt("AS2ReceiverModulePort").toString()
-                  attrs()[AbstractActiveNetModule.ATTR_ERROR_DIRECTORY] = config.getString("AS2ReceiverModuleErrorDir")
-                  attrs()[AbstractActiveNetModule.ATTR_ERROR_FORMAT] = config.getString("AS2ReceiveModuleErrorFormat")
+                  attrs()[AbstractActiveNetModule.ATTR_PORT] = config.getInt("as2.AS2ReceiverModulePort").toString()
+                  attrs()[AbstractActiveNetModule.ATTR_ERROR_DIRECTORY] = config.getString("as2.AS2ReceiverModuleErrorDir")
+                  attrs()[AbstractActiveNetModule.ATTR_ERROR_FORMAT] = config.getString("as2.AS2ReceiveModuleErrorFormat")
                   initDynamicComponent(self, attrs())
                 }
             )
@@ -53,7 +53,7 @@ object As2SessionFactory {
             addModule(
               AS2MDNReceiverModule()
                 .apply {
-                  attrs()[AS2MDNReceiverModule.ATTR_PORT] = config.getInt("AS2MDNReceiverModulePort").toString()
+                  attrs()[AS2MDNReceiverModule.ATTR_PORT] = config.getInt("as2.AS2MDNReceiverModulePort").toString()
                   initDynamicComponent(self, attrs())
                 }
             )
@@ -61,6 +61,7 @@ object As2SessionFactory {
             addModule(
               JmsStorageProcessorModule()
                 .apply {
+                  attrs()[JmsStorageProcessorModule.ATTR_BROKER_URL] = config.getString("activemq.brokerUrl")
                   initDynamicComponent(self, attrs())
                 }
             )

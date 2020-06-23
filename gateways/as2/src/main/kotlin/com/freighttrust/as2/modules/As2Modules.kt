@@ -45,6 +45,7 @@ val As2Module = module {
   }
 
   factory {
-    As2SessionFactory.create(get(named("as2")))
+    val config = get<Config>(named("app"))
+    As2SessionFactory.create(config)
   }
 }

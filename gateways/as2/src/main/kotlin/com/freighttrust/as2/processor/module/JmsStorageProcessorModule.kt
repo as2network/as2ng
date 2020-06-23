@@ -45,17 +45,11 @@ import com.helger.as2lib.session.IAS2Session
 import com.helger.commons.collection.attr.IStringMap
 import org.apache.activemq.ActiveMQConnectionFactory
 import java.util.concurrent.ConcurrentHashMap
-import javax.jms.*
-import kotlin.Any
-import kotlin.Boolean
-import kotlin.IllegalStateException
-import kotlin.Pair
-import kotlin.String
-import kotlin.also
-import kotlin.apply
-import kotlin.getValue
-import kotlin.lazy
-import kotlin.let
+import javax.jms.Connection
+import javax.jms.DeliveryMode
+import javax.jms.Destination
+import javax.jms.MessageProducer
+import javax.jms.Session
 
 class JmsStorageProcessorModule : AbstractProcessorModule(), IProcessorStorageModule {
 
@@ -64,11 +58,11 @@ class JmsStorageProcessorModule : AbstractProcessorModule(), IProcessorStorageMo
     // we handle both message and mdn storage
     val supportedActions = setOf(DO_STORE, DO_STOREMDN)
 
-    val ATTR_BROKER_URL = "brokerUrl"
-    val ATTR_BASE_QUEUE = "baseQueue"
+    const val ATTR_BROKER_URL = "brokerUrl"
+    const val ATTR_BASE_QUEUE = "baseQueue"
 
-    val DEFAULT_BROKER_URL = "tcp://localhost:61616"
-    val DEFAULT_BASE_QUEUE = "as2.inbound"
+    const val DEFAULT_BROKER_URL = "tcp://localhost:61616"
+    const val DEFAULT_BASE_QUEUE = "as2.inbound"
 
   }
 
@@ -97,9 +91,8 @@ class JmsStorageProcessorModule : AbstractProcessorModule(), IProcessorStorageMo
       }
   }
 
-  override fun canHandle(action: String, message: IMessage, options: MutableMap<String, Any>?): Boolean {
-    return supportedActions.contains(action)
-  }
+  override fun canHandle(action: String, message: IMessage, options: MutableMap<String, Any>?): Boolean =
+    supportedActions.contains(action)
 
   private fun destinationFor(action: String, message: IMessage): Destination {
 
@@ -149,6 +142,5 @@ class JmsStorageProcessorModule : AbstractProcessorModule(), IProcessorStorageMo
       }
 
   }
-
 
 }
