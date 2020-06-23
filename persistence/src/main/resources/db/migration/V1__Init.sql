@@ -71,7 +71,7 @@ create table as2_message (
 
 create table as2_mdn (
     id varchar(64) primary key,
-    message_id varchar(64),
+    message_id varchar(64) references as2_message(id),
     "text" text,
     /* store header and attributes as jsonb to allow for free form data but make it queryable */
     headers jsonb,
