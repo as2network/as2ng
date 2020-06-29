@@ -9,12 +9,10 @@ import com.freighttrust.jooq.tables.As2Message;
 import com.freighttrust.jooq.tables.FlywaySchemaHistory;
 import com.freighttrust.jooq.tables.TradingChannel;
 import com.freighttrust.jooq.tables.TradingPartner;
-import com.freighttrust.jooq.tables.TradingPartnerCertificate;
 import com.freighttrust.jooq.tables.records.As2MdnRecord;
 import com.freighttrust.jooq.tables.records.As2MessageRecord;
 import com.freighttrust.jooq.tables.records.FlywaySchemaHistoryRecord;
 import com.freighttrust.jooq.tables.records.TradingChannelRecord;
-import com.freighttrust.jooq.tables.records.TradingPartnerCertificateRecord;
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord;
 
 import javax.annotation.processing.Generated;
@@ -53,16 +51,15 @@ public class Keys {
     public static final UniqueKey<TradingChannelRecord> TRADING_CHANNEL_PKEY = UniqueKeys0.TRADING_CHANNEL_PKEY;
     public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_PKEY = UniqueKeys0.TRADING_PARTNER_PKEY;
     public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_NAME_KEY = UniqueKeys0.TRADING_PARTNER_NAME_KEY;
-    public static final UniqueKey<TradingPartnerCertificateRecord> TRADING_PARTNER_CERTIFICATE_PKEY = UniqueKeys0.TRADING_PARTNER_CERTIFICATE_PKEY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final ForeignKey<As2MdnRecord, As2MessageRecord> AS2_MDN__AS2_MDN_MESSAGE_ID_FKEY = ForeignKeys0.AS2_MDN__AS2_MDN_MESSAGE_ID_FKEY;
+    public static final ForeignKey<As2MessageRecord, TradingPartnerRecord> AS2_MESSAGE__AS2_MESSAGE_FROM_FKEY = ForeignKeys0.AS2_MESSAGE__AS2_MESSAGE_FROM_FKEY;
+    public static final ForeignKey<As2MessageRecord, TradingPartnerRecord> AS2_MESSAGE__AS2_MESSAGE_TO_FKEY = ForeignKeys0.AS2_MESSAGE__AS2_MESSAGE_TO_FKEY;
     public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY = ForeignKeys0.TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY;
     public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY = ForeignKeys0.TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY;
-    public static final ForeignKey<TradingPartnerCertificateRecord, TradingPartnerRecord> TRADING_PARTNER_CERTIFICATE__TRADING_PARTNER_CERTIFICATE_TRADING_PARTNER_ID_FKEY = ForeignKeys0.TRADING_PARTNER_CERTIFICATE__TRADING_PARTNER_CERTIFICATE_TRADING_PARTNER_ID_FKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -75,13 +72,12 @@ public class Keys {
         public static final UniqueKey<TradingChannelRecord> TRADING_CHANNEL_PKEY = Internal.createUniqueKey(TradingChannel.TRADING_CHANNEL, "trading_channel_pkey", TradingChannel.TRADING_CHANNEL.SENDER_ID, TradingChannel.TRADING_CHANNEL.RECIPIENT_ID);
         public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_PKEY = Internal.createUniqueKey(TradingPartner.TRADING_PARTNER, "trading_partner_pkey", TradingPartner.TRADING_PARTNER.ID);
         public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_NAME_KEY = Internal.createUniqueKey(TradingPartner.TRADING_PARTNER, "trading_partner_name_key", TradingPartner.TRADING_PARTNER.NAME);
-        public static final UniqueKey<TradingPartnerCertificateRecord> TRADING_PARTNER_CERTIFICATE_PKEY = Internal.createUniqueKey(TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE, "trading_partner_certificate_pkey", TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE.TRADING_PARTNER_ID, TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE.ALIAS);
     }
 
     private static class ForeignKeys0 {
-        public static final ForeignKey<As2MdnRecord, As2MessageRecord> AS2_MDN__AS2_MDN_MESSAGE_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.AS2_MESSAGE_PKEY, As2Mdn.AS2_MDN, "as2_mdn__as2_mdn_message_id_fkey", As2Mdn.AS2_MDN.MESSAGE_ID);
+        public static final ForeignKey<As2MessageRecord, TradingPartnerRecord> AS2_MESSAGE__AS2_MESSAGE_FROM_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, As2Message.AS2_MESSAGE, "as2_message__as2_message_from_fkey", As2Message.AS2_MESSAGE.FROM);
+        public static final ForeignKey<As2MessageRecord, TradingPartnerRecord> AS2_MESSAGE__AS2_MESSAGE_TO_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, As2Message.AS2_MESSAGE, "as2_message__as2_message_to_fkey", As2Message.AS2_MESSAGE.TO);
         public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, TradingChannel.TRADING_CHANNEL, "trading_channel__trading_channel_sender_id_fkey", TradingChannel.TRADING_CHANNEL.SENDER_ID);
         public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, TradingChannel.TRADING_CHANNEL, "trading_channel__trading_channel_recipient_id_fkey", TradingChannel.TRADING_CHANNEL.RECIPIENT_ID);
-        public static final ForeignKey<TradingPartnerCertificateRecord, TradingPartnerRecord> TRADING_PARTNER_CERTIFICATE__TRADING_PARTNER_CERTIFICATE_TRADING_PARTNER_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE, "trading_partner_certificate__trading_partner_certificate_trading_partner_id_fkey", TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE.TRADING_PARTNER_ID);
     }
 }

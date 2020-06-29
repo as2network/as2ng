@@ -32,24 +32,15 @@
 
 package com.freighttrust.as2.utils
 
-import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
 import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.commons.io.resource.ClassPathResource
 import com.helger.security.keystore.EKeyStoreType
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 object KoinTestModules {
-
-  private val server = module {
-
-    single { MainOpenAS2Server() }
-
-    single(named("config-path")) { ClassPathResource.getAsFile("/config/config.xml")!!.absolutePath }
-  }
 
   private val client = module {
 
@@ -69,7 +60,7 @@ object KoinTestModules {
     single { As2MessageSender(get(), get()) }
   }
 
-  private val modules = listOf(server, client)
+  private val modules = listOf(client)
 
   operator fun invoke() = modules
 }

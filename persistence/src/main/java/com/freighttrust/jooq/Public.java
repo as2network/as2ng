@@ -9,7 +9,6 @@ import com.freighttrust.jooq.tables.As2Message;
 import com.freighttrust.jooq.tables.FlywaySchemaHistory;
 import com.freighttrust.jooq.tables.TradingChannel;
 import com.freighttrust.jooq.tables.TradingPartner;
-import com.freighttrust.jooq.tables.TradingPartnerCertificate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +34,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = 60398564;
+    private static final long serialVersionUID = -969331216;
 
     /**
      * The reference instance of <code>public</code>
@@ -68,11 +67,6 @@ public class Public extends SchemaImpl {
     public final TradingPartner TRADING_PARTNER = com.freighttrust.jooq.tables.TradingPartner.TRADING_PARTNER;
 
     /**
-     * The table <code>public.trading_partner_certificate</code>.
-     */
-    public final TradingPartnerCertificate TRADING_PARTNER_CERTIFICATE = com.freighttrust.jooq.tables.TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE;
-
-    /**
      * No further instances allowed
      */
     private Public() {
@@ -98,7 +92,6 @@ public class Public extends SchemaImpl {
             As2Message.AS2_MESSAGE,
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
             TradingChannel.TRADING_CHANNEL,
-            TradingPartner.TRADING_PARTNER,
-            TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE);
+            TradingPartner.TRADING_PARTNER);
     }
 }

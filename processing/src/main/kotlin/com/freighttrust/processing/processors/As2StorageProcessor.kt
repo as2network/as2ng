@@ -34,10 +34,10 @@ package com.freighttrust.processing.processors
 
 import com.freighttrust.as2.fb.As2Mdn
 import com.freighttrust.as2.fb.As2Message
-import com.freighttrust.db.repositories.As2MdnRepository
-import com.freighttrust.db.repositories.As2MessageRepository
 import com.freighttrust.db.extensions.toAs2MdnRecord
 import com.freighttrust.db.extensions.toAs2MessageRecord
+import com.freighttrust.db.repositories.As2MdnRepository
+import com.freighttrust.db.repositories.As2MessageRepository
 import com.google.common.flogger.FluentLogger
 import java.nio.ByteBuffer
 import javax.jms.BytesMessage

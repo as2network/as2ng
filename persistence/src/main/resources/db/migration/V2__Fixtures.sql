@@ -30,18 +30,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.db.repositories
+/* TODO: Remove this file once we have a better story on fixtures */
 
-import com.freighttrust.jooq.tables.records.As2MdnRecord
-import org.jooq.DSLContext
+insert into trading_partner
+values ('OpenAS2A', 'OpenAS2A', 'OpenAS2 A email');
 
-class As2MdnRepository(
-  private val dbCtx: DSLContext
-) {
+insert into trading_partner
+values ('OpenAS2B', 'OpenAS2B', 'OpenAS2 B email');
 
-  fun insert(record: As2MdnRecord): As2MdnRecord {
-    dbCtx.executeInsert(record)
-    return record
-  }
-  
-}
+insert into trading_channel
+values ('OpenAS2A',
+        'OpenAS2B',
+        'OpenAS2A_alias',
+        'OpenAS2B_alias',
+        'as2',
+        'http://localhost:10080',
+        'http://localhost:10080',
+        'signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5',
+        '3des',
+        'md5');
+
+insert into trading_channel
+values ('OpenAS2B',
+        'OpenAS2A',
+        'OpenAS2B_alias',
+        'OpenAS2A_alias',
+        'as2',
+        'http://localhost:10080',
+        'http://localhost:10080',
+        'signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, sha1',
+        '3des',
+        'sha1');

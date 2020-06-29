@@ -36,21 +36,15 @@ create table trading_partner (
     email varchar(128)
 );
 
-create table trading_partner_certificate (
-    trading_partner_id varchar(64) references trading_partner,
-    alias varchar(64),
-    x509_certificate bytea,
-    primary key (trading_partner_id, alias)
-);
-
 create table trading_channel (
     sender_id varchar(64) references trading_partner(id),
     recipient_id varchar(64) references trading_partner(id),
+    sender_id_x509_alias varchar(128),
+    recipient_id_x509_alias varchar(128),
     protocol varchar(16),
-    subject varchar(128),
     as2_url varchar(128),
     as2_mdn_to varchar(128) null,
-    as2_mdn_options varchar(64)[],
+    as2_mdn_options varchar(128),
     encryption_algorithm varchar(16) null,
     signing_algorithm varchar(16),
     primary key (sender_id, recipient_id)

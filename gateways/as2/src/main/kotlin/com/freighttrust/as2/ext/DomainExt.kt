@@ -75,7 +75,6 @@ fun IMessageMDN.toFlatBuffer(bb: FlatBufferBuilder, parent: IMessage): Int {
   return As2Mdn.endAs2Mdn(bb)
 }
 
-
 fun IMessage.toFlatBuffer(bb: FlatBufferBuilder): Int {
 
   val headersOffset = bb.createVectorOfTables(writeHeaders(this, extractedHeaders, bb))
@@ -148,4 +147,3 @@ private fun writeAttrs(
 
       KeyValue.endKeyValue(bb)
     }.toIntArray()
-

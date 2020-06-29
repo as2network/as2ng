@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class As2Mdn extends TableImpl<As2MdnRecord> {
 
-    private static final long serialVersionUID = 1439327625;
+    private static final long serialVersionUID = -1558798140;
 
     /**
      * The reference instance of <code>public.as2_mdn</code>
@@ -133,15 +133,6 @@ public class As2Mdn extends TableImpl<As2MdnRecord> {
     @Override
     public List<UniqueKey<As2MdnRecord>> getKeys() {
         return Arrays.<UniqueKey<As2MdnRecord>>asList(Keys.AS2_MDN_PKEY);
-    }
-
-    @Override
-    public List<ForeignKey<As2MdnRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<As2MdnRecord, ?>>asList(Keys.AS2_MDN__AS2_MDN_MESSAGE_ID_FKEY);
-    }
-
-    public As2Message as2Message() {
-        return new As2Message(this, Keys.AS2_MDN__AS2_MDN_MESSAGE_ID_FKEY);
     }
 
     @Override

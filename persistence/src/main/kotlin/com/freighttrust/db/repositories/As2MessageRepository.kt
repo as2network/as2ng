@@ -32,7 +32,6 @@
 
 package com.freighttrust.db.repositories
 
-import com.freighttrust.jooq.Tables
 import com.freighttrust.jooq.tables.records.As2MessageRecord
 import org.jooq.DSLContext
 
@@ -40,20 +39,9 @@ class As2MessageRepository(
   private val dbCtx: DSLContext
 ) {
 
-  fun findOne(id: String): As2MessageRecord? =
-    dbCtx
-      .selectFrom(Tables.AS2_MESSAGE)
-      .where(Tables.AS2_MESSAGE.ID.eq(id))
-      .fetchOne()
-
   fun insert(record: As2MessageRecord): As2MessageRecord {
     dbCtx.executeInsert(record)
     return record
-  }
-
-  fun insert(records: List<As2MessageRecord>): List<As2MessageRecord> {
-    dbCtx.batchInsert(records).execute()
-    return records
   }
 
 }

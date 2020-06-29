@@ -1,20 +1,20 @@
 package com.freighttrust.as2.session
 
+import com.freighttrust.as2.partner.ServerTradingChannelFactory
 import com.freighttrust.as2.processor.module.JmsStorageProcessorModule
 import com.helger.as2.app.cert.ServerCertificateFactory
-import com.helger.as2.app.partner.ServerXMLPartnershipFactory
-import com.helger.as2lib.partner.xml.XMLPartnershipFactory
 import com.helger.as2lib.processor.DefaultMessageProcessor
 import com.helger.as2lib.processor.receiver.AS2MDNReceiverModule
 import com.helger.as2lib.processor.receiver.AS2ReceiverModule
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import com.helger.as2lib.session.AS2Session
 import com.typesafe.config.Config
+import org.koin.core.Koin
 import java.io.File
 
 object As2SessionFactory {
 
-  fun create(config: Config): AS2Session =
+  fun create(koin: Koin, config: Config): AS2Session =
     object : AS2Session() {
       init {
         val self = this
@@ -68,10 +68,8 @@ object As2SessionFactory {
           }
 
         // Partnerships
-        // TODO: Replace this with our factory
-        partnershipFactory = ServerXMLPartnershipFactory()
+        partnershipFactory = ServerTradingChannelFactory(koin.get())
           .apply {
-            attrs()[XMLPartnershipFactory.ATTR_FILENAME] = "gateways/as2/src/main/resources/config/partnerships.xml"
             initDynamicComponent(self, attrs())
           }
       }
