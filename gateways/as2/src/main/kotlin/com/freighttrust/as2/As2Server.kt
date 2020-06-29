@@ -36,7 +36,6 @@ import com.freighttrust.as2.modules.As2Module
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.db.modules.PersistenceModule
 import com.freighttrust.messaging.modules.ActiveMQModule
-import com.helger.as2lib.exception.AS2Exception
 import com.helger.as2lib.session.AS2Session
 import kotlinx.cli.ArgParser
 import kotlinx.coroutines.channels.Channel
@@ -70,14 +69,11 @@ object As2Server {
         for (module in session.messageProcessor.allActiveModules) {
           launch { module.start() }
         }
+        channel.receive()
       } catch (e: Exception) {
-        try {
-          session.messageProcessor.stopActiveModules()
-        } catch (same: AS2Exception) {
-          same.terminate()
-        }
+        session.messageProcessor.stopActiveModules()
+        channel.close(e)
       }
-      channel.receive()
     }
   }
 }

@@ -9,7 +9,6 @@ import com.freighttrust.jooq.tables.As2Message;
 import com.freighttrust.jooq.tables.FlywaySchemaHistory;
 import com.freighttrust.jooq.tables.TradingChannel;
 import com.freighttrust.jooq.tables.TradingPartner;
-import com.freighttrust.jooq.tables.TradingPartnerCertificate;
 
 import javax.annotation.processing.Generated;
 
@@ -51,9 +50,4 @@ public class Tables {
      * The table <code>public.trading_partner</code>.
      */
     public static final TradingPartner TRADING_PARTNER = TradingPartner.TRADING_PARTNER;
-
-    /**
-     * The table <code>public.trading_partner_certificate</code>.
-     */
-    public static final TradingPartnerCertificate TRADING_PARTNER_CERTIFICATE = TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE;
 }

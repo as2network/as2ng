@@ -32,9 +32,18 @@
 
 package com.freighttrust.db.repositories
 
+import com.freighttrust.jooq.Tables
+import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import org.jooq.DSLContext
 
 class TradingChannelRepository(
   private val dbCtx: DSLContext
 ) {
+
+  fun findOne(record: TradingChannelRecord): TradingChannelRecord? =
+    dbCtx
+      .selectFrom(Tables.TRADING_CHANNEL)
+      .where(Tables.TRADING_CHANNEL.SENDER_ID.eq(record.senderId).and(Tables.TRADING_CHANNEL.RECIPIENT_ID.eq(record.recipientId)))
+      .fetchOne()
+
 }

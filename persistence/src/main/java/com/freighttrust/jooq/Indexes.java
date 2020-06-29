@@ -9,7 +9,6 @@ import com.freighttrust.jooq.tables.As2Message;
 import com.freighttrust.jooq.tables.FlywaySchemaHistory;
 import com.freighttrust.jooq.tables.TradingChannel;
 import com.freighttrust.jooq.tables.TradingPartner;
-import com.freighttrust.jooq.tables.TradingPartnerCertificate;
 
 import javax.annotation.processing.Generated;
 
@@ -42,7 +41,6 @@ public class Indexes {
     public static final Index TRADING_CHANNEL_PKEY = Indexes0.TRADING_CHANNEL_PKEY;
     public static final Index TRADING_PARTNER_NAME_KEY = Indexes0.TRADING_PARTNER_NAME_KEY;
     public static final Index TRADING_PARTNER_PKEY = Indexes0.TRADING_PARTNER_PKEY;
-    public static final Index TRADING_PARTNER_CERTIFICATE_PKEY = Indexes0.TRADING_PARTNER_CERTIFICATE_PKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -56,6 +54,5 @@ public class Indexes {
         public static Index TRADING_CHANNEL_PKEY = Internal.createIndex("trading_channel_pkey", TradingChannel.TRADING_CHANNEL, new OrderField[] { TradingChannel.TRADING_CHANNEL.SENDER_ID, TradingChannel.TRADING_CHANNEL.RECIPIENT_ID }, true);
         public static Index TRADING_PARTNER_NAME_KEY = Internal.createIndex("trading_partner_name_key", TradingPartner.TRADING_PARTNER, new OrderField[] { TradingPartner.TRADING_PARTNER.NAME }, true);
         public static Index TRADING_PARTNER_PKEY = Internal.createIndex("trading_partner_pkey", TradingPartner.TRADING_PARTNER, new OrderField[] { TradingPartner.TRADING_PARTNER.ID }, true);
-        public static Index TRADING_PARTNER_CERTIFICATE_PKEY = Internal.createIndex("trading_partner_certificate_pkey", TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE, new OrderField[] { TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE.TRADING_PARTNER_ID, TradingPartnerCertificate.TRADING_PARTNER_CERTIFICATE.ALIAS }, true);
     }
 }

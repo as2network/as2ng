@@ -32,57 +32,71 @@
 
 package com.freighttrust.as2.partner
 
+import com.freighttrust.as2.ext.toPartnership
+import com.freighttrust.as2.ext.toTradingChannelRecord
 import com.freighttrust.db.repositories.TradingChannelRepository
 import com.helger.as2lib.AbstractDynamicComponent
 import com.helger.as2lib.message.IMessage
 import com.helger.as2lib.message.IMessageMDN
+import com.helger.as2lib.params.MessageParameters
+import com.helger.as2lib.partner.AS2PartnershipNotFoundException
 import com.helger.as2lib.partner.IPartnershipFactory
 import com.helger.as2lib.partner.Partnership
-import com.helger.as2lib.session.IAS2Session
-import com.helger.commons.collection.attr.IStringMap
+import com.helger.commons.ValueEnforcer
 import com.helger.commons.collection.impl.ICommonsList
 import com.helger.commons.collection.impl.ICommonsSet
 import com.helger.commons.state.EChange
 
-class TradingChannelFactory(
-  private val repository: TradingChannelRepository
+class ServerTradingChannelFactory(
+  private val tradingChannelRepository: TradingChannelRepository
 ) : AbstractDynamicComponent(), IPartnershipFactory {
 
   override fun addPartnership(partnership: Partnership): EChange {
-    TODO("Not yet implemented")
+    throw NotImplementedError("This method is not supported!")
   }
 
   override fun getAllPartnershipNames(): ICommonsSet<String> {
-    TODO("Not yet implemented")
+    throw NotImplementedError("This method is not supported!")
   }
 
   override fun getAllPartnerships(): ICommonsList<Partnership> {
-    TODO("Not yet implemented")
+    throw NotImplementedError("This method is not supported!")
   }
 
   override fun removePartnership(partnership: Partnership): EChange {
-    TODO("Not yet implemented")
+    throw NotImplementedError("This method is not supported!")
   }
 
   override fun getPartnershipByName(name: String?): Partnership? {
-    TODO("Not yet implemented")
+    throw NotImplementedError("This method is not supported!")
   }
 
-  override fun initDynamicComponent(aSession: IAS2Session, params: IStringMap?) {
-    TODO("Not yet implemented")
+  // Copied from AbstractPartnershipFactory
+  override fun updatePartnership(msg: IMessage, overwrite: Boolean) {
+    ValueEnforcer.notNull<IMessage>(msg, "Message")
+
+    val partnership = getPartnership(msg.partnership())
+    msg.partnership().copyFrom(partnership)
+
+    if (overwrite) {
+      partnership.subject?.let {
+        msg.subject = MessageParameters(msg).format(it)
+      }
+    }
   }
 
-  override fun updatePartnership(aMsg: IMessage, overwrite: Boolean) {
-    TODO("Not yet implemented")
-  }
-
-  override fun updatePartnership(aMdn: IMessageMDN, overwrite: Boolean) {
-    TODO("Not yet implemented")
+  // Copied from AbstractPartnershipFactory
+  override fun updatePartnership(mdn: IMessageMDN, overwrite: Boolean) {
+    ValueEnforcer.notNull<IMessageMDN>(mdn, "MessageMDN")
+    val partnership = getPartnership(mdn.partnership())
+    mdn.partnership().copyFrom(partnership)
   }
 
   override fun getPartnership(partnership: Partnership): Partnership {
-    TODO("Not yet implemented")
+    val found = tradingChannelRepository
+      .findOne(partnership.toTradingChannelRecord())
+      ?: throw AS2PartnershipNotFoundException(partnership)
+
+    return found.toPartnership()
   }
-
 }
-

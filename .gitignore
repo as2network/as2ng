@@ -83,12 +83,14 @@ nb-configuration.xml
 ##############################
 .DS_Store
 
-
-.env.local
-.envrc.local
-
 ##############################
 ## Node
 ##############################
-
 node_modules/
+
+##############################
+## Project
+##############################
+.env.local
+.envrc.local
+as2-data/

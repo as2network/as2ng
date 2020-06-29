@@ -19,7 +19,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row9;
+import org.jooq.Row10;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannel extends TableImpl<TradingChannelRecord> {
 
-    private static final long serialVersionUID = 238172016;
+    private static final long serialVersionUID = 2074444993;
 
     /**
      * The reference instance of <code>public.trading_channel</code>
@@ -67,14 +67,19 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     public final TableField<TradingChannelRecord, String> RECIPIENT_ID = createField(DSL.name("recipient_id"), org.jooq.impl.SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
+     * The column <code>public.trading_channel.sender_id_x509_alias</code>.
+     */
+    public final TableField<TradingChannelRecord, String> SENDER_ID_X509_ALIAS = createField(DSL.name("sender_id_x509_alias"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+
+    /**
+     * The column <code>public.trading_channel.recipient_id_x509_alias</code>.
+     */
+    public final TableField<TradingChannelRecord, String> RECIPIENT_ID_X509_ALIAS = createField(DSL.name("recipient_id_x509_alias"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+
+    /**
      * The column <code>public.trading_channel.protocol</code>.
      */
     public final TableField<TradingChannelRecord, String> PROTOCOL = createField(DSL.name("protocol"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
-
-    /**
-     * The column <code>public.trading_channel.subject</code>.
-     */
-    public final TableField<TradingChannelRecord, String> SUBJECT = createField(DSL.name("subject"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
 
     /**
      * The column <code>public.trading_channel.as2_url</code>.
@@ -89,7 +94,7 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     /**
      * The column <code>public.trading_channel.as2_mdn_options</code>.
      */
-    public final TableField<TradingChannelRecord, String[]> AS2_MDN_OPTIONS = createField(DSL.name("as2_mdn_options"), org.jooq.impl.SQLDataType.VARCHAR(64).getArrayDataType(), this, "");
+    public final TableField<TradingChannelRecord, String> AS2_MDN_OPTIONS = createField(DSL.name("as2_mdn_options"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
 
     /**
      * The column <code>public.trading_channel.encryption_algorithm</code>.
@@ -194,11 +199,11 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row9 type methods
+    // Row10 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row9<String, String, String, String, String, String, String[], String, String> fieldsRow() {
-        return (Row9) super.fieldsRow();
+    public Row10<String, String, String, String, String, String, String, String, String, String> fieldsRow() {
+        return (Row10) super.fieldsRow();
     }
 }

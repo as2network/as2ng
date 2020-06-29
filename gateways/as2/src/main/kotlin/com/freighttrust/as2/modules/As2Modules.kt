@@ -46,6 +46,6 @@ val As2Module = module {
 
   factory {
     val config = get<Config>(named("app"))
-    As2SessionFactory.create(config)
+    As2SessionFactory.create(_koin, config)
   }
 }
