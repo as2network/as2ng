@@ -4,11 +4,7 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.As2Mdn;
-import com.freighttrust.jooq.tables.As2Message;
-import com.freighttrust.jooq.tables.FlywaySchemaHistory;
-import com.freighttrust.jooq.tables.TradingChannel;
-import com.freighttrust.jooq.tables.TradingPartner;
+import com.freighttrust.jooq.tables.*;
 
 import javax.annotation.processing.Generated;
 
@@ -26,25 +22,30 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
 
-    /**
-     * The table <code>public.as2_mdn</code>.
-     */
-    public static final As2Mdn AS2_MDN = As2Mdn.AS2_MDN;
+  /**
+   * The table <code>public.as2_mdn</code>.
+   */
+  public static final As2Mdn AS2_MDN = As2Mdn.AS2_MDN;
 
-    /**
-     * The table <code>public.as2_message</code>.
-     */
-    public static final As2Message AS2_MESSAGE = As2Message.AS2_MESSAGE;
+  /**
+   * The table <code>public.as2_message</code>.
+   */
+  public static final As2Message AS2_MESSAGE = As2Message.AS2_MESSAGE;
 
-    /**
-     * The table <code>public.flyway_schema_history</code>.
-     */
-    public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
+  /**
+   * The table <code>public.certificate</code>.
+   */
+  public static final Certificate CERTIFICATE = Certificate.CERTIFICATE;
 
-    /**
-     * The table <code>public.trading_channel</code>.
-     */
-    public static final TradingChannel TRADING_CHANNEL = TradingChannel.TRADING_CHANNEL;
+  /**
+   * The table <code>public.flyway_schema_history</code>.
+   */
+  public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
+
+  /**
+   * The table <code>public.trading_channel</code>.
+   */
+  public static final TradingChannel TRADING_CHANNEL = TradingChannel.TRADING_CHANNEL;
 
     /**
      * The table <code>public.trading_partner</code>.

@@ -34,6 +34,7 @@ package com.freighttrust.db.modules
 
 import com.freighttrust.db.repositories.As2MdnRepository
 import com.freighttrust.db.repositories.As2MessageRepository
+import com.freighttrust.db.repositories.CertificateRepository
 import com.freighttrust.db.repositories.TradingChannelRepository
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariConfig
@@ -80,4 +81,6 @@ val PersistenceModule = module {
   factory { As2MdnRepository(get()) }
 
   factory { TradingChannelRepository(get()) }
+
+  factory { CertificateRepository(get()) }
 }

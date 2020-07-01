@@ -1,8 +1,8 @@
 package com.freighttrust.as2.session
 
-import com.freighttrust.as2.partner.ServerTradingChannelFactory
+import com.freighttrust.as2.factories.PostgresCertificateFactory
+import com.freighttrust.as2.factories.PostgresTradingChannelFactory
 import com.freighttrust.as2.processor.module.JmsStorageProcessorModule
-import com.helger.as2.app.cert.ServerCertificateFactory
 import com.helger.as2lib.processor.DefaultMessageProcessor
 import com.helger.as2lib.processor.receiver.AS2MDNReceiverModule
 import com.helger.as2lib.processor.receiver.AS2ReceiverModule
@@ -10,7 +10,6 @@ import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import com.helger.as2lib.session.AS2Session
 import com.typesafe.config.Config
 import org.koin.core.Koin
-import java.io.File
 
 object As2SessionFactory {
 
@@ -24,14 +23,20 @@ object As2SessionFactory {
         isCryptoSignIncludeCertificateInBodyPart = config.getBoolean("as2.CryptoSignIncludeCertificateInBodyPartEnabled")
 
         // Certificates
-        certificateFactory = ServerCertificateFactory()
+
+        certificateFactory = PostgresCertificateFactory(koin.get())
           .apply {
-            attrs()[ServerCertificateFactory.ATTR_FILENAME] = File(config.getString("as2.KeyStoreFilename")).absolutePath
-            attrs()[ServerCertificateFactory.ATTR_TYPE] = config.getString("as2.KeystoreType")
-            attrs()[ServerCertificateFactory.ATTR_PASSWORD] = config.getString("as2.KeyStorePassword")
-            attrs()[ServerCertificateFactory.ATTR_INTERVAL] = config.getInt("as2.KeyStoreMonitoringInterval").toString()
             initDynamicComponent(self, attrs())
           }
+
+//        certificateFactory = ServerCertificateFactory()
+//          .apply {
+//            attrs()[ServerCertificateFactory.ATTR_FILENAME] = File(config.getString("as2.KeyStoreFilename")).absolutePath
+//            attrs()[ServerCertificateFactory.ATTR_TYPE] = config.getString("as2.KeystoreType")
+//            attrs()[ServerCertificateFactory.ATTR_PASSWORD] = config.getString("as2.KeyStorePassword")
+//            attrs()[ServerCertificateFactory.ATTR_INTERVAL] = config.getInt("as2.KeyStoreMonitoringInterval").toString()
+//            initDynamicComponent(self, attrs())
+//          }
 
         // Processors
         messageProcessor = DefaultMessageProcessor()
@@ -68,7 +73,7 @@ object As2SessionFactory {
           }
 
         // Partnerships
-        partnershipFactory = ServerTradingChannelFactory(koin.get())
+        partnershipFactory = PostgresTradingChannelFactory(koin.get())
           .apply {
             initDynamicComponent(self, attrs())
           }

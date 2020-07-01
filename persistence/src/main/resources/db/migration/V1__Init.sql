@@ -36,11 +36,15 @@ create table trading_partner (
     email varchar(128)
 );
 
+create table certificate (
+    trading_partner_id varchar(64) primary key references trading_partner(id),
+    private_key varchar(2048),
+    x509_certificate varchar(2048)
+);
+
 create table trading_channel (
     sender_id varchar(64) references trading_partner(id),
     recipient_id varchar(64) references trading_partner(id),
-    sender_id_x509_alias varchar(128),
-    recipient_id_x509_alias varchar(128),
     protocol varchar(16),
     as2_url varchar(128),
     as2_mdn_to varchar(128) null,
