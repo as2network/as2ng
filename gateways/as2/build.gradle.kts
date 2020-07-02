@@ -61,7 +61,10 @@ dependencies {
   implementation(project(":persistence"))
 
   implementation("com.helger:as2-server")
+
   implementation("com.google.guava:guava")
+
+  implementation("io.vertx:vertx-web-client")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
   testImplementation("org.koin:koin-test")

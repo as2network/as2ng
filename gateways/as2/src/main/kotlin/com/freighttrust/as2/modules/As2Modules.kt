@@ -34,6 +34,8 @@ package com.freighttrust.as2.modules
 
 import com.freighttrust.as2.session.As2SessionFactory
 import com.typesafe.config.Config
+import io.vertx.core.Vertx
+import io.vertx.ext.web.client.WebClient
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -47,5 +49,9 @@ val As2Module = module {
   factory {
     val config = get<Config>(named("app"))
     As2SessionFactory.create(_koin, config)
+  }
+
+  single {
+    WebClient.create(Vertx.vertx())
   }
 }

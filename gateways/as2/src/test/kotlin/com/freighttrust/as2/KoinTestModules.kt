@@ -30,48 +30,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.freighttrust.as2.utils.As2MessageSender
-import com.freighttrust.as2.utils.KoinTestModules
-import com.helger.as2lib.client.AS2ClientRequest
+package com.freighttrust.as2
+
+import com.helger.as2lib.client.AS2Client
+import com.helger.as2lib.client.AS2ClientSettings
+import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
+import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.commons.io.resource.ClassPathResource
-import io.kotlintest.*
-import io.kotlintest.extensions.TopLevelTest
-import io.kotlintest.specs.FunSpec
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
-import org.koin.test.KoinTest
-import org.koin.test.inject
-import java.nio.charset.Charset
+import com.helger.security.keystore.EKeyStoreType
+import org.koin.dsl.module
 
+object KoinTestModules {
 
-class As2MessageSenderSpec : FunSpec(), KoinTest {
+  private val client = module {
 
-  private val as2MessageSender by inject<As2MessageSender>()
-
-  override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
-    startKoin { modules(KoinTestModules()) }
-  }
-
-  override fun afterSpecClass(spec: Spec, results: Map<TestCase, TestResult>) {
-    stopKoin()
-  }
-
-  init {
-
-    test("it should send an AS2 message") {
-
-    // Prepare AS2 request
-      val request = AS2ClientRequest("Test request")
+    factory {
+      AS2ClientSettings()
         .apply {
-          setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
+          setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+          setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
+          setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10080/HttpReceiver")
+          setPartnershipName("Partnership name")
+          setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
         }
-
-      // Fire request
-      val response = as2MessageSender.send(request)
-
-      // Assert
-      response shouldNotBe null
-      response.exception shouldBe null
     }
+
+    single { AS2Client() }
   }
+
+  private val modules = listOf(client)
+
+  operator fun invoke() = modules
 }

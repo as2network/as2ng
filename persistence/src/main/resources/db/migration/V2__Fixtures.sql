@@ -45,11 +45,11 @@ values ('OpenAS2A',
         'MIIDpTCCAo2gAwIBAgIUPTqpBaKVESX/cq0nhf/UcuMgIuYwDQYJKoZIhvcNAQEFBQAwYjELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFDASBgNVBAcMC0xvcyBBbmdlbGVzMRUwEwYDVQQKDAxGcmVpZ2h0VHJ1c3QxETAPBgNVBAMMCE9wZW5BUzJBMB4XDTIwMDcwMTEzMjA0MloXDTIzMDMyODEzMjA0MlowYjELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFDASBgNVBAcMC0xvcyBBbmdlbGVzMRUwEwYDVQQKDAxGcmVpZ2h0VHJ1c3QxETAPBgNVBAMMCE9wZW5BUzJBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4RBjTdVKCVa4X680rAA4zuvqPVb9dYhtOud9EgyY5tNErLok7YO1wlknfNT9COOjhBa8VeNyuRWJ8U4UuMrTSv2LA2ptk2l6PtgKE77Vr9UPpDRzE8lU14UAP6ij23ahwx53JkCGijDxFDyvcvPrnNUXY1LPOMTRdZsWrIepKjAdQYLugNW0t9RLKUjSRQOqJtYXM5az5deQh1xOusEKaUZvHl+wnLluRbG3K7aiRs8nfvz38pgQiCHyRzFDsMqwskw1e+Q9H4kv1whe+9rmK8luU6PbBRZTxyPHnMh/W0EqU1WIZ4p3CBslUT5+JSUzAFnydGVyyEzQqtlXRAHDsQIDAQABo1MwUTAdBgNVHQ4EFgQUFLkmoGrrtqX6ukZxdyycqUmxwqAwHwYDVR0jBBgwFoAUFLkmoGrrtqX6ukZxdyycqUmxwqAwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAQEAtZ0cvQWVsrzkXsAxN7t+EBAhp0fs3LGMRvaq7tCt1sNBshDi0zG5UZWgoIedaP2k5UFRvnG5hmLpdfyx4surPSZqYhm4H9i9Wt7MN7Luy6890G0aiHWXrR+Omz4nggzUXIzgkJAfTal8esve5I4PwRQ6QXgK5mFFfJREzGX/xFCSjqV2OpPToKBE08+B5OFsXk3523/JJfI3/Qu/Hu5rn8TG1IcK2qRMxe6cwrHFd9rKgLVkV/eYzUqlPPtVntvNjP52FubFFUCsk8/cv7TYZPE9KrdYnQraqC9jH+oeT8UtS9iphuaARnu3GrxZFWE2E9ASI+llcPNu/PvQp7Gmxg==');
 
 insert into trading_channel
-values ('OpenAS2A', 'OpenAS2B', 'as2', 'http://localhost:10080', 'http://localhost:10080',
+values ('OpenAS2A', 'OpenAS2B', 'as2', 'http://localhost:10082', 'http://localhost:10080',
         'signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5',
         '3des',
         'md5'),
-       ('OpenAS2B', 'OpenAS2A', 'as2', 'http://localhost:10080', 'http://localhost:10080',
+       ('OpenAS2B', 'OpenAS2A', 'as2', 'http://localhost:10081', 'http://localhost:10080',
         'signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, sha1',
         '3des',
         'sha1');

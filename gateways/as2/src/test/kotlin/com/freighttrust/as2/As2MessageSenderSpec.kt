@@ -30,37 +30,67 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.as2.utils
+package com.freighttrust.as2
 
 import com.helger.as2lib.client.AS2Client
+import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientSettings
 import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.commons.io.resource.ClassPathResource
 import com.helger.security.keystore.EKeyStoreType
-import org.koin.dsl.module
+import io.kotlintest.Spec
+import io.kotlintest.TestCase
+import io.kotlintest.TestResult
+import io.kotlintest.extensions.TopLevelTest
+import io.kotlintest.shouldBe
+import io.kotlintest.shouldNotBe
+import io.kotlintest.specs.FunSpec
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.test.KoinTest
+import org.koin.test.inject
+import java.nio.charset.Charset
 
-object KoinTestModules {
+class As2MessageSenderSpec : FunSpec(), KoinTest {
 
-  private val client = module {
+  private val as2Client by inject<AS2Client>()
 
-    single {
-      AS2ClientSettings()
+  override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
+    startKoin { modules(KoinTestModules()) }
+  }
+
+  override fun afterSpecClass(spec: Spec, results: Map<TestCase, TestResult>) {
+    stopKoin()
+  }
+
+  init {
+    test("it should send an AS2 message from OpenAS2 to OpenAS2B") {
+
+      // Prepare client settings
+      val clientSettings = AS2ClientSettings()
         .apply {
           setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
           setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
-          setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10080/HttpReceiver")
+          setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10085/HttpReceiver")
           setPartnershipName("Partnership name")
           setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
         }
+
+      // Prepare AS2 request
+      val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+        .apply {
+          setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
+        }
+
+      // Fire request
+      val response = as2Client.sendSynchronous(clientSettings, request)
+
+      // Assert
+      response shouldNotBe null
+      response.exception shouldBe null
+      response.mdn shouldNotBe null
+      response.mdn?.message shouldNotBe null
     }
-
-    single { AS2Client() }
-
-    single { As2MessageSender(get(), get()) }
   }
-
-  private val modules = listOf(client)
-
-  operator fun invoke() = modules
 }
