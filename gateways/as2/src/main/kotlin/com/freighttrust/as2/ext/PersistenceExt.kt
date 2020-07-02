@@ -8,9 +8,7 @@ fun Partnership.toTradingChannelRecord(): TradingChannelRecord {
   return TradingChannelRecord()
     .apply {
       senderId = self.getSenderID("as2_id")
-      senderIdX509Alias = self.senderX509Alias
       recipientId = self.getReceiverID("as2_id")
-      recipientIdX509Alias = self.receiverX509Alias
       protocol = self.protocol
       as2Url = self.aS2URL
       as2MdnTo = self.aS2MDNTo
@@ -25,9 +23,7 @@ fun TradingChannelRecord.toPartnership(): Partnership {
   return Partnership(Partnership.DEFAULT_NAME)
     .apply {
       setSenderID("as2_id", senderId)
-      senderX509Alias = self.senderIdX509Alias
       setReceiverID("as2_id", recipientId)
-      receiverX509Alias = self.recipientIdX509Alias
       protocol = self.protocol
       as2Url = self.as2Url
       as2MdnTo = self.as2MdnTo

@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.as2.partner
+package com.freighttrust.as2.factories
 
 import com.freighttrust.as2.ext.toPartnership
 import com.freighttrust.as2.ext.toTradingChannelRecord
@@ -47,7 +47,7 @@ import com.helger.commons.collection.impl.ICommonsList
 import com.helger.commons.collection.impl.ICommonsSet
 import com.helger.commons.state.EChange
 
-class ServerTradingChannelFactory(
+class PostgresTradingChannelFactory(
   private val tradingChannelRepository: TradingChannelRepository
 ) : AbstractDynamicComponent(), IPartnershipFactory {
 
