@@ -6,7 +6,6 @@ import com.freighttrust.jooq.tables.records.As2MessageRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.message.AS2MessageMDN
-import com.helger.as2lib.message.IMessage
 import com.helger.as2lib.partner.Partnership
 import org.jooq.tools.json.JSONObject
 
@@ -33,12 +32,12 @@ fun AS2Message.toAs2MessageRecord(): As2MessageRecord {
     }
 }
 
-fun AS2MessageMDN.toAs2MdnRecord(parent: IMessage): As2MdnRecord {
+fun AS2MessageMDN.toAs2MdnRecord(): As2MdnRecord {
   val self = this
   return As2MdnRecord()
     .apply {
       id = self.messageID
-      messageId = parent.messageID
+      messageId = message.messageID
       text = self.text
       headers = JSONObject(
         self.headers()
@@ -72,13 +71,13 @@ fun TradingChannelRecord.toPartnership(): Partnership {
   val self = this
   return Partnership(Partnership.DEFAULT_NAME)
     .apply {
-      setSenderID("as2_id", senderId)
-      setReceiverID("as2_id", recipientId)
-      setProtocol(self.protocol)
-      setAS2URL(self.as2Url)
-      setAs2MdnTo(self.as2MdnTo)
-      setAs2MdnOptions(self.as2MdnOptions)
-      setEncryptionAlgorithm(self.encryptionAlgorithm)
-      setSigningAlgorithm(self.signingAlgorithm)
+      this.setSenderID("as2_id", senderId)
+      this.setReceiverID("as2_id", recipientId)
+      this.setProtocol(self.protocol)
+      this.setAS2URL(self.as2Url)
+      this.setAS2MDNTo(self.as2MdnTo)
+      this.setAS2MDNOptions(self.as2MdnOptions)
+      this.setEncryptAlgorithm(self.encryptionAlgorithm)
+      this.setSigningAlgorithm(self.signingAlgorithm)
     }
 }
