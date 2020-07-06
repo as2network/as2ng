@@ -75,6 +75,7 @@ class ProxyProcessorModule(
                   session.isCryptoVerifyUseCertificateInBodyPart
                 }
 
+                // TODO: We can avoid validating the MDN if we don't want to
                 val as2ResourceHelper = AS2ResourceHelper()
                 AS2Helper.parseMDN(
                   msg,
@@ -87,6 +88,7 @@ class ProxyProcessorModule(
 
                 as2MdnRepository.insert(mdn.toAs2MdnRecord())
 
+                // TODO: Check if the AS2 request is synchronous or not and return directly the answer
                 webClient
                   .postAbs(mdn.partnership().aS2MDNTo)
                   .apply {
