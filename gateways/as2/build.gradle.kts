@@ -67,6 +67,9 @@ dependencies {
   implementation("io.vertx:vertx-web-client")
   implementation("com.squareup.okhttp3:okhttp:4.7.2")
 
+  implementation("org.apache.logging.log4j:log4j")
+  implementation("org.apache.logging.log4j:log4j-slf4j-impl")
+
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
   testImplementation("org.koin:koin-test")
 }
