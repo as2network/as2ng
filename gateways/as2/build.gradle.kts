@@ -65,6 +65,7 @@ dependencies {
   implementation("com.google.guava:guava")
 
   implementation("io.vertx:vertx-web-client")
+  implementation("com.squareup.okhttp3:okhttp:4.7.2")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
   testImplementation("org.koin:koin-test")

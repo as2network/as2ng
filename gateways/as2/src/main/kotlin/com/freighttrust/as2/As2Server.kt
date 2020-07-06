@@ -42,6 +42,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 object As2Server {
 

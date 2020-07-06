@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
+import java.util.HashMap;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -346,6 +347,7 @@ public class AS2ModifiedReceiverHandler extends AbstractReceiverHandler
           // Save sent MDN for later examination
           try
           {
+            // We pass directly the handler and the client info to return properly the response
             aSession.getMessageProcessor ().handle (IProcessorStorageModule.DO_STOREMDN, aMsg, null);
           }
           catch (final AS2ComponentNotFoundException | AS2NoModuleException ex)
@@ -481,7 +483,10 @@ public class AS2ModifiedReceiverHandler extends AbstractReceiverHandler
       // Store the received message
       try
       {
-        aSession.getMessageProcessor ().handle (IProcessorStorageModule.DO_STORE, aMsg, null);
+        aSession.getMessageProcessor ().handle (IProcessorStorageModule.DO_STORE, aMsg, new HashMap<>() {{
+          put("ResponseHandler", aResponseHandler);
+          put("ClientInfo", sClientInfo);
+        }});
       }
       catch (final AS2NoModuleException ex)
       {

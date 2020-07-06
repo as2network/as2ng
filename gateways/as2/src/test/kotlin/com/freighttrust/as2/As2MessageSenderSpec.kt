@@ -75,6 +75,8 @@ class As2MessageSenderSpec : FunSpec(), KoinTest {
           setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10085/HttpReceiver")
           setPartnershipName("Partnership name")
           setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
+          connectTimeoutMS = 20000
+          readTimeoutMS = 20000
         }
 
       // Prepare AS2 request
