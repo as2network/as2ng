@@ -40,7 +40,7 @@ object As2SessionFactory {
         val cf = c.getString("as2.CertificateFactory")
         certificateFactory = when (cf) {
           "PostgresCertificateFactory" -> {
-            PostgresCertificateFactory(k.get())
+            PostgresCertificateFactory(k.get(), k.get())
               .apply {
                 initDynamicComponent(self, attrs())
               }
