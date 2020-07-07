@@ -67,7 +67,9 @@ services:
     ports:
       - 8200:8200
     volumes:
-    - vault-data:/vault/file
-    - vault-logs:/valut/logs
+      - ./docker/vault/init.sh:/init.sh
+      - vault-data:/vault/file
+      - vault-logs:/valut/logs
     environment:
       VAULT_DEV_ROOT_TOKEN_ID:
+      VAULT_ADDR:
