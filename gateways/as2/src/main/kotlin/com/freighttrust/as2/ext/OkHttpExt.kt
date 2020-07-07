@@ -30,27 +30,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.as2.modules
+package com.freighttrust.as2.ext
 
-import com.freighttrust.as2.session.As2SessionFactory
-import com.typesafe.config.Config
-import okhttp3.OkHttpClient
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
+import com.helger.commons.http.HttpHeaderMap
+import okhttp3.Headers
+import okhttp3.Response
 
-val As2Module = module {
+val Response.isNotSuccessful: Boolean
+  get() = !isSuccessful
 
-  single(named("as2")) {
-    val config = get<Config>(named("app"))
-    config.getConfig("as2")
-  }
-
-  factory {
-    val config = get<Config>(named("app"))
-    As2SessionFactory.create(_koin, config)
-  }
-
-  single {
-    OkHttpClient()
-  }
+fun Headers.toHttpHeaderMap(): HttpHeaderMap {
+  val map = HttpHeaderMap()
+  forEach { e -> map.addHeader(e.first, e.second) }
+  return map
 }

@@ -58,10 +58,11 @@ dependencyManagement {
     dependency 'com.typesafe:config:1.4.0'
 
     // ------------------------------------------------------------------
-    // VertX
+    // Web Clients
     // ------------------------------------------------------------------
 
     dependency 'io.vertx:vertx-web-client:3.9.1'
+    dependency 'com.squareup.okhttp3:okhttp:4.7.2'
 
     // ------------------------------------------------------------------
     // Serialisation

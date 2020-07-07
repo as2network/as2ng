@@ -65,7 +65,7 @@ dependencies {
   implementation("com.google.guava:guava")
 
   implementation("io.vertx:vertx-web-client")
-  implementation("com.squareup.okhttp3:okhttp:4.7.2")
+  implementation("com.squareup.okhttp3:okhttp")
 
   implementation("org.apache.logging.log4j:log4j")
   implementation("org.apache.logging.log4j:log4j-slf4j-impl")

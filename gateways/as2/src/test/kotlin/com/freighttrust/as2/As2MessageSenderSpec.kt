@@ -72,7 +72,7 @@ class As2MessageSenderSpec : FunSpec(), KoinTest {
         .apply {
           setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
           setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
-          setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10085/HttpReceiver")
+          setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10082/HttpReceiver")
           setPartnershipName("Partnership name")
           setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
           connectTimeoutMS = 20000

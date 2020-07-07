@@ -30,27 +30,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.as2.modules
+package com.freighttrust.as2.ext
 
-import com.freighttrust.as2.session.As2SessionFactory
-import com.typesafe.config.Config
-import okhttp3.OkHttpClient
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
+import com.helger.as2lib.message.IMessage
 
-val As2Module = module {
+val IMessage.isRequestingSyncMDN: Boolean
+  get() = isRequestingMDN && !isRequestingAsynchMDN
 
-  single(named("as2")) {
-    val config = get<Config>(named("app"))
-    config.getConfig("as2")
-  }
-
-  factory {
-    val config = get<Config>(named("app"))
-    As2SessionFactory.create(_koin, config)
-  }
-
-  single {
-    OkHttpClient()
-  }
-}
