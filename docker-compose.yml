@@ -13,6 +13,12 @@ volumes:
   activemq-data:
     driver: local
 
+  vault-data:
+    driver: local
+
+  vault-logs:
+    driver: local
+
 services:
 
   activemq:
@@ -53,3 +59,15 @@ services:
       - 8082:8082
     command: "/usr/bin/pgweb --bind=0.0.0.0 --listen=8082 --url postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
 
+  vault:
+    image: vault:1.4.3
+    restart: unless-stopped
+    networks:
+      - net
+    ports:
+      - 8200:8200
+    volumes:
+    - vault-data:/vault/file
+    - vault-logs:/valut/logs
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID:
