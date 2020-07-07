@@ -49,8 +49,9 @@ fun AS2Message.toAs2MessageRecord(): As2MessageRecord {
       from = self.aS2From
       to = self.aS2To
       subject = self.subject
-      contenttype = self.contentType
-      contentdisposition = self.contentDisposition
+      contentType = self.contentType
+      contentDisposition = self.contentDisposition
+      mic = self.attrs()[AS2Message.ATTRIBUTE_MIC]
       headers = JSONObject(
         self.headers()
           .map { h -> h.key to h.value }
@@ -105,11 +106,11 @@ fun TradingChannelRecord.toPartnership(): Partnership {
     .apply {
       this.setSenderID("as2_id", senderId)
       this.setReceiverID("as2_id", recipientId)
-      this.setProtocol(self.protocol)
-      this.setAS2URL(self.as2Url)
-      this.setAS2MDNTo(self.as2MdnTo)
-      this.setAS2MDNOptions(self.as2MdnOptions)
-      this.setEncryptAlgorithm(self.encryptionAlgorithm)
-      this.setSigningAlgorithm(self.signingAlgorithm)
+      this.protocol = self.protocol
+      this.aS2URL = self.as2Url
+      this.aS2MDNTo = self.as2MdnTo
+      this.aS2MDNOptions = self.as2MdnOptions
+      this.encryptAlgorithm = self.encryptionAlgorithm
+      this.signingAlgorithm = self.signingAlgorithm
     }
 }

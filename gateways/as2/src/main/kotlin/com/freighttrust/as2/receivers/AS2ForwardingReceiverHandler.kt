@@ -6,6 +6,8 @@ import com.freighttrust.as2.ext.toHttpHeaderMap
 import com.freighttrust.db.repositories.As2MdnRepository
 import com.freighttrust.db.repositories.As2MessageRepository
 import com.helger.as2lib.cert.ECertificatePartnershipType
+import com.helger.as2lib.crypto.ECryptoAlgorithmSign
+import com.helger.as2lib.crypto.MIC
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
 import com.helger.as2lib.exception.AS2Exception
@@ -21,8 +23,6 @@ import com.helger.as2lib.processor.receiver.net.AS2NetException
 import com.helger.as2lib.processor.receiver.net.AbstractReceiverHandler
 import com.helger.as2lib.processor.receiver.net.INetModuleHandler
 import com.helger.as2lib.processor.sender.IProcessorSenderModule
-import com.helger.as2lib.processor.storage.IProcessorStorageModule
-import com.helger.as2lib.session.AS2ComponentNotFoundException
 import com.helger.as2lib.util.AS2Helper
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.as2lib.util.AS2IOHelper
@@ -32,6 +32,7 @@ import com.helger.as2lib.util.http.AS2InputStreamProviderSocket
 import com.helger.as2lib.util.http.IAS2HttpResponseHandler
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
+import com.helger.commons.http.CHttpHeader.RECEIPT_DELIVERY_OPTION
 import com.helger.commons.http.HttpHeaderMap
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream
 import com.helger.commons.io.stream.StreamHelper
@@ -253,23 +254,33 @@ class AS2ForwardingReceiverHandler(
     }
   }
 
-  private fun storeAndForward(msg: IMessage, responseHandler: IAS2HttpResponseHandler) {
+  private fun storeAndForward(message: AS2Message, responseHandler: IAS2HttpResponseHandler) {
 
-    as2MessageRepository.insert((msg as AS2Message).toAs2MessageRecord())
+    calculateMIC(message)
 
-    val url = msg.partnership().aS2URL!!
+    as2MessageRepository.insert(message.toAs2MessageRecord())
 
-    val part = msg.data!!.parent.parent
+    val url = message.partnership().aS2URL!!
+
+    val part = message.data!!.parent.parent
     val mediaType = part.contentType.split("\r").first().toMediaType()
 
     val body = part.inputStream.readAllBytes().toRequestBody(mediaType)
 
-    val request = Request.Builder()
+    val requestBuilder = Request.Builder()
       .url(url)
       .apply {
-        val headers = msg.headers().allHeaders
+        val headers = message.headers().allHeaders
         headers.forEach { h -> header(h.key, h.value.first!!) }
       }
+
+    if (message.isRequestingAsynchMDN) {
+      // override the mdn reply to to point to this server instead of the originating server
+      // TODO load url from config
+      requestBuilder.header(RECEIPT_DELIVERY_OPTION, "http://localhost:10086/MDNReceiver")
+    }
+
+    val request = requestBuilder
       .post(body)
       .build()
 
@@ -279,7 +290,7 @@ class AS2ForwardingReceiverHandler(
       .use { response ->
         when {
 
-          response.isSuccessful && msg.isRequestingMDN && !msg.isRequestingAsynchMDN -> {
+          response.isSuccessful && message.isRequestingMDN && !message.isRequestingAsynchMDN -> {
 
             NonBlockingByteArrayOutputStream()
               .use { data ->
@@ -561,15 +572,15 @@ class AS2ForwardingReceiverHandler(
               responseHandler.sendHttpResponse(CHttp.HTTP_OK, mdn.headers(), data)
             }
 
-          // Save sent MDN for later examination
-          try {
-            // We pass directly the handler and the client info to return properly the response
-            session.messageProcessor.handle(IProcessorStorageModule.DO_STOREMDN, message, null)
-          } catch (ex: AS2ComponentNotFoundException) {
-            // No message processor found
-            // or No module found in message processor
-          } catch (ex: AS2NoModuleException) {
-          }
+//          // Save sent MDN for later examination
+//          try {
+//            // We pass directly the handler and the client info to return properly the response
+//            session.messageProcessor.handle(IProcessorStorageModule.DO_STOREMDN, message, null)
+//          } catch (ex: AS2ComponentNotFoundException) {
+//            // No message processor found
+//            // or No module found in message processor
+//          } catch (ex: AS2NoModuleException) {
+//          }
           if (logger.isInfoEnabled) logger.info("sent MDN [" + disposition.asString + "] " + clientInfo + message.loggingText)
         }
       } catch (ex: Exception) {
@@ -578,6 +589,33 @@ class AS2ForwardingReceiverHandler(
     }
   }
 
+  @Throws(java.lang.Exception::class)
+  private fun calculateMIC(message: AS2Message): MIC? {
+    val partnership = message.partnership()
+
+    // Calculate and get the original mic
+    val includeHeadersInMIC = partnership.signingAlgorithm != null || partnership.encryptAlgorithm != null || partnership.compressionType != null
+
+    // For sending, we need to use the Signing algorithm defined in the
+    // partnership
+    var eSigningAlgorithm = ECryptoAlgorithmSign.getFromIDOrNull(partnership.signingAlgorithm)
+    if (eSigningAlgorithm == null) {
+      // If no valid algorithm is defined, fall back to the defaults
+      val bUseRFC3851MICAlg = partnership.isRFC3851MICAlgs
+      eSigningAlgorithm = if (bUseRFC3851MICAlg) ECryptoAlgorithmSign.DEFAULT_RFC_3851 else ECryptoAlgorithmSign.DEFAULT_RFC_5751
+      if (logger.isWarnEnabled) logger.warn("The partnership signing algorithm name '" +
+        partnership.signingAlgorithm +
+        "' is unknown. Fallbacking back to the default '" +
+        eSigningAlgorithm.id +
+        "'")
+    }
+
+    val mic = AS2Helper.getCryptoHelper()
+      .calculateMIC(message.data!!, eSigningAlgorithm!!, includeHeadersInMIC)
+
+    message.attrs().putIn(AS2Message.ATTRIBUTE_MIC, mic.asAS2String)
+    return mic
+  }
 
   private fun dispositionText(ex: AS2Exception): String? {
     // Issue 90 - use CRLF as separator

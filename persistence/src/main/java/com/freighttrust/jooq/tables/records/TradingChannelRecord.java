@@ -30,22 +30,21 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   private static final long serialVersionUID = -1260049897;
 
   /**
-   * Setter for <code>public.trading_channel.sender_id</code>.
+   * Create a detached TradingChannelRecord
    */
-  public TradingChannelRecord setSenderId(String value) {
-    set(0, value);
-    return this;
+  public TradingChannelRecord() {
+    super(TradingChannel.TRADING_CHANNEL);
   }
 
-    /**
-     * Getter for <code>public.trading_channel.sender_id</code>.
-     */
-    public String getSenderId() {
-        return (String) get(0);
-    }
+  /**
+   * Getter for <code>public.trading_channel.sender_id</code>.
+   */
+  public String getSenderId() {
+    return (String) get(0);
+  }
 
-    /**
-     * Setter for <code>public.trading_channel.recipient_id</code>.
+  /**
+   * Setter for <code>public.trading_channel.recipient_id</code>.
      */
     public TradingChannelRecord setRecipientId(String value) {
         set(1, value);
@@ -76,6 +75,14 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
     }
 
   /**
+   * Setter for <code>public.trading_channel.sender_id</code>.
+   */
+  public TradingChannelRecord setSenderId(String value) {
+    set(0, value);
+    return this;
+  }
+
+  /**
    * Getter for <code>public.trading_channel.protocol</code>.
    */
   public String getProtocol() {
@@ -85,85 +92,80 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   /**
    * Setter for <code>public.trading_channel.protocol</code>.
    */
-    public TradingChannelRecord setProtocol(String value) {
-        set(2, value);
-      return this;
-    }
+  public TradingChannelRecord setProtocol(String value) {
+    set(2, value);
+    return this;
+  }
 
-    /**
-     * Getter for <code>public.trading_channel.as2_url</code>.
-     */
-    public String getAs2Url() {
-      return (String) get(3);
-    }
+  /**
+   * Getter for <code>public.trading_channel.as2_url</code>.
+   */
+  public String getAs2Url() {
+    return (String) get(3);
+  }
 
   /**
    * Setter for <code>public.trading_channel.as2_url</code>.
    */
-    public TradingChannelRecord setAs2Url(String value) {
-        set(3, value);
-      return this;
-    }
+  public TradingChannelRecord setAs2Url(String value) {
+    set(3, value);
+    return this;
+  }
 
-    /**
-     * Getter for <code>public.trading_channel.as2_mdn_to</code>.
-     */
-    public String getAs2MdnTo() {
-        return (String) get(4);
-    }
+  /**
+   * Getter for <code>public.trading_channel.as2_mdn_to</code>.
+   */
+  public String getAs2MdnTo() {
+    return (String) get(4);
+  }
 
-    /**
-     * Setter for <code>public.trading_channel.as2_mdn_to</code>.
-     */
-    public TradingChannelRecord setAs2MdnTo(String value) {
-      set(4, value);
-      return this;
-    }
+  /**
+   * Setter for <code>public.trading_channel.as2_mdn_to</code>.
+   */
+  public TradingChannelRecord setAs2MdnTo(String value) {
+    set(4, value);
+    return this;
+  }
 
   /**
    * Getter for <code>public.trading_channel.as2_mdn_options</code>.
    */
-    public String getAs2MdnOptions() {
-        return (String) get(5);
-    }
+  public String getAs2MdnOptions() {
+    return (String) get(5);
+  }
 
-    /**
-     * Setter for <code>public.trading_channel.as2_mdn_options</code>.
-     */
-    public TradingChannelRecord setAs2MdnOptions(String value) {
-      set(5, value);
-      return this;
-    }
+  /**
+   * Setter for <code>public.trading_channel.as2_mdn_options</code>.
+   */
+  public TradingChannelRecord setAs2MdnOptions(String value) {
+    set(5, value);
+    return this;
+  }
 
   /**
    * Getter for <code>public.trading_channel.encryption_algorithm</code>.
    */
-    public String getEncryptionAlgorithm() {
-        return (String) get(6);
-    }
-
-    /**
-     * Setter for <code>public.trading_channel.encryption_algorithm</code>.
-     */
-    public TradingChannelRecord setEncryptionAlgorithm(String value) {
-      set(6, value);
-      return this;
-    }
+  public String getEncryptionAlgorithm() {
+    return (String) get(6);
+  }
 
   /**
-     * Getter for <code>public.trading_channel.signing_algorithm</code>.
-     */
-    public String getSigningAlgorithm() {
-        return (String) get(7);
-    }
+   * Setter for <code>public.trading_channel.encryption_algorithm</code>.
+   */
+  public TradingChannelRecord setEncryptionAlgorithm(String value) {
+    set(6, value);
+    return this;
+  }
 
-    // -------------------------------------------------------------------------
-    // Primary key information
-    // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // Primary key information
+  // -------------------------------------------------------------------------
 
-  @Override
-  public Record2<String, String> key() {
-    return (Record2) super.key();
+  /**
+   * Getter for <code>public.trading_channel.signing_algorithm</code>.
+   */
+  public String getSigningAlgorithm() {
+    return (String) get(7);
   }
 
   // -------------------------------------------------------------------------
@@ -179,8 +181,18 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   }
 
   @Override
+  public Record2<String, String> key() {
+    return (Record2) super.key();
+  }
+
+  @Override
   public Row8<String, String, String, String, String, String, String, String> fieldsRow() {
     return (Row8) super.fieldsRow();
+  }
+
+  @Override
+  public Row8<String, String, String, String, String, String, String, String> valuesRow() {
+    return (Row8) super.valuesRow();
   }
 
   @Override
@@ -194,11 +206,6 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   }
 
   @Override
-  public Row8<String, String, String, String, String, String, String, String> valuesRow() {
-    return (Row8) super.valuesRow();
-  }
-
-  @Override
   public Field<String> field3() {
     return TradingChannel.TRADING_CHANNEL.PROTOCOL;
   }
@@ -209,38 +216,38 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   }
 
   @Override
-    public Field<String> field5() {
-        return TradingChannel.TRADING_CHANNEL.AS2_MDN_TO;
+  public Field<String> field5() {
+    return TradingChannel.TRADING_CHANNEL.AS2_MDN_TO;
   }
 
   @Override
-    public Field<String> field7() {
-        return TradingChannel.TRADING_CHANNEL.ENCRYPTION_ALGORITHM;
-    }
-
-    @Override
-    public Field<String> field6() {
-      return TradingChannel.TRADING_CHANNEL.AS2_MDN_OPTIONS;
-    }
+  public Field<String> field6() {
+    return TradingChannel.TRADING_CHANNEL.AS2_MDN_OPTIONS;
+  }
 
   @Override
-    public String component1() {
-        return getSenderId();
-    }
-
-    @Override
-    public String component2() {
-      return getRecipientId();
-    }
-
-  @Override
-  public String component3() {
-    return getProtocol();
+  public Field<String> field7() {
+    return TradingChannel.TRADING_CHANNEL.ENCRYPTION_ALGORITHM;
   }
 
   @Override
   public Field<String> field8() {
     return TradingChannel.TRADING_CHANNEL.SIGNING_ALGORITHM;
+  }
+
+  @Override
+  public String component1() {
+    return getSenderId();
+  }
+
+  @Override
+  public String component2() {
+    return getRecipientId();
+  }
+
+  @Override
+  public String component3() {
+    return getProtocol();
   }
 
   @Override
@@ -264,6 +271,11 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   }
 
   @Override
+  public String component8() {
+    return getSigningAlgorithm();
+  }
+
+  @Override
   public String value1() {
     return getSenderId();
   }
@@ -271,11 +283,6 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   @Override
   public String value2() {
     return getRecipientId();
-  }
-
-  @Override
-  public String component8() {
-    return getSigningAlgorithm();
   }
 
   @Override
@@ -289,35 +296,35 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   }
 
   @Override
-    public String value5() {
-        return getAs2MdnTo();
+  public String value5() {
+    return getAs2MdnTo();
   }
 
   @Override
-    public String value6() {
-        return getAs2MdnOptions();
-  }
-
-  @Override
-    public String value8() {
-        return getSigningAlgorithm();
-    }
-
-    @Override
-    public TradingChannelRecord value1(String value) {
-      setSenderId(value);
-      return this;
-    }
-
-  @Override
-  public TradingChannelRecord value2(String value) {
-    setRecipientId(value);
-    return this;
+  public String value6() {
+    return getAs2MdnOptions();
   }
 
   @Override
   public String value7() {
     return getEncryptionAlgorithm();
+  }
+
+  @Override
+  public String value8() {
+    return getSigningAlgorithm();
+  }
+
+  @Override
+  public TradingChannelRecord value1(String value) {
+    setSenderId(value);
+    return this;
+  }
+
+  @Override
+  public TradingChannelRecord value2(String value) {
+    setRecipientId(value);
+    return this;
   }
 
   @Override
@@ -330,25 +337,19 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   public TradingChannelRecord value4(String value) {
     setAs2Url(value);
     return this;
-    }
+  }
 
-    @Override
-    public TradingChannelRecord value5(String value) {
-        setAs2MdnTo(value);
-      return this;
-    }
+  @Override
+  public TradingChannelRecord value5(String value) {
+    setAs2MdnTo(value);
+    return this;
+  }
 
-    @Override
-    public TradingChannelRecord value6(String value) {
-        setAs2MdnOptions(value);
-      return this;
-    }
-
-    @Override
-    public TradingChannelRecord value8(String value) {
-      setSigningAlgorithm(value);
-      return this;
-    }
+  @Override
+  public TradingChannelRecord value6(String value) {
+    setAs2MdnOptions(value);
+    return this;
+  }
 
   @Override
   public TradingChannelRecord value7(String value) {
@@ -360,11 +361,10 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   // Constructors
   // -------------------------------------------------------------------------
 
-  /**
-   * Create a detached TradingChannelRecord
-   */
-  public TradingChannelRecord() {
-    super(TradingChannel.TRADING_CHANNEL);
+  @Override
+  public TradingChannelRecord value8(String value) {
+    setSigningAlgorithm(value);
+    return this;
   }
 
   @Override
@@ -378,5 +378,5 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
     value7(value7);
     value8(value8);
     return this;
-  }
+    }
 }

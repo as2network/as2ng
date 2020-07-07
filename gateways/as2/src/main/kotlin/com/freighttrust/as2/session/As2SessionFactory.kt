@@ -5,6 +5,7 @@ import com.freighttrust.as2.factories.PostgresTradingChannelFactory
 import com.freighttrust.as2.processor.module.JmsStorageProcessorModule
 import com.freighttrust.as2.processor.module.LoggingProcessorModule
 import com.freighttrust.as2.receivers.AS2ForwardingReceiverModule
+import com.freighttrust.as2.receivers.AS2MDNForwardingReceiverModule
 import com.helger.as2.app.cert.ServerCertificateFactory
 import com.helger.as2.app.cert.ServerCertificateFactory.*
 import com.helger.as2lib.processor.DefaultMessageProcessor
@@ -13,6 +14,7 @@ import com.helger.as2lib.processor.DefaultMessageProcessor.ATTR_PENDINGMDNINFO
 import com.helger.as2lib.processor.receiver.AS2MDNReceiverModule
 import com.helger.as2lib.processor.receiver.AS2ReceiverModule
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule.*
+import com.helger.as2lib.processor.sender.AsynchMDNSenderModule
 import com.helger.as2lib.session.AS2Session
 import com.typesafe.config.Config
 import org.koin.core.Koin
@@ -73,6 +75,14 @@ object As2SessionFactory {
                       }
                   )
                 }
+                "AsynchMDNSenderModule" -> {
+                  addModule(
+                    AsynchMDNSenderModule()
+                      .apply {
+                        initDynamicComponent(self, attrs())
+                      }
+                  )
+                }
                 "AS2ForwardingReceiverModule" -> {
                   addModule(
                     AS2ForwardingReceiverModule(k.get(), k.get(), k.get())
@@ -80,6 +90,15 @@ object As2SessionFactory {
                         attrs()[ATTR_PORT] = c.getInt("as2.AS2ForwardingReceiverModule.port").toString()
                         attrs()[ATTR_ERROR_DIRECTORY] = c.getString("as2.AS2ForwardingReceiverModule.errorDir")
                         attrs()[ATTR_ERROR_FORMAT] = c.getString("as2.AS2ForwardingReceiverModule.errorFormat")
+                        initDynamicComponent(self, attrs())
+                      }
+                  )
+                }
+                "AS2MDNForwardingReceiverModule" -> {
+                  addModule(
+                    AS2MDNForwardingReceiverModule(k.get(), k.get(), k.get())
+                      .apply {
+                        attrs()[ATTR_PORT] = c.getInt("as2.AS2MDNForwardingReceiverModule.port").toString()
                         initDynamicComponent(self, attrs())
                       }
                   )

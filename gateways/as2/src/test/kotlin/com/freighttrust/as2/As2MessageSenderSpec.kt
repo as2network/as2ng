@@ -71,6 +71,7 @@ class As2MessageSenderSpec : FunSpec(), KoinTest {
           setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10085/HttpReceiver")
           setPartnershipName("Partnership name")
           setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
+          asyncMDNUrl = "http://localhost:10800/MDNReceiver"
           connectTimeoutMS = 20000
           readTimeoutMS = 20000
         }
@@ -82,6 +83,7 @@ class As2MessageSenderSpec : FunSpec(), KoinTest {
         }
 
       // Fire request
+
       val response = as2Client.sendSynchronous(clientSettings, request)
 
       // Assert

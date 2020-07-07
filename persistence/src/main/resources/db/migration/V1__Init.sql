@@ -59,8 +59,9 @@ create table as2_message (
     "from" varchar(64) references trading_partner(id),
     "to" varchar(64) references trading_partner(id),
     subject varchar(128),
-    contentType varchar(128),
-    contentDisposition varchar(128),
+    content_type varchar(128),
+    content_disposition varchar(128),
+    mic varchar(32) null,
     /* store header and attributes as jsonb to allow for free form data but make it queryable */
     headers jsonb,
     attributes jsonb,

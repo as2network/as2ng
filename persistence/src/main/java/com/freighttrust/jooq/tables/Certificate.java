@@ -35,7 +35,7 @@ public class Certificate extends TableImpl<CertificateRecord> {
    * The reference instance of <code>public.certificate</code>
    */
   public static final Certificate CERTIFICATE = new Certificate();
-  private static final long serialVersionUID = -1518464228;
+  private static final long serialVersionUID = -1399461956;
   /**
    * The column <code>public.certificate.trading_partner_id</code>.
    */
@@ -43,11 +43,11 @@ public class Certificate extends TableImpl<CertificateRecord> {
   /**
    * The column <code>public.certificate.private_key</code>.
    */
-  public final TableField<CertificateRecord, String> PRIVATE_KEY = createField(DSL.name("private_key"), org.jooq.impl.SQLDataType.VARCHAR(1628), this, "");
+  public final TableField<CertificateRecord, String> PRIVATE_KEY = createField(DSL.name("private_key"), org.jooq.impl.SQLDataType.VARCHAR(2048), this, "");
   /**
    * The column <code>public.certificate.x509_certificate</code>.
    */
-  public final TableField<CertificateRecord, String> X509_CERTIFICATE = createField(DSL.name("x509_certificate"), org.jooq.impl.SQLDataType.VARCHAR(1628), this, "");
+  public final TableField<CertificateRecord, String> X509_CERTIFICATE = createField(DSL.name("x509_certificate"), org.jooq.impl.SQLDataType.VARCHAR(2048), this, "");
 
   /**
    * Create a <code>public.certificate</code> table reference
