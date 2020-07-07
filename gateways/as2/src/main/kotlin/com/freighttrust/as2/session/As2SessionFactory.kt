@@ -4,21 +4,15 @@ import com.freighttrust.as2.factories.PostgresCertificateFactory
 import com.freighttrust.as2.factories.PostgresTradingChannelFactory
 import com.freighttrust.as2.processor.module.JmsStorageProcessorModule
 import com.freighttrust.as2.processor.module.LoggingProcessorModule
-import com.freighttrust.as2.processor.module.ProxyProcessorModule
-import com.freighttrust.as2.processor.receiver.AS2ModifiedReceiverModule
+import com.freighttrust.as2.receivers.AS2ForwardingReceiverModule
 import com.helger.as2.app.cert.ServerCertificateFactory
-import com.helger.as2.app.cert.ServerCertificateFactory.ATTR_FILENAME
-import com.helger.as2.app.cert.ServerCertificateFactory.ATTR_INTERVAL
-import com.helger.as2.app.cert.ServerCertificateFactory.ATTR_PASSWORD
-import com.helger.as2.app.cert.ServerCertificateFactory.ATTR_TYPE
+import com.helger.as2.app.cert.ServerCertificateFactory.*
 import com.helger.as2lib.processor.DefaultMessageProcessor
 import com.helger.as2lib.processor.DefaultMessageProcessor.ATTR_PENDINGMDN
 import com.helger.as2lib.processor.DefaultMessageProcessor.ATTR_PENDINGMDNINFO
 import com.helger.as2lib.processor.receiver.AS2MDNReceiverModule
 import com.helger.as2lib.processor.receiver.AS2ReceiverModule
-import com.helger.as2lib.processor.receiver.AbstractActiveNetModule.ATTR_ERROR_DIRECTORY
-import com.helger.as2lib.processor.receiver.AbstractActiveNetModule.ATTR_ERROR_FORMAT
-import com.helger.as2lib.processor.receiver.AbstractActiveNetModule.ATTR_PORT
+import com.helger.as2lib.processor.receiver.AbstractActiveNetModule.*
 import com.helger.as2lib.session.AS2Session
 import com.typesafe.config.Config
 import org.koin.core.Koin
@@ -79,13 +73,13 @@ object As2SessionFactory {
                       }
                   )
                 }
-                "AS2ModifiedReceiverModule" -> {
+                "AS2ForwardingReceiverModule" -> {
                   addModule(
-                    AS2ModifiedReceiverModule()
+                    AS2ForwardingReceiverModule(k.get(), k.get(), k.get())
                       .apply {
-                        attrs()[ATTR_PORT] = c.getInt("as2.AS2ReceiverModulePort").toString()
-                        attrs()[ATTR_ERROR_DIRECTORY] = c.getString("as2.AS2ReceiverModuleErrorDir")
-                        attrs()[ATTR_ERROR_FORMAT] = c.getString("as2.AS2ReceiveModuleErrorFormat")
+                        attrs()[ATTR_PORT] = c.getInt("as2.AS2ForwardingReceiverModule.port").toString()
+                        attrs()[ATTR_ERROR_DIRECTORY] = c.getString("as2.AS2ForwardingReceiverModule.errorDir")
+                        attrs()[ATTR_ERROR_FORMAT] = c.getString("as2.AS2ForwardingReceiverModule.errorFormat")
                         initDynamicComponent(self, attrs())
                       }
                   )
@@ -104,14 +98,6 @@ object As2SessionFactory {
                     JmsStorageProcessorModule()
                       .apply {
                         attrs()[JmsStorageProcessorModule.ATTR_BROKER_URL] = c.getString("activemq.brokerUrl")
-                        initDynamicComponent(self, attrs())
-                      }
-                  )
-                }
-                "ProxyProcessorModule" -> {
-                  addModule(
-                    ProxyProcessorModule(k.get(), k.get(), k.get())
-                      .apply {
                         initDynamicComponent(self, attrs())
                       }
                   )
