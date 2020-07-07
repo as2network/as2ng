@@ -32,12 +32,15 @@ class PostgresCertificateFactory(
       ECertificatePartnershipType.RECEIVER -> msg.partnership().receiverAS2ID
     }
 
-    var certificate = partnerId
+    val certificate = partnerId
       ?.let { certificateRepository.findOneById(it) }
       ?.x509Certificate
-      ?.toX509()
+      ?.toX509() ?: requestX509Certificate(partnerId)
 
-    // If certificate == null, let's generate a new key pair and store it
+    return requireNotNull(certificate) { "Certificate not found" }
+  }
+
+  private fun requestX509Certificate(partnerId: String?): X509Certificate? =
     okHttpClient
       .newCall(
         Request.Builder()
@@ -73,19 +76,24 @@ class PostgresCertificateFactory(
                   .getString("private_key")
                   .replace("-----BEGIN RSA PRIVATE KEY-----", "")
                   .replace("-----END RSA PRIVATE KEY-----", "")
+                  .replace("\\n", "")
+                  .replace("\\r", "")
+                  .replace(" ", "")
                   .trim()
+
+                // val reader = StringReader(json.getJsonObject("data").getString("private_key"))
+                // val privateKey = PEMParser(reader).readPemObject().content.toString()
+                // privateKey.toString()
               }
             certificateRepository.insert(certificateRecord)
-            certificate = certificateRecord.x509Certificate.toX509()
+            return certificateRecord.x509Certificate.toX509()
           }
           response.isNotSuccessful -> {
             TODO("Write handler for not successful response")
           }
+          else -> throw IllegalStateException("Response is neither successful or unsuccessful!")
         }
       }
-
-    return requireNotNull(certificate) { "Certificate not found" }
-  }
 
   override fun getPrivateKey(certificate: X509Certificate?): PrivateKey {
     // we use the common name for lookup, it should match the trading partner id
