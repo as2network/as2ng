@@ -59,8 +59,6 @@ class AS2MDNForwardingReceiverHandler(
     val bQuoteHeaderValues = receiverModule.isQuoteHeaderValues
     val responseHandler: IAS2HttpResponseHandler = AS2HttpResponseHandlerSocket(socket, bQuoteHeaderValues)
 
-    var data: ByteArray? = null
-
     // Read in the message request, headers, and data
     try {
       AS2ResourceHelper().use { resourceHelper ->
@@ -72,7 +70,7 @@ class AS2MDNForwardingReceiverHandler(
           effectiveHttpIncomingDumper
         )
 
-        data = StreamHelper.getAllBytes(bodyDataSource.inputStream)
+        val data = StreamHelper.getAllBytes(bodyDataSource.inputStream)
 
         // Asynch MDN 2007-03-12
         // check if the requested URL is defined in attribute "as2_receipt_option"
@@ -117,7 +115,7 @@ class AS2MDNForwardingReceiverHandler(
   @Throws(AS2Exception::class, IOException::class)
   private fun receiveMDN(
     message: AS2Message,
-    data: ByteArray?,
+    data: ByteArray,
     responseHandler: IAS2HttpResponseHandler,
     resourceHelper: AS2ResourceHelper
   ) {
@@ -206,15 +204,17 @@ class AS2MDNForwardingReceiverHandler(
       val url = message.partnership().aS2MDNTo!!
 
       // TODO: Review here how to send properly the body
-      val p = MimeBodyPart(AS2HttpHelper.getAsInternetHeaders(message.headers()), data)
-      val mediaType = p.contentType.split("\r").first().toMediaType()
-      val body = p.inputStream.readAllBytes().toRequestBody(mediaType)
+      val mediaType = part.contentType.split("\r").first().toMediaType()
+      val body = data.toRequestBody(mediaType)
 
       val request = Request.Builder()
         .url(url)
         .apply {
-          val headers = message.headers().allHeaders
-          headers.forEach { h -> header(h.key, h.value.first!!) }
+          message.headers()
+            .allHeaders
+            // need to make sure not to send the original content type which has boundary info encoded in it
+            .filter { h -> h.key != CHttpHeader.CONTENT_TYPE }
+            .forEach { h -> header(h.key, h.value.first!!) }
           header(CHttpHeader.RECEIPT_DELIVERY_OPTION, url)
         }
         .post(body)
@@ -226,8 +226,10 @@ class AS2MDNForwardingReceiverHandler(
         .use { response ->
 
           when {
-            response.isSuccessful -> {}
-            response.isNotSuccessful -> {}
+            response.isSuccessful -> {
+            }
+            response.isNotSuccessful -> {
+            }
           }
         }
 
@@ -235,6 +237,8 @@ class AS2MDNForwardingReceiverHandler(
       HTTPHelper.sendSimpleHTTPResponse(responseHandler, CHttp.HTTP_BAD_REQUEST)
       throw ex
     } catch (ex: Exception) {
+      // TODO improve exception logging as important info was being obscured
+      ex.printStackTrace()
       HTTPHelper.sendSimpleHTTPResponse(responseHandler, CHttp.HTTP_BAD_REQUEST)
       throw WrappedAS2Exception.wrap(ex).setSourceMsg(message)
     }
