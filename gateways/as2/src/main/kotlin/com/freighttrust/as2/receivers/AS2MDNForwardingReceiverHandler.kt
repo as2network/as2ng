@@ -93,8 +93,6 @@ class AS2MDNForwardingReceiverHandler(
     }
   }
 
-  // Asynch MDN 2007-03-12
-  // Asynch MDN 2007-03-12
   /**
    * method for receiving and processing Async MDN sent from receiver.
    *
@@ -112,10 +110,12 @@ class AS2MDNForwardingReceiverHandler(
    * In case of IO error
    */
   @Throws(AS2Exception::class, IOException::class)
-  private fun receiveMDN(message: AS2Message,
-                         data: ByteArray?,
-                         responseHandler: IAS2HttpResponseHandler,
-                         resourceHelper: AS2ResourceHelper) {
+  private fun receiveMDN(
+    message: AS2Message,
+    data: ByteArray?,
+    responseHandler: IAS2HttpResponseHandler,
+    resourceHelper: AS2ResourceHelper
+  ) {
     try {
       // Create a MessageMDN and copy HTTP headers
       val mdn: IMessageMDN = AS2MessageMDN(message)
@@ -136,7 +136,6 @@ class AS2MDNForwardingReceiverHandler(
           senderX509Alias = message.partnership().receiverX509Alias
           receiverX509Alias = message.partnership().senderX509Alias
         }
-
 
       // Update the partnership
       receiverModule.session.partnershipFactory.updatePartnership(mdn, false)
@@ -196,7 +195,6 @@ class AS2MDNForwardingReceiverHandler(
           throw ex
         }
       }
-
     } catch (ex: IOException) {
       HTTPHelper.sendSimpleHTTPResponse(responseHandler, CHttp.HTTP_BAD_REQUEST)
       throw ex
@@ -206,8 +204,6 @@ class AS2MDNForwardingReceiverHandler(
     }
   }
 
-  // Asynch MDN 2007-03-12
-  // Asynch MDN 2007-03-12
   /**
    * verify if the mic is matched.
    *
@@ -242,7 +238,6 @@ class AS2MDNForwardingReceiverHandler(
         return false
       }
       micMatchingHandler.onMICMatch(message, returnedMicStr!!)
-
     } catch (ex: IOException) {
       logger.error("Error checking async MDN", ex)
       return false
@@ -252,7 +247,6 @@ class AS2MDNForwardingReceiverHandler(
     }
     return true
   }
-
 }
 
 class AS2MDNForwardingReceiverModule(
@@ -260,7 +254,6 @@ class AS2MDNForwardingReceiverModule(
   private val as2MdnRepository: As2MdnRepository,
   private val okHttpClient: OkHttpClient
 ) : AbstractActiveNetModule() {
-
 
   override fun createHandler(): INetModuleHandler =
     AS2MDNForwardingReceiverHandler(
