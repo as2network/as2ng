@@ -2,7 +2,6 @@ package com.freighttrust.as2.receivers
 
 import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.as2.ext.isRequestingSyncMDN
-import com.freighttrust.as2.ext.toAs2MdnRecord
 import com.freighttrust.as2.ext.toAs2MessageRecord
 import com.freighttrust.as2.ext.toHttpHeaderMap
 import com.freighttrust.db.repositories.As2MdnRepository
@@ -301,22 +300,22 @@ class AS2ForwardingReceiverHandler(
       .use { response ->
         when {
 
-          response.isSuccessful && message.isRequestingMDN && !message.isRequestingAsynchMDN -> {
+          response.isSuccessful && message.isRequestingMDN && message.isRequestingSyncMDN -> {
 
             // Store MDN request
             val mdn = AS2MessageMDN(message)
               .apply {
                 with(headers()) {
                   setHeader(CHttpHeader.AS2_VERSION, response.headers[CHttpHeader.AS2_VERSION])
-                  setHeader (CHttpHeader.DATE, response.headers[CHttpHeader.DATE])
-                  setHeader (CHttpHeader.SERVER, response.headers[CHttpHeader.SERVER])
-                  setHeader (CHttpHeader.MIME_VERSION, response.headers[CHttpHeader.MIME_VERSION])
-                  setHeader (CHttpHeader.AS2_FROM, response.headers[CHttpHeader.AS2_FROM])
-                  setHeader (CHttpHeader.AS2_TO, response.headers[CHttpHeader.AS2_TO])
+                  setHeader(CHttpHeader.DATE, response.headers[CHttpHeader.DATE])
+                  setHeader(CHttpHeader.SERVER, response.headers[CHttpHeader.SERVER])
+                  setHeader(CHttpHeader.MIME_VERSION, response.headers[CHttpHeader.MIME_VERSION])
+                  setHeader(CHttpHeader.AS2_FROM, response.headers[CHttpHeader.AS2_FROM])
+                  setHeader(CHttpHeader.AS2_TO, response.headers[CHttpHeader.AS2_TO])
                 }
                 with(partnership()) {
-                  senderAS2ID = (getHeader (CHttpHeader.AS2_FROM))
-                  receiverAS2ID = (getHeader (CHttpHeader.AS2_TO))
+                  senderAS2ID = (getHeader(CHttpHeader.AS2_FROM))
+                  receiverAS2ID = (getHeader(CHttpHeader.AS2_TO))
                   senderX509Alias = message.partnership().receiverX509Alias
                   receiverX509Alias = message.partnership().senderX509Alias
                 }
@@ -324,7 +323,8 @@ class AS2ForwardingReceiverHandler(
 
             // TODO: Continue with updating the partnership info
             try {
-            } catch (ex: AS2PartnershipNotFoundException) {}
+            } catch (ex: AS2PartnershipNotFoundException) {
+            }
 
             // as2MdnRepository.insert(mdn.toAs2MdnRecord())
 
@@ -345,6 +345,17 @@ class AS2ForwardingReceiverHandler(
                 // start HTTP response
                 responseHandler.sendHttpResponse(CHttp.HTTP_OK, headers, data)
               }
+          }
+
+          response.isSuccessful && message.isRequestingMDN && message.isRequestingAsynchMDN -> {
+
+            // if AsyncMDN requested, return
+            val headers = HttpHeaderMap().apply { setContentLength(0) }
+            NonBlockingByteArrayOutputStream().use { aData ->
+              // Empty data
+              // Ideally this would be HTTP 204 (no content)
+              responseHandler.sendHttpResponse(CHttp.HTTP_OK, headers, aData)
+            }
           }
 
           response.isNotSuccessful -> {

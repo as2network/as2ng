@@ -1,5 +1,6 @@
 package com.freighttrust.as2.receivers
 
+import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.db.repositories.As2MdnRepository
 import com.freighttrust.db.repositories.As2MessageRepository
 import com.helger.as2lib.cert.ECertificatePartnershipType
@@ -29,7 +30,10 @@ import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
 import com.helger.commons.io.stream.StreamHelper
 import com.helger.mail.datasource.ByteArrayDataSource
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.Socket
@@ -85,6 +89,7 @@ class AS2MDNForwardingReceiverHandler(
         // Must be set AFTER the DataHandler!
         receivedPart.setHeader(CHttpHeader.CONTENT_TYPE, receivedContentType)
         message.data = receivedPart
+
         receiveMDN(message, data, responseHandler, resourceHelper)
       }
     } catch (ex: Exception) {
@@ -132,9 +137,10 @@ class AS2MDNForwardingReceiverHandler(
           senderAS2ID = mdn.getHeader(CHttpHeader.AS2_FROM)
           receiverAS2ID = mdn.getHeader(CHttpHeader.AS2_TO)
 
+          // TODO: These are null as the message is Async
           // Set the appropriate keystore aliases
-          senderX509Alias = message.partnership().receiverX509Alias
-          receiverX509Alias = message.partnership().senderX509Alias
+          // senderX509Alias = message.partnership().receiverX509Alias
+          // receiverX509Alias = message.partnership().senderX509Alias
         }
 
       // Update the partnership
@@ -195,6 +201,36 @@ class AS2MDNForwardingReceiverHandler(
           throw ex
         }
       }
+
+      // Forward message to origin
+      val url = message.partnership().aS2MDNTo!!
+
+      // TODO: Review here how to send properly the body
+      val p = MimeBodyPart(AS2HttpHelper.getAsInternetHeaders(message.headers()), data)
+      val mediaType = p.contentType.split("\r").first().toMediaType()
+      val body = p.inputStream.readAllBytes().toRequestBody(mediaType)
+
+      val request = Request.Builder()
+        .url(url)
+        .apply {
+          val headers = message.headers().allHeaders
+          headers.forEach { h -> header(h.key, h.value.first!!) }
+          header(CHttpHeader.RECEIPT_DELIVERY_OPTION, url)
+        }
+        .post(body)
+        .build()
+
+      okHttpClient
+        .newCall(request)
+        .execute()
+        .use { response ->
+
+          when {
+            response.isSuccessful -> {}
+            response.isNotSuccessful -> {}
+          }
+        }
+
     } catch (ex: IOException) {
       HTTPHelper.sendSimpleHTTPResponse(responseHandler, CHttp.HTTP_BAD_REQUEST)
       throw ex

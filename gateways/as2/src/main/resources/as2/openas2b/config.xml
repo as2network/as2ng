@@ -4,12 +4,12 @@
 
   <certificates classname="com.helger.as2.app.cert.ServerCertificateFactory"
                 type="pkcs12"
-                filename="%home%\keystore.p12"
+                filename="%home%/keystore.p12"
                 password="password"
                 interval="300"/>
 
   <partnerships classname="com.helger.as2.app.partner.ServerXMLPartnershipFactory"
-                filename="%home%\partnerships.xml"/>
+                filename="%home%/partnerships.xml"/>
 
   <processor classname="com.helger.as2lib.processor.DefaultMessageProcessor"
              pendingMDN="as2-data/openas2b/data/pendingMDN3"
