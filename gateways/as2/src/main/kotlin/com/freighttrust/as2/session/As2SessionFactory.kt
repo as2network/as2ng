@@ -33,7 +33,7 @@ object As2SessionFactory {
 
         // Certificates
 
-        val cf = c.getString("as2.CertificateFactory")
+        val cf = c.getString("as2.CertificateFactory.Name")
         certificateFactory = when (cf) {
           "PostgresCertificateFactory" -> {
             PostgresCertificateFactory(k.get())
@@ -44,10 +44,10 @@ object As2SessionFactory {
           "ServerCertificateFactory" -> {
             ServerCertificateFactory()
               .apply {
-                attrs()[ATTR_FILENAME] = File(c.getString("as2.KeyStoreFilename")).absolutePath
-                attrs()[ATTR_TYPE] = c.getString("as2.KeystoreType")
-                attrs()[ATTR_PASSWORD] = c.getString("as2.KeyStorePassword")
-                attrs()[ATTR_INTERVAL] = c.getInt("as2.KeyStoreMonitoringInterval").toString()
+                attrs()[ATTR_FILENAME] = File(c.getString("as2.ServerCertificateFactory.KeyStoreFilename")).absolutePath
+                attrs()[ATTR_TYPE] = c.getString("as2.ServerCertificateFactory.KeystoreType")
+                attrs()[ATTR_PASSWORD] = c.getString("as2.ServerCertificateFactory.KeyStorePassword")
+                attrs()[ATTR_INTERVAL] = c.getInt("as2.ServerCertificateFactory.KeyStoreMonitoringInterval").toString()
                 initDynamicComponent(self, attrs())
               }
           }
@@ -57,20 +57,20 @@ object As2SessionFactory {
         // Processors
         messageProcessor = DefaultMessageProcessor()
           .apply {
-            attrs()[ATTR_PENDINGMDN] = c.getString("as2.DefaultMessageProcessorPendingMdn")
-            attrs()[ATTR_PENDINGMDNINFO] = c.getString("as2.DefaultMessageProcessorPendingMdnInfo")
+            attrs()[ATTR_PENDINGMDN] = c.getString("as2.DefaultMessageProcessor.PendingMdn")
+            attrs()[ATTR_PENDINGMDNINFO] = c.getString("as2.DefaultMessageProcessor.PendingMdnInfo")
             initDynamicComponent(self, attrs())
 
-            val modules = c.getStringList("as2.EnabledProcessorModules")
+            val modules = c.getStringList("as2.DefaultMessageProcessor.EnabledModules")
             modules.forEach { module ->
               when (module) {
                 "AS2ReceiverModule" -> {
                   addModule(
                     AS2ReceiverModule()
                       .apply {
-                        attrs()[ATTR_PORT] = c.getInt("as2.AS2ReceiverModulePort").toString()
-                        attrs()[ATTR_ERROR_DIRECTORY] = c.getString("as2.AS2ReceiverModuleErrorDir")
-                        attrs()[ATTR_ERROR_FORMAT] = c.getString("as2.AS2ReceiveModuleErrorFormat")
+                        attrs()[ATTR_PORT] = c.getInt("as2.DefaultMessageProcessor.AS2ReceiverModule.Port").toString()
+                        attrs()[ATTR_ERROR_DIRECTORY] = c.getString("as2.DefaultMessageProcessor.AS2ReceiverModule.ErrorDir")
+                        attrs()[ATTR_ERROR_FORMAT] = c.getString("as2.DefaultMessageProcessor.AS2ReceiveModuleError.ErrorFormat")
                         initDynamicComponent(self, attrs())
                       }
                   )
@@ -87,9 +87,9 @@ object As2SessionFactory {
                   addModule(
                     AS2ForwardingReceiverModule(k.get(), k.get(), k.get())
                       .apply {
-                        attrs()[ATTR_PORT] = c.getInt("as2.AS2ForwardingReceiverModule.port").toString()
-                        attrs()[ATTR_ERROR_DIRECTORY] = c.getString("as2.AS2ForwardingReceiverModule.errorDir")
-                        attrs()[ATTR_ERROR_FORMAT] = c.getString("as2.AS2ForwardingReceiverModule.errorFormat")
+                        attrs()[ATTR_PORT] = c.getInt("as2.DefaultMessageProcessor.AS2ForwardingReceiverModule.Port").toString()
+                        attrs()[ATTR_ERROR_DIRECTORY] = c.getString("as2.DefaultMessageProcessor.AS2ForwardingReceiverModule.ErrorDir")
+                        attrs()[ATTR_ERROR_FORMAT] = c.getString("as2.DefaultMessageProcessor.AS2ForwardingReceiverModule.ErrorFormat")
                         initDynamicComponent(self, attrs())
                       }
                   )
@@ -98,7 +98,7 @@ object As2SessionFactory {
                   addModule(
                     AS2MDNForwardingReceiverModule(k.get(), k.get(), k.get())
                       .apply {
-                        attrs()[ATTR_PORT] = c.getInt("as2.AS2MDNForwardingReceiverModule.port").toString()
+                        attrs()[ATTR_PORT] = c.getInt("as2.DefaultMessageProcessor.AS2MDNForwardingReceiverModule.Port").toString()
                         initDynamicComponent(self, attrs())
                       }
                   )
@@ -107,7 +107,7 @@ object As2SessionFactory {
                   addModule(
                     AS2MDNReceiverModule()
                       .apply {
-                        attrs()[ATTR_PORT] = c.getInt("as2.AS2MDNReceiverModulePort").toString()
+                        attrs()[ATTR_PORT] = c.getInt("as2.DefaultMessageProcessor.AS2MDNReceiverModule.Port").toString()
                         initDynamicComponent(self, attrs())
                       }
                   )
@@ -134,7 +134,7 @@ object As2SessionFactory {
           }
 
         // Partnerships
-        val pf = c.getString("as2.PartnershipsFactory")
+        val pf = c.getString("as2.PartnershipsFactory.Name")
         partnershipFactory = when (pf) {
           "PostgresTradingChannelFactory" -> {
             PostgresTradingChannelFactory(k.get())
