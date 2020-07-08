@@ -48,7 +48,7 @@ class PostgresCertificateFactory(
           .header("X-Vault-Token", "root")
           .header("Content-Type", "application/json")
           .post(
-            """{"common_name": "${partnerId!!.toLowerCase()}.freighttrust.com", "ttl": "24h"}"""
+            """{"common_name": "${partnerId!!.toLowerCase()}.freighttrust.com", "format": "der", "private_key_format": "pkcs8", "ttl": "24h"}"""
               .toRequestBody(
                 "application/json".toMediaType()
               )
@@ -65,25 +65,8 @@ class PostgresCertificateFactory(
             val certificateRecord = CertificateRecord()
               .apply {
                 tradingPartnerId = partnerId
-                x509Certificate = json
-                  .getJsonObject("data")
-                  .getString("certificate")
-                  .replace("-----BEGIN CERTIFICATE-----", "")
-                  .replace("-----END CERTIFICATE-----", "")
-                  .trim()
-                privateKey = json
-                  .getJsonObject("data")
-                  .getString("private_key")
-                  .replace("-----BEGIN RSA PRIVATE KEY-----", "")
-                  .replace("-----END RSA PRIVATE KEY-----", "")
-                  .replace("\\n", "")
-                  .replace("\\r", "")
-                  .replace(" ", "")
-                  .trim()
-
-                // val reader = StringReader(json.getJsonObject("data").getString("private_key"))
-                // val privateKey = PEMParser(reader).readPemObject().content.toString()
-                // privateKey.toString()
+                x509Certificate = json.getJsonObject("data").getString("certificate")
+                privateKey = json.getJsonObject("data").getString("private_key")
               }
             certificateRepository.insert(certificateRecord)
             return certificateRecord.x509Certificate.toX509()

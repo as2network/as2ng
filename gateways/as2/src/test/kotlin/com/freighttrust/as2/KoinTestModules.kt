@@ -32,33 +32,38 @@
 
 package com.freighttrust.as2
 
+import com.freighttrust.as2.factories.PostgresCertificateFactory
+import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.db.modules.PersistenceModule
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
-import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
-import com.helger.as2lib.crypto.ECryptoAlgorithmSign
-import com.helger.commons.io.resource.ClassPathResource
-import com.helger.security.keystore.EKeyStoreType
+import com.helger.as2lib.session.AS2Session
+import okhttp3.OkHttpClient
+import org.koin.core.qualifier._q
 import org.koin.dsl.module
 
 object KoinTestModules {
 
-  private val client = module {
+  private val http = module {
 
-    factory {
-      AS2ClientSettings()
-        .apply {
-          setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
-          setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
-          setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10080/HttpReceiver")
-          setPartnershipName("Partnership name")
-          setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
-        }
-    }
-
-    single { AS2Client() }
+    single { OkHttpClient() }
   }
 
-  private val modules = listOf(client)
+  private val as2 = module {
+
+    single { AS2Client() }
+
+    single<AS2Client>(_q("as2client-postgres")) {
+      val client = object : AS2Client() {
+        override fun initCertificateFactory(aSettings: AS2ClientSettings, aSession: AS2Session) {
+          aSession.certificateFactory = PostgresCertificateFactory(get(), get())
+        }
+      }
+      client
+    }
+  }
+
+  private val modules = listOf(AppConfigModule, PersistenceModule, http, as2)
 
   operator fun invoke() = modules
 }

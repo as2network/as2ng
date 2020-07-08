@@ -48,13 +48,11 @@ import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.FunSpec
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.qualifier._q
 import org.koin.test.KoinTest
-import org.koin.test.inject
 import java.nio.charset.Charset
 
 class As2MessageSenderSpec : FunSpec(), KoinTest {
-
-  private val as2Client by inject<AS2Client>()
 
   override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
     startKoin { modules(KoinTestModules()) }
@@ -65,34 +63,72 @@ class As2MessageSenderSpec : FunSpec(), KoinTest {
   }
 
   init {
-    test("it should send an AS2 message from OpenAS2 to OpenAS2B") {
+    test("it should send an AS2 message from OpenAS2 to OpenAS2B")
+      .config(enabled = false) {
 
-      // Prepare client settings
-      val clientSettings = AS2ClientSettings()
-        .apply {
-          setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
-          setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
-          setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10082/HttpReceiver")
-          setPartnershipName("Partnership name")
-          setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
-          connectTimeoutMS = 20000
-          readTimeoutMS = 20000
-        }
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
 
-      // Prepare AS2 request
-      val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
-        .apply {
-          setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
-        }
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
+            setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10082/HttpReceiver")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
 
-      // Fire request
-      val response = as2Client.sendSynchronous(clientSettings, request)
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
+          }
 
-      // Assert
-      response shouldNotBe null
-      response.exception shouldBe null
-      response.mdn shouldNotBe null
-      response.mdn?.message shouldNotBe null
-    }
+        // Fire request
+        val response = as2Client.sendSynchronous(clientSettings, request)
+
+        // Assert
+        response shouldNotBe null
+        response.exception shouldBe null
+        response.mdn shouldNotBe null
+        response.mdn?.message shouldNotBe null
+      }
+
+    test("it should send an AS2 message from OpenAS2 to OpenAS2B using Vault")
+      .config(enabled = true) {
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>(_q("as2client-postgres"))
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
+            setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10082/HttpReceiver")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request
+        val response = as2Client.sendSynchronous(clientSettings, request)
+
+        // Assert
+        response shouldNotBe null
+        response.exception shouldBe null
+        response.mdn shouldNotBe null
+        response.mdn?.message shouldNotBe null
+
+      }
   }
 }
