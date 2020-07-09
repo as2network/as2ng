@@ -1,5 +1,6 @@
 package com.freighttrust.as2.factories
 
+import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.db.extensions.toPrivateKey
 import com.freighttrust.db.extensions.toX509
 import com.freighttrust.db.repositories.CertificateRepository
@@ -13,13 +14,9 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
 import org.bouncycastle.util.encoders.Base64
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
-
-val Response.isNotSuccessful: Boolean
-  get() = !isSuccessful
 
 class PostgresCertificateFactory(
   private val certificateRepository: CertificateRepository,
