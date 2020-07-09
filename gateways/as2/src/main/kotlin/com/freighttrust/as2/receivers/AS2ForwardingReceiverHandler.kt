@@ -4,8 +4,9 @@ import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.as2.ext.isRequestingSyncMDN
 import com.freighttrust.as2.ext.toAs2MessageRecord
 import com.freighttrust.as2.ext.toHttpHeaderMap
-import com.freighttrust.db.repositories.As2MdnRepository
-import com.freighttrust.db.repositories.As2MessageRepository
+import com.freighttrust.postgres.repositories.As2MdnRepository
+import com.freighttrust.postgres.repositories.As2MessageRepository
+import com.freighttrust.s3.repositories.FileRepository
 import com.helger.as2lib.cert.ECertificatePartnershipType
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.crypto.MIC
@@ -66,6 +67,7 @@ import javax.mail.internet.MimeBodyPart
 
 class AS2ForwardingReceiverHandler(
   private val receiverModule: AS2ForwardingReceiverModule,
+  private val fileRepository: FileRepository,
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository,
   private val okHttpClient: OkHttpClient
@@ -268,14 +270,18 @@ class AS2ForwardingReceiverHandler(
 
     calculateMIC(message)
 
-    as2MessageRepository.insert(message.toAs2MessageRecord())
-
-    val url = message.partnership().aS2URL!!
 
     val part = message.data!!.parent.parent
     val mediaType = part.contentType.split("\r").first().toMediaType()
-
     val body = part.inputStream.readAllBytes().toRequestBody(mediaType)
+
+    val fileRecord = fileRepository.insert(message.messageID!!, part.inputStream, body.contentLength())
+
+    // todo handle errors
+
+    as2MessageRepository.insert(message.toAs2MessageRecord(fileRecord))
+
+    val url = message.partnership().aS2URL!!
 
     val requestBuilder = Request.Builder()
       .url(url)
@@ -686,6 +692,7 @@ class AS2ForwardingReceiverHandler(
 }
 
 class AS2ForwardingReceiverModule(
+  private val fileRepository: FileRepository,
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository,
   private val okHttpClient: OkHttpClient
@@ -693,6 +700,7 @@ class AS2ForwardingReceiverModule(
 
   override fun createHandler(): INetModuleHandler = AS2ForwardingReceiverHandler(
     this,
+    fileRepository,
     as2MessageRepository,
     as2MdnRepository,
     okHttpClient

@@ -4,7 +4,13 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.*;
+import com.freighttrust.jooq.tables.As2Mdn;
+import com.freighttrust.jooq.tables.As2Message;
+import com.freighttrust.jooq.tables.Certificate;
+import com.freighttrust.jooq.tables.File;
+import com.freighttrust.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.jooq.tables.TradingChannel;
+import com.freighttrust.jooq.tables.TradingPartner;
 
 import javax.annotation.processing.Generated;
 
@@ -36,6 +42,11 @@ public class Tables {
    * The table <code>public.certificate</code>.
    */
   public static final Certificate CERTIFICATE = Certificate.CERTIFICATE;
+
+  /**
+   * The table <code>public.file</code>.
+   */
+  public static final File FILE = File.FILE;
 
   /**
    * The table <code>public.flyway_schema_history</code>.

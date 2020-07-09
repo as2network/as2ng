@@ -1,8 +1,8 @@
 package com.freighttrust.as2.factories
 
-import com.freighttrust.db.extensions.toPrivateKey
-import com.freighttrust.db.extensions.toX509
-import com.freighttrust.db.repositories.CertificateRepository
+import com.freighttrust.postgres.extensions.toPrivateKey
+import com.freighttrust.postgres.extensions.toX509
+import com.freighttrust.postgres.repositories.CertificateRepository
 import com.helger.as2lib.AbstractDynamicComponent
 import com.helger.as2lib.cert.ECertificatePartnershipType
 import com.helger.as2lib.cert.ICertificateFactory

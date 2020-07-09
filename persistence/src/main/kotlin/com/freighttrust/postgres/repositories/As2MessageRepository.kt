@@ -30,45 +30,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.processing
+package com.freighttrust.postgres.repositories
 
-import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
-import com.freighttrust.messaging.modules.ActiveMQModule
-import com.freighttrust.processing.modules.ProcessingModule
-import com.freighttrust.processing.processors.As2StorageProcessor
-import kotlinx.cli.ArgParser
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.koin.core.context.startKoin
+import com.freighttrust.jooq.Tables.AS2_MESSAGE
+import com.freighttrust.jooq.tables.records.As2MessageRecord
+import org.jooq.DSLContext
 
-object ProcessingServer {
+class As2MessageRepository(
+  private val dbCtx: DSLContext
+) {
 
-  fun start(args: Array<String>) {
+  fun findMic(id: String): String? =
+    dbCtx
+      .select(AS2_MESSAGE.MIC)
+      .from(AS2_MESSAGE)
+      .where(AS2_MESSAGE.ID.eq(id))
+      .fetch()
+      .firstOrNull()
+      ?.value1()
 
-    val parser = ArgParser("processor")
-    parser.parse(args)
-
-    val koinApp = startKoin {
-      printLogger()
-
-      modules(
-        AppConfigModule,
-        ActiveMQModule,
-        PostgresModule,
-        ProcessingModule
-      )
-    }
-
-    val storageProcessor = koinApp.koin.get<As2StorageProcessor>()
-
-    runBlocking {
-      launch(Dispatchers.IO) {
-        storageProcessor.listen()
-      }
-    }
+  fun insert(record: As2MessageRecord): As2MessageRecord {
+    dbCtx.executeInsert(record)
+    return record
   }
-}
 
-fun main(args: Array<String>) = ProcessingServer.start(args)
+}

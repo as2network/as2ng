@@ -5,13 +5,14 @@ package com.freighttrust.jooq.tables.records;
 
 
 import com.freighttrust.jooq.tables.TradingChannel;
+
+import javax.annotation.processing.Generated;
+
 import org.jooq.Field;
 import org.jooq.Record2;
 import org.jooq.Record8;
 import org.jooq.Row8;
 import org.jooq.impl.UpdatableRecordImpl;
-
-import javax.annotation.processing.Generated;
 
 
 /**
@@ -37,6 +38,22 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   }
 
   /**
+   * Create a detached, initialised TradingChannelRecord
+   */
+  public TradingChannelRecord(String senderId, String recipientId, String protocol, String as2Url, String as2MdnTo, String as2MdnOptions, String encryptionAlgorithm, String signingAlgorithm) {
+    super(TradingChannel.TRADING_CHANNEL);
+
+    set(0, senderId);
+    set(1, recipientId);
+    set(2, protocol);
+    set(3, as2Url);
+    set(4, as2MdnTo);
+    set(5, as2MdnOptions);
+    set(6, encryptionAlgorithm);
+    set(7, signingAlgorithm);
+  }
+
+  /**
    * Getter for <code>public.trading_channel.sender_id</code>.
    */
   public String getSenderId() {
@@ -44,41 +61,25 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   }
 
   /**
-   * Setter for <code>public.trading_channel.recipient_id</code>.
-     */
-    public TradingChannelRecord setRecipientId(String value) {
-        set(1, value);
-        return this;
-    }
-
-    /**
-     * Getter for <code>public.trading_channel.recipient_id</code>.
-     */
-    public String getRecipientId() {
-        return (String) get(1);
-    }
-
-    /**
-     * Create a detached, initialised TradingChannelRecord
-     */
-    public TradingChannelRecord(String senderId, String recipientId, String protocol, String as2Url, String as2MdnTo, String as2MdnOptions, String encryptionAlgorithm, String signingAlgorithm) {
-      super(TradingChannel.TRADING_CHANNEL);
-
-      set(0, senderId);
-      set(1, recipientId);
-      set(2, protocol);
-      set(3, as2Url);
-      set(4, as2MdnTo);
-      set(5, as2MdnOptions);
-      set(6, encryptionAlgorithm);
-      set(7, signingAlgorithm);
-    }
+   * Getter for <code>public.trading_channel.recipient_id</code>.
+   */
+  public String getRecipientId() {
+    return (String) get(1);
+  }
 
   /**
    * Setter for <code>public.trading_channel.sender_id</code>.
    */
   public TradingChannelRecord setSenderId(String value) {
     set(0, value);
+    return this;
+  }
+
+  /**
+   * Setter for <code>public.trading_channel.recipient_id</code>.
+   */
+  public TradingChannelRecord setRecipientId(String value) {
+    set(1, value);
     return this;
   }
 
@@ -378,5 +379,5 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
     value7(value7);
     value8(value8);
     return this;
-    }
+  }
 }

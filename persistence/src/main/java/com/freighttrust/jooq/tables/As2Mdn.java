@@ -96,13 +96,13 @@ public class As2Mdn extends TableImpl<As2MdnRecord> {
         this(alias, aliased, null);
     }
 
-    private As2Mdn(Name alias, Table<As2MdnRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""));
-    }
+  private As2Mdn(Name alias, Table<As2MdnRecord> aliased, Field<?>[] parameters) {
+    super(alias, null, aliased, parameters, DSL.comment(""));
+  }
 
-    public <O extends Record> As2Mdn(Table<O> child, ForeignKey<O, As2MdnRecord> key) {
-        super(child, key, AS2_MDN);
-    }
+  public <O extends Record> As2Mdn(Table<O> child, ForeignKey<O, As2MdnRecord> key) {
+    super(child, key, AS2_MDN);
+  }
 
   @Override
   public Schema getSchema() {
@@ -152,14 +152,14 @@ public class As2Mdn extends TableImpl<As2MdnRecord> {
   }
 
   /**
-     * Rename this table
-     */
-    @Override
-    public As2Mdn rename(Name name) {
-        return new As2Mdn(name, null);
-    }
+   * Rename this table
+   */
+  @Override
+  public As2Mdn rename(Name name) {
+    return new As2Mdn(name, null);
+  }
 
-    // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
     // Row5 type methods
     // -------------------------------------------------------------------------
 

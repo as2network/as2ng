@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.db.extensions
+package com.freighttrust.postgres.extensions
 
 import com.freighttrust.as2.fb.As2Mdn
 import com.freighttrust.as2.fb.As2Message

@@ -1,23 +1,5 @@
 package com.freighttrust.as2.receiver.net;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.X509Certificate;
-
-import javax.activation.DataSource;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-
-import com.helger.as2lib.processor.receiver.net.AS2NetException;
-import com.helger.as2lib.processor.receiver.net.AbstractReceiverHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.helger.as2lib.cert.ECertificatePartnershipType;
 import com.helger.as2lib.cert.ICertificateFactory;
 import com.helger.as2lib.crypto.IMICMatchingHandler;
@@ -32,8 +14,9 @@ import com.helger.as2lib.message.AS2MessageMDN;
 import com.helger.as2lib.message.IMessageMDN;
 import com.helger.as2lib.processor.AS2NoModuleException;
 import com.helger.as2lib.processor.IMessageProcessor;
-import com.helger.as2lib.processor.receiver.AS2MDNReceiverModule;
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule;
+import com.helger.as2lib.processor.receiver.net.AS2NetException;
+import com.helger.as2lib.processor.receiver.net.AbstractReceiverHandler;
 import com.helger.as2lib.processor.storage.IProcessorStorageModule;
 import com.helger.as2lib.session.AS2ComponentNotFoundException;
 import com.helger.as2lib.util.AS2Helper;
@@ -41,11 +24,7 @@ import com.helger.as2lib.util.AS2HttpHelper;
 import com.helger.as2lib.util.AS2IOHelper;
 import com.helger.as2lib.util.AS2ResourceHelper;
 import com.helger.as2lib.util.dump.IHTTPIncomingDumper;
-import com.helger.as2lib.util.http.AS2HttpClient;
-import com.helger.as2lib.util.http.AS2HttpResponseHandlerSocket;
-import com.helger.as2lib.util.http.AS2InputStreamProviderSocket;
-import com.helger.as2lib.util.http.HTTPHelper;
-import com.helger.as2lib.util.http.IAS2HttpResponseHandler;
+import com.helger.as2lib.util.http.*;
 import com.helger.commons.ValueEnforcer;
 import com.helger.commons.collection.ArrayHelper;
 import com.helger.commons.http.CHttp;
@@ -58,22 +37,33 @@ import com.helger.commons.io.stream.StreamHelper;
 import com.helger.commons.state.ETriState;
 import com.helger.commons.string.StringParser;
 import com.helger.mail.datasource.ByteArrayDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class FixedAS2MDNReceiverHandler extends AbstractReceiverHandler
-{
-  private static final Logger LOGGER = LoggerFactory.getLogger (FixedAS2MDNReceiverHandler.class);
+import javax.activation.DataSource;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeBodyPart;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.X509Certificate;
 
-  private final FixedAS2MDNReceiverModule m_aModule;
-  private IMICMatchingHandler m_aMICMatchingHandler = new LoggingMICMatchingHandler ();
+public class AS2MDNReceiverHandler extends AbstractReceiverHandler {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AS2MDNReceiverHandler.class);
+
+  private final AS2MDNReceiverModule m_aModule;
+  private IMICMatchingHandler m_aMICMatchingHandler = new LoggingMICMatchingHandler();
 
   /**
-   * @param aModule
-   *        The receiver module for attributes, session etc. May not be
-   *        <code>null</code>.
+   * @param aModule The receiver module for attributes, session etc. May not be
+   *                <code>null</code>.
    */
-  public FixedAS2MDNReceiverHandler (@Nonnull final FixedAS2MDNReceiverModule aModule)
-  {
-    m_aModule = ValueEnforcer.notNull (aModule, "Module");
+  public AS2MDNReceiverHandler(@Nonnull final AS2MDNReceiverModule aModule) {
+    m_aModule = ValueEnforcer.notNull(aModule, "Module");
   }
 
   /**
@@ -81,8 +71,7 @@ public class FixedAS2MDNReceiverHandler extends AbstractReceiverHandler
    *         <code>null</code>.
    */
   @Nonnull
-  public final FixedAS2MDNReceiverModule getModule ()
-  {
+  public final AS2MDNReceiverModule getModule() {
     return m_aModule;
   }
 

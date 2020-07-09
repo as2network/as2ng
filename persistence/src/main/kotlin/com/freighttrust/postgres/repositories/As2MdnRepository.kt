@@ -30,45 +30,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.processing
+package com.freighttrust.postgres.repositories
 
-import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
-import com.freighttrust.messaging.modules.ActiveMQModule
-import com.freighttrust.processing.modules.ProcessingModule
-import com.freighttrust.processing.processors.As2StorageProcessor
-import kotlinx.cli.ArgParser
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.koin.core.context.startKoin
+import com.freighttrust.jooq.tables.records.As2MdnRecord
+import org.jooq.DSLContext
 
-object ProcessingServer {
+class As2MdnRepository(
+  private val dbCtx: DSLContext
+) {
 
-  fun start(args: Array<String>) {
-
-    val parser = ArgParser("processor")
-    parser.parse(args)
-
-    val koinApp = startKoin {
-      printLogger()
-
-      modules(
-        AppConfigModule,
-        ActiveMQModule,
-        PostgresModule,
-        ProcessingModule
-      )
-    }
-
-    val storageProcessor = koinApp.koin.get<As2StorageProcessor>()
-
-    runBlocking {
-      launch(Dispatchers.IO) {
-        storageProcessor.listen()
-      }
-    }
+  fun insert(record: As2MdnRecord): As2MdnRecord {
+    dbCtx.executeInsert(record)
+    return record
   }
-}
 
-fun main(args: Array<String>) = ProcessingServer.start(args)
+}

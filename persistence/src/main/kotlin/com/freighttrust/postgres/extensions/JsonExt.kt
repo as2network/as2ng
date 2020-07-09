@@ -30,45 +30,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.processing
+package com.freighttrust.postgres.extensions
 
-import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
-import com.freighttrust.messaging.modules.ActiveMQModule
-import com.freighttrust.processing.modules.ProcessingModule
-import com.freighttrust.processing.processors.As2StorageProcessor
-import kotlinx.cli.ArgParser
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.koin.core.context.startKoin
+import org.jooq.JSONB
+import org.jooq.tools.json.JSONObject
 
-object ProcessingServer {
-
-  fun start(args: Array<String>) {
-
-    val parser = ArgParser("processor")
-    parser.parse(args)
-
-    val koinApp = startKoin {
-      printLogger()
-
-      modules(
-        AppConfigModule,
-        ActiveMQModule,
-        PostgresModule,
-        ProcessingModule
-      )
-    }
-
-    val storageProcessor = koinApp.koin.get<As2StorageProcessor>()
-
-    runBlocking {
-      launch(Dispatchers.IO) {
-        storageProcessor.listen()
-      }
-    }
-  }
-}
-
-fun main(args: Array<String>) = ProcessingServer.start(args)
+fun JSONObject.toJSONB(): JSONB = JSONB.valueOf(this.toString())

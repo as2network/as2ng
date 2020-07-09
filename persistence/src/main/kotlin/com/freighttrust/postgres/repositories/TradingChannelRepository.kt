@@ -30,45 +30,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.processing
+package com.freighttrust.postgres.repositories
 
-import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
-import com.freighttrust.messaging.modules.ActiveMQModule
-import com.freighttrust.processing.modules.ProcessingModule
-import com.freighttrust.processing.processors.As2StorageProcessor
-import kotlinx.cli.ArgParser
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.koin.core.context.startKoin
+import com.freighttrust.jooq.Tables
+import com.freighttrust.jooq.tables.records.TradingChannelRecord
+import org.jooq.DSLContext
 
-object ProcessingServer {
+class TradingChannelRepository(
+  private val dbCtx: DSLContext
+) {
 
-  fun start(args: Array<String>) {
+  fun findOne(record: TradingChannelRecord): TradingChannelRecord? =
+    dbCtx
+      .selectFrom(Tables.TRADING_CHANNEL)
+      .where(Tables.TRADING_CHANNEL.SENDER_ID.eq(record.senderId).and(Tables.TRADING_CHANNEL.RECIPIENT_ID.eq(record.recipientId)))
+      .fetchOne()
 
-    val parser = ArgParser("processor")
-    parser.parse(args)
-
-    val koinApp = startKoin {
-      printLogger()
-
-      modules(
-        AppConfigModule,
-        ActiveMQModule,
-        PostgresModule,
-        ProcessingModule
-      )
-    }
-
-    val storageProcessor = koinApp.koin.get<As2StorageProcessor>()
-
-    runBlocking {
-      launch(Dispatchers.IO) {
-        storageProcessor.listen()
-      }
-    }
-  }
 }
-
-fun main(args: Array<String>) = ProcessingServer.start(args)

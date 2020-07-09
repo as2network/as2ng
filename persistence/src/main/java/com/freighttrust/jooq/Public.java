@@ -4,15 +4,24 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.*;
-import org.jooq.Catalog;
-import org.jooq.Table;
-import org.jooq.impl.SchemaImpl;
+import com.freighttrust.jooq.tables.As2Mdn;
+import com.freighttrust.jooq.tables.As2Message;
+import com.freighttrust.jooq.tables.Certificate;
+import com.freighttrust.jooq.tables.File;
+import com.freighttrust.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.jooq.tables.TradingChannel;
+import com.freighttrust.jooq.tables.TradingPartner;
 
-import javax.annotation.processing.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.annotation.processing.Generated;
+
+import org.jooq.Catalog;
+import org.jooq.Sequence;
+import org.jooq.Table;
+import org.jooq.impl.SchemaImpl;
 
 
 /**
@@ -28,13 +37,11 @@ import java.util.List;
 @SuppressWarnings({"all", "unchecked", "rawtypes"})
 public class Public extends SchemaImpl {
 
-  private static final long serialVersionUID = -1266936214;
-
   /**
    * The reference instance of <code>public</code>
    */
   public static final Public PUBLIC = new Public();
-
+  private static final long serialVersionUID = -1605697141;
   /**
    * The table <code>public.as2_mdn</code>.
    */
@@ -49,6 +56,11 @@ public class Public extends SchemaImpl {
    * The table <code>public.certificate</code>.
    */
   public final Certificate CERTIFICATE = com.freighttrust.jooq.tables.Certificate.CERTIFICATE;
+
+  /**
+   * The table <code>public.file</code>.
+   */
+  public final File FILE = com.freighttrust.jooq.tables.File.FILE;
 
   /**
    * The table <code>public.flyway_schema_history</code>.
@@ -69,29 +81,42 @@ public class Public extends SchemaImpl {
    * No further instances allowed
    */
   private Public() {
-        super("public", null);
-    }
+    super("public", null);
+  }
 
 
-    @Override
-    public Catalog getCatalog() {
-        return DefaultCatalog.DEFAULT_CATALOG;
-    }
+  @Override
+  public Catalog getCatalog() {
+    return DefaultCatalog.DEFAULT_CATALOG;
+  }
 
-    @Override
-    public final List<Table<?>> getTables() {
-        List result = new ArrayList();
-        result.addAll(getTables0());
-        return result;
-    }
+  @Override
+  public final List<Sequence<?>> getSequences() {
+    List result = new ArrayList();
+    result.addAll(getSequences0());
+    return result;
+  }
 
-    private final List<Table<?>> getTables0() {
-      return Arrays.<Table<?>>asList(
-        As2Mdn.AS2_MDN,
-        As2Message.AS2_MESSAGE,
-        Certificate.CERTIFICATE,
-        FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
-        TradingChannel.TRADING_CHANNEL,
-        TradingPartner.TRADING_PARTNER);
-    }
+  private final List<Sequence<?>> getSequences0() {
+    return Arrays.<Sequence<?>>asList(
+      Sequences.FILE_ID_SEQ);
+  }
+
+  @Override
+  public final List<Table<?>> getTables() {
+    List result = new ArrayList();
+    result.addAll(getTables0());
+    return result;
+  }
+
+  private final List<Table<?>> getTables0() {
+    return Arrays.<Table<?>>asList(
+      As2Mdn.AS2_MDN,
+      As2Message.AS2_MESSAGE,
+      Certificate.CERTIFICATE,
+      File.FILE,
+      FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
+      TradingChannel.TRADING_CHANNEL,
+      TradingPartner.TRADING_PARTNER);
+  }
 }

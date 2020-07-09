@@ -48,6 +48,7 @@ dependencies {
 
   jooqGeneratorRuntime("org.postgresql:postgresql")
 
+  api("com.amazonaws:aws-java-sdk-s3")
   api("org.postgresql:postgresql")
   api("org.jooq:jooq")
   api("com.zaxxer:HikariCP")
