@@ -8,24 +8,14 @@ import com.freighttrust.jooq.Indexes;
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.TradingChannelRecord;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.processing.Generated;
-
-import org.jooq.Field;
-import org.jooq.ForeignKey;
-import org.jooq.Index;
-import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row8;
-import org.jooq.Schema;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.UniqueKey;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
+
+import javax.annotation.processing.Generated;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -162,15 +152,15 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
         return new TradingPartner(this, Keys.TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY);
     }
 
-    @Override
-    public TradingChannel as(String alias) {
-        return new TradingChannel(DSL.name(alias), this);
-    }
+  @Override
+  public TradingChannel as(String alias) {
+    return new TradingChannel(DSL.name(alias), this);
+  }
 
-    @Override
-    public TradingChannel as(Name alias) {
-        return new TradingChannel(alias, this);
-    }
+  @Override
+  public TradingChannel as(Name alias) {
+    return new TradingChannel(alias, this);
+  }
 
   /**
    * Rename this table

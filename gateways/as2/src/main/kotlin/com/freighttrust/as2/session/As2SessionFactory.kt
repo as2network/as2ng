@@ -96,7 +96,7 @@ object As2SessionFactory {
                 }
                 "AS2MDNForwardingReceiverModule" -> {
                   addModule(
-                    AS2MDNForwardingReceiverModule(k.get(), k.get(), k.get())
+                    AS2MDNForwardingReceiverModule(k.get(), k.get(), k.get(), k.get())
                       .apply {
                         attrs()[ATTR_PORT] = c.getInt("as2.DefaultMessageProcessor.AS2MDNForwardingReceiverModule.Port").toString()
                         initDynamicComponent(self, attrs())

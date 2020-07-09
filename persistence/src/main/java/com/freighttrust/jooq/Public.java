@@ -4,24 +4,16 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.As2Mdn;
-import com.freighttrust.jooq.tables.As2Message;
-import com.freighttrust.jooq.tables.Certificate;
-import com.freighttrust.jooq.tables.File;
-import com.freighttrust.jooq.tables.FlywaySchemaHistory;
-import com.freighttrust.jooq.tables.TradingChannel;
-import com.freighttrust.jooq.tables.TradingPartner;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.processing.Generated;
-
+import com.freighttrust.jooq.tables.*;
 import org.jooq.Catalog;
 import org.jooq.Sequence;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
+
+import javax.annotation.processing.Generated;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**

@@ -1,8 +1,10 @@
 package com.freighttrust.as2.receivers
 
 import com.freighttrust.as2.ext.isNotSuccessful
+import com.freighttrust.as2.ext.toAs2MdnRecord
 import com.freighttrust.postgres.repositories.As2MdnRepository
 import com.freighttrust.postgres.repositories.As2MessageRepository
+import com.freighttrust.s3.repositories.FileRepository
 import com.helger.as2lib.cert.ECertificatePartnershipType
 import com.helger.as2lib.crypto.IMICMatchingHandler
 import com.helger.as2lib.crypto.LoggingMICMatchingHandler
@@ -13,7 +15,6 @@ import com.helger.as2lib.exception.AS2Exception
 import com.helger.as2lib.exception.WrappedAS2Exception
 import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.message.AS2MessageMDN
-import com.helger.as2lib.message.IMessageMDN
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import com.helger.as2lib.processor.receiver.net.AS2NetException
 import com.helger.as2lib.processor.receiver.net.AbstractReceiverHandler
@@ -41,6 +42,7 @@ import javax.mail.internet.MimeBodyPart
 
 class AS2MDNForwardingReceiverHandler(
   private val receiverModule: AS2MDNForwardingReceiverModule,
+  private val fileRepository: FileRepository,
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository,
   private val okHttpClient: OkHttpClient
@@ -121,7 +123,7 @@ class AS2MDNForwardingReceiverHandler(
   ) {
     try {
       // Create a MessageMDN and copy HTTP headers
-      val mdn: IMessageMDN = AS2MessageMDN(message)
+      val mdn = AS2MessageMDN(message)
 
       // copy headers from msg to MDN from msg
       mdn.headers().setAllHeaders(message.headers())
@@ -177,7 +179,7 @@ class AS2MDNForwardingReceiverHandler(
         }
 
       receiverModule.session.partnershipFactory.updatePartnership(message, false)
-      message.messageID = message.mdn!!.attrs().getAsString(AS2MessageMDN.MDNA_ORIG_MESSAGEID)
+      message.messageID = mdn.attrs().getAsString(AS2MessageMDN.MDNA_ORIG_MESSAGEID)
 
       // check if the mic (message integrity check) is correct
       if (checkAsyncMDN(message))
@@ -200,12 +202,18 @@ class AS2MDNForwardingReceiverHandler(
         }
       }
 
-      // Forward message to origin
-      val url = message.partnership().aS2MDNTo!!
-
       // TODO: Review here how to send properly the body
       val mediaType = part.contentType.split("\r").first().toMediaType()
       val body = data.toRequestBody(mediaType)
+
+      // store first
+
+      val bodyRecord = fileRepository.insert(mdn.messageID!!, part.inputStream, body.contentLength())
+      val mdnRecord = mdn.toAs2MdnRecord(bodyRecord)
+      as2MdnRepository.insert(mdnRecord)
+
+      // Forward message to origin
+      val url = message.partnership().aS2MDNTo!!
 
       val request = Request.Builder()
         .url(url)
@@ -290,6 +298,7 @@ class AS2MDNForwardingReceiverHandler(
 }
 
 class AS2MDNForwardingReceiverModule(
+  private val fileRepository: FileRepository,
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository,
   private val okHttpClient: OkHttpClient
@@ -298,6 +307,7 @@ class AS2MDNForwardingReceiverModule(
   override fun createHandler(): INetModuleHandler =
     AS2MDNForwardingReceiverHandler(
       this,
+      fileRepository,
       as2MessageRepository,
       as2MdnRepository,
       okHttpClient

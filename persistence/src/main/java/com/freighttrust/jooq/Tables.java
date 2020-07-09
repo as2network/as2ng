@@ -4,13 +4,7 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.As2Mdn;
-import com.freighttrust.jooq.tables.As2Message;
-import com.freighttrust.jooq.tables.Certificate;
-import com.freighttrust.jooq.tables.File;
-import com.freighttrust.jooq.tables.FlywaySchemaHistory;
-import com.freighttrust.jooq.tables.TradingChannel;
-import com.freighttrust.jooq.tables.TradingPartner;
+import com.freighttrust.jooq.tables.*;
 
 import javax.annotation.processing.Generated;
 

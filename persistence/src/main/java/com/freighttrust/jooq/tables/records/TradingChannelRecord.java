@@ -5,14 +5,13 @@ package com.freighttrust.jooq.tables.records;
 
 
 import com.freighttrust.jooq.tables.TradingChannel;
-
-import javax.annotation.processing.Generated;
-
 import org.jooq.Field;
 import org.jooq.Record2;
 import org.jooq.Record8;
 import org.jooq.Row8;
 import org.jooq.impl.UpdatableRecordImpl;
+
+import javax.annotation.processing.Generated;
 
 
 /**
@@ -61,18 +60,18 @@ public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelReco
   }
 
   /**
-   * Getter for <code>public.trading_channel.recipient_id</code>.
-   */
-  public String getRecipientId() {
-    return (String) get(1);
-  }
-
-  /**
    * Setter for <code>public.trading_channel.sender_id</code>.
    */
   public TradingChannelRecord setSenderId(String value) {
     set(0, value);
     return this;
+  }
+
+  /**
+   * Getter for <code>public.trading_channel.recipient_id</code>.
+   */
+  public String getRecipientId() {
+    return (String) get(1);
   }
 
   /**

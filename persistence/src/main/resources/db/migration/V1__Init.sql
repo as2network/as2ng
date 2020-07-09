@@ -77,12 +77,13 @@ create table as2_message
     body_file_id        int references file (id)
 );
 
-create table as2_mdn (
-    id varchar(64) primary key,
-    message_id varchar(64) references as2_message(id),
-    "text" text,
+create table as2_mdn(
+                        id           varchar(64) primary key,
+                        message_id   varchar(64) references as2_message (id),
+                        "text"       text,
     /* store header and attributes as jsonb to allow for free form data but make it queryable */
-    headers jsonb,
-    attributes jsonb
+                        headers      jsonb,
+                        attributes   jsonb,
+                        body_file_id int references file (id)
 );
 

@@ -46,15 +46,15 @@ public class As2Message extends TableImpl<As2MessageRecord> {
         return As2MessageRecord.class;
     }
 
-    /**
-     * The column <code>public.as2_message.id</code>.
-     */
-    public final TableField<As2MessageRecord, String> ID = createField(DSL.name("id"), org.jooq.impl.SQLDataType.VARCHAR(64).nullable(false), this, "");
+  /**
+   * The column <code>public.as2_message.id</code>.
+   */
+  public final TableField<As2MessageRecord, String> ID = createField(DSL.name("id"), org.jooq.impl.SQLDataType.VARCHAR(64).nullable(false), this, "");
 
-    /**
-     * The column <code>public.as2_message.from</code>.
-     */
-    public final TableField<As2MessageRecord, String> FROM = createField(DSL.name("from"), org.jooq.impl.SQLDataType.VARCHAR(64), this, "");
+  /**
+   * The column <code>public.as2_message.from</code>.
+   */
+  public final TableField<As2MessageRecord, String> FROM = createField(DSL.name("from"), org.jooq.impl.SQLDataType.VARCHAR(64), this, "");
 
   /**
    * The column <code>public.as2_message.to</code>.
@@ -100,15 +100,15 @@ public class As2Message extends TableImpl<As2MessageRecord> {
    * Create a <code>public.as2_message</code> table reference
    */
   public As2Message() {
-        this(DSL.name("as2_message"), null);
-    }
+    this(DSL.name("as2_message"), null);
+  }
 
-    /**
-     * Create an aliased <code>public.as2_message</code> table reference
-     */
-    public As2Message(String alias) {
-        this(DSL.name(alias), AS2_MESSAGE);
-    }
+  /**
+   * Create an aliased <code>public.as2_message</code> table reference
+   */
+  public As2Message(String alias) {
+    this(DSL.name(alias), AS2_MESSAGE);
+  }
 
     /**
      * Create an aliased <code>public.as2_message</code> table reference
@@ -144,15 +144,15 @@ public class As2Message extends TableImpl<As2MessageRecord> {
         return Keys.AS2_MESSAGE_PKEY;
     }
 
-    @Override
-    public List<UniqueKey<As2MessageRecord>> getKeys() {
-        return Arrays.<UniqueKey<As2MessageRecord>>asList(Keys.AS2_MESSAGE_PKEY);
-    }
+  @Override
+  public List<UniqueKey<As2MessageRecord>> getKeys() {
+    return Arrays.<UniqueKey<As2MessageRecord>>asList(Keys.AS2_MESSAGE_PKEY);
+  }
 
-    @Override
-    public List<ForeignKey<As2MessageRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<As2MessageRecord, ?>>asList(Keys.AS2_MESSAGE__AS2_MESSAGE_FROM_FKEY, Keys.AS2_MESSAGE__AS2_MESSAGE_TO_FKEY, Keys.AS2_MESSAGE__AS2_MESSAGE_BODY_FILE_ID_FKEY);
-    }
+  @Override
+  public List<ForeignKey<As2MessageRecord, ?>> getReferences() {
+    return Arrays.<ForeignKey<As2MessageRecord, ?>>asList(Keys.AS2_MESSAGE__AS2_MESSAGE_FROM_FKEY, Keys.AS2_MESSAGE__AS2_MESSAGE_TO_FKEY, Keys.AS2_MESSAGE__AS2_MESSAGE_BODY_FILE_ID_FKEY);
+  }
 
   public TradingPartner as2Message_As2MessageFromFkey() {
     return new TradingPartner(this, Keys.AS2_MESSAGE__AS2_MESSAGE_FROM_FKEY);
@@ -179,10 +179,10 @@ public class As2Message extends TableImpl<As2MessageRecord> {
   /**
    * Rename this table
    */
-    @Override
-    public As2Message rename(String name) {
-        return new As2Message(DSL.name(name), null);
-    }
+  @Override
+  public As2Message rename(String name) {
+    return new As2Message(DSL.name(name), null);
+  }
 
   /**
    * Rename this table
@@ -199,5 +199,5 @@ public class As2Message extends TableImpl<As2MessageRecord> {
   @Override
   public Row10<String, String, String, String, String, String, String, JSONB, JSONB, Integer> fieldsRow() {
     return (Row10) super.fieldsRow();
-  }
+    }
 }

@@ -32,17 +32,17 @@
 
 package com.freighttrust.as2.ext
 
-import com.freighttrust.postgres.extensions.toJSONB
 import com.freighttrust.jooq.tables.records.As2MdnRecord
 import com.freighttrust.jooq.tables.records.As2MessageRecord
 import com.freighttrust.jooq.tables.records.FileRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
+import com.freighttrust.postgres.extensions.toJSONB
 import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.message.AS2MessageMDN
 import com.helger.as2lib.partner.Partnership
 import org.jooq.tools.json.JSONObject
 
-fun AS2Message.toAs2MessageRecord(fileRecord: FileRecord): As2MessageRecord {
+fun AS2Message.toAs2MessageRecord(bodyRecord: FileRecord): As2MessageRecord {
   val self = this
   return As2MessageRecord()
     .apply {
@@ -63,11 +63,11 @@ fun AS2Message.toAs2MessageRecord(fileRecord: FileRecord): As2MessageRecord {
           .map { a -> a.key to a.value }
           .toMap()
       ).toJSONB()
-      bodyFileId = fileRecord.id
+      bodyFileId = bodyRecord.id
     }
 }
 
-fun AS2MessageMDN.toAs2MdnRecord(): As2MdnRecord {
+fun AS2MessageMDN.toAs2MdnRecord(bodyRecord: FileRecord): As2MdnRecord {
   val self = this
   return As2MdnRecord()
     .apply {
@@ -84,6 +84,7 @@ fun AS2MessageMDN.toAs2MdnRecord(): As2MdnRecord {
           .map { a -> a.key to a.value }
           .toMap()
       ).toJSONB()
+      bodyFileId = bodyRecord.id
     }
 }
 

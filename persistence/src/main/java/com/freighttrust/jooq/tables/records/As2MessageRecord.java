@@ -34,51 +34,6 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   }
 
   /**
-   * Getter for <code>public.as2_message.id</code>.
-   */
-  public String getId() {
-    return (String) get(0);
-  }
-
-  /**
-   * Setter for <code>public.as2_message.from</code>.
-     */
-    public As2MessageRecord setFrom(String value) {
-        set(1, value);
-        return this;
-    }
-
-    /**
-     * Getter for <code>public.as2_message.from</code>.
-     */
-    public String getFrom() {
-        return (String) get(1);
-    }
-
-    /**
-     * Setter for <code>public.as2_message.to</code>.
-     */
-    public As2MessageRecord setTo(String value) {
-        set(2, value);
-        return this;
-    }
-
-    /**
-     * Getter for <code>public.as2_message.to</code>.
-     */
-    public String getTo() {
-        return (String) get(2);
-    }
-
-  /**
-   * Setter for <code>public.as2_message.subject</code>.
-   */
-  public As2MessageRecord setSubject(String value) {
-    set(3, value);
-    return this;
-  }
-
-  /**
    * Create a detached, initialised As2MessageRecord
    */
   public As2MessageRecord(String id, String from, String to, String subject, String contentType, String contentDisposition, String mic, JSONB headers, JSONB attributes, Integer bodyFileId) {
@@ -97,6 +52,35 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   }
 
   /**
+   * Getter for <code>public.as2_message.id</code>.
+   */
+  public String getId() {
+    return (String) get(0);
+  }
+
+  /**
+   * Getter for <code>public.as2_message.from</code>.
+   */
+  public String getFrom() {
+    return (String) get(1);
+  }
+
+  /**
+   * Setter for <code>public.as2_message.to</code>.
+   */
+  public As2MessageRecord setTo(String value) {
+    set(2, value);
+    return this;
+  }
+
+  /**
+   * Getter for <code>public.as2_message.to</code>.
+   */
+  public String getTo() {
+    return (String) get(2);
+  }
+
+  /**
    * Setter for <code>public.as2_message.id</code>.
    */
   public As2MessageRecord setId(String value) {
@@ -105,10 +89,26 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   }
 
   /**
+   * Setter for <code>public.as2_message.from</code>.
+   */
+  public As2MessageRecord setFrom(String value) {
+    set(1, value);
+    return this;
+  }
+
+  /**
    * Getter for <code>public.as2_message.subject</code>.
    */
   public String getSubject() {
     return (String) get(3);
+  }
+
+  /**
+   * Setter for <code>public.as2_message.subject</code>.
+   */
+  public As2MessageRecord setSubject(String value) {
+    set(3, value);
+    return this;
   }
 
   /**
@@ -270,11 +270,6 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   }
 
   @Override
-  public String component2() {
-    return getFrom();
-  }
-
-  @Override
   public Field<Integer> field10() {
     return As2Message.AS2_MESSAGE.BODY_FILE_ID;
   }
@@ -282,6 +277,11 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   @Override
   public String component1() {
     return getId();
+  }
+
+  @Override
+  public String component2() {
+    return getFrom();
   }
 
   @Override
@@ -320,11 +320,6 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   }
 
   @Override
-  public String value2() {
-    return getFrom();
-  }
-
-  @Override
   public Integer component10() {
     return getBodyFileId();
   }
@@ -332,6 +327,11 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   @Override
   public String value1() {
     return getId();
+  }
+
+  @Override
+  public String value2() {
+    return getFrom();
   }
 
   @Override
@@ -370,12 +370,6 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   }
 
   @Override
-  public As2MessageRecord value2(String value) {
-    setFrom(value);
-    return this;
-  }
-
-  @Override
   public Integer value10() {
     return getBodyFileId();
   }
@@ -383,6 +377,12 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
   @Override
   public As2MessageRecord value1(String value) {
     setId(value);
+    return this;
+  }
+
+  @Override
+  public As2MessageRecord value2(String value) {
+    setFrom(value);
     return this;
   }
 
@@ -449,7 +449,7 @@ public class As2MessageRecord extends UpdatableRecordImpl<As2MessageRecord> impl
     value7(value7);
     value8(value8);
     value9(value9);
-        value10(value10);
-        return this;
-    }
+    value10(value10);
+    return this;
+  }
 }
