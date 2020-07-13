@@ -34,7 +34,7 @@ package com.freighttrust.as2
 
 import com.freighttrust.as2.factories.PostgresCertificateFactory
 import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.db.modules.PersistenceModule
+import com.freighttrust.postgres.PostgresModule
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
 import com.helger.as2lib.session.AS2Session
@@ -63,7 +63,7 @@ object KoinTestModules {
     }
   }
 
-  private val modules = listOf(AppConfigModule, PersistenceModule, http, as2)
+  private val modules = listOf(AppConfigModule, PostgresModule, http, as2)
 
   operator fun invoke() = modules
 }

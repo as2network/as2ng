@@ -32,25 +32,53 @@
 
 package com.freighttrust.as2.modules
 
+import com.freighttrust.as2.cert.VaultCertificateProvider
+import com.freighttrust.as2.cert.VaultConfigOptions
 import com.freighttrust.as2.session.As2SessionFactory
 import com.typesafe.config.Config
 import okhttp3.OkHttpClient
-import org.koin.core.qualifier.named
+import org.koin.core.qualifier._q
 import org.koin.dsl.module
+import java.net.URL
 
 val As2Module = module {
 
-  single(named("as2")) {
-    val config = get<Config>(named("app"))
+  single(_q("as2")) {
+    val config = get<Config>(_q("app"))
     config.getConfig("as2")
   }
 
   factory {
-    val config = get<Config>(named("app"))
+    val config = get<Config>(_q("app"))
     As2SessionFactory.create(_koin, config)
   }
 
   single {
     OkHttpClient()
+  }
+}
+
+val CertsModule = module {
+
+  factory(_q("certs")) {
+    val config = get<Config>(_q("app"))
+    config.getConfig("certs")
+  }
+
+  factory {
+    val c = get<Config>(_q("certs.VaultCertificateFactory"))
+
+    VaultConfigOptions(
+      x509CertificateRequestUrl = URL(c.getString("X509CertificateUrl")),
+      authToken = c.getString("AuthToken"),
+      commonName = c.getString("CommonName"),
+      format = c.getString("Format"),
+      privateKeyFormat = c.getString("PrivateKeyFormat"),
+      ttl = c.getString("TTL")
+    )
+  }
+
+  factory {
+    VaultCertificateProvider(get(), get())
   }
 }

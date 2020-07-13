@@ -32,27 +32,24 @@
 
 package com.freighttrust.as2.factories
 
-import com.freighttrust.as2.ext.isNotSuccessful
-import com.freighttrust.db.repositories.CertificateRepository
+import com.freighttrust.as2.cert.CertificateProvider
+import com.freighttrust.as2.cert.Either
+import com.freighttrust.as2.cert.X509PublicPrivatePair
 import com.freighttrust.jooq.tables.records.CertificateRecord
 import com.freighttrust.postgres.extensions.toPrivateKey
 import com.freighttrust.postgres.extensions.toX509
+import com.freighttrust.postgres.repositories.CertificateRepository
 import com.helger.as2lib.AbstractDynamicComponent
 import com.helger.as2lib.cert.ECertificatePartnershipType
 import com.helger.as2lib.cert.ICertificateFactory
 import com.helger.as2lib.message.IBaseMessage
-import io.vertx.core.json.JsonObject
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.bouncycastle.util.encoders.Base64
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
 
 class PostgresCertificateFactory(
   private val certificateRepository: CertificateRepository,
-  private val okHttpClient: OkHttpClient
+  private val certificateProvider: CertificateProvider
 ) : AbstractDynamicComponent(), ICertificateFactory {
 
   override fun getCertificate(msg: IBaseMessage, partnershipType: ECertificatePartnershipType): X509Certificate {
@@ -70,40 +67,25 @@ class PostgresCertificateFactory(
   }
 
   private fun requestX509Certificate(partnerId: String?): X509Certificate? =
-    okHttpClient
-      .newCall(
-        Request.Builder()
-          .url("http://localhost:8200/v1/pki_int/issue/freighttrust-dot-com")
-          .header("X-Vault-Token", "root")
-          .header("Content-Type", "application/json")
-          .post(
-            """{"common_name": "${partnerId!!.toLowerCase()}.freighttrust.com", "format": "der", "private_key_format": "pkcs8", "ttl": "24h"}"""
-              .toRequestBody(
-                "application/json".toMediaType()
-              )
-          )
-          .build()
-      )
-      .execute()
-      .use { response ->
-        when {
-          response.isSuccessful -> {
-            val body = response.body!!.string()
-            val json = JsonObject(body)
+    certificateProvider
+      .createX509Certificate(partnerId!!)
+      .let { result ->
+        when (result) {
+          is Either.Success -> {
+            val value = result.value
+            if (value == X509PublicPrivatePair.None) return null
 
             val certificateRecord = CertificateRecord()
               .apply {
                 tradingPartnerId = partnerId
-                x509Certificate = json.getJsonObject("data").getString("certificate")
-                privateKey = json.getJsonObject("data").getString("private_key")
+                x509Certificate = value.x509Certificate
+                privateKey = value.privateKey
               }
             certificateRepository.insert(certificateRecord)
+
             return certificateRecord.x509Certificate.toX509()
           }
-          response.isNotSuccessful -> {
-            TODO("Write handler for not successful response")
-          }
-          else -> throw IllegalStateException("Response is neither successful or unsuccessful!")
+          is Either.Error -> TODO("Handle correctly error")
         }
       }
 

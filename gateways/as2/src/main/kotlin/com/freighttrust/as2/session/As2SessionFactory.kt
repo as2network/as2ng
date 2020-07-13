@@ -32,6 +32,8 @@
 
 package com.freighttrust.as2.session
 
+import com.freighttrust.as2.cert.NoneCertificateProvider
+import com.freighttrust.as2.cert.VaultCertificateProvider
 import com.freighttrust.as2.factories.PostgresCertificateFactory
 import com.freighttrust.as2.factories.PostgresTradingChannelFactory
 import com.freighttrust.as2.processor.module.JmsStorageProcessorModule
@@ -68,7 +70,15 @@ object As2SessionFactory {
         val cf = c.getString("as2.CertificateFactory.Name")
         certificateFactory = when (cf) {
           "PostgresCertificateFactory" -> {
-            PostgresCertificateFactory(k.get(), k.get())
+            val cp = c.getString("as2.CertificateFactory.PostgresCertificateFactory.CertificateProvider")
+
+            val certificateProvider = when (cp) {
+              "NoneCertificateProvider" -> NoneCertificateProvider()
+              "VaultCertificateProvider" -> VaultCertificateProvider(k.get(), k.get())
+              else -> throw IllegalArgumentException("Invalid CertificateProvider passed: $cp!")
+            }
+
+            PostgresCertificateFactory(k.get(), certificateProvider)
               .apply {
                 initDynamicComponent(self, attrs())
               }

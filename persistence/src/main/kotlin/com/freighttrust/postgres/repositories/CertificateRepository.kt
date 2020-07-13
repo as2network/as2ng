@@ -51,4 +51,10 @@ class CertificateRepository(
       .selectFrom(Tables.CERTIFICATE)
       .where(Tables.CERTIFICATE.X509_CERTIFICATE.eq(certificate))
       .fetchOne()
+
+  fun insert(record: CertificateRecord): Int =
+    dbCtx
+      .insertInto(Tables.CERTIFICATE)
+      .set(record)
+      .execute()
 }
