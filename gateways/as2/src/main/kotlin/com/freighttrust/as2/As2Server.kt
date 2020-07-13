@@ -49,9 +49,9 @@ import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 import java.io.File
 
-object Server {
+object As2Server {
 
-  fun startAs2Server() {
+  fun start() {
     val koinApp = startKoin {
       printLogger()
 
@@ -82,7 +82,7 @@ object Server {
     }
   }
 
-  fun startMainAs2Server(configPath: String?) {
+  fun startAs2LibServer(configPath: String?) {
     if (!File(configPath).exists()) throw IllegalArgumentException("AS2 config.xml not found! Current path: $configPath")
     MainOpenAS2Server().start(configPath)
   }
@@ -106,8 +106,8 @@ fun main(args: Array<String>) {
   parser.parse(args)
 
   when (mode) {
-    "As2Server" -> Server.startAs2Server()
-    "MainOpenAs2Server" -> Server.startMainAs2Server(configPath)
+    "As2Server" -> As2Server.start()
+    "MainOpenAs2Server" -> As2Server.startAs2LibServer(configPath)
     else -> throw IllegalArgumentException("Invalid server mode specified!")
   }
 }
