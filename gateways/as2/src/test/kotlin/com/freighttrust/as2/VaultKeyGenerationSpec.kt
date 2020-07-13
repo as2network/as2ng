@@ -32,7 +32,7 @@
 
 package com.freighttrust.as2
 
-import com.freighttrust.as2.factories.isNotSuccessful
+import com.freighttrust.as2.ext.isNotSuccessful
 import io.kotlintest.Spec
 import io.kotlintest.TestCase
 import io.kotlintest.TestResult
