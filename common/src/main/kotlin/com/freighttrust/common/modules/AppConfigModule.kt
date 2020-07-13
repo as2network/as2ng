@@ -43,5 +43,4 @@ val AppConfigModule = module {
   System.setProperty("flogger.backend_factory", "com.google.common.flogger.backend.slf4j.Slf4jBackendFactory#getInstance")
 
   single<Config>(named("app")) { ConfigFactory.load() }
-
 }

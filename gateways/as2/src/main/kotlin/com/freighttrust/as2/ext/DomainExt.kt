@@ -103,7 +103,6 @@ fun IMessage.toFlatBuffer(bb: FlatBufferBuilder): Int {
   As2Message.addData(bb, dataOffset)
 
   return As2Message.endAs2Message(bb)
-
 }
 
 private fun writeHeaders(

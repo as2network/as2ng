@@ -63,7 +63,6 @@ class JmsStorageProcessorModule : AbstractProcessorModule(), IProcessorStorageMo
 
     const val DEFAULT_BROKER_URL = "tcp://localhost:61616"
     const val DEFAULT_BASE_QUEUE = "as2.inbound"
-
   }
 
   private val destinationMap = ConcurrentHashMap<String, Destination>()
@@ -103,9 +102,8 @@ class JmsStorageProcessorModule : AbstractProcessorModule(), IProcessorStorageMo
     }
 
     // TODO review if there are concurrency issues here
-    val id = "${baseQueue}.${messageType}.${message.aS2To}.${message.aS2From}"
+    val id = "$baseQueue.$messageType.${message.aS2To}.${message.aS2From}"
     return destinationMap.getOrPut(id, { jmsSession.createQueue(id) })
-
   }
 
   override fun handle(action: String, message: IMessage, options: MutableMap<String, Any>?) {
@@ -127,20 +125,16 @@ class JmsStorageProcessorModule : AbstractProcessorModule(), IProcessorStorageMo
             bytesMessage.jmsCorrelationID = message.messageID
             bytesMessage.jmsType = jmsType
 
-
             // finish serialisation
             bb.finish(rootOffset)
             bb.sizedByteArray()
           }
           // set payload of the message
           .also { byteArray -> bytesMessage.writeBytes(byteArray) }
-
       }
       .apply {
         // send
         messageProducer.send(destinationFor(action, message), this)
       }
-
   }
-
 }

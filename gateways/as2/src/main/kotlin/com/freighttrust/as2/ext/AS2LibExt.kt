@@ -36,4 +36,3 @@ import com.helger.as2lib.message.IMessage
 
 val IMessage.isRequestingSyncMDN: Boolean
   get() = isRequestingMDN && !isRequestingAsynchMDN
-

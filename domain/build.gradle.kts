@@ -52,9 +52,9 @@ dependencies {
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
-//xjc {
+// xjc {
 //  outputJavaDir.set(File("$projectDir/src/xjc/java"))
-//}
+// }
 
 sourceSets.create("xjc") {
   java.srcDir("src/xjc")

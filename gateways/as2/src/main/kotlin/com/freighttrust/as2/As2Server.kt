@@ -84,7 +84,6 @@ object Server {
     if (!File(configPath).exists()) throw IllegalArgumentException("AS2 config.xml not found! Current path: $configPath")
     MainOpenAS2Server().start(configPath)
   }
-
 }
 
 fun main(args: Array<String>) {

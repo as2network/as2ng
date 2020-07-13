@@ -94,12 +94,9 @@ class As2StorageProcessor(
 
         logger.atInfo().log("Finished processing message, correlation id: %s", message.jmsCorrelationID)
       }
-
     } finally {
       session.close()
       jmsConnection.close()
     }
-
   }
-
 }

@@ -30,8 +30,5 @@ class FileRepository(
           .fetch()
           .into(Tables.FILE)
           .first()
-
       }
-
-
 }

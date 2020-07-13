@@ -2,7 +2,6 @@ package com.freighttrust.s3
 
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder
 import com.freighttrust.s3.repositories.FileRepository
@@ -48,5 +47,4 @@ val S3Module = module {
     val config = get<Config>(named("s3"))
     FileRepository(get(), get(), config.getString("bucket"))
   }
-
 }

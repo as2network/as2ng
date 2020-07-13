@@ -96,4 +96,3 @@ fun As2Mdn.toAs2MdnRecord(): As2MdnRecord {
       ).toJSONB()
     }
 }
-

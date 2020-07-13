@@ -58,5 +58,4 @@ val ActiveMQModule = module {
       .createConnection()
       .apply { this.start() }
   }
-
 }

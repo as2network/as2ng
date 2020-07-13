@@ -53,5 +53,4 @@ class As2MessageRepository(
     dbCtx.executeInsert(record)
     return record
   }
-
 }

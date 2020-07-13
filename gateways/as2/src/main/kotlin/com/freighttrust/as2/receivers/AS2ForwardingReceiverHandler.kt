@@ -270,7 +270,6 @@ class AS2ForwardingReceiverHandler(
 
     calculateMIC(message)
 
-
     val part = message.data!!.parent.parent
     val mediaType = part.contentType.split("\r").first().toMediaType()
     val body = part.inputStream.readAllBytes().toRequestBody(mediaType)

@@ -10,5 +10,4 @@ val ProcessingModule = module {
   single { get<Config>(named("app")).getConfig("processing") }
 
   factory { As2StorageProcessor(get(), get(), get()) }
-
 }

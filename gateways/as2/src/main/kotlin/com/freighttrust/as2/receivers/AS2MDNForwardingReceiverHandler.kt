@@ -240,7 +240,6 @@ class AS2MDNForwardingReceiverHandler(
             }
           }
         }
-
     } catch (ex: IOException) {
       HTTPHelper.sendSimpleHTTPResponse(responseHandler, CHttp.HTTP_BAD_REQUEST)
       throw ex

@@ -45,5 +45,4 @@ class TradingChannelRepository(
       .selectFrom(Tables.TRADING_CHANNEL)
       .where(Tables.TRADING_CHANNEL.SENDER_ID.eq(record.senderId).and(Tables.TRADING_CHANNEL.RECIPIENT_ID.eq(record.recipientId)))
       .fetchOne()
-
 }

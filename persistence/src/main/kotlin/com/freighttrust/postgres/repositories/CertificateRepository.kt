@@ -19,5 +19,4 @@ class CertificateRepository(
       .selectFrom(Tables.CERTIFICATE)
       .where(Tables.CERTIFICATE.X509_CERTIFICATE.eq(certificate))
       .fetchOne()
-
 }

@@ -43,5 +43,4 @@ class As2MdnRepository(
     dbCtx.executeInsert(record)
     return record
   }
-  
 }
