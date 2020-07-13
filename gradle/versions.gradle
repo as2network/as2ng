@@ -63,6 +63,7 @@ dependencyManagement {
 
     dependency 'io.vertx:vertx-web-client:3.9.1'
     dependency 'com.squareup.okhttp3:okhttp:4.7.2'
+    dependency 'com.amazonaws:aws-java-sdk-s3:1.11.764'
 
     // ------------------------------------------------------------------
     // Serialisation

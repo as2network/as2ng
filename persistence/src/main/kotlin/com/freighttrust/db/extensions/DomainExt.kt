@@ -46,8 +46,8 @@ fun As2Message.toAs2MessageRecord(): As2MessageRecord {
       from = self.from()
       to = self.to()
       subject = self.subject()
-      contenttype = self.contentType()
-      contentdisposition = self.contentDisposition()
+      contentType = self.contentType()
+      contentDisposition = self.contentDisposition()
       headers = JSONObject(
         (0 until self.headersLength())
           .map { i ->
@@ -66,7 +66,6 @@ fun As2Message.toAs2MessageRecord(): As2MessageRecord {
           }
           .toMap()
       ).toJSONB()
-      setData(*(if (self.dataLength() > 0) self.dataAsByteBuffer().array() else byteArrayOf()))
     }
 }
 

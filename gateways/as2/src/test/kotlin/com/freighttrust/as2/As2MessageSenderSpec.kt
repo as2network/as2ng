@@ -39,12 +39,8 @@ import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.commons.io.resource.ClassPathResource
 import com.helger.security.keystore.EKeyStoreType
-import io.kotlintest.Spec
-import io.kotlintest.TestCase
-import io.kotlintest.TestResult
+import io.kotlintest.*
 import io.kotlintest.extensions.TopLevelTest
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.FunSpec
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -63,6 +59,7 @@ class As2MessageSenderSpec : FunSpec(), KoinTest {
   }
 
   init {
+<<<<<<< HEAD
     test("it should send an AS2 message from OpenAS2 to OpenAS2B")
       .config(enabled = false) {
 
@@ -130,5 +127,38 @@ class As2MessageSenderSpec : FunSpec(), KoinTest {
         response.mdn?.message shouldNotBe null
 
       }
+=======
+    test("it should send an AS2 message from OpenAS2 to OpenAS2B") {
+
+      // Prepare client settings
+      val clientSettings = AS2ClientSettings()
+        .apply {
+          setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+          setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
+          setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10085/HttpReceiver")
+          setPartnershipName("Partnership name")
+          setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
+          asyncMDNUrl = "http://localhost:10800/MDNReceiver"
+          connectTimeoutMS = 20000
+          readTimeoutMS = 20000
+        }
+
+      // Prepare AS2 request
+      val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+        .apply {
+          setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
+        }
+
+      // Fire request
+
+      val response = as2Client.sendSynchronous(clientSettings, request)
+
+      // Assert
+      response shouldNotBe null
+      response.exception shouldBe null
+      response.mdn shouldNotBe null
+      response.mdn?.message shouldNotBe null
+    }
+>>>>>>> develop
   }
 }

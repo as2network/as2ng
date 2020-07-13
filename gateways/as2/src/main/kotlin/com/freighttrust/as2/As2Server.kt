@@ -34,30 +34,31 @@ package com.freighttrust.as2
 
 import com.freighttrust.as2.modules.As2Module
 import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.db.modules.PersistenceModule
+import com.freighttrust.postgres.PostgresModule
 import com.freighttrust.messaging.modules.ActiveMQModule
+import com.freighttrust.s3.S3Module
+import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.session.AS2Session
 import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
+import kotlinx.cli.default
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import java.io.File
 
-object As2Server {
+object Server {
 
-  fun start(args: Array<String>) {
-    val parser = ArgParser("as2")
-    parser.parse(args)
-
+  fun startAs2Server() {
     val koinApp = startKoin {
       printLogger()
 
       modules(
         AppConfigModule,
         ActiveMQModule,
-        PersistenceModule,
+        PostgresModule,
+        S3Module,
         As2Module
       )
     }
@@ -78,6 +79,34 @@ object As2Server {
       }
     }
   }
+
+  fun startMainAs2Server(configPath: String?) {
+    if (!File(configPath).exists()) throw IllegalArgumentException("AS2 config.xml not found! Current path: $configPath")
+    MainOpenAS2Server().start(configPath)
+  }
+
 }
 
-fun main(args: Array<String>) = As2Server.start(args)
+fun main(args: Array<String>) {
+  val parser = ArgParser("as2")
+  val mode by parser.option(
+    ArgType.Choice(listOf("As2Server", "MainOpenAs2Server")),
+    fullName = "mode",
+    shortName = "m",
+    description = "Server running mode"
+  ).default("As2Server")
+  val configPath by parser.option(
+    ArgType.String,
+    fullName = "config",
+    shortName = "c",
+    description = "AS2 config file path"
+  )
+
+  parser.parse(args)
+
+  when (mode) {
+    "As2Server" -> Server.startAs2Server()
+    "MainOpenAs2Server" -> Server.startMainAs2Server(configPath)
+    else -> throw IllegalArgumentException("Invalid server mode specified!")
+  }
+}

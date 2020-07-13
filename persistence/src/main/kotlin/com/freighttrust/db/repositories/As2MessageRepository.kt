@@ -32,12 +32,22 @@
 
 package com.freighttrust.db.repositories
 
+import com.freighttrust.jooq.Tables.AS2_MESSAGE
 import com.freighttrust.jooq.tables.records.As2MessageRecord
 import org.jooq.DSLContext
 
 class As2MessageRepository(
   private val dbCtx: DSLContext
 ) {
+
+  fun findMic(id: String): String? =
+    dbCtx
+      .select(AS2_MESSAGE.MIC)
+      .from(AS2_MESSAGE)
+      .where(AS2_MESSAGE.ID.eq(id))
+      .fetch()
+      .firstOrNull()
+      ?.value1()
 
   fun insert(record: As2MessageRecord): As2MessageRecord {
     dbCtx.executeInsert(record)

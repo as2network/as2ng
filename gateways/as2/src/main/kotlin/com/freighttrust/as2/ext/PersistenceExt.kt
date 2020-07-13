@@ -32,16 +32,17 @@
 
 package com.freighttrust.as2.ext
 
-import com.freighttrust.db.extensions.toJSONB
 import com.freighttrust.jooq.tables.records.As2MdnRecord
 import com.freighttrust.jooq.tables.records.As2MessageRecord
+import com.freighttrust.jooq.tables.records.FileRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
+import com.freighttrust.postgres.extensions.toJSONB
 import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.message.AS2MessageMDN
 import com.helger.as2lib.partner.Partnership
 import org.jooq.tools.json.JSONObject
 
-fun AS2Message.toAs2MessageRecord(): As2MessageRecord {
+fun AS2Message.toAs2MessageRecord(bodyRecord: FileRecord): As2MessageRecord {
   val self = this
   return As2MessageRecord()
     .apply {
@@ -49,8 +50,9 @@ fun AS2Message.toAs2MessageRecord(): As2MessageRecord {
       from = self.aS2From
       to = self.aS2To
       subject = self.subject
-      contenttype = self.contentType
-      contentdisposition = self.contentDisposition
+      contentType = self.contentType
+      contentDisposition = self.contentDisposition
+      mic = self.attrs()[AS2Message.ATTRIBUTE_MIC]
       headers = JSONObject(
         self.headers()
           .map { h -> h.key to h.value }
@@ -61,10 +63,11 @@ fun AS2Message.toAs2MessageRecord(): As2MessageRecord {
           .map { a -> a.key to a.value }
           .toMap()
       ).toJSONB()
+      bodyFileId = bodyRecord.id
     }
 }
 
-fun AS2MessageMDN.toAs2MdnRecord(): As2MdnRecord {
+fun AS2MessageMDN.toAs2MdnRecord(bodyRecord: FileRecord): As2MdnRecord {
   val self = this
   return As2MdnRecord()
     .apply {
@@ -81,6 +84,7 @@ fun AS2MessageMDN.toAs2MdnRecord(): As2MdnRecord {
           .map { a -> a.key to a.value }
           .toMap()
       ).toJSONB()
+      bodyFileId = bodyRecord.id
     }
 }
 
@@ -105,11 +109,11 @@ fun TradingChannelRecord.toPartnership(): Partnership {
     .apply {
       this.setSenderID("as2_id", senderId)
       this.setReceiverID("as2_id", recipientId)
-      this.setProtocol(self.protocol)
-      this.setAS2URL(self.as2Url)
-      this.setAS2MDNTo(self.as2MdnTo)
-      this.setAS2MDNOptions(self.as2MdnOptions)
-      this.setEncryptAlgorithm(self.encryptionAlgorithm)
-      this.setSigningAlgorithm(self.signingAlgorithm)
+      this.protocol = self.protocol
+      this.aS2URL = self.as2Url
+      this.aS2MDNTo = self.as2MdnTo
+      this.aS2MDNOptions = self.as2MdnOptions
+      this.encryptAlgorithm = self.encryptionAlgorithm
+      this.signingAlgorithm = self.signingAlgorithm
     }
 }

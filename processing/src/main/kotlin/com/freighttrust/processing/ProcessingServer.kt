@@ -33,7 +33,7 @@
 package com.freighttrust.processing
 
 import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.db.modules.PersistenceModule
+import com.freighttrust.postgres.PostgresModule
 import com.freighttrust.messaging.modules.ActiveMQModule
 import com.freighttrust.processing.modules.ProcessingModule
 import com.freighttrust.processing.processors.As2StorageProcessor
@@ -56,7 +56,7 @@ object ProcessingServer {
       modules(
         AppConfigModule,
         ActiveMQModule,
-        PersistenceModule,
+        PostgresModule,
         ProcessingModule
       )
     }

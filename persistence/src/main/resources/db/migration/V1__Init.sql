@@ -43,36 +43,47 @@ create table certificate (
 );
 
 create table trading_channel (
-    sender_id varchar(64) references trading_partner(id),
-    recipient_id varchar(64) references trading_partner(id),
-    protocol varchar(16),
-    as2_url varchar(128),
-    as2_mdn_to varchar(128) null,
-    as2_mdn_options varchar(128),
-    encryption_algorithm varchar(16) null,
-    signing_algorithm varchar(16),
-    primary key (sender_id, recipient_id)
+                                 sender_id            varchar(64) references trading_partner(id),
+                                 recipient_id         varchar(64) references trading_partner (id),
+                                 protocol             varchar(16),
+                                 as2_url              varchar(128),
+                                 as2_mdn_to           varchar(128) null,
+                                 as2_mdn_options      varchar(128),
+                                 encryption_algorithm varchar(16)  null,
+                                 signing_algorithm    varchar(16),
+                                 primary key (sender_id, recipient_id)
 );
 
-create table as2_message (
-    id varchar(64) primary key,
-    "from" varchar(64) references trading_partner(id),
-    "to" varchar(64) references trading_partner(id),
-    subject varchar(128),
-    contentType varchar(128),
-    contentDisposition varchar(128),
-    /* store header and attributes as jsonb to allow for free form data but make it queryable */
-    headers jsonb,
-    attributes jsonb,
-    data bytea
+create table file
+(
+    id     serial primary key,
+    bucket varchar(128),
+    key    varchar(128),
+    unique (bucket, key)
 );
 
-create table as2_mdn (
-    id varchar(64) primary key,
-    message_id varchar(64) references as2_message(id),
-    "text" text,
+create table as2_message
+(
+    id                  varchar(64) primary key,
+    "from"              varchar(64) references trading_partner (id),
+    "to"                varchar(64) references trading_partner (id),
+    subject             varchar(128),
+    content_type        varchar(128),
+    content_disposition varchar(128),
+    mic                 varchar(32) null,
     /* store header and attributes as jsonb to allow for free form data but make it queryable */
-    headers jsonb,
-    attributes jsonb
+    headers             jsonb,
+    attributes          jsonb,
+    body_file_id        int references file (id)
+);
+
+create table as2_mdn(
+                        id           varchar(64) primary key,
+                        message_id   varchar(64) references as2_message (id),
+                        "text"       text,
+    /* store header and attributes as jsonb to allow for free form data but make it queryable */
+                        headers      jsonb,
+                        attributes   jsonb,
+                        body_file_id int references file (id)
 );
 
