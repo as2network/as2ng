@@ -102,7 +102,8 @@ class AS2ForwardingReceiverHandler(
   private val fileRepository: FileRepository,
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository,
-  private val okHttpClient: OkHttpClient
+  private val okHttpClient: OkHttpClient,
+  private val asyncMdnReceiverUrl: String
 ) : AbstractReceiverHandler() {
 
   private val logger = LoggerFactory.getLogger(AS2ForwardingReceiverHandler::class.java)
@@ -322,9 +323,8 @@ class AS2ForwardingReceiverHandler(
       }
 
     if (message.isRequestingAsynchMDN) {
-      // override the mdn reply to to point to this server instead of the originating server
-      // TODO load url from config
-      requestBuilder.header(RECEIPT_DELIVERY_OPTION, "http://localhost:10086/MDNReceiver")
+      // override the mdn reply to point to this server instead of the originating server
+      requestBuilder.header(RECEIPT_DELIVERY_OPTION, asyncMdnReceiverUrl)
     }
 
     val request = requestBuilder
@@ -706,8 +706,7 @@ class AS2ForwardingReceiverHandler(
   private fun dispositionText(ex: AS2Exception): String? {
     // Issue 90 - use CRLF as separator
     if (sendExceptionsInMDN) {
-      val sExceptionText: String
-      sExceptionText = if (sendExceptionStackTraceInMDN) {
+      val sExceptionText: String = if (sendExceptionStackTraceInMDN) {
         // Message and stack trace
         StackTraceHelper.getStackAsString(ex, true, CHttp.EOL)
       } else {
@@ -726,7 +725,8 @@ class AS2ForwardingReceiverModule(
   private val fileRepository: FileRepository,
   private val as2MessageRepository: As2MessageRepository,
   private val as2MdnRepository: As2MdnRepository,
-  private val okHttpClient: OkHttpClient
+  private val okHttpClient: OkHttpClient,
+  private val asyncMdnReceiverUrl: String
 ) : AbstractActiveNetModule() {
 
   override fun createHandler(): INetModuleHandler = AS2ForwardingReceiverHandler(
@@ -734,6 +734,7 @@ class AS2ForwardingReceiverModule(
     fileRepository,
     as2MessageRepository,
     as2MdnRepository,
-    okHttpClient
+    okHttpClient,
+    asyncMdnReceiverUrl
   )
 }

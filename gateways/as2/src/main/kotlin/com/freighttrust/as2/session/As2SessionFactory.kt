@@ -127,7 +127,13 @@ object As2SessionFactory {
                 }
                 "AS2ForwardingReceiverModule" -> {
                   addModule(
-                    AS2ForwardingReceiverModule(k.get(), k.get(), k.get(), k.get())
+                    AS2ForwardingReceiverModule(
+                      k.get(),
+                      k.get(),
+                      k.get(),
+                      k.get(),
+                      c.getString("as2.DefaultMessageProcessor.AS2ForwardingReceiverModule.AsyncMdnReceiverUrl")
+                    )
                       .apply {
                         attrs()[ATTR_PORT] = c.getInt("as2.DefaultMessageProcessor.AS2ForwardingReceiverModule.Port").toString()
                         attrs()[ATTR_ERROR_DIRECTORY] = c.getString("as2.DefaultMessageProcessor.AS2ForwardingReceiverModule.ErrorDir")
