@@ -33,6 +33,8 @@
 package com.freighttrust.s3
 
 import com.amazonaws.ClientConfiguration
+import com.amazonaws.auth.AWSStaticCredentialsProvider
+import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder
@@ -63,6 +65,14 @@ val S3Module = module {
         AwsClientBuilder.EndpointConfiguration(
           config.getString("endpoint.serviceEndpoint"),
           config.getString("endpoint.signingRegion")
+        )
+      )
+      .withCredentials(
+        AWSStaticCredentialsProvider(
+          BasicAWSCredentials(
+            config.getString("endpoint.accessKey"),
+            config.getString("endpoint.secretKey")
+          )
         )
       )
       .build()

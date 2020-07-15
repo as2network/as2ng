@@ -34,6 +34,7 @@ package com.freighttrust.as2.receivers
 
 import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.as2.ext.isRequestingSyncMDN
+import com.freighttrust.as2.ext.toAs2MdnRecord
 import com.freighttrust.as2.ext.toAs2MessageRecord
 import com.freighttrust.as2.ext.toHttpHeaderMap
 import com.freighttrust.postgres.repositories.As2MdnRepository
@@ -50,7 +51,6 @@ import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.message.AS2MessageMDN
 import com.helger.as2lib.message.IMessage
 import com.helger.as2lib.params.MessageParameters
-import com.helger.as2lib.partner.AS2PartnershipNotFoundException
 import com.helger.as2lib.processor.AS2NoModuleException
 import com.helger.as2lib.processor.AS2ProcessorException
 import com.helger.as2lib.processor.CNetAttribute
@@ -339,9 +339,12 @@ class AS2ForwardingReceiverHandler(
 
           response.isSuccessful && message.isRequestingMDN && message.isRequestingSyncMDN -> {
 
+            val rawData = response.body!!.bytes()
+
             // Store MDN request
             val mdn = AS2MessageMDN(message)
               .apply {
+
                 with(headers()) {
                   setHeader(CHttpHeader.AS2_VERSION, response.headers[CHttpHeader.AS2_VERSION])
                   setHeader(CHttpHeader.DATE, response.headers[CHttpHeader.DATE])
@@ -349,21 +352,72 @@ class AS2ForwardingReceiverHandler(
                   setHeader(CHttpHeader.MIME_VERSION, response.headers[CHttpHeader.MIME_VERSION])
                   setHeader(CHttpHeader.AS2_FROM, response.headers[CHttpHeader.AS2_FROM])
                   setHeader(CHttpHeader.AS2_TO, response.headers[CHttpHeader.AS2_TO])
+                  setHeader(CHttpHeader.MESSAGE_ID, response.headers[CHttpHeader.MESSAGE_ID])
+                  setHeader(CHttpHeader.SUBJECT, response.headers[CHttpHeader.SUBJECT])
+                  setHeader(CHttpHeader.CONTENT_TYPE, response.headers[CHttpHeader.CONTENT_TYPE])
                 }
+
                 with(partnership()) {
                   senderAS2ID = (getHeader(CHttpHeader.AS2_FROM))
                   receiverAS2ID = (getHeader(CHttpHeader.AS2_TO))
-                  senderX509Alias = message.partnership().receiverX509Alias
-                  receiverX509Alias = message.partnership().senderX509Alias
                 }
+
+                receiverModule.session.partnershipFactory.updatePartnership(this, false)
+
+                val receivedContentType = AS2HttpHelper.getCleanContentType(getHeader(CHttpHeader.CONTENT_TYPE))
+                val receivedPart =
+                  MimeBodyPart(AS2HttpHelper.getAsInternetHeaders(message.headers()), rawData)
+
+                receivedPart.dataHandler =
+                  ByteArrayDataSource(rawData, receivedContentType, null).asDataHandler
+                receivedPart.setHeader(CHttpHeader.CONTENT_TYPE, receivedContentType)
+
+                data = receivedPart
               }
 
-            // TODO: Continue with updating the partnership info
+            val certificateFactory = receiverModule.session.certificateFactory
+            val senderCert = certificateFactory.getCertificate(mdn, ECertificatePartnershipType.SENDER)
+
+            val useCertificateInBodyPart = message
+              .partnership()
+              .verifyUseCertificateInBodyPart
+              .let {
+                if (it.isDefined)
+                  it.asBooleanValue
+                else
+                  receiverModule.session.isCryptoVerifyUseCertificateInBodyPart
+              }
+
+            val resourceHelper = AS2ResourceHelper()
+            AS2Helper.parseMDN(
+              message,
+              senderCert,
+              useCertificateInBodyPart,
+              verificationCertificateConsumer,
+              resourceHelper
+            )
+            resourceHelper.close()
+
+            val disposition = mdn.attrs().getAsString(AS2MessageMDN.MDNA_DISPOSITION)
+
             try {
-            } catch (ex: AS2PartnershipNotFoundException) {
+              DispositionType.createFromString(disposition).validate()
+            } catch (ex: AS2DispositionException) {
+              ex.text = mdn.text
+              if (ex.disposition.isWarning) {
+                // Warning
+                ex.setSourceMsg(message).terminate()
+              } else {
+                // Error
+                throw ex
+              }
             }
 
-            // as2MdnRepository.insert(mdn.toAs2MdnRecord())
+            val mediaType = mdn.data!!.contentType.toMediaType()
+            val body = mdn.data!!.inputStream.readAllBytes().toRequestBody(mediaType)
+
+            val bodyRecord = fileRepository.insert(mdn.messageID!!, mdn.data!!.inputStream, body.contentLength())
+            as2MdnRepository.insert(mdn.toAs2MdnRecord(bodyRecord))
 
             // Forward back the MDN response
             NonBlockingByteArrayOutputStream()
@@ -373,7 +427,7 @@ class AS2ForwardingReceiverHandler(
 
                 val inputStream = MimeBodyPart(
                   AS2HttpHelper.getAsInternetHeaders(headers),
-                  response.body!!.bytes()
+                  rawData
                 ).inputStream
 
                 StreamHelper.copyInputStreamToOutputStream(inputStream, data)
