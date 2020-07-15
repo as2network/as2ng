@@ -50,15 +50,15 @@ import com.helger.as2lib.exception.WrappedAS2Exception
 import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.message.AS2MessageMDN
 import com.helger.as2lib.message.IMessage
-import com.helger.as2lib.params.MessageParameters
 import com.helger.as2lib.processor.AS2NoModuleException
-import com.helger.as2lib.processor.AS2ProcessorException
 import com.helger.as2lib.processor.CNetAttribute
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import com.helger.as2lib.processor.receiver.net.AS2NetException
 import com.helger.as2lib.processor.receiver.net.AbstractReceiverHandler
 import com.helger.as2lib.processor.receiver.net.INetModuleHandler
 import com.helger.as2lib.processor.sender.IProcessorSenderModule
+import com.helger.as2lib.processor.storage.IProcessorStorageModule
+import com.helger.as2lib.session.AS2ComponentNotFoundException
 import com.helger.as2lib.util.AS2Helper
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.as2lib.util.AS2IOHelper
@@ -72,7 +72,6 @@ import com.helger.commons.http.CHttpHeader.RECEIPT_DELIVERY_OPTION
 import com.helger.commons.http.HttpHeaderMap
 import com.helger.commons.io.stream.NonBlockingByteArrayOutputStream
 import com.helger.commons.io.stream.StreamHelper
-import com.helger.commons.lang.StackTraceHelper
 import com.helger.commons.state.ESuccess
 import com.helger.commons.string.StringHelper
 import com.helger.commons.timing.StopWatch
@@ -106,10 +105,12 @@ class AS2ForwardingReceiverHandler(
   private val asyncMdnReceiverUrl: String
 ) : AbstractReceiverHandler() {
 
-  private val logger = LoggerFactory.getLogger(AS2ForwardingReceiverHandler::class.java)
+  private val session = receiverModule.session
+  private val partnershipFactory = session.partnershipFactory
+  private val certificateFactory = session.certificateFactory
+  private val cryptoHelper = AS2Helper.getCryptoHelper()
 
-  private val sendExceptionsInMDN = false
-  private val sendExceptionStackTraceInMDN = false
+  private val logger = LoggerFactory.getLogger(AS2ForwardingReceiverHandler::class.java)
 
   private fun createMessage(aSocket: Socket): AS2Message =
     AS2Message().apply {
@@ -125,7 +126,7 @@ class AS2ForwardingReceiverHandler(
   override fun handle(owner: AbstractActiveNetModule, socket: Socket) {
 
     val clientInfo = getClientInfo(socket)
-      .also { info -> if (logger.isInfoEnabled) logger.info("Incoming connection $info") }
+      .also { info -> logger.info("Incoming connection $info") }
 
     val message = createMessage(socket)
     val quoteHeaderValues = receiverModule.isQuoteHeaderValues
@@ -151,49 +152,30 @@ class AS2ForwardingReceiverHandler(
 
     stopWatch.stop()
 
-    if (messageDataSource is ByteArrayDataSource) {
-      if (logger.isInfoEnabled) logger.info(
-        "received " +
-          AS2IOHelper.getTransferRate(
+    when (messageDataSource) {
+      is ByteArrayDataSource -> {
+        logger.info(
+          "received ${AS2IOHelper.getTransferRate(
             messageDataSource.directGetBytes().size.toLong(),
             stopWatch
-          ) +
-          " from " +
-          clientInfo +
-          message.loggingText
-      )
-    } else {
-      logger.info(
-        "received message from " +
-          clientInfo +
-          message.loggingText +
-          " in " +
-          stopWatch.millis +
-          " ms"
-      )
+          )} from $clientInfo${message.loggingText}"
+        )
+      }
+      else -> {
+        logger.info("received message from $clientInfo${message.loggingText} in ${stopWatch.millis} ms")
+      }
     }
 
-    handleIncomingMessage(clientInfo, messageDataSource, message, responseHandler)
-  }
-
-  private fun handleIncomingMessage(
-    clientInfo: String,
-    messageData: DataSource,
-    message: AS2Message,
-    responseHandler: IAS2HttpResponseHandler
-  ) {
     try {
 
       AS2ResourceHelper()
         .use { resourceHelper ->
 
-          val session = receiverModule.session
-
           try {
 
             message.data = MimeBodyPart()
               .apply {
-                dataHandler = DataHandler(messageData)
+                dataHandler = DataHandler(messageDataSource)
                 // Header must be set AFTER the DataHandler!
                 val receivedContentType = AS2HttpHelper.getCleanContentType(message.getHeader(CHttpHeader.CONTENT_TYPE))
                 setHeader(CHttpHeader.CONTENT_TYPE, receivedContentType)
@@ -217,7 +199,7 @@ class AS2ForwardingReceiverHandler(
               }
 
             // Fill all partnership attributes etc.
-            session.partnershipFactory.updatePartnership(message, false)
+            partnershipFactory.updatePartnership(message, false)
           } catch (ex: AS2Exception) {
             throw AS2DispositionException(
               DispositionType.createError("authentication-failed"),
@@ -228,7 +210,6 @@ class AS2ForwardingReceiverHandler(
 
           // Per RFC5402 compression is always before encryption but can be before
           // or after signing of message but only in one place
-          val cryptoHelper = AS2Helper.getCryptoHelper()
           var isDecompressed = false
 
           // Decrypt and verify signature of the data, and attach data to the
@@ -236,7 +217,7 @@ class AS2ForwardingReceiverHandler(
           decrypt(message, resourceHelper)
 
           if (cryptoHelper.isCompressed(message.contentType!!)) {
-            if (logger.isTraceEnabled) logger.trace("Decompressing received message before checking signature...")
+            logger.trace("Decompressing received message before checking signature...")
             decompress(message)
             isDecompressed = true
           }
@@ -254,18 +235,17 @@ class AS2ForwardingReceiverHandler(
               )
             }
 
-            if (logger.isTraceEnabled) if (message.attrs()
-                .containsKey(AS2Message.ATTRIBUTE_RECEIVED_SIGNED)
-            ) logger.trace("Decompressing received message after verifying signature...") else logger.trace("Decompressing received message after decryption...")
+            if (message.attrs().containsKey(AS2Message.ATTRIBUTE_RECEIVED_SIGNED))
+              logger.trace("Decompressing received message after verifying signature...")
+            else
+              logger.trace("Decompressing received message after decryption...")
 
             decompress(message)
-            isDecompressed = true
           }
 
           // Store the received message
           try {
-
-            this.storeAndForward(message, responseHandler)
+            storeAndForward(message, responseHandler)
           } catch (ex: AS2NoModuleException) {
             // No module installed - ignore
           } catch (ex: AS2Exception) {
@@ -362,7 +342,7 @@ class AS2ForwardingReceiverHandler(
                   receiverAS2ID = (getHeader(CHttpHeader.AS2_TO))
                 }
 
-                receiverModule.session.partnershipFactory.updatePartnership(this, false)
+                partnershipFactory.updatePartnership(this, false)
 
                 val receivedContentType = AS2HttpHelper.getCleanContentType(getHeader(CHttpHeader.CONTENT_TYPE))
                 val receivedPart =
@@ -375,7 +355,6 @@ class AS2ForwardingReceiverHandler(
                 data = receivedPart
               }
 
-            val certificateFactory = receiverModule.session.certificateFactory
             val senderCert = certificateFactory.getCertificate(mdn, ECertificatePartnershipType.SENDER)
 
             val useCertificateInBodyPart = message
@@ -385,7 +364,7 @@ class AS2ForwardingReceiverHandler(
                 if (it.isDefined)
                   it.asBooleanValue
                 else
-                  receiverModule.session.isCryptoVerifyUseCertificateInBodyPart
+                  session.isCryptoVerifyUseCertificateInBodyPart
               }
 
             val resourceHelper = AS2ResourceHelper()
@@ -459,9 +438,6 @@ class AS2ForwardingReceiverHandler(
   @Throws(AS2Exception::class)
   private fun decrypt(message: IMessage, resourceHelper: AS2ResourceHelper) {
 
-    val certificateFactory = receiverModule.session.certificateFactory
-    val cryptoHelper = AS2Helper.getCryptoHelper()
-
     try {
       val disableDecrypt = message.partnership().isDisableDecrypt
       val messageIsEncrypted = cryptoHelper.isEncrypted(message.data!!)
@@ -470,15 +446,16 @@ class AS2ForwardingReceiverHandler(
       when {
 
         messageIsEncrypted && disableDecrypt ->
-          if (logger.isInfoEnabled) logger.info("Message claims to be encrypted but decryption is disabled" + message.loggingText)
+          logger.info("Message claims to be encrypted but decryption is disabled" + message.loggingText)
 
         messageIsEncrypted || forceDecrypt -> {
 
           // Decrypt
           if (forceDecrypt && !messageIsEncrypted) {
-            if (logger.isInfoEnabled) logger.info("Forced decrypting" + message.loggingText)
-          } else if (logger.isDebugEnabled)
+            logger.info("Forced decrypting" + message.loggingText)
+          } else {
             logger.debug("Decrypting" + message.loggingText)
+          }
 
           val receiverCertificate = certificateFactory.getCertificate(message, ECertificatePartnershipType.RECEIVER)
           val receiverKey = certificateFactory.getPrivateKey(receiverCertificate)
@@ -496,11 +473,11 @@ class AS2ForwardingReceiverHandler(
           // Remember that message was encrypted
           message.attrs().putIn(AS2Message.ATTRIBUTE_RECEIVED_ENCRYPTED, true)
 
-          if (logger.isInfoEnabled) logger.info("Successfully decrypted incoming AS2 message" + message.loggingText)
+          logger.info("Successfully decrypted incoming AS2 message ${message.loggingText}")
         }
       }
     } catch (ex: Exception) {
-      if (logger.isErrorEnabled) logger.error("Error decrypting " + message.loggingText + ": " + ex.message)
+      logger.error("Error decrypting ${message.loggingText}: ${ex.message}")
       throw AS2DispositionException(
         DispositionType.createError("decryption-failed"),
         AbstractActiveNetModule.DISP_DECRYPTION_ERROR,
@@ -512,9 +489,6 @@ class AS2ForwardingReceiverHandler(
   @Throws(AS2Exception::class)
   private fun verify(message: IMessage, resourceHelper: AS2ResourceHelper) {
 
-    val certificateFactory = receiverModule.session.certificateFactory
-    val cryptoHelper = AS2Helper.getCryptoHelper()
-
     try {
       val disableVerify = message.partnership().isDisableVerify
       val messageIsSigned = cryptoHelper.isSigned(message.data!!)
@@ -523,14 +497,15 @@ class AS2ForwardingReceiverHandler(
       when {
 
         messageIsSigned && disableVerify ->
-          if (logger.isInfoEnabled) logger.info("Message claims to be signed but signature validation is disabled" + message.loggingText)
+          logger.info("Message claims to be signed but signature validation is disabled ${message.loggingText}")
 
         messageIsSigned || forceVerify -> {
 
           if (forceVerify && !messageIsSigned) {
-            if (logger.isInfoEnabled) logger.info("Forced verify signature" + message.loggingText)
-          } else if (logger.isDebugEnabled)
-            logger.debug("Verifying signature" + message.loggingText)
+            logger.info("Forced verify signature ${message.loggingText}")
+          } else {
+            logger.debug("Verifying signature ${message.loggingText}")
+          }
 
           val senderCertificate = certificateFactory.getCertificateOrNull(message, ECertificatePartnershipType.SENDER)
 
@@ -542,7 +517,7 @@ class AS2ForwardingReceiverHandler(
               if (it.isDefined)
                 it.asBooleanValue
               else
-                receiverModule.session.isCryptoVerifyUseCertificateInBodyPart
+                session.isCryptoVerifyUseCertificateInBodyPart
             }
 
           val certificateHolder = Wrapper<X509Certificate>()
@@ -568,11 +543,11 @@ class AS2ForwardingReceiverHandler(
               AS2Message.ATTRIBUTE_RECEIVED_SIGNATURE_CERTIFICATE,
               CertificateHelper.getPEMEncodedCertificate(certificateHolder.get()!!)
             )
-          if (logger.isInfoEnabled) logger.info("Successfully verified signature of incoming AS2 message" + message.loggingText)
+          logger.info("Successfully verified signature of incoming AS2 message ${message.loggingText}")
         }
       }
     } catch (ex: Exception) {
-      if (logger.isErrorEnabled) logger.error("Error verifying signature " + message.loggingText + ": " + ex.message)
+      logger.error("Error verifying signature ${message.loggingText}: ${ex.message}")
       throw AS2DispositionException(
         DispositionType.createError("integrity-check-failed"),
         AbstractActiveNetModule.DISP_VERIFY_SIGNATURE_FAILED,
@@ -585,9 +560,9 @@ class AS2ForwardingReceiverHandler(
   private fun decompress(message: IMessage) {
     try {
       if (message.partnership().isDisableDecompress) {
-        if (logger.isInfoEnabled) logger.info("Message claims to be compressed but decompression is disabled" + message.loggingText)
+        logger.info("Message claims to be compressed but decompression is disabled ${message.loggingText}")
       } else {
-        if (logger.isDebugEnabled) logger.debug("Decompressing a compressed AS2 message")
+        logger.debug("Decompressing a compressed AS2 message")
 
         val decompressedPart: MimeBodyPart
         val expander = ZlibExpanderProvider()
@@ -619,24 +594,25 @@ class AS2ForwardingReceiverHandler(
         message.setData(decompressedPart)
         // Remember that message was decompressed
         message.attrs().putIn(AS2Message.ATTRIBUTE_RECEIVED_COMPRESSED, true)
-        if (logger.isInfoEnabled) logger.info("Successfully decompressed incoming AS2 message" + message.loggingText)
+
+        logger.info("Successfully decompressed incoming AS2 message ${message.loggingText}")
       }
     } catch (ex: SMIMEException) {
-      if (logger.isErrorEnabled) logger.error("Error decompressing received message", ex)
+      logger.error("Error decompressing received message", ex)
       throw AS2DispositionException(
         DispositionType.createError("unexpected-processing-error"),
         AbstractActiveNetModule.DISP_DECOMPRESSION_ERROR,
         ex
       )
     } catch (ex: CMSException) {
-      if (logger.isErrorEnabled) logger.error("Error decompressing received message", ex)
+      logger.error("Error decompressing received message", ex)
       throw AS2DispositionException(
         DispositionType.createError("unexpected-processing-error"),
         AbstractActiveNetModule.DISP_DECOMPRESSION_ERROR,
         ex
       )
     } catch (ex: MessagingException) {
-      if (logger.isErrorEnabled) logger.error("Error decompressing received message", ex)
+      logger.error("Error decompressing received message", ex)
       throw AS2DispositionException(
         DispositionType.createError("unexpected-processing-error"),
         AbstractActiveNetModule.DISP_DECOMPRESSION_ERROR,
@@ -658,7 +634,6 @@ class AS2ForwardingReceiverHandler(
 
     if (success.isSuccess || allowErrorMDN) {
       try {
-        val session = receiverModule.session
         val mdn = AS2Helper.createMDN(session, message, disposition, text)
 
         when {
@@ -672,14 +647,8 @@ class AS2ForwardingReceiverHandler(
               // Ideally this would be HTTP 204 (no content)
               responseHandler.sendHttpResponse(CHttp.HTTP_OK, headers, aData)
             }
-            if (logger.isInfoEnabled)
-              logger.info(
-                "Setup to send async MDN [" +
-                  disposition.asString +
-                  "] " +
-                  clientInfo +
-                  message.loggingText
-              )
+
+            logger.info("Setup to send async MDN [${disposition.asString}] $clientInfo${message.loggingText}")
 
             // trigger explicit async sending
             session.messageProcessor.handle(IProcessorSenderModule.DO_SEND_ASYNC_MDN, message, null)
@@ -688,14 +657,7 @@ class AS2ForwardingReceiverHandler(
           message.isRequestingSyncMDN -> {
 
             // otherwise, send sync MDN back on same connection
-            if (logger.isInfoEnabled)
-              logger.info(
-                "Sending back sync MDN [" +
-                  disposition.asString +
-                  "] " +
-                  clientInfo +
-                  message.loggingText
-              )
+            logger.info("Sending back sync MDN [${disposition.asString}] $clientInfo${message.loggingText}")
 
             NonBlockingByteArrayOutputStream()
               .use { data ->
@@ -707,16 +669,16 @@ class AS2ForwardingReceiverHandler(
                 responseHandler.sendHttpResponse(CHttp.HTTP_OK, mdn.headers(), data)
               }
 
-            //          // Save sent MDN for later examination
-            //          try {
-            //            // We pass directly the handler and the client info to return properly the response
-            //            session.messageProcessor.handle(IProcessorStorageModule.DO_STOREMDN, message, null)
-            //          } catch (ex: AS2ComponentNotFoundException) {
-            //            // No message processor found
-            //            // or No module found in message processor
-            //          } catch (ex: AS2NoModuleException) {
-            //          }
-            if (logger.isInfoEnabled) logger.info("sent MDN [" + disposition.asString + "] " + clientInfo + message.loggingText)
+            // Save sent MDN for later examination
+            try {
+              // We pass directly the handler and the client info to return properly the response
+              session.messageProcessor.handle(IProcessorStorageModule.DO_STOREMDN, message, null)
+            } catch (ex: AS2ComponentNotFoundException) {
+              // No message processor found
+              // or No module found in message processor
+            } catch (ex: AS2NoModuleException) {
+            }
+            logger.info("sent MDN [${disposition.asString}] $clientInfo${message.loggingText}")
           }
         }
       } catch (ex: Exception) {
@@ -741,16 +703,11 @@ class AS2ForwardingReceiverHandler(
       val bUseRFC3851MICAlg = partnership.isRFC3851MICAlgs
       eSigningAlgorithm =
         if (bUseRFC3851MICAlg) ECryptoAlgorithmSign.DEFAULT_RFC_3851 else ECryptoAlgorithmSign.DEFAULT_RFC_5751
-      if (logger.isWarnEnabled) logger.warn(
-        "The partnership signing algorithm name '" +
-          partnership.signingAlgorithm +
-          "' is unknown. Fallbacking back to the default '" +
-          eSigningAlgorithm.id +
-          "'"
-      )
+
+      logger.warn("The partnership signing algorithm name '${partnership.signingAlgorithm}' is unknown. Fallbacking back to the default '${eSigningAlgorithm.id}'")
     }
 
-    val mic = AS2Helper.getCryptoHelper()
+    val mic = cryptoHelper
       .calculateMIC(message.data!!, eSigningAlgorithm!!, includeHeadersInMIC)
 
     message.attrs().putIn(AS2Message.ATTRIBUTE_MIC, mic.asAS2String)
@@ -758,18 +715,6 @@ class AS2ForwardingReceiverHandler(
   }
 
   private fun dispositionText(ex: AS2Exception): String? {
-    // Issue 90 - use CRLF as separator
-    if (sendExceptionsInMDN) {
-      val sExceptionText: String = if (sendExceptionStackTraceInMDN) {
-        // Message and stack trace
-        StackTraceHelper.getStackAsString(ex, true, CHttp.EOL)
-      } else {
-        // Exception message only
-        if (ex is AS2ProcessorException) ex.shortToString else ex.toString()
-      }
-      return CHttp.EOL + MessageParameters.getEscapedString(sExceptionText)
-    }
-
     // No information at all
     return ""
   }
