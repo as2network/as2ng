@@ -131,7 +131,7 @@ class AS2ForwardingReceiverHandler(
     val message = createMessage(socket)
     val quoteHeaderValues = receiverModule.isQuoteHeaderValues
 
-    val responseHandler: IAS2HttpResponseHandler = AS2HttpResponseHandlerSocket(socket, quoteHeaderValues)
+    val responseHandler = AS2HttpResponseHandlerSocket(socket, quoteHeaderValues)
 
     // Time the transmission
     val stopWatch = StopWatch.createdStarted()
