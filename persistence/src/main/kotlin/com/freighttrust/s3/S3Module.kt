@@ -39,6 +39,7 @@ import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder
 import com.freighttrust.s3.repositories.FileRepository
+import com.freighttrust.s3.repositories.S3FileRepository
 import com.typesafe.config.Config
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -85,8 +86,8 @@ val S3Module = module {
       .build()
   }
 
-  single {
+  single<FileRepository> {
     val config = get<Config>(named("s3"))
-    FileRepository(get(), get(), config.getString("bucket"))
+    S3FileRepository(get(), get(), config.getString("bucket"))
   }
 }

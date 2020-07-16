@@ -34,6 +34,7 @@ package com.freighttrust.as2
 
 import com.freighttrust.as2.modules.As2Module
 import com.freighttrust.as2.modules.CertsModule
+import com.freighttrust.as2.modules.HttpModule
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.postgres.PostgresModule
 import com.freighttrust.messaging.modules.ActiveMQModule
@@ -60,8 +61,9 @@ object As2Server {
         ActiveMQModule,
         PostgresModule,
         S3Module,
-        As2Module,
-        CertsModule
+        HttpModule,
+        CertsModule,
+        As2Module
       )
     }
 

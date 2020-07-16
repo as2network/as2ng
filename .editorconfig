@@ -15,3 +15,6 @@ max_line_length = off
 
 [*.md]
 trim_trailing_whitespace = false
+
+[*.http]
+end_of_line = cr

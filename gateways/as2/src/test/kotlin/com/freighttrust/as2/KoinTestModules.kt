@@ -33,23 +33,26 @@
 package com.freighttrust.as2
 
 import com.freighttrust.as2.factories.PostgresCertificateFactory
-import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
 import com.helger.as2lib.session.AS2Session
-import okhttp3.OkHttpClient
+import com.opentable.db.postgres.embedded.EmbeddedPostgres
+import io.mockk.every
+import io.mockk.mockk
+import okhttp3.mockwebserver.MockWebServer
+import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.configuration.FluentConfiguration
+import org.jooq.DSLContext
+import org.jooq.SQLDialect
+import org.jooq.impl.DSL
 import org.koin.core.qualifier._q
 import org.koin.dsl.module
+import java.net.InetSocketAddress
+import java.net.Socket
 
 object KoinTestModules {
 
-  private val http = module {
-
-    single { OkHttpClient() }
-  }
-
-  private val as2 = module {
+  val AS2ClientModule = module {
 
     single { AS2Client() }
 
@@ -63,7 +66,37 @@ object KoinTestModules {
     }
   }
 
-  private val modules = listOf(AppConfigModule, PostgresModule, http, as2)
+  val HttpMockModule = module {
 
-  operator fun invoke() = modules
+    factory { MockWebServer() }
+
+    factory {
+      mockk<Socket>().apply {
+        every { inetAddress } returns InetSocketAddress(10085).address
+        every { localAddress } returns InetSocketAddress(10085).address
+        every { port } returns 10085
+        every { localPort } returns 10085
+        every { isConnected } returns true
+        every { isBound } returns true
+        every { isClosed } returns false
+      }
+    }
+  }
+
+  val PostgresMockModule = module(override = true) {
+
+    factory<DSLContext> {
+      val pg = get<EmbeddedPostgres>()
+      val ds = pg.postgresDatabase
+
+      val config = FluentConfiguration()
+        .dataSource(ds)
+        .locations("classpath:/db/migration")
+
+      Flyway(config).migrate()
+
+      DSL.using(ds, SQLDialect.POSTGRES)
+    }
+
+  }
 }

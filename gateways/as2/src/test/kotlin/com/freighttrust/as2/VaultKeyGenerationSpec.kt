@@ -32,7 +32,12 @@
 
 package com.freighttrust.as2
 
+import com.freighttrust.as2.KoinTestModules.AS2ClientModule
+import com.freighttrust.as2.KoinTestModules.PostgresMockModule
 import com.freighttrust.as2.ext.isNotSuccessful
+import com.freighttrust.as2.modules.HttpModule
+import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.postgres.PostgresModule
 import io.kotlintest.Spec
 import io.kotlintest.TestCase
 import io.kotlintest.TestResult
@@ -55,7 +60,19 @@ import java.security.spec.PKCS8EncodedKeySpec
 class VaultKeyGenerationSpec : FunSpec(), KoinTest {
 
   override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
-    startKoin { modules(KoinTestModules()) }
+    startKoin {
+      startKoin {
+        modules(
+          listOf(
+            AppConfigModule,
+            PostgresModule,
+            PostgresMockModule,
+            HttpModule,
+            AS2ClientModule
+          )
+        )
+      }
+    }
   }
 
   override fun afterSpecClass(spec: Spec, results: Map<TestCase, TestResult>) {

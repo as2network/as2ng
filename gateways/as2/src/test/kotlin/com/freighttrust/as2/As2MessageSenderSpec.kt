@@ -32,6 +32,10 @@
 
 package com.freighttrust.as2
 
+import com.freighttrust.as2.KoinTestModules.AS2ClientModule
+import com.freighttrust.as2.modules.HttpModule
+import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.postgres.PostgresModule
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientSettings
@@ -55,7 +59,16 @@ import java.nio.charset.Charset
 class As2MessageSenderSpec : FunSpec(), KoinTest {
 
   override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
-    startKoin { modules(KoinTestModules()) }
+    startKoin {
+      modules(
+        listOf(
+          AppConfigModule,
+          PostgresModule,
+          HttpModule,
+          AS2ClientModule
+        )
+      )
+    }
   }
 
   override fun afterSpecClass(spec: Spec, results: Map<TestCase, TestResult>) {

@@ -40,13 +40,18 @@ import com.freighttrust.jooq.tables.records.FileRecord
 import org.jooq.DSLContext
 import java.io.InputStream
 
-class FileRepository(
+interface FileRepository {
+
+  fun insert(key: String, inputStream: InputStream, contentLength: Long): FileRecord
+}
+
+class S3FileRepository(
   private val dbCtx: DSLContext,
   private val transferManager: TransferManager,
   private val bucket: String
-) {
+) : FileRepository {
 
-  fun insert(key: String, inputStream: InputStream, contentLength: Long): FileRecord =
+  override fun insert(key: String, inputStream: InputStream, contentLength: Long): FileRecord =
 
     ObjectMetadata()
       .apply { this.contentLength = contentLength }

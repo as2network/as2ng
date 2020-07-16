@@ -171,15 +171,17 @@ class AS2ForwardingReceiverHandler(
       AS2ResourceHelper()
         .use { resourceHelper ->
 
+          val rawData: MimeBodyPart
           try {
 
-            message.data = MimeBodyPart()
+            rawData = MimeBodyPart()
               .apply {
                 dataHandler = DataHandler(messageDataSource)
                 // Header must be set AFTER the DataHandler!
                 val receivedContentType = AS2HttpHelper.getCleanContentType(message.getHeader(CHttpHeader.CONTENT_TYPE))
                 setHeader(CHttpHeader.CONTENT_TYPE, receivedContentType)
               }
+            message.data = rawData
           } catch (ex: Exception) {
             throw AS2DispositionException(
               DispositionType.createError("unexpected-processing-error"),
@@ -245,7 +247,7 @@ class AS2ForwardingReceiverHandler(
 
           // Store the received message
           try {
-            storeAndForward(message, responseHandler)
+            storeAndForward(message, rawData, responseHandler)
           } catch (ex: AS2NoModuleException) {
             // No module installed - ignore
           } catch (ex: AS2Exception) {
@@ -279,18 +281,20 @@ class AS2ForwardingReceiverHandler(
     }
   }
 
-  private fun storeAndForward(message: AS2Message, responseHandler: IAS2HttpResponseHandler) {
+  private fun storeAndForward(message: AS2Message, rawData: MimeBodyPart, responseHandler: IAS2HttpResponseHandler) {
 
     calculateMIC(message)
 
-    val part = message.data!!.parent.parent
-    val mediaType = part.contentType.split("\r").first().toMediaType()
-    val body = part.inputStream.readAllBytes().toRequestBody(mediaType)
+    // TODO: Review this with a signed payload and determine what we want to store
+    // val part = message.data!!.parent.parent
+    // val mediaType = part.contentType.split("\r").first().toMediaType()
+    // val body = part.inputStream.readAllBytes().toRequestBody(mediaType)
 
-    val fileRecord = fileRepository.insert(message.messageID!!, part.inputStream, body.contentLength())
+    val rawIs = rawData.inputStream
+    val body = rawIs.readAllBytes().toRequestBody(rawData.contentType.toMediaType())
+    val length = body.contentLength()
 
-    // todo handle errors
-
+    val fileRecord = fileRepository.insert(message.messageID!!, rawIs, length)
     as2MessageRepository.insert(message.toAs2MessageRecord(fileRecord))
 
     val url = message.partnership().aS2URL!!

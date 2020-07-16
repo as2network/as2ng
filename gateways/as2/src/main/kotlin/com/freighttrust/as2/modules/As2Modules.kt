@@ -52,6 +52,9 @@ val As2Module = module {
     val config = get<Config>(_q("app"))
     As2SessionFactory.create(_koin, config)
   }
+}
+
+val HttpModule = module {
 
   single {
     OkHttpClient()
