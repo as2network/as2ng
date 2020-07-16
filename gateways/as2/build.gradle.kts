@@ -72,6 +72,9 @@ dependencies {
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
   testImplementation("org.koin:koin-test")
+  testImplementation("com.opentable.components:otj-pg-embedded")
+  testImplementation("com.squareup.okhttp3:mockwebserver")
+  testImplementation("net.javacrumbs:mock-socket-http")
 }
 
 tasks {

@@ -110,6 +110,9 @@ dependencyManagement {
 
     dependency 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
     dependency 'io.mockk:mockk:1.10.0'
+    dependency 'com.opentable.components:otj-pg-embedded:0.13.3'
+    dependency 'com.squareup.okhttp3:mockwebserver:4.8.0'
+    dependency 'net.javacrumbs:mock-socket-http:0.9.0'
 
   }
 
