@@ -194,7 +194,6 @@ class As2SyncTestingSuite : FunSpec(), KoinTest {
       test("11. Sender sends encrypted and signed data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
 
       test("12. Sender sends encrypted and signed data and requests a signed receipt. Receiver sends back the signed receipt.")
-
     }
   }
 }

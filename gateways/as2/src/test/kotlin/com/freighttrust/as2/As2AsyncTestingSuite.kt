@@ -111,7 +111,6 @@ class As2AsyncTestingSuite : FunSpec(), KoinTest {
 
       test("12. Sender sends encrypted and signed data and requests a signed receipt. Receiver sends back the signed receipt.")
         .config(enabled = false) {}
-
     }
   }
 }

@@ -97,6 +97,5 @@ object KoinTestModules {
 
       DSL.using(ds, SQLDialect.POSTGRES)
     }
-
   }
 }
