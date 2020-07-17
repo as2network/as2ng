@@ -46,7 +46,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.test.KoinTest
 
-class As2AsyncTestingSuite : FunSpec(), KoinTest {
+class As2AsyncMdnTestingSuite : FunSpec(), KoinTest {
 
   override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
     startKoin {

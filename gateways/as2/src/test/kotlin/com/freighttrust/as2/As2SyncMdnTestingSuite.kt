@@ -68,7 +68,7 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.net.Socket
 
-class As2SyncTestingSuite : FunSpec(), KoinTest {
+class As2SyncMdnTestingSuite : FunSpec(), KoinTest {
 
   private lateinit var pg: EmbeddedPostgres
   private lateinit var dsl: DSLContext
