@@ -34,9 +34,6 @@
 
 package com.freighttrust.as2
 
-import com.freighttrust.as2.KoinTestModules.AS2ClientModule
-import com.freighttrust.as2.KoinTestModules.HttpMockModule
-import com.freighttrust.as2.KoinTestModules.PostgresMockModule
 import com.freighttrust.as2.modules.HttpModule
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.postgres.PostgresModule

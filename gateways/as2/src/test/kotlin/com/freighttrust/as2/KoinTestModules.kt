@@ -50,52 +50,53 @@ import org.koin.dsl.module
 import java.net.InetSocketAddress
 import java.net.Socket
 
-object KoinTestModules {
+val AS2ClientModule = module {
 
-  val AS2ClientModule = module {
+  single { AS2Client() }
 
-    single { AS2Client() }
-
-    single<AS2Client>(_q("as2client-postgres")) {
-      val client = object : AS2Client() {
-        override fun initCertificateFactory(aSettings: AS2ClientSettings, aSession: AS2Session) {
-          aSession.certificateFactory = PostgresCertificateFactory(get(), get())
-        }
-      }
-      client
-    }
-  }
-
-  val HttpMockModule = module {
-
-    factory { MockWebServer() }
-
-    factory {
-      mockk<Socket>().apply {
-        every { inetAddress } returns InetSocketAddress(10085).address
-        every { localAddress } returns InetSocketAddress(10085).address
-        every { port } returns 10085
-        every { localPort } returns 10085
-        every { isConnected } returns true
-        every { isBound } returns true
-        every { isClosed } returns false
+  single<AS2Client>(_q("as2client-postgres")) {
+    val client = object : AS2Client() {
+      override fun initCertificateFactory(aSettings: AS2ClientSettings, aSession: AS2Session) {
+        aSession.certificateFactory = PostgresCertificateFactory(get(), get())
       }
     }
+    client
   }
+}
 
-  val PostgresMockModule = module(override = true) {
+val HttpMockModule = module {
 
-    factory<DSLContext> {
-      val pg = get<EmbeddedPostgres>()
-      val ds = pg.postgresDatabase
+  factory { MockWebServer() }
 
-      val config = FluentConfiguration()
-        .dataSource(ds)
-        .locations("classpath:/db/migration")
+}
 
-      Flyway(config).migrate()
+val SocketMockModule = module {
 
-      DSL.using(ds, SQLDialect.POSTGRES)
+  factory {
+    mockk<Socket>().apply {
+      every { inetAddress } returns InetSocketAddress(10085).address
+      every { localAddress } returns InetSocketAddress(10085).address
+      every { port } returns 10085
+      every { localPort } returns 10085
+      every { isConnected } returns true
+      every { isBound } returns true
+      every { isClosed } returns false
     }
+  }
+}
+
+val PostgresMockModule = module(override = true) {
+
+  factory<DSLContext> {
+    val pg = get<EmbeddedPostgres>()
+    val ds = pg.postgresDatabase
+
+    val config = FluentConfiguration()
+      .dataSource(ds)
+      .locations("classpath:/db/migration")
+
+    Flyway(config).migrate()
+
+    DSL.using(ds, SQLDialect.POSTGRES)
   }
 }

@@ -34,9 +34,6 @@
 
 package com.freighttrust.as2
 
-import com.freighttrust.as2.KoinTestModules.AS2ClientModule
-import com.freighttrust.as2.KoinTestModules.HttpMockModule
-import com.freighttrust.as2.KoinTestModules.PostgresMockModule
 import com.freighttrust.as2.cert.NoneCertificateProvider
 import com.freighttrust.as2.factories.PostgresCertificateFactory
 import com.freighttrust.as2.factories.PostgresTradingChannelFactory
@@ -57,9 +54,9 @@ import io.kotlintest.Spec
 import io.kotlintest.TestCase
 import io.kotlintest.TestResult
 import io.kotlintest.extensions.TopLevelTest
-import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
 import io.mockk.every
+import io.mockk.verify
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.jooq.DSLContext
@@ -85,6 +82,7 @@ class As2SyncTestingSuite : FunSpec(), KoinTest {
           PostgresMockModule,
           HttpModule,
           HttpMockModule,
+          SocketMockModule,
           AS2ClientModule
         )
       )
@@ -97,6 +95,7 @@ class As2SyncTestingSuite : FunSpec(), KoinTest {
 
   override fun beforeSpec(spec: Spec) {
     val koin = getKoin()
+
     koin.loadModules(
       listOf(module(override = true) {
 
@@ -132,6 +131,7 @@ class As2SyncTestingSuite : FunSpec(), KoinTest {
         }
       })
     )
+
     pg = koin.get()
     dsl = koin.get()
   }
@@ -163,14 +163,18 @@ class As2SyncTestingSuite : FunSpec(), KoinTest {
 
         // Prepare Socket
         val socket = koin.get<Socket>().apply {
-          every { getInputStream() } returns FileInputStream(ClassPathResource.getAsFile("/messages/text/plain/unencrypted-data-no-receipt.http")!!)
+          every { getInputStream() } returns FileInputStream(
+            ClassPathResource.getAsFile("/messages/text/plain/unencrypted-data-no-receipt.http")!!
+          )
         }
 
         // Send information to handler
         handler.handle(module, socket)
 
         // Assert
-        true shouldBe true
+
+        // GetOutputStream is called whenever we are returning a response
+        verify { socket.getOutputStream() }
       }
 
       test("2. Sender sends un-encrypted data and requests an unsigned receipt. Receiver sends back the unsigned receipt.") {}
