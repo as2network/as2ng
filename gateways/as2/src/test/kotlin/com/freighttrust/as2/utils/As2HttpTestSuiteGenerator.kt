@@ -35,14 +35,14 @@
 package com.freighttrust.as2.utils
 
 import com.freighttrust.as2.AS2ClientModule
+import com.freighttrust.as2.HttpMockModule
 import com.freighttrust.as2.modules.HttpModule
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.postgres.PostgresModule
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientSettings
-import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
-import com.helger.as2lib.crypto.ECryptoAlgorithmSign
+import com.helger.as2lib.util.dump.HTTPOutgoingDumperFileBased
 import com.helger.commons.io.resource.ClassPathResource
 import com.helger.security.keystore.EKeyStoreType
 import io.kotlintest.Spec
@@ -52,13 +52,19 @@ import io.kotlintest.extensions.TopLevelTest
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.FunSpec
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.core.qualifier._q
 import org.koin.test.KoinTest
+import java.io.File
 import java.nio.charset.Charset
 
-class As2HttpMessageGenerator : FunSpec(), KoinTest {
+/**
+ * This class is in charge of generating HTTP messages for testing
+ * with As2TestingSuite.
+ * */
+class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
 
   override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
     startKoin {
@@ -67,6 +73,7 @@ class As2HttpMessageGenerator : FunSpec(), KoinTest {
           AppConfigModule,
           PostgresModule,
           HttpModule,
+          HttpMockModule,
           AS2ClientModule
         )
       )
@@ -79,8 +86,17 @@ class As2HttpMessageGenerator : FunSpec(), KoinTest {
 
   init {
 
-    test("it should send an AS2 message from OpenAS2 to OpenAS2B")
-      .config(enabled = false) {
+    test("it should generate text/plain/unencrypted-data-no-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(MockResponse().setResponseCode(200))
+        }
 
         // Obtain client
         val as2Client = getKoin().get<AS2Client>()
@@ -89,10 +105,20 @@ class As2HttpMessageGenerator : FunSpec(), KoinTest {
         val clientSettings = AS2ClientSettings()
           .apply {
             setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
-            setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
-            setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10085/HttpReceiver")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
             setPartnershipName("Partnership name")
-            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
+            setEncryptAndSign(null, null)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/1B-unencrypted-data-no-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = null
+            isMDNRequested = false
             connectTimeoutMS = 20000
             readTimeoutMS = 20000
           }
@@ -100,7 +126,7 @@ class As2HttpMessageGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
           .apply {
-            setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
           }
 
         // Fire request
@@ -109,23 +135,43 @@ class As2HttpMessageGenerator : FunSpec(), KoinTest {
         // Assert
         response shouldNotBe null
         response.exception shouldBe null
-        response.mdn shouldNotBe null
-        response.mdn?.message shouldNotBe null
+        response.mdn shouldBe null
+        response.mdn?.message shouldBe null
       }
 
-    test("it should send an AS2 message from OpenAS2 to OpenAS2B using Vault")
+    test("it should generate text/plain/unencrypted-data-unsidned-receipt.http")
       .config(enabled = true) {
 
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(MockResponse().setResponseCode(200))
+        }
+
         // Obtain client
-        val as2Client = getKoin().get<AS2Client>(_q("as2client-postgres"))
+        val as2Client = getKoin().get<AS2Client>()
 
         // Prepare client settings
         val clientSettings = AS2ClientSettings()
           .apply {
-            setSenderData("OpenAS2A", "email@example.org", "OpenAS2A")
-            setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:10082/HttpReceiver")
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
             setPartnershipName("Partnership name")
-            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_SHA_1)
+            setEncryptAndSign(null, null)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/1A-unencrypted-data-unsigned-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = null
+            isMDNRequested = true
             connectTimeoutMS = 20000
             readTimeoutMS = 20000
           }
@@ -133,7 +179,7 @@ class As2HttpMessageGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
           .apply {
-            setData(ClassPathResource.getAsFile("/messages/dummy.txt")!!, Charset.defaultCharset())
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
           }
 
         // Fire request
@@ -142,8 +188,8 @@ class As2HttpMessageGenerator : FunSpec(), KoinTest {
         // Assert
         response shouldNotBe null
         response.exception shouldBe null
-        response.mdn shouldNotBe null
-        response.mdn?.message shouldNotBe null
+        response.mdn shouldBe null
+        response.mdn?.message shouldBe null
       }
   }
 }

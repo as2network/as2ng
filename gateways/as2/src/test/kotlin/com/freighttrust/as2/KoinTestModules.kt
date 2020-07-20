@@ -47,6 +47,7 @@ import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.koin.core.qualifier._q
 import org.koin.dsl.module
+import java.io.ByteArrayOutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
 
@@ -81,6 +82,7 @@ val SocketMockModule = module {
       every { isConnected } returns true
       every { isBound } returns true
       every { isClosed } returns false
+      every { getOutputStream() } returns ByteArrayOutputStream()
     }
   }
 }

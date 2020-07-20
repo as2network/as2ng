@@ -48,13 +48,13 @@ import com.helger.as2lib.cert.ICertificateFactory
 import com.helger.as2lib.partner.IPartnershipFactory
 import com.helger.as2lib.session.AS2Session
 import com.helger.as2lib.session.IAS2Session
-import com.helger.commons.io.resource.ClassPathResource
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.kotlintest.Spec
 import io.kotlintest.TestCase
 import io.kotlintest.TestResult
 import io.kotlintest.extensions.TopLevelTest
 import io.kotlintest.specs.FunSpec
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.verify
 import okhttp3.mockwebserver.MockResponse
@@ -68,7 +68,7 @@ import java.io.FileInputStream
 import java.io.InputStream
 import java.net.Socket
 
-class As2SyncMdnTestingSuite : FunSpec(), KoinTest {
+class As2TestingSuiteSpec : FunSpec(), KoinTest {
 
   private lateinit var pg: EmbeddedPostgres
   private lateinit var dsl: DSLContext
@@ -163,9 +163,7 @@ class As2SyncMdnTestingSuite : FunSpec(), KoinTest {
 
         // Prepare Socket
         val socket = koin.get<Socket>().apply {
-          every { getInputStream() } returns FileInputStream(
-            ClassPathResource.getAsFile("/messages/text/plain/unencrypted-data-no-receipt.http")!!
-          )
+          every { getInputStream() } returns FileInputStream(TestMessages.UnencryptedDataNoReceipt)
         }
 
         // Send information to handler
@@ -175,6 +173,7 @@ class As2SyncMdnTestingSuite : FunSpec(), KoinTest {
 
         // GetOutputStream is called whenever we are returning a response
         verify { socket.getOutputStream() }
+        confirmVerified(socket)
       }
 
       test("2. Sender sends un-encrypted data and requests an unsigned receipt. Receiver sends back the unsigned receipt.") {}
@@ -198,6 +197,45 @@ class As2SyncMdnTestingSuite : FunSpec(), KoinTest {
       test("11. Sender sends encrypted and signed data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
 
       test("12. Sender sends encrypted and signed data and requests a signed receipt. Receiver sends back the signed receipt.")
+    }
+
+    context("Asynchronous flow") {
+
+      test("1. Sender sends un-encrypted data and does NOT request a receipt")
+        .config(enabled = false) {}
+
+      test("2. Sender sends un-encrypted data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
+        .config(enabled = false) {}
+
+      test("3. Sender sends un-encrypted data and requests a signed receipt. Receiver sends back the signed receipt.")
+        .config(enabled = false) {}
+
+      test("4. Sender sends encrypted data and does NOT request a receipt.")
+        .config(enabled = false) {}
+
+      test("5. Sender sends encrypted data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
+        .config(enabled = false) {}
+
+      test("6. Sender sends encrypted data and requests a signed receipt. Receiver sends back the signed receipt.")
+        .config(enabled = false) {}
+
+      test("7. Sender sends signed data and does NOT request a signed or unsigned receipt.")
+        .config(enabled = false) {}
+
+      test("8. Sender sends signed data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
+        .config(enabled = false) {}
+
+      test("9. Sender sends signed data and requests a signed receipt. Receiver sends back the signed receipt.")
+        .config(enabled = false) {}
+
+      test("10. Sender sends encrypted and signed data and does NOT request a signed or unsigned receipt.")
+        .config(enabled = false) {}
+
+      test("11. Sender sends encrypted and signed data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
+        .config(enabled = false) {}
+
+      test("12. Sender sends encrypted and signed data and requests a signed receipt. Receiver sends back the signed receipt.")
+        .config(enabled = false) {}
     }
   }
 }
