@@ -323,7 +323,7 @@ class AS2ForwardingReceiverHandler(
 
           response.isSuccessful && message.isRequestingMDN && message.isRequestingSyncMDN -> {
 
-            val rawData = response.body!!.bytes()
+            val responseData = response.body!!.bytes()
 
             // Store MDN request
             val mdn = AS2MessageMDN(message)
@@ -350,10 +350,10 @@ class AS2ForwardingReceiverHandler(
 
                 val receivedContentType = AS2HttpHelper.getCleanContentType(getHeader(CHttpHeader.CONTENT_TYPE))
                 val receivedPart =
-                  MimeBodyPart(AS2HttpHelper.getAsInternetHeaders(message.headers()), rawData)
+                  MimeBodyPart(AS2HttpHelper.getAsInternetHeaders(message.headers()), responseData)
 
                 receivedPart.dataHandler =
-                  ByteArrayDataSource(rawData, receivedContentType, null).asDataHandler
+                  ByteArrayDataSource(responseData, receivedContentType, null).asDataHandler
                 receivedPart.setHeader(CHttpHeader.CONTENT_TYPE, receivedContentType)
 
                 data = receivedPart
@@ -410,7 +410,7 @@ class AS2ForwardingReceiverHandler(
 
                 val inputStream = MimeBodyPart(
                   AS2HttpHelper.getAsInternetHeaders(headers),
-                  rawData
+                  responseData
                 ).inputStream
 
                 StreamHelper.copyInputStreamToOutputStream(inputStream, data)
