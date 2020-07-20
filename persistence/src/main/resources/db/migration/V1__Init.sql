@@ -38,8 +38,8 @@ create table trading_partner (
 
 create table certificate (
     trading_partner_id varchar(64) primary key references trading_partner(id),
-    private_key varchar(2048),
-    x509_certificate varchar(2048)
+    private_key varchar(4096),
+    x509_certificate varchar(4096)
 );
 
 create table trading_channel (
