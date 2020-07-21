@@ -68,7 +68,6 @@ val AS2ClientModule = module {
 val HttpMockModule = module {
 
   factory { MockWebServer() }
-
 }
 
 val SocketMockModule = module {
