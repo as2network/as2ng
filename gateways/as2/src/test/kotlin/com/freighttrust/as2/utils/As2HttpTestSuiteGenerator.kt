@@ -47,8 +47,13 @@ import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.disposition.DispositionOptions.IMPORTANCE_REQUIRED
 import com.helger.as2lib.disposition.DispositionOptions.PROTOCOL_PKCS7_SIGNATURE
-import com.helger.as2lib.util.dump.HTTPOutgoingDumperFileBased
+import com.helger.as2lib.message.AS2Message
+import com.helger.as2lib.util.dump.IHTTPOutgoingDumper
+import com.helger.commons.http.CHttp
+import com.helger.commons.io.file.FileHelper
 import com.helger.commons.io.resource.ClassPathResource
+import com.helger.commons.io.stream.StreamHelper
+import com.helger.commons.string.ToStringGenerator
 import com.helger.security.keystore.EKeyStoreType
 import io.kotlintest.Spec
 import io.kotlintest.TestCase
@@ -62,6 +67,8 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
+import java.io.File
+import java.io.IOException
 import java.nio.charset.Charset
 
 /**
@@ -70,7 +77,7 @@ import java.nio.charset.Charset
  * */
 class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
 
-  private val k = getKoin()
+  private val k by lazy { getKoin() }
 
   override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
     startKoin {
@@ -129,7 +136,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/1-unencrypted-data-no-receipt.http"
                   .asAbsoluteFile()
               )
@@ -174,7 +181,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/2-unencrypted-data-unsigned-receipt.http"
                   .asAbsoluteFile()
               )
@@ -215,11 +222,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/3-unencrypted-data-signed-receipt.http"
                   .asAbsoluteFile()
               )
@@ -258,11 +265,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/4-encrypted-data-no-receipt.http"
                   .asAbsoluteFile()
               )
@@ -303,11 +310,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/5-encrypted-data-unsigned-receipt.http"
                   .asAbsoluteFile()
               )
@@ -348,11 +355,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/6-encrypted-data-signed-receipt.http"
                   .asAbsoluteFile()
               )
@@ -391,11 +398,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/7-signed-data-no-receipt.http"
                   .asAbsoluteFile()
               )
@@ -436,11 +443,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/8-signed-data-unsigned-receipt.http"
                   .asAbsoluteFile()
               )
@@ -481,11 +488,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/9-signed-data-signed-receipt.http"
                   .asAbsoluteFile()
               )
@@ -524,11 +531,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/10-encrypted-and-signed-data-no-receipt.http"
                   .asAbsoluteFile()
               )
@@ -569,11 +576,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/11-encrypted-and-signed-data-unsigned-receipt.http"
                   .asAbsoluteFile()
               )
@@ -614,11 +621,11 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val as2Client = k.get<AS2Client>()
 
         // Prepare client settings
-        val clientSettings = AS2ClientSettings()
+        val clientSettings = k.get<AS2ClientSettings>()
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumperFileBased(
+              HTTPOutgoingDumper(
                 "src/test/resources/messages/text/plain/12-encrypted-and-signed-data-signed-receipt.http"
                   .asAbsoluteFile()
               )
@@ -642,5 +649,76 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Close
         mockWebServer.closeQuietly()
       }
+  }
+}
+
+/** Outputs the content of a request and saves it to a file */
+private class HTTPOutgoingDumper(dumpFile: File) : IHTTPOutgoingDumper {
+
+  private val os = FileHelper.getBufferedOutputStream(dumpFile)!!
+
+  private var headers = 0
+
+  private fun write(byte: Int) {
+    try {
+      os.write(byte)
+    } catch (ex: IOException) {
+      throw ex
+    }
+  }
+
+  private fun write(
+    bytes: ByteArray,
+    ofs: Int = 0,
+    len: Int = bytes.size
+  ) {
+    try {
+      os.write(bytes, ofs, len)
+    } catch (ex: IOException) {
+      throw ex
+    }
+  }
+
+  override fun start(url: String, msg: AS2Message) {
+    // Every request is a POST request
+    // The original code was not writing the header, so we force it here
+    write("POST / HTTP/1.1${CHttp.EOL}".toByteArray(CHttp.HTTP_CHARSET))
+  }
+
+  override fun dumpHeader(name: String, value: String) {
+    val headerLine = "$name: $value${CHttp.EOL}"
+    write(headerLine.toByteArray(CHttp.HTTP_CHARSET))
+    headers++
+  }
+
+  override fun finishedHeaders() {
+    if (headers > 0) {
+      // empty line
+      write(CHttp.EOL.toByteArray(CHttp.HTTP_CHARSET))
+    }
+  }
+
+  override fun dumpPayload(byte: Int) {
+    write(byte)
+  }
+
+  override fun dumpPayload(
+    bytes: ByteArray,
+    ofs: Int,
+    len: Int
+  ) {
+    write(bytes, ofs, len)
+  }
+
+  override fun finishedPayload() {
+    StreamHelper.flush(os)
+  }
+
+  override fun close() {
+    StreamHelper.close(os)
+  }
+
+  override fun toString(): String {
+    return ToStringGenerator(this).append("OutputStream", os).toString
   }
 }
