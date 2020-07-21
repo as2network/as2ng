@@ -32,36 +32,20 @@
  *
  */
 
-package com.freighttrust.as2
+package com.freighttrust.as2.utils
 
-import com.freighttrust.as2.utils.asPathResourceFile
 import com.helger.commons.io.resource.ClassPathResource
+import java.io.File
 
-object TestMessages {
+fun String.asPathResourceFile(): File? = ClassPathResource.getAsFile(this)
 
-  val UnencryptedDataNoReceipt = "/messages/text/plain/1-unencrypted-data-no-receipt.http".asPathResourceFile()!!
+fun String.asAbsoluteFile(): File =
+  File(this).absoluteFile.apply { if (!exists()) createNewFile() }
 
-  val UnencryptedDataUnsignedReceipt = "/messages/text/plain/2-unencrypted-data-unsigned-receipt.http".asPathResourceFile()!!
-
-  val UnencryptedDataSignedReceipt = "/messages/text/plain/3-unencrypted-data-signed-receipt.http".asPathResourceFile()!!
-
-  val EncryptedDataNoReceipt = "/messages/text/plain/4-encrypted-data-no-receipt.http".asPathResourceFile()!!
-
-  val EncryptedDataUnsignedReceipt = "/messages/text/plain/5-encrypted-data-unsigned-receipt.http".asPathResourceFile()!!
-
-  val EncryptedDataSignedReceipt = "/messages/text/plain/6-encrypted-data-signed-receipt.http".asPathResourceFile()!!
-
-  val SignedDataNoReceipt = "/messages/text/plain/7-signed-data-no-receipt.http".asPathResourceFile()!!
-
-  val SignedDataUnsignedReceipt = "/messages/text/plain/8-signed-data-unsigned-receipt.http".asPathResourceFile()!!
-
-  val SignedDataSignedReceipt = "/messages/text/plain/9-signed-data-signed-receipt.http".asPathResourceFile()!!
-
-  val EncryptedAndSignedDataNoReceipt = "/messages/text/plain/10-encrypted-and-signed-data-no-receipt.http".asPathResourceFile()!!
-
-  val EncryptedAndSignedDataUnsignedReceipt = "/messages/text/plain/11-encrypted-and-signed-data-unsigned-receipt.http".asPathResourceFile()!!
-
-  val EncryptedAndSignedDataSignedReceipt = "/messages/text/plain/12-encrypted-and-signed-data-signed-receipt.http".asPathResourceFile()!!
-
-  val ContentLengthRequest = "/messages/text/plain/request-with-content-length.http".asPathResourceFile()
+inline fun ignoreExceptions(block: () -> Unit) {
+  try {
+    block()
+  } catch (e: Exception) {
+    // ignored
+  }
 }
