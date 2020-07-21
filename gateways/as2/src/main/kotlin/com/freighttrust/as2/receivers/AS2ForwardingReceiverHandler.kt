@@ -78,6 +78,7 @@ import com.helger.commons.timing.StopWatch
 import com.helger.commons.wrapper.Wrapper
 import com.helger.mail.datasource.ByteArrayDataSource
 import com.helger.security.certificate.CertificateHelper
+import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -151,6 +152,16 @@ class AS2ForwardingReceiverHandler(
     }
 
     stopWatch.stop()
+
+    // there is some kind of mutation happening which means we cannot use the simple method of copying
+    val originalHeaders = HttpHeaderMap()
+      .apply {
+        message.headers().allHeaders
+          .forEach { entry ->
+            val key = entry.key
+            entry.value.forEach { value -> this.addHeader(key, value) }
+          }
+      }
 
     when (messageDataSource) {
       is ByteArrayDataSource -> {
@@ -247,7 +258,7 @@ class AS2ForwardingReceiverHandler(
 
           // Store the received message
           try {
-            storeAndForward(message, rawData, responseHandler)
+            storeAndForward(message, originalHeaders, responseHandler)
           } catch (ex: AS2NoModuleException) {
             // No module installed - ignore
           } catch (ex: AS2Exception) {
@@ -281,20 +292,37 @@ class AS2ForwardingReceiverHandler(
     }
   }
 
-  private fun storeAndForward(message: AS2Message, rawData: MimeBodyPart, responseHandler: IAS2HttpResponseHandler) {
+  private fun storeAndForward(
+    message: AS2Message,
+    originalHeaders: HttpHeaderMap,
+    responseHandler: IAS2HttpResponseHandler
+  ) {
 
     calculateMIC(message)
 
     // TODO: Review this with a signed payload and determine what we want to store
-    // val part = message.data!!.parent.parent
-    // val mediaType = part.contentType.split("\r").first().toMediaType()
-    // val body = part.inputStream.readAllBytes().toRequestBody(mediaType)
 
-    val rawIs = rawData.inputStream
-    val body = rawIs.readAllBytes().toRequestBody(rawData.contentType.toMediaType())
-    val length = body.contentLength()
+    // as2-lib sends the content type with newline characters which is not valid so we strip them if present
+    val contentType = originalHeaders.getFirstHeaderValue(CHttpHeader.CONTENT_TYPE)!!
 
-    val fileRecord = fileRepository.insert(message.messageID!!, rawIs, length)
+    // TODO this is a problem for large files
+
+    val bodyInputStreamFactory = message.data
+      ?.let { bodyPart ->
+        if (bodyPart.parent != null)
+        // dealing with a multipart request
+          { -> bodyPart.parent.parent.inputStream }
+        else
+        // dealing with a simple request without an embedded key
+          { -> bodyPart.inputStream }
+      }!!
+
+    val rawBytes = bodyInputStreamFactory().readAllBytes()
+
+    val body = rawBytes.toRequestBody(contentType.toMediaType())
+    val length = rawBytes.size.toLong()
+
+    val fileRecord = fileRepository.insert(message.messageID!!, bodyInputStreamFactory(), length)
     as2MessageRepository.insert(message.toAs2MessageRecord(fileRecord))
 
     val url = message.partnership().aS2URL!!
@@ -302,8 +330,11 @@ class AS2ForwardingReceiverHandler(
     val requestBuilder = Request.Builder()
       .url(url)
       .apply {
-        val headers = message.headers().allHeaders
-        headers.forEach { h -> header(h.key, h.value.first!!) }
+        originalHeaders.allHeaders
+          .forEach { entry ->
+            val key = entry.key
+            entry.value.forEach { value -> addHeader(key, value) }
+          }
       }
 
     if (message.isRequestingAsynchMDN) {
@@ -383,18 +414,18 @@ class AS2ForwardingReceiverHandler(
 
             val disposition = mdn.attrs().getAsString(AS2MessageMDN.MDNA_DISPOSITION)
 
-            try {
-              DispositionType.createFromString(disposition).validate()
-            } catch (ex: AS2DispositionException) {
-              ex.text = mdn.text
-              if (ex.disposition.isWarning) {
-                // Warning
-                ex.setSourceMsg(message).terminate()
-              } else {
-                // Error
-                throw ex
-              }
-            }
+//            try {
+//              DispositionType.createFromString(disposition).validate()
+//            } catch (ex: AS2DispositionException) {
+//              ex.text = mdn.text
+//              if (ex.disposition.isWarning) {
+//                // Warning
+//                ex.setSourceMsg(message).terminate()
+//              } else {
+//                // Error
+//                throw ex
+//              }
+//            }
 
             val mediaType = mdn.data!!.contentType.toMediaType()
             val body = mdn.data!!.inputStream.readAllBytes().toRequestBody(mediaType)
