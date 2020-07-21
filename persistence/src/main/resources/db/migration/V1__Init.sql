@@ -70,7 +70,7 @@ create table as2_message
     subject             varchar(128),
     content_type        varchar(128),
     content_disposition varchar(128),
-    mic                 varchar(32) null,
+    mic                 varchar(64) null,
     /* store header and attributes as jsonb to allow for free form data but make it queryable */
     headers             jsonb,
     attributes          jsonb,
