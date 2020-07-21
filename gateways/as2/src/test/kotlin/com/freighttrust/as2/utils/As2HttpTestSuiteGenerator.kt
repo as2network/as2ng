@@ -99,7 +99,6 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
                 readTimeoutMS = 20000
               }
             }
-
           }
         )
       )

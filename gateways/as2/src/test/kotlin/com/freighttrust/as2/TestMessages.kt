@@ -35,7 +35,6 @@
 package com.freighttrust.as2
 
 import com.freighttrust.as2.utils.asPathResourceFile
-import com.helger.commons.io.resource.ClassPathResource
 
 object TestMessages {
 
