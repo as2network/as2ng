@@ -202,8 +202,8 @@ The configuration is stored into `partnerships.xml` and the generic format is th
 ```xml
 <partnerships>
     <!-- Definition of partners -->
-	<partner name="OpenAS2A" as2_id="OpenAS2A" x509_alias="OpenAS2A_alias" email="OpenAS2 A email"/>
-	<partner name="OpenAS2B" as2_id="OpenAS2B" x509_alias="OpenAS2B_alias" email="OpenAS2 B email"/>	
+	<partner name="OpenAS2A" as2_id="OpenAS2A" x509_alias="OpenAS2A_alias" email="openas2a@email.com"/>
+	<partner name="OpenAS2B" as2_id="OpenAS2B" x509_alias="OpenAS2B_alias" email="openas2b@email.com"/>	
 
     <!-- Definition of partnerships -->
 	<partnership name="OpenAS2A-OpenAS2B">

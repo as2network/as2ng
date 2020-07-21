@@ -42,6 +42,11 @@ import com.freighttrust.postgres.PostgresModule
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientSettings
+import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
+import com.helger.as2lib.crypto.ECryptoAlgorithmSign
+import com.helger.as2lib.disposition.DispositionOptions
+import com.helger.as2lib.disposition.DispositionOptions.IMPORTANCE_REQUIRED
+import com.helger.as2lib.disposition.DispositionOptions.PROTOCOL_PKCS7_SIGNATURE
 import com.helger.as2lib.util.dump.HTTPOutgoingDumperFileBased
 import com.helger.commons.io.resource.ClassPathResource
 import com.helger.security.keystore.EKeyStoreType
@@ -52,6 +57,7 @@ import io.kotlintest.extensions.TopLevelTest
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.FunSpec
+import okhttp3.internal.closeQuietly
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.koin.core.context.startKoin
@@ -104,6 +110,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare client settings
         val clientSettings = AS2ClientSettings()
           .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
             setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
             setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
             setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
@@ -111,7 +118,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
               val file =
-                File("src/test/resources/messages/text/plain/1B-unencrypted-data-no-receipt.http").absoluteFile
+                File("src/test/resources/messages/text/plain/1-unencrypted-data-no-receipt.http").absoluteFile
               if (!file.exists()) {
                 file.createNewFile()
               }
@@ -137,9 +144,139 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         response.exception shouldBe null
         response.mdn shouldBe null
         response.mdn?.message shouldBe null
+
+        // Close
+        mockWebServer.closeQuietly()
       }
 
-    test("it should generate text/plain/unencrypted-data-unsidned-receipt.http")
+    test("it should generate text/plain/unencrypted-data-unsigned-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(
+            MockResponse()
+              .setResponseCode(200)
+              .setHeader("Content-Type", "message/disposition-notification")
+              .setBody("Requested data")
+          )
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(null, null)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/2-unencrypted-data-unsigned-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions().asString
+            isMDNRequested = true
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request
+        val response = as2Client.sendSynchronous(clientSettings, request)
+
+        // Assert
+        response shouldNotBe null
+        response.exception shouldBe null
+        response.mdn shouldNotBe null
+        response.mdn?.message shouldNotBe null
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/unencrypted-data-signed-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(
+            MockResponse()
+              .setResponseCode(200)
+              .setHeader("Content-Type", "message/disposition-notification")
+              .setBody("Requested data")
+          )
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(null, null)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/3-unencrypted-data-signed-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions()
+              .setProtocolImportance(IMPORTANCE_REQUIRED)
+              .setProtocol(PROTOCOL_PKCS7_SIGNATURE)
+              .asString
+            isMDNRequested = true
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request
+        val response = as2Client.sendSynchronous(clientSettings, request)
+
+        // Assert
+        response shouldNotBe null
+        response.exception shouldBe null
+        response.mdn shouldNotBe null
+        response.mdn?.message shouldNotBe null
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/encrypted-data-no-receipt.http")
       .config(enabled = true) {
 
         val koin = getKoin()
@@ -157,21 +294,22 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare client settings
         val clientSettings = AS2ClientSettings()
           .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
             setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
             setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
             setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
             setPartnershipName("Partnership name")
-            setEncryptAndSign(null, null)
+            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
               val file =
-                File("src/test/resources/messages/text/plain/1A-unencrypted-data-unsigned-receipt.http").absoluteFile
+                File("src/test/resources/messages/text/plain/4-encrypted-data-no-receipt.http").absoluteFile
               if (!file.exists()) {
                 file.createNewFile()
               }
               HTTPOutgoingDumperFileBased(file)
             }
-            mdnOptions = null
-            isMDNRequested = true
+            mdnOptions = DispositionOptions().asString
+            isMDNRequested = false
             connectTimeoutMS = 20000
             readTimeoutMS = 20000
           }
@@ -190,6 +328,494 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         response.exception shouldBe null
         response.mdn shouldBe null
         response.mdn?.message shouldBe null
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/encrypted-data-unsigned-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(
+            MockResponse()
+              .setResponseCode(200)
+              .setHeader("Content-Type", "message/disposition-notification")
+              .setBody("Requested data")
+          )
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/5-encrypted-data-unsigned-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions().asString
+            isMDNRequested = true
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request
+        val response = as2Client.sendSynchronous(clientSettings, request)
+
+        // Assert
+        response shouldNotBe null
+        response.exception shouldBe null
+        response.mdn shouldNotBe null
+        response.mdn?.message shouldNotBe null
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/encrypted-data-signed-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(
+            MockResponse()
+              .setResponseCode(200)
+              .setHeader("Content-Type", "message/disposition-notification")
+              .setBody("Requested data")
+          )
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/6-encrypted-data-signed-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions()
+              .setProtocolImportance(IMPORTANCE_REQUIRED)
+              .setProtocol(PROTOCOL_PKCS7_SIGNATURE)
+              .asString
+            isMDNRequested = true
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request
+        val response = as2Client.sendSynchronous(clientSettings, request)
+
+        // Assert
+        response shouldNotBe null
+        response.exception shouldBe null
+        response.mdn shouldNotBe null
+        response.mdn?.message shouldNotBe null
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/signed-data-no-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(MockResponse().setResponseCode(200))
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/7-signed-data-no-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions().asString
+            isMDNRequested = false
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request
+        val response = as2Client.sendSynchronous(clientSettings, request)
+
+        // Assert
+        response shouldNotBe null
+        response.exception shouldBe null
+        response.mdn shouldBe null
+        response.mdn?.message shouldBe null
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/signed-data-unsigned-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(
+            MockResponse()
+              .setResponseCode(200)
+              .setHeader("Content-Type", "message/disposition-notification")
+              .setBody("Requested data")
+          )
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/8-signed-data-unsigned-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = null
+            isMDNRequested = true
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request (we ignore returned data, so we wrap this code inside a try/catch)
+        try {
+          as2Client.sendSynchronous(clientSettings, request)
+        } catch (e: Exception) {
+          // ignore it
+        }
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/signed-data-signed-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(
+            MockResponse()
+              .setResponseCode(200)
+              .setHeader("Content-Type", "message/disposition-notification")
+              .setBody("Requested data")
+          )
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/9-signed-data-signed-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions()
+              .setProtocolImportance(IMPORTANCE_REQUIRED)
+              .setProtocol(PROTOCOL_PKCS7_SIGNATURE)
+              .asString
+            isMDNRequested = true
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request (we ignore returned data, so we wrap this code inside a try/catch)
+        try {
+          as2Client.sendSynchronous(clientSettings, request)
+        } catch (e: Exception) {
+          // ignore it
+        }
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/encrypted-and-signed-data-no-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(MockResponse().setResponseCode(200))
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/10-encrypted-and-signed-data-no-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions().asString
+            isMDNRequested = false
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request (we ignore returned data, so we wrap this code inside a try/catch)
+        try {
+          as2Client.sendSynchronous(clientSettings, request)
+        } catch (e: Exception) {
+          // ignore it
+        }
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/encrypted-and-signed-data-unsigned-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(
+            MockResponse()
+              .setResponseCode(200)
+              .setHeader("Content-Type", "message/disposition-notification")
+              .setBody("Requested data")
+          )
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/11-encrypted-and-signed-data-unsigned-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions().asString
+            isMDNRequested = true
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request (we ignore returned data, so we wrap this code inside a try/catch)
+        try {
+          as2Client.sendSynchronous(clientSettings, request)
+        } catch (e: Exception) {
+          // ignore it
+        }
+
+        // Close
+        mockWebServer.closeQuietly()
+      }
+
+    test("it should generate text/plain/encrypted-and-signed-data-signed-receipt.http")
+      .config(enabled = true) {
+
+        val koin = getKoin()
+
+        // Prepare mock web server
+        val mockWebServer = koin.get<MockWebServer>()
+        with(mockWebServer) {
+          start(port = 10085)
+          enqueue(
+            MockResponse()
+              .setResponseCode(200)
+              .setHeader("Content-Type", "message/disposition-notification")
+              .setBody("Requested data")
+          )
+        }
+
+        // Obtain client
+        val as2Client = getKoin().get<AS2Client>()
+
+        // Prepare client settings
+        val clientSettings = AS2ClientSettings()
+          .apply {
+            messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+            setKeyStore(EKeyStoreType.PKCS12, ClassPathResource.getAsFile("/certificates/keystore.p12")!!, "password")
+            setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+            setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+            setPartnershipName("Partnership name")
+            setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
+            setHttpOutgoingDumperFactory {
+              val file =
+                File("src/test/resources/messages/text/plain/12-encrypted-and-signed-data-signed-receipt.http").absoluteFile
+              if (!file.exists()) {
+                file.createNewFile()
+              }
+              HTTPOutgoingDumperFileBased(file)
+            }
+            mdnOptions = DispositionOptions()
+              .setProtocolImportance(IMPORTANCE_REQUIRED)
+              .setProtocol(PROTOCOL_PKCS7_SIGNATURE)
+              .asString
+            isMDNRequested = true
+            connectTimeoutMS = 20000
+            readTimeoutMS = 20000
+          }
+
+        // Prepare AS2 request
+        val request = AS2ClientRequest("Message from OpenAS2 to OpenAS2B")
+          .apply {
+            setData(ClassPathResource.getAsFile("/messages/attachment.txt")!!, Charset.defaultCharset())
+          }
+
+        // Fire request (we ignore returned data, so we wrap this code inside a try/catch)
+        try {
+          as2Client.sendSynchronous(clientSettings, request)
+        } catch (e: Exception) {
+          // ignore it
+        }
+
+        // Close
+        mockWebServer.closeQuietly()
       }
   }
 }

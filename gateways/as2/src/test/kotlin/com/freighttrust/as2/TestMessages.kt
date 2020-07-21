@@ -38,5 +38,29 @@ import com.helger.commons.io.resource.ClassPathResource
 
 object TestMessages {
 
-  val UnencryptedDataNoReceipt = ClassPathResource.getAsFile("/messages/text/plain/1A-unencrypted-data-no-receipt.http")!!
+  val UnencryptedDataNoReceipt = ClassPathResource.getAsFile("/messages/text/plain/1-unencrypted-data-no-receipt.http")!!
+
+  val UnencryptedDataUnsignedReceipt = ClassPathResource.getAsFile("/messages/text/plain/2-unencrypted-data-unsigned-receipt.http")!!
+
+  val UnencryptedDataSignedReceipt = ClassPathResource.getAsFile("/messages/text/plain/3-unencrypted-data-signed-receipt.http")!!
+
+  val EncryptedDataNoReceipt = ClassPathResource.getAsFile("/messages/text/plain/4-encrypted-data-no-receipt.http")!!
+
+  val EncryptedDataUnsignedReceipt = ClassPathResource.getAsFile("/messages/text/plain/5-encrypted-data-unsigned-receipt.http")!!
+
+  val EncryptedDataSignedReceipt = ClassPathResource.getAsFile("/messages/text/plain/6-encrypted-data-signed-receipt.http")!!
+
+  val SignedDataNoReceipt = ClassPathResource.getAsFile("/messages/text/plain/7-signed-data-no-receipt.http")!!
+
+  val SignedDataUnsignedReceipt = ClassPathResource.getAsFile("/messages/text/plain/8-signed-data-unsigned-receipt.http")!!
+
+  val SignedDataSignedReceipt = ClassPathResource.getAsFile("/messages/text/plain/9-signed-data-signed-receipt.http")!!
+
+  val EncryptedAndSignedDataNoReceipt = ClassPathResource.getAsFile("/messages/text/plain/10-encrypted-and-signed-data-no-receipt.http")!!
+
+  val EncryptedAndSignedDataUnsignedReceipt = ClassPathResource.getAsFile("/messages/text/plain/11-encrypted-and-signed-data-unsigned-receipt.http")!!
+
+  val EncryptedAndSignedDataSignedReceipt = ClassPathResource.getAsFile("/messages/text/plain/12-encrypted-and-signed-data-signed-receipt.http")!!
+
+  val ContentLengthRequest = ClassPathResource.getAsFile("/messages/text/plain/request-with-content-length.http")
 }
