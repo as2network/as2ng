@@ -54,9 +54,10 @@ import io.kotlintest.TestCase
 import io.kotlintest.TestResult
 import io.kotlintest.extensions.TopLevelTest
 import io.kotlintest.specs.FunSpec
+import io.mockk.Called
 import io.mockk.confirmVerified
 import io.mockk.every
-import io.mockk.verify
+import io.mockk.verifySequence
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.jooq.DSLContext
@@ -152,7 +153,7 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
         // Prepare mock web server
         val mockWebServer = koin.get<MockWebServer>()
         with(mockWebServer) {
-          start(port = 10082)
+          start(port = 10080)
           enqueue(MockResponse().setResponseCode(200))
         }
 
@@ -171,8 +172,20 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
 
         // Assert
 
-        // GetOutputStream is called whenever we are returning a response
-        verify { socket.getOutputStream() }
+        // Verify the sequence call made to this socket
+        verifySequence {
+          socket.inetAddress
+          socket.port
+          socket.inetAddress
+          socket.port
+          socket.localAddress
+          socket.localPort
+          socket.getInputStream()
+
+          // The connection in this particular test case is closed
+          // This verifies that we are not sending anything
+          socket.getOutputStream() wasNot Called
+        }
         confirmVerified(socket)
       }
 
