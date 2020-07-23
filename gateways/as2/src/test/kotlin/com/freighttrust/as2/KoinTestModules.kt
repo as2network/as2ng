@@ -108,7 +108,7 @@ val PostgresMockModule = module(override = true) {
   }
 }
 
-val As2MockModule = module {
+val As2ExchangeServerModule = module {
 
   factory<FileRepository> {
     val fr = object : FileRepository {
