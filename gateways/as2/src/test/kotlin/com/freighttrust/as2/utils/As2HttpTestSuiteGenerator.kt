@@ -136,11 +136,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
-                path = "src/test/resources/messages/text/plain/1-unencrypted-data-no-receipt",
-                dumpHeaders = false,
-                dumpBody = true
-              )
+              httpRawDumper("src/test/resources/messages/text/plain/1-unencrypted-data-no-receipt")
             }
             mdnOptions = null
             isMDNRequested = false
@@ -177,7 +173,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/2-unencrypted-data-unsigned-receipt"
               )
             }
@@ -216,7 +212,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/3-unencrypted-data-signed-receipt"
               )
             }
@@ -258,7 +254,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/4-encrypted-data-no-receipt"
               )
             }
@@ -297,7 +293,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/5-encrypted-data-unsigned-receipt"
               )
             }
@@ -336,7 +332,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/6-encrypted-data-signed-receipt"
               )
             }
@@ -378,7 +374,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/7-signed-data-no-receipt"
               )
             }
@@ -417,7 +413,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/8-signed-data-unsigned-receipt"
               )
             }
@@ -456,7 +452,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/9-signed-data-signed-receipt"
               )
             }
@@ -498,7 +494,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/10-encrypted-and-signed-data-no-receipt"
               )
             }
@@ -537,7 +533,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/11-encrypted-and-signed-data-unsigned-receipt"
               )
             }
@@ -576,7 +572,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPRawDumper(
+              httpRawDumper(
                 "src/test/resources/messages/text/plain/12-encrypted-and-signed-data-signed-receipt"
               )
             }
@@ -602,8 +598,15 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
   }
 }
 
+fun httpRawDumper(path: String): HTTPRawDumper =
+  HTTPRawDumper(
+    path = path,
+    dumpHeaders = true,
+    dumpBody = true
+  )
+
 /** Outputs the content of a request and saves it to a file */
-private class HTTPRawDumper(
+class HTTPRawDumper(
   path: String,
   private val dumpHeaders: Boolean = true,
   private val dumpBody: Boolean = true
