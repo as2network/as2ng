@@ -425,10 +425,17 @@ class AS2ForwardingReceiverHandler(
 
             // if AsyncMDN requested, return
             val headers = HttpHeaderMap().apply { setContentLength(0) }
-            NonBlockingByteArrayOutputStream().use { aData ->
-              // Empty data
-              // Ideally this would be HTTP 204 (no content)
-              responseHandler.sendHttpResponse(CHttp.HTTP_OK, headers, aData)
+            NonBlockingByteArrayOutputStream().use { data ->
+              responseHandler.sendHttpResponse(CHttp.HTTP_OK, headers, data)
+            }
+          }
+
+          response.isSuccessful -> {
+
+            // Return
+            val headers = HttpHeaderMap().apply { setContentLength(0) }
+            NonBlockingByteArrayOutputStream().use { data ->
+              responseHandler.sendHttpResponse(CHttp.HTTP_OK, headers, data)
             }
           }
 

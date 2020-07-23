@@ -32,13 +32,24 @@
 
 package com.freighttrust.as2
 
+import com.freighttrust.as2.cert.NoneCertificateProvider
 import com.freighttrust.as2.factories.PostgresCertificateFactory
+import com.freighttrust.as2.factories.PostgresTradingChannelFactory
+import com.freighttrust.as2.receivers.AS2ForwardingReceiverModule
+import com.freighttrust.jooq.tables.records.FileRecord
+import com.freighttrust.postgres.repositories.TradingChannelRepository
+import com.freighttrust.s3.repositories.FileRepository
+import com.helger.as2lib.cert.ICertificateFactory
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
+import com.helger.as2lib.partner.IPartnershipFactory
+import com.helger.as2lib.processor.DefaultMessageProcessor
+import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import com.helger.as2lib.session.AS2Session
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.mockk.every
 import io.mockk.mockk
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.configuration.FluentConfiguration
@@ -48,8 +59,10 @@ import org.jooq.impl.DSL
 import org.koin.core.qualifier._q
 import org.koin.dsl.module
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.util.concurrent.TimeUnit
 
 val AS2ClientModule = module {
 
@@ -70,23 +83,22 @@ val HttpMockModule = module {
   factory { MockWebServer() }
 }
 
-val SocketMockModule = module {
+val HttpTestingModule = module {
 
-  factory {
-    mockk<Socket>().apply {
-      every { inetAddress } returns InetSocketAddress(10085).address
-      every { localAddress } returns InetSocketAddress(10085).address
-      every { port } returns 10085
-      every { localPort } returns 10085
-      every { isConnected } returns true
-      every { isBound } returns true
-      every { isClosed } returns false
-      every { getOutputStream() } returns ByteArrayOutputStream()
-    }
+  single {
+    OkHttpClient.Builder()
+      .connectTimeout(2, TimeUnit.MINUTES)
+      .readTimeout(2, TimeUnit.MINUTES)
+      .writeTimeout(2, TimeUnit.MINUTES)
+      .retryOnConnectionFailure(false)
+      .build()
   }
+
 }
 
 val PostgresMockModule = module(override = true) {
+
+  single { EmbeddedPostgres.builder().start() }
 
   factory<DSLContext> {
     val pg = get<EmbeddedPostgres>()
@@ -100,4 +112,58 @@ val PostgresMockModule = module(override = true) {
 
     DSL.using(ds, SQLDialect.POSTGRES)
   }
+}
+
+val As2MockModule = module {
+
+  factory<FileRepository> {
+    val fr = object : FileRepository {
+      override fun insert(key: String, inputStream: InputStream, contentLength: Long): FileRecord = FileRecord()
+    }
+    fr
+  }
+
+  factory<ICertificateFactory> {
+    PostgresCertificateFactory(get(), NoneCertificateProvider())
+  }
+
+  factory<IPartnershipFactory> {
+    PostgresTradingChannelFactory(TradingChannelRepository(get()))
+  }
+
+  factory {
+    AS2ForwardingReceiverModule(get(), get(), get(), get(), "")
+      .apply {
+        initDynamicComponent(get(), null)
+      }
+  }
+
+  factory {
+    AS2Session().apply {
+      val self = this
+
+      certificateFactory = get()
+      partnershipFactory = get()
+      messageProcessor = DefaultMessageProcessor().apply {
+        initDynamicComponent(self, attrs())
+
+        addModule(
+          AS2ForwardingReceiverModule(
+            get(),
+            get(),
+            get(),
+            get(),
+            ""
+          )
+            .apply {
+              attrs()[AbstractActiveNetModule.ATTR_PORT] = "10085"
+              attrs()[AbstractActiveNetModule.ATTR_ERROR_DIRECTORY] = "as2-data/proxy/inbox/error"
+              attrs()[AbstractActiveNetModule.ATTR_ERROR_FORMAT] = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+              initDynamicComponent(self, attrs())
+            }
+        )
+      }
+    }
+  }
+
 }

@@ -67,8 +67,8 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
-import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.nio.charset.Charset
 
 /**
@@ -136,9 +136,10 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/1-unencrypted-data-no-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                path = "src/test/resources/messages/text/plain/1-unencrypted-data-no-receipt",
+                dumpHeaders = false,
+                dumpBody = true
               )
             }
             mdnOptions = null
@@ -148,7 +149,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -165,12 +166,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val mockWebServer = k.get<MockWebServer>()
         with(mockWebServer) {
           start(port = 10085)
-          enqueue(
-            MockResponse()
-              .setResponseCode(200)
-              .setHeader("Content-Type", "message/disposition-notification")
-              .setBody("Requested data")
-          )
+          enqueue(MockResponse().setResponseCode(200))
         }
 
         // Obtain client
@@ -181,9 +177,8 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/2-unencrypted-data-unsigned-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/2-unencrypted-data-unsigned-receipt"
               )
             }
             mdnOptions = DispositionOptions().asString
@@ -193,7 +188,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -210,12 +205,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val mockWebServer = k.get<MockWebServer>()
         with(mockWebServer) {
           start(port = 10085)
-          enqueue(
-            MockResponse()
-              .setResponseCode(200)
-              .setHeader("Content-Type", "message/disposition-notification")
-              .setBody("Requested data")
-          )
+          enqueue(MockResponse().setResponseCode(200))
         }
 
         // Obtain client
@@ -226,9 +216,8 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/3-unencrypted-data-signed-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/3-unencrypted-data-signed-receipt"
               )
             }
             mdnOptions = DispositionOptions()
@@ -241,7 +230,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -269,19 +258,18 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/4-encrypted-data-no-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/4-encrypted-data-no-receipt"
               )
             }
-            mdnOptions = DispositionOptions().asString
+            mdnOptions = null
             isMDNRequested = false
           }
 
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -298,12 +286,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val mockWebServer = k.get<MockWebServer>()
         with(mockWebServer) {
           start(port = 10085)
-          enqueue(
-            MockResponse()
-              .setResponseCode(200)
-              .setHeader("Content-Type", "message/disposition-notification")
-              .setBody("Requested data")
-          )
+          enqueue(MockResponse().setResponseCode(200))
         }
 
         // Obtain client
@@ -314,19 +297,18 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/5-encrypted-data-unsigned-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/5-encrypted-data-unsigned-receipt"
               )
             }
-            mdnOptions = DispositionOptions().asString
+            mdnOptions = null
             isMDNRequested = true
           }
 
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -343,12 +325,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val mockWebServer = k.get<MockWebServer>()
         with(mockWebServer) {
           start(port = 10085)
-          enqueue(
-            MockResponse()
-              .setResponseCode(200)
-              .setHeader("Content-Type", "message/disposition-notification")
-              .setBody("Requested data")
-          )
+          enqueue(MockResponse().setResponseCode(200))
         }
 
         // Obtain client
@@ -359,9 +336,8 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, null)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/6-encrypted-data-signed-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/6-encrypted-data-signed-receipt"
               )
             }
             mdnOptions = DispositionOptions()
@@ -374,7 +350,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -402,19 +378,18 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/7-signed-data-no-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/7-signed-data-no-receipt"
               )
             }
-            mdnOptions = DispositionOptions().asString
+            mdnOptions = null
             isMDNRequested = false
           }
 
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -431,12 +406,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val mockWebServer = k.get<MockWebServer>()
         with(mockWebServer) {
           start(port = 10085)
-          enqueue(
-            MockResponse()
-              .setResponseCode(200)
-              .setHeader("Content-Type", "message/disposition-notification")
-              .setBody("Requested data")
-          )
+          enqueue(MockResponse().setResponseCode(200))
         }
 
         // Obtain client
@@ -447,9 +417,8 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/8-signed-data-unsigned-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/8-signed-data-unsigned-receipt"
               )
             }
             mdnOptions = null
@@ -459,7 +428,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -476,12 +445,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val mockWebServer = k.get<MockWebServer>()
         with(mockWebServer) {
           start(port = 10085)
-          enqueue(
-            MockResponse()
-              .setResponseCode(200)
-              .setHeader("Content-Type", "message/disposition-notification")
-              .setBody("Requested data")
-          )
+          enqueue(MockResponse().setResponseCode(200))
         }
 
         // Obtain client
@@ -492,9 +456,8 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/9-signed-data-signed-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/9-signed-data-signed-receipt"
               )
             }
             mdnOptions = DispositionOptions()
@@ -507,7 +470,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -535,19 +498,18 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/10-encrypted-and-signed-data-no-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/10-encrypted-and-signed-data-no-receipt"
               )
             }
-            mdnOptions = DispositionOptions().asString
+            mdnOptions = null
             isMDNRequested = false
           }
 
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -564,12 +526,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val mockWebServer = k.get<MockWebServer>()
         with(mockWebServer) {
           start(port = 10085)
-          enqueue(
-            MockResponse()
-              .setResponseCode(200)
-              .setHeader("Content-Type", "message/disposition-notification")
-              .setBody("Requested data")
-          )
+          enqueue(MockResponse().setResponseCode(200))
         }
 
         // Obtain client
@@ -580,19 +537,18 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/11-encrypted-and-signed-data-unsigned-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/11-encrypted-and-signed-data-unsigned-receipt"
               )
             }
-            mdnOptions = DispositionOptions().asString
+            mdnOptions = null
             isMDNRequested = true
           }
 
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -609,12 +565,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         val mockWebServer = k.get<MockWebServer>()
         with(mockWebServer) {
           start(port = 10085)
-          enqueue(
-            MockResponse()
-              .setResponseCode(200)
-              .setHeader("Content-Type", "message/disposition-notification")
-              .setBody("Requested data")
-          )
+          enqueue(MockResponse().setResponseCode(200))
         }
 
         // Obtain client
@@ -625,9 +576,8 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
           .apply {
             setEncryptAndSign(ECryptoAlgorithmCrypt.CRYPT_3DES, ECryptoAlgorithmSign.DIGEST_MD5)
             setHttpOutgoingDumperFactory {
-              HTTPOutgoingDumper(
-                "src/test/resources/messages/text/plain/12-encrypted-and-signed-data-signed-receipt.http"
-                  .asAbsoluteFile()
+              HTTPRawDumper(
+                "src/test/resources/messages/text/plain/12-encrypted-and-signed-data-signed-receipt"
               )
             }
             mdnOptions = DispositionOptions()
@@ -640,7 +590,7 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
         // Prepare AS2 request
         val request = AS2ClientRequest("Message")
           .apply {
-            setData("/messages/attachment.txt".asPathResourceFile()!!, Charset.defaultCharset())
+            setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
           }
 
         // Send request
@@ -653,11 +603,27 @@ class As2HttpTestSuiteGenerator : FunSpec(), KoinTest {
 }
 
 /** Outputs the content of a request and saves it to a file */
-private class HTTPOutgoingDumper(dumpFile: File) : IHTTPOutgoingDumper {
+private class HTTPRawDumper(
+  path: String,
+  private val dumpHeaders: Boolean = true,
+  private val dumpBody: Boolean = true
+) : IHTTPOutgoingDumper {
 
-  private val os = FileHelper.getBufferedOutputStream(dumpFile)!!
+  private val os: OutputStream
 
+  private var contentLengthWritten = false
   private var headers = 0
+
+  init {
+    val ext = when {
+      dumpHeaders && dumpBody -> "http"
+      dumpHeaders && !dumpBody -> "header"
+      !dumpHeaders && dumpBody -> "body"
+      else -> "http"
+    }
+    val file = "${path}.${ext}".asPathResourceFile()
+    os = FileHelper.getBufferedOutputStream(file)!!
+  }
 
   private fun write(byte: Int) {
     try {
@@ -680,26 +646,34 @@ private class HTTPOutgoingDumper(dumpFile: File) : IHTTPOutgoingDumper {
   }
 
   override fun start(url: String, msg: AS2Message) {
-    // Every request is a POST request
-    // The original code was not writing the header, so we force it here
-    write("POST / HTTP/1.1${CHttp.EOL}".toByteArray(CHttp.HTTP_CHARSET))
+    if (dumpHeaders) {
+      // Every request is a POST request
+      // The original code was not writing the header, so we force it here
+      write("POST / HTTP/1.1${CHttp.EOL}".toByteArray(CHttp.HTTP_CHARSET))
+    }
   }
 
   override fun dumpHeader(name: String, value: String) {
-    val headerLine = "$name: $value${CHttp.EOL}"
-    write(headerLine.toByteArray(CHttp.HTTP_CHARSET))
-    headers++
+    if (dumpHeaders) {
+      val headerLine = "$name: $value${CHttp.EOL}"
+      write(headerLine.toByteArray(CHttp.HTTP_CHARSET))
+      headers++
+    }
   }
 
   override fun finishedHeaders() {
-    if (headers > 0) {
-      // empty line
-      write(CHttp.EOL.toByteArray(CHttp.HTTP_CHARSET))
+    if (dumpHeaders && contentLengthWritten) {
+      if (headers > 0) {
+        // empty line
+        write(CHttp.EOL.toByteArray(CHttp.HTTP_CHARSET))
+      }
     }
   }
 
   override fun dumpPayload(byte: Int) {
-    write(byte)
+    if (dumpBody) {
+      write(byte)
+    }
   }
 
   override fun dumpPayload(
@@ -707,7 +681,24 @@ private class HTTPOutgoingDumper(dumpFile: File) : IHTTPOutgoingDumper {
     ofs: Int,
     len: Int
   ) {
-    write(bytes, ofs, len)
+    if (dumpHeaders) {
+      if (!contentLengthWritten) {
+        // We add the by default the Content-Length header
+        write("Content-Length: ${len}${CHttp.EOL}".toByteArray(CHttp.HTTP_CHARSET))
+
+        // And after that, we proceed with the body
+        if (headers > 0) {
+          // empty line
+          write(CHttp.EOL.toByteArray(CHttp.HTTP_CHARSET))
+        }
+
+        contentLengthWritten = true
+      }
+    }
+
+    if (dumpBody) {
+      write(bytes, ofs, len)
+    }
   }
 
   override fun finishedPayload() {

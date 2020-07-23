@@ -34,23 +34,54 @@
 
 package com.freighttrust.as2.utils
 
-import com.helger.commons.io.resource.ClassPathResource
-import okhttp3.HttpUrl
 import okhttp3.Request
-import java.io.File
+import okhttp3.RequestBody.Companion.asRequestBody
+import okio.buffer
+import okio.source
 
-fun String.asPathResourceFile(): File =
-  ClassPathResource.getAsFile(this) ?: this.asAbsoluteFile()
+object OkHttpRawHttpReader {
 
-fun String.asAbsoluteFile(): File =
-  File(this).absoluteFile.apply { if (!exists()) createNewFile() }
+  fun read(url: String, path: String): Request {
+    val rawHttpFile = "${path}.http".asPathResourceFile()
+    val rawBodyFile = "${path}.body".asPathResourceFile()
 
-fun String.asOkHttpRequest(url: String): Request = OkHttpRawHttpReader.read(url, this)
+    // Prepare request builder
+    val builder = Request.Builder()
 
-inline fun ignoreExceptions(block: () -> Unit) {
-  try {
-    block()
-  } catch (e: Exception) {
-    // ignored
+    // Add URL
+    builder.url(url)
+
+    // Read .http file
+    rawHttpFile
+      .source()
+      .buffer()
+      .use { source ->
+        loop@ while (!source.exhausted()) {
+
+          // Process Headers
+          when (val line = source.readUtf8Line()) {
+            "POST / HTTP/1.1" -> {
+              // Ignore it as always will be a POST request
+            }
+            "" -> {
+              // We have reached end of Header section
+              break@loop
+            }
+            else -> {
+              // Process header
+              val elem = line!!.split(":".toRegex(), 2)
+              val key = elem.first().trim()
+              val value = elem[1].trim()
+              builder.header(key, value)
+            }
+          }
+        }
+      }
+
+    // Add payload
+    builder.post(rawBodyFile.asRequestBody())
+
+    // Build request
+    return builder.build()
   }
 }
