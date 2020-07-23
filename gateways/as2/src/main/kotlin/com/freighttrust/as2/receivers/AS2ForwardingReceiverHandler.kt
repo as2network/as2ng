@@ -78,7 +78,6 @@ import com.helger.commons.timing.StopWatch
 import com.helger.commons.wrapper.Wrapper
 import com.helger.mail.datasource.ByteArrayDataSource
 import com.helger.security.certificate.CertificateHelper
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
