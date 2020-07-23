@@ -35,7 +35,6 @@
 package com.freighttrust.as2.utils
 
 import com.helger.commons.io.resource.ClassPathResource
-import okhttp3.HttpUrl
 import okhttp3.Request
 import java.io.File
 

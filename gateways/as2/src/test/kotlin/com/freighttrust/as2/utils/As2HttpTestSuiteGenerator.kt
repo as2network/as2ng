@@ -624,7 +624,7 @@ class HTTPRawDumper(
       !dumpHeaders && dumpBody -> "body"
       else -> "http"
     }
-    val file = "${path}.${ext}".asPathResourceFile()
+    val file = "$path.$ext".asPathResourceFile()
     os = FileHelper.getBufferedOutputStream(file)!!
   }
 

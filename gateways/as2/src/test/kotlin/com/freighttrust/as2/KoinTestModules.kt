@@ -47,8 +47,6 @@ import com.helger.as2lib.processor.DefaultMessageProcessor
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import com.helger.as2lib.session.AS2Session
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import io.mockk.every
-import io.mockk.mockk
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import org.flywaydb.core.Flyway
@@ -58,10 +56,7 @@ import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.koin.core.qualifier._q
 import org.koin.dsl.module
-import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.net.InetSocketAddress
-import java.net.Socket
 import java.util.concurrent.TimeUnit
 
 val AS2ClientModule = module {
@@ -93,7 +88,6 @@ val HttpTestingModule = module {
       .retryOnConnectionFailure(false)
       .build()
   }
-
 }
 
 val PostgresMockModule = module(override = true) {
@@ -165,5 +159,4 @@ val As2MockModule = module {
       }
     }
   }
-
 }

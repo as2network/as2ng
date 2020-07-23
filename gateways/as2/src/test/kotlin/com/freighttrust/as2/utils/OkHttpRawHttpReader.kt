@@ -42,8 +42,8 @@ import okio.source
 object OkHttpRawHttpReader {
 
   fun read(url: String, path: String): Request {
-    val rawHttpFile = "${path}.http".asPathResourceFile()
-    val rawBodyFile = "${path}.body".asPathResourceFile()
+    val rawHttpFile = "$path.http".asPathResourceFile()
+    val rawBodyFile = "$path.body".asPathResourceFile()
 
     // Prepare request builder
     val builder = Request.Builder()
