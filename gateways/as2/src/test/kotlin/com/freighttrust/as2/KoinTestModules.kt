@@ -58,6 +58,7 @@ import org.koin.core.qualifier._q
 import org.koin.dsl.module
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
+import javax.activation.DataHandler
 
 val AS2ClientModule = module {
 
@@ -112,7 +113,7 @@ val As2ExchangeServerModule = module {
 
   factory<FileRepository> {
     val fr = object : FileRepository {
-      override fun insert(key: String, inputStream: InputStream, contentLength: Long): FileRecord = FileRecord()
+      override fun insert(key: String, dataHandler: DataHandler): FileRecord = FileRecord()
     }
     fr
   }
