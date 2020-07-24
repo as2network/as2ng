@@ -36,9 +36,16 @@ package com.freighttrust.as2
 
 import com.freighttrust.as2.utils.asOkHttpRequest
 import com.freighttrust.as2.utils.asPathResourceFile
+import com.freighttrust.as2.utils.ignoreExceptions
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.postgres.PostgresModule
+import com.helger.as2lib.client.AS2Client
+import com.helger.as2lib.client.AS2ClientRequest
+import com.helger.as2lib.client.AS2ClientSettings
+import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.session.AS2Session
+import com.helger.commons.io.resource.ClassPathResource
+import com.helger.security.keystore.EKeyStoreType
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import io.kotlintest.Spec
 import io.kotlintest.TestCase
@@ -56,7 +63,9 @@ import okhttp3.mockwebserver.MockWebServer
 import org.jooq.DSLContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import org.koin.test.KoinTest
+import java.nio.charset.Charset
 
 class As2TestingSuiteSpec : FunSpec(), KoinTest {
 
@@ -75,7 +84,27 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
           HttpTestingModule,
           HttpMockModule,
           AS2ClientModule,
-          As2ExchangeServerModule
+          As2ExchangeServerModule,
+          module {
+
+            factory {
+              AS2ClientSettings().apply {
+                messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+                setKeyStore(
+                  EKeyStoreType.PKCS12,
+                  ClassPathResource.getAsFile("/certificates/keystore.p12")!!,
+                  "password"
+                )
+                setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
+                setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
+                setPartnershipName("Partnership name")
+
+                connectTimeoutMS = 20000
+                readTimeoutMS = 20000
+              }
+            }
+
+          }
         )
       )
     }
@@ -146,31 +175,67 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
         .config(enabled = false) {}
 
       test("8. Sender sends signed data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
-        .config(enabled = false) {}
+        .config(enabled = true) {
+
+          // Prepare OpenAS2C server (the one receiving the MDN)
+          val mockServerC = k.get<MockWebServer>()
+          with(mockServerC) {
+            start(port = 10090)
+          }
+
+          // Prepare OpenAS2A server (the one receiving the AS2 message)
+          GlobalScope.launch(Dispatchers.IO) {
+            As2Server.startAs2LibServer("/as2/openas2a/config.xml".asPathResourceFile().absolutePath)
+          }
+
+          // Start our exchange server
+          val session = k.get<AS2Session>()
+          session.messageProcessor.startActiveModules()
+
+          // Obtain client
+          val as2Client = k.get<AS2Client>()
+
+          // Prepare client settings
+          val clientSettings = k.get<AS2ClientSettings>()
+            .apply {
+              setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
+              mdnOptions = null
+              isMDNRequested = true
+            }
+
+          // Prepare AS2 request
+          val request = AS2ClientRequest("Message")
+            .apply {
+              setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
+            }
+
+          // Send request
+          ignoreExceptions { as2Client.sendSynchronous(clientSettings, request) }
+
+          // Assert OpenAS2C received a correct MDN response
+          mockServerC.requestCount shouldBe 1
+        }
 
       test("9. Sender sends signed data and requests a signed receipt. Receiver sends back the signed receipt.")
         .config(enabled = false) {}
 
       test("10. Sender sends encrypted and signed data and does not request a signed or unsigned receipt.")
-        .config(enabled = true) {
+        .config(enabled = false) {
 
-          println("Current Thread: ${Thread.currentThread()}")
-
-          // Prepare OpenAS2B server
+          // Prepare OpenAS2A server (the receiving one)
           GlobalScope.launch(Dispatchers.IO) {
-            println("Current Thread: ${Thread.currentThread()}")
-            As2Server.startAs2LibServer("/as2/openas2b/config.xml".asPathResourceFile().absolutePath)
+            As2Server.startAs2LibServer("/as2/openas2a/config.xml".asPathResourceFile().absolutePath)
           }
 
-          // Start our proxy server
+          // Start our exchange server
           val session = k.get<AS2Session>()
           session.messageProcessor.startActiveModules()
 
-          // Fire request
+          // Fire request as we were OpenAS2C server
           val client = k.get<OkHttpClient>()
           val response = client
             .newCall(
-              "/messages/text/plain/10-encrypted-and-signed-data-no-receipt"
+              "/messages/text/plain/10-encrypted-and-signed-data-unsigned-receipt"
                 .asOkHttpRequest("http://localhost:10085")
             )
             .execute()
@@ -181,7 +246,35 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
         }
 
       test("11. Sender sends encrypted and signed data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
-        .config(enabled = false) {}
+        .config(enabled = false) {
+
+          // Prepare OpenAS2C server (the one receiving the MDN)
+          val mockServerC = k.get<MockWebServer>()
+          with(mockServerC) {
+            start(port = 10090)
+          }
+
+          // Prepare OpenAS2A server (the one receiving the AS2 message)
+          GlobalScope.launch(Dispatchers.IO) {
+            As2Server.startAs2LibServer("/as2/openas2a/config.xml".asPathResourceFile().absolutePath)
+          }
+
+          // Start our exchange server
+          val session = k.get<AS2Session>()
+          session.messageProcessor.startActiveModules()
+
+          // Fire request as we were OpenAS2C server
+          val client = k.get<OkHttpClient>()
+          val response = client
+            .newCall(
+              "/messages/text/plain/10-encrypted-and-signed-data-no-receipt"
+                .asOkHttpRequest("http://localhost:10085")
+            )
+            .execute()
+
+          // Assert OpenAS2C received a correct MDN response
+          mockServerC.requestCount shouldBe 1
+        }
 
       test("12. Sender sends encrypted and signed data and requests a signed receipt. Receiver sends back the signed receipt.")
         .config(enabled = false) {}
