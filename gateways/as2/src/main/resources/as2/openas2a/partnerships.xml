@@ -2,6 +2,7 @@
 <partnerships>
   <partner name="OpenAS2A" as2_id="OpenAS2A" x509_alias="OpenAS2A" email="openas2a@email.com"/>
   <partner name="OpenAS2B" as2_id="OpenAS2B" x509_alias="OpenAS2B" email="openas2b@email.com"/>
+  <partner name="OpenAS2C" as2_id="OpenAS2C" x509_alias="OpenAS2C" email="openas2c@email.com"/>
 
   <partnership name="OpenAS2A-OpenAS2B">
     <sender name="OpenAS2A"/>
@@ -28,5 +29,17 @@
     <attribute name="as2_mdn_options" value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, sha1"/>
     <attribute name="encrypt" value="3des"/>
     <attribute name="sign" value="sha1"/>
+  </partnership>
+
+  <partnership name="OpenAS2C-OpenAS2A">
+    <sender name="OpenAS2C"/>
+    <receiver name="OpenAS2A"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="subject" value="From OpenAS2C to OpenAS2A"/>
+    <attribute name="as2_url" value="http://localhost:10090"/>
+    <attribute name="as2_mdn_to" value="http://localhost:10083"/>
+    <attribute name="encrypt" value="3des"/>
+    <attribute name="sign" value="sha1"/>
+    <attribute name="verify_use_cert_in_body_part" value="true" />
   </partnership>
 </partnerships>

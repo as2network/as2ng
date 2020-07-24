@@ -8,13 +8,14 @@ Connection: close, TE
 User-Agent: as2-lib/AS2Sender-4.5.5
 Mime-Version: 1.0
 AS2-Version: 1.1
-Date: Tue, 21 Jul 2020 16:06:22 +0200
+Date: Thu, 23 Jul 2020 16:01:08 +0200
 Recipient-Address: http://localhost:10085
 AS2-From: OpenAS2C
 AS2-To: OpenAS2A
 From: openas2c@email.com
 Disposition-Notification-To: openas2c@email.com
 Disposition-Notification-Options: signed-receipt-protocol=required, pkcs7-signature
+Content-Length: 64
 
 This is a test file for sending.
 The whole content is sent.
