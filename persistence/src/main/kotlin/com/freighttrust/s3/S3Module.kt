@@ -83,6 +83,8 @@ val S3Module = module {
     TransferManagerBuilder
       .standard()
       .withS3Client(get())
+      // 5 mb
+      .withMultipartUploadThreshold(1024 * 1024 * 5)
       .build()
   }
 

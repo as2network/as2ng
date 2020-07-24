@@ -39,10 +39,11 @@ import com.freighttrust.jooq.Tables
 import com.freighttrust.jooq.tables.records.FileRecord
 import org.jooq.DSLContext
 import java.io.InputStream
+import javax.activation.DataHandler
 
 interface FileRepository {
 
-  fun insert(key: String, inputStream: InputStream, contentLength: Long): FileRecord
+  fun insert(key: String, dataHandler: DataHandler): FileRecord
 }
 
 class S3FileRepository(
@@ -51,11 +52,12 @@ class S3FileRepository(
   private val bucket: String
 ) : FileRepository {
 
-  override fun insert(key: String, inputStream: InputStream, contentLength: Long): FileRecord =
+  // TODO large file support
+  override fun insert(key: String, dataHandler: DataHandler): FileRecord =
 
     ObjectMetadata()
-      .apply { this.contentLength = contentLength }
-      .let { metadata -> PutObjectRequest(bucket, key, inputStream, metadata) }
+      .apply { this.contentType = dataHandler.contentType }
+      .let { metadata -> PutObjectRequest(bucket, key, dataHandler.inputStream, metadata) }
       .let(transferManager::upload)
       .waitForUploadResult()
       .let {

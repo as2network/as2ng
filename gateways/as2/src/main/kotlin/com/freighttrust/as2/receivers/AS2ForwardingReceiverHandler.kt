@@ -34,8 +34,6 @@ package com.freighttrust.as2.receivers
 
 import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.as2.ext.isRequestingSyncMDN
-import com.freighttrust.as2.ext.toAs2MdnRecord
-import com.freighttrust.as2.ext.toAs2MessageRecord
 import com.freighttrust.as2.ext.toHttpHeaderMap
 import com.freighttrust.postgres.repositories.As2MdnRepository
 import com.freighttrust.postgres.repositories.As2MessageRepository
@@ -294,8 +292,8 @@ class AS2ForwardingReceiverHandler(
     val body = rawIs.readAllBytes().toRequestBody(rawData.contentType.toMediaType())
     val length = body.contentLength()
 
-    val fileRecord = fileRepository.insert(message.messageID!!, rawIs, length)
-    as2MessageRepository.insert(message.toAs2MessageRecord(fileRecord))
+//    val fileRecord = fileRepository.insert(message.messageID!!, rawIs)
+//    as2MessageRepository.insert(message.toAs2MessageRecord(fileRecord))
 
     val url = message.partnership().aS2URL!!
 
@@ -399,8 +397,8 @@ class AS2ForwardingReceiverHandler(
             val mediaType = mdn.data!!.contentType.toMediaType()
             val body = mdn.data!!.inputStream.readAllBytes().toRequestBody(mediaType)
 
-            val bodyRecord = fileRepository.insert(mdn.messageID!!, mdn.data!!.inputStream, body.contentLength())
-            as2MdnRepository.insert(mdn.toAs2MdnRecord(bodyRecord))
+//            val bodyRecord = fileRepository.insert(mdn.messageID!!, mdn.data!!.inputStream)
+//            as2MdnRepository.insert(mdn.toAs2MdnRecord(bodyRecord))
 
             // Forward back the MDN response
             NonBlockingByteArrayOutputStream()

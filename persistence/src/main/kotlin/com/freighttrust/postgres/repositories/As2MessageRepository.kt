@@ -40,7 +40,14 @@ class As2MessageRepository(
   private val dbCtx: DSLContext
 ) {
 
-  fun findMic(id: String): String? =
+  fun findById(id: String): As2MessageRecord? =
+    dbCtx
+      .selectFrom(AS2_MESSAGE)
+      .where(AS2_MESSAGE.ID.eq(id))
+      .fetch()
+      .firstOrNull()
+
+  fun findMicById(id: String): String? =
     dbCtx
       .select(AS2_MESSAGE.MIC)
       .from(AS2_MESSAGE)

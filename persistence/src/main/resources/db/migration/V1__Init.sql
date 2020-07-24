@@ -30,28 +30,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-create table trading_partner (
-    id varchar(64) primary key,
-    name varchar(128) unique,
+create table trading_partner
+(
+    id    varchar(64) primary key,
+    name  varchar(128) unique,
     email varchar(128)
 );
 
-create table certificate (
-    trading_partner_id varchar(64) primary key references trading_partner(id),
-    private_key varchar(4096),
-    x509_certificate varchar(4096)
+create table certificate
+(
+    trading_partner_id varchar(64) primary key references trading_partner (id),
+    private_key        varchar(4096),
+    x509_certificate   varchar(4096)
 );
 
-create table trading_channel (
-                                 sender_id            varchar(64) references trading_partner(id),
-                                 recipient_id         varchar(64) references trading_partner (id),
-                                 protocol             varchar(16),
-                                 as2_url              varchar(128),
-                                 as2_mdn_to           varchar(128) null,
-                                 as2_mdn_options      varchar(128),
-                                 encryption_algorithm varchar(16)  null,
-                                 signing_algorithm    varchar(16),
-                                 primary key (sender_id, recipient_id)
+create table trading_channel
+(
+    sender_id                       varchar(64) references trading_partner (id),
+    recipient_id                    varchar(64) references trading_partner (id),
+    protocol                        varchar(16),
+    as2_url                         varchar(128),
+    as2_mdn_to                      varchar(128) null,
+    as2_mdn_options                 varchar(128),
+    encryption_algorithm            varchar(16)  null,
+    signing_algorithm               varchar(16)  null,
+    rfc_3851_mic_algorithms_enabled bool,
+    primary key (sender_id, recipient_id)
 );
 
 create table file
@@ -64,26 +68,28 @@ create table file
 
 create table as2_message
 (
-    id                  varchar(64) primary key,
-    "from"              varchar(64) references trading_partner (id),
-    "to"                varchar(64) references trading_partner (id),
-    subject             varchar(128),
-    content_type        varchar(128),
-    content_disposition varchar(128),
-    mic                 varchar(64) null,
-    /* store header and attributes as jsonb to allow for free form data but make it queryable */
-    headers             jsonb,
-    attributes          jsonb,
-    body_file_id        int references file (id)
+    id                               varchar(64) primary key,
+    sender_id                        varchar(64) references trading_partner (id),
+    recipient_id                     varchar(64) references trading_partner (id),
+    subject                          varchar(128),
+    body_content_type                varchar(128),
+    body_file_id                     int references file (id),
+    encrypted                        bool,
+    compressed                       bool,
+    signed                           bool,
+    mic                              varchar(32)  null,
+    mic_algorithm                    varchar(32)  null,
+    receipt_delivery_option          varchar(128) null,
+    disposition_notification_to      varchar(128) null,
+    /* store headers as jsonb to allow for free form data but make it queryable */
+    headers                          jsonb
 );
 
-create table as2_mdn(
-                        id           varchar(64) primary key,
-                        message_id   varchar(64) references as2_message (id),
-                        "text"       text,
-    /* store header and attributes as jsonb to allow for free form data but make it queryable */
-                        headers      jsonb,
-                        attributes   jsonb,
-                        body_file_id int references file (id)
+create table as2_mdn
+(
+    message_id   varchar(64) primary key references as2_message (id),
+    signed       bool,
+    mic          varchar(32) null,
+    body_file_id int references file (id)
 );
 

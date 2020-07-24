@@ -36,7 +36,7 @@ import org.jooq.meta.jaxb.Configuration
 plugins {
   kotlin("jvm")
   id("org.flywaydb.flyway") version "6.4.2"
-  id("com.rohanprabhu.kotlin-dsl-jooq") version "0.4.5"
+  id("com.rohanprabhu.kotlin-dsl-jooq") version "0.4.6"
 }
 
 dependencies {

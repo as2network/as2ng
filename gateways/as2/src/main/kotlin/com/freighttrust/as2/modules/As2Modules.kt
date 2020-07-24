@@ -34,8 +34,11 @@ package com.freighttrust.as2.modules
 
 import com.freighttrust.as2.cert.VaultCertificateProvider
 import com.freighttrust.as2.cert.VaultConfigOptions
+import com.freighttrust.as2.controllers.AS2Controller
+import com.freighttrust.as2.handlers.*
 import com.freighttrust.as2.session.As2SessionFactory
 import com.typesafe.config.Config
+import io.vertx.ext.web.client.WebClient
 import okhttp3.OkHttpClient
 import org.koin.core.qualifier._q
 import org.koin.dsl.module
@@ -52,6 +55,29 @@ val As2Module = module {
     val config = get<Config>(_q("app"))
     As2SessionFactory.create(_koin, config)
   }
+
+  single {
+    OkHttpClient()
+  }
+
+  factory {
+    AS2Controller(get(), get(), get())
+  }
+
+  single { As2BodyHandler() }
+  single { As2TempFileHandler() }
+  single { As2ContextHandler(get()) }
+  single { As2DecompressionHandler() }
+  single { As2DecryptionHandler(get()) }
+  // TODO integrate verification handler with config
+  single { As2VerificationHandler(get(), true)}
+  single { As2StoreMessageHandler(get(), get()) }
+  single { As2StoreMdnHandler(get(), get(), get()) }
+  single { As2ForwardMessageHandler(get()) }
+  single { As2ForwardMdnHandler(get()) }
+
+  single { WebClient.create(get()) }
+
 }
 
 val HttpModule = module {
@@ -59,6 +85,7 @@ val HttpModule = module {
   single {
     OkHttpClient()
   }
+
 }
 
 val CertsModule = module {

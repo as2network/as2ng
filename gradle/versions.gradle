@@ -58,10 +58,23 @@ dependencyManagement {
     dependency 'com.typesafe:config:1.4.0'
 
     // ------------------------------------------------------------------
+    // Vertx
+    // ------------------------------------------------------------------
+
+    dependency 'io.vertx:vertx-core:3.9.1'
+    dependency 'io.vertx:vertx-config:3.9.1'
+    dependency 'io.vertx:vertx-lang-kotlin:3.9.1'
+    dependency 'io.vertx:vertx-lang-kotlin-coroutines:3.9.1'
+    dependency 'io.vertx:vertx-hazelcast:3.9.1'
+    dependency 'io.vertx:vertx-web:3.9.1'
+    dependency 'io.vertx:vertx-web-api-contract:3.9.1'
+    dependency 'io.vertx:vertx-web-client:3.9.1'
+    dependency 'io.vertx:vertx-reactive-streams:3.9.1'
+
+    // ------------------------------------------------------------------
     // Web Clients
     // ------------------------------------------------------------------
 
-    dependency 'io.vertx:vertx-web-client:3.9.1'
     dependency 'com.squareup.okhttp3:okhttp:4.7.2'
     dependency 'com.amazonaws:aws-java-sdk-s3:1.11.764'
 

@@ -42,30 +42,30 @@ fun As2Message.toAs2MessageRecord(): As2MessageRecord {
   val self = this
   return As2MessageRecord()
     .apply {
-      id = self.id()
-      from = self.from()
-      to = self.to()
-      subject = self.subject()
-      contentType = self.contentType()
-      contentDisposition = self.contentDisposition()
-      headers = JSONObject(
-        (0 until self.headersLength())
-          .map { i ->
-            val key = self.headers(i).key()
-            val values = (0 until self.headers(i).valueLength()).map { j -> self.headers(i).value(j) }
-            key to values
-          }
-          .toMap()
-      ).toJSONB()
-      attributes = JSONObject(
-        (0 until self.attributesLength())
-          .map { i ->
-            val key = self.attributes(i).key()
-            val values = (0 until self.attributes(i).valueLength()).map { j -> self.attributes(i).value(j) }
-            key to values
-          }
-          .toMap()
-      ).toJSONB()
+//      id = self.id()
+//      from = self.from()
+//      to = self.to()
+//      subject = self.subject()
+//      contentType = self.contentType()
+//      contentDisposition = self.contentDisposition()
+//      headers = JSONObject(
+//        (0 until self.headersLength())
+//          .map { i ->
+//            val key = self.headers(i).key()
+//            val values = (0 until self.headers(i).valueLength()).map { j -> self.headers(i).value(j) }
+//            key to values
+//          }
+//          .toMap()
+//      ).toJSONB()
+//      attributes = JSONObject(
+//        (0 until self.attributesLength())
+//          .map { i ->
+//            val key = self.attributes(i).key()
+//            val values = (0 until self.attributes(i).valueLength()).map { j -> self.attributes(i).value(j) }
+//            key to values
+//          }
+//          .toMap()
+//      ).toJSONB()
     }
 }
 
@@ -73,26 +73,26 @@ fun As2Mdn.toAs2MdnRecord(): As2MdnRecord {
   val self = this
   return As2MdnRecord()
     .apply {
-      id = self.id()
-      messageId = self.messageId()
-      text = self.text()
-      headers = JSONObject(
-        (0 until self.headersLength())
-          .map { i ->
-            val key = self.headers(i).key()
-            val values = (0 until self.headers(i).valueLength()).map { j -> self.headers(i).value(j) }
-            key to values
-          }
-          .toMap()
-      ).toJSONB()
-      attributes = JSONObject(
-        (0 until self.attributesLength())
-          .map { i ->
-            val key = self.attributes(i).key()
-            val values = (0 until self.attributes(i).valueLength()).map { j -> self.attributes(i).value(j) }
-            key to values
-          }
-          .toMap()
-      ).toJSONB()
+//      id = self.id()
+//      messageId = self.messageId()
+//      text = self.text()
+//      headers = JSONObject(
+//        (0 until self.headersLength())
+//          .map { i ->
+//            val key = self.headers(i).key()
+//            val values = (0 until self.headers(i).valueLength()).map { j -> self.headers(i).value(j) }
+//            key to values
+//          }
+//          .toMap()
+//      ).toJSONB()
+//      attributes = JSONObject(
+//        (0 until self.attributesLength())
+//          .map { i ->
+//            val key = self.attributes(i).key()
+//            val values = (0 until self.attributes(i).valueLength()).map { j -> self.attributes(i).value(j) }
+//            key to values
+//          }
+//          .toMap()
+//      ).toJSONB()
     }
 }

@@ -54,12 +54,15 @@ insert into trading_channel
 values ('OpenAS2A', 'OpenAS2B', 'as2', 'http://localhost:10082', 'http://localhost:10081',
         'signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5',
         '3des',
-        'md5'),
+        'md5',
+        false),
        ('OpenAS2B', 'OpenAS2A', 'as2', 'http://localhost:10080', 'http://localhost:10083',
         'signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5',
         '3des',
-        'sha1'),
+        'sha1',
+        false),
        ('OpenAS2C', 'OpenAS2A', 'as2', 'http://localhost:10080', null,
         null,
         '3des',
-        'sha1');
+        'sha1',
+        false);

@@ -66,8 +66,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import java.io.FileInputStream
-import java.io.InputStream
 import java.net.Socket
+import javax.activation.DataHandler
 
 class As2TestingSuiteSpec : FunSpec(), KoinTest {
 
@@ -104,7 +104,7 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
 
         factory<FileRepository> {
           val fr = object : FileRepository {
-            override fun insert(key: String, inputStream: InputStream, contentLength: Long): FileRecord = FileRecord()
+            override fun insert(key: String, dataHandler: DataHandler): FileRecord = FileRecord()
           }
           fr
         }

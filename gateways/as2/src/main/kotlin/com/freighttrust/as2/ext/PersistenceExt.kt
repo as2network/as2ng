@@ -42,51 +42,7 @@ import com.helger.as2lib.message.AS2MessageMDN
 import com.helger.as2lib.partner.Partnership
 import org.jooq.tools.json.JSONObject
 
-fun AS2Message.toAs2MessageRecord(bodyRecord: FileRecord): As2MessageRecord {
-  val self = this
-  return As2MessageRecord()
-    .apply {
-      id = self.messageID
-      from = self.aS2From
-      to = self.aS2To
-      subject = self.subject
-      contentType = self.contentType
-      contentDisposition = self.contentDisposition
-      mic = self.attrs()[AS2Message.ATTRIBUTE_MIC]
-      headers = JSONObject(
-        self.headers()
-          .map { h -> h.key to h.value }
-          .toMap()
-      ).toJSONB()
-      attributes = JSONObject(
-        self.attrs()
-          .map { a -> a.key to a.value }
-          .toMap()
-      ).toJSONB()
-      bodyFileId = bodyRecord.id
-    }
-}
 
-fun AS2MessageMDN.toAs2MdnRecord(bodyRecord: FileRecord): As2MdnRecord {
-  val self = this
-  return As2MdnRecord()
-    .apply {
-      id = self.messageID
-      messageId = message.messageID
-      text = self.text
-      headers = JSONObject(
-        self.headers()
-          .map { h -> h.key to h.value }
-          .toMap()
-      ).toJSONB()
-      attributes = JSONObject(
-        self.attrs()
-          .map { a -> a.key to a.value }
-          .toMap()
-      ).toJSONB()
-      bodyFileId = bodyRecord.id
-    }
-}
 
 fun Partnership.toTradingChannelRecord(): TradingChannelRecord {
   val self = this

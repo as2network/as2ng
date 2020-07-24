@@ -33,7 +33,6 @@
 package com.freighttrust.as2.receivers
 
 import com.freighttrust.as2.ext.isNotSuccessful
-import com.freighttrust.as2.ext.toAs2MdnRecord
 import com.freighttrust.postgres.repositories.As2MdnRepository
 import com.freighttrust.postgres.repositories.As2MessageRepository
 import com.freighttrust.s3.repositories.FileRepository
@@ -205,9 +204,9 @@ class AS2MDNForwardingReceiverHandler(
 
           // store first
 
-          val bodyRecord = fileRepository.insert(mdn.messageID!!, part.inputStream, body.contentLength())
-          val mdnRecord = mdn.toAs2MdnRecord(bodyRecord)
-          as2MdnRepository.insert(mdnRecord)
+//          val bodyRecord = fileRepository.insert(mdn.messageID!!, part.inputStream)
+//          val mdnRecord = mdn.toAs2MdnRecord(bodyRecord)
+//          as2MdnRepository.insert(mdnRecord)
 
           // Forward message to origin
           val url = message.partnership().aS2MDNTo!!
@@ -275,7 +274,7 @@ class AS2MDNForwardingReceiverHandler(
       // from pendinginfo folder.
       val originalMessageId = message.mdn!!.attrs().getAsString(AS2MessageMDN.MDNA_ORIG_MESSAGEID)!!
 
-      val originalMICStr = as2MessageRepository.findMic(originalMessageId)
+      val originalMICStr = as2MessageRepository.findMicById(originalMessageId)
       val originalMIC = MIC.parse(originalMICStr)
 
       val dispositionStr = message.mdn!!.attrs().getAsString(AS2MessageMDN.MDNA_DISPOSITION)
