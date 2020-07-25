@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.s3
+package com.freighttrust.persistence.s3
 
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSStaticCredentialsProvider
@@ -38,8 +38,8 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder
-import com.freighttrust.s3.repositories.FileRepository
-import com.freighttrust.s3.repositories.S3FileRepository
+import com.freighttrust.persistence.s3.repositories.FileRepository
+import com.freighttrust.persistence.s3.repositories.S3FileRepository
 import com.typesafe.config.Config
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

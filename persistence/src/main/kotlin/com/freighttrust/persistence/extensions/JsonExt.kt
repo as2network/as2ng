@@ -30,31 +30,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.postgres.repositories
+package com.freighttrust.persistence.extensions
 
-import com.freighttrust.jooq.Tables
-import com.freighttrust.jooq.tables.records.CertificateRecord
-import org.jooq.DSLContext
+import org.jooq.JSONB
+import org.jooq.tools.json.JSONObject
 
-class CertificateRepository(
-  private val dbCtx: DSLContext
-) {
-
-  fun findOneById(partnerId: String): CertificateRecord? =
-    dbCtx
-      .selectFrom(Tables.CERTIFICATE)
-      .where(Tables.CERTIFICATE.TRADING_PARTNER_ID.eq(partnerId))
-      .fetchOne()
-
-  fun findOneByCertificate(certificate: String): CertificateRecord? =
-    dbCtx
-      .selectFrom(Tables.CERTIFICATE)
-      .where(Tables.CERTIFICATE.X509_CERTIFICATE.eq(certificate))
-      .fetchOne()
-
-  fun insert(record: CertificateRecord): Int =
-    dbCtx
-      .insertInto(Tables.CERTIFICATE)
-      .set(record)
-      .execute()
-}
+fun JSONObject.toJSONB(): JSONB = JSONB.valueOf(this.toString())

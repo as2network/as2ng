@@ -30,12 +30,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.db.extensions
+package com.freighttrust.persistence.postgres.extensions
 
-import com.freighttrust.as2.fb.As2Mdn
-import com.freighttrust.as2.fb.As2Message
-import com.freighttrust.jooq.tables.records.As2MdnRecord
-import com.freighttrust.jooq.tables.records.As2MessageRecord
+import org.jooq.JSONB
 import org.jooq.tools.json.JSONObject
 
-
+fun JSONObject.toJSONB(): JSONB = JSONB.valueOf(this.toString())

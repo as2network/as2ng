@@ -36,9 +36,9 @@ import com.freighttrust.as2.modules.As2ExchangeServerModule
 import com.freighttrust.as2.modules.CertsModule
 import com.freighttrust.as2.modules.HttpModule
 import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
+import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.messaging.modules.ActiveMQModule
-import com.freighttrust.s3.S3Module
+import com.freighttrust.persistence.s3.S3Module
 import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.session.AS2Session
 import kotlinx.cli.ArgParser

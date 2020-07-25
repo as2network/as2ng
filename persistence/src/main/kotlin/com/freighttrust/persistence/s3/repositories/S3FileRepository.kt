@@ -30,34 +30,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.postgres.repositories
+package com.freighttrust.persistence.s3.repositories
 
-import com.freighttrust.jooq.Tables.AS2_MESSAGE
-import com.freighttrust.jooq.tables.records.As2MessageRecord
+import com.amazonaws.services.s3.model.ObjectMetadata
+import com.amazonaws.services.s3.model.PutObjectRequest
+import com.amazonaws.services.s3.transfer.TransferManager
+import com.freighttrust.jooq.Tables
+import com.freighttrust.jooq.tables.records.FileRecord
 import org.jooq.DSLContext
+import java.io.InputStream
+import javax.activation.DataHandler
 
-class As2MessageRepository(
-  private val dbCtx: DSLContext
-) {
+interface FileRepository {
 
-  fun findById(id: String): As2MessageRecord? =
-    dbCtx
-      .selectFrom(AS2_MESSAGE)
-      .where(AS2_MESSAGE.ID.eq(id))
-      .fetch()
-      .firstOrNull()
+  fun insert(key: String, dataHandler: DataHandler): FileRecord
+}
 
-  fun findMicById(id: String): String? =
-    dbCtx
-      .select(AS2_MESSAGE.MIC)
-      .from(AS2_MESSAGE)
-      .where(AS2_MESSAGE.ID.eq(id))
-      .fetch()
-      .firstOrNull()
-      ?.value1()
+class S3FileRepository(
+  private val dbCtx: DSLContext,
+  private val transferManager: TransferManager,
+  private val bucket: String
+) : FileRepository {
 
-  fun insert(record: As2MessageRecord): As2MessageRecord {
-    dbCtx.executeInsert(record)
-    return record
-  }
+  // TODO large file support
+  override fun insert(key: String, dataHandler: DataHandler): FileRecord =
+
+    ObjectMetadata()
+      .apply { this.contentType = dataHandler.contentType }
+      .let { metadata -> PutObjectRequest(bucket, key, dataHandler.inputStream, metadata) }
+      .let(transferManager::upload)
+      .waitForUploadResult()
+      .let {
+
+        dbCtx
+          .insertInto(Tables.FILE, Tables.FILE.BUCKET, Tables.FILE.KEY)
+          .values(bucket, key)
+          .returningResult(Tables.FILE.ID, Tables.FILE.BUCKET, Tables.FILE.KEY)
+          .fetch()
+          .into(Tables.FILE)
+          .first()
+      }
 }

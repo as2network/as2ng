@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.postgres.extensions
+package com.freighttrust.persistence.extensions
 
 import org.postgresql.util.Base64
 import java.io.ByteArrayInputStream

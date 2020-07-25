@@ -6,7 +6,7 @@ import com.freighttrust.as2.ext.get
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.jooq.tables.records.As2MessageRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.postgres.repositories.TradingChannelRepository
+import com.freighttrust.persistence.postgres.repositories.TradingChannelRepository
 import io.vertx.core.Handler
 import io.vertx.core.MultiMap
 import io.vertx.ext.web.RoutingContext

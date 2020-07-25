@@ -4,9 +4,9 @@ import com.amazonaws.util.Base64
 import com.freighttrust.as2.ext.as2Context
 import com.freighttrust.as2.ext.mic
 import com.freighttrust.jooq.tables.records.As2MessageRecord
-import com.freighttrust.postgres.extensions.toJSONB
-import com.freighttrust.postgres.repositories.As2MessageRepository
-import com.freighttrust.s3.repositories.FileRepository
+import com.freighttrust.persistence.postgres.extensions.toJSONB
+import com.freighttrust.persistence.postgres.repositories.As2MessageRepository
+import com.freighttrust.persistence.s3.repositories.FileRepository
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import org.jooq.tools.json.JSONObject

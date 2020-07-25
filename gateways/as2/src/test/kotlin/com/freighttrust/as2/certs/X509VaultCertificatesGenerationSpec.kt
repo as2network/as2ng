@@ -39,7 +39,7 @@ import com.freighttrust.as2.EmbeddedPostgresModule
 import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.as2.modules.HttpModule
 import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
+import com.freighttrust.persistence.postgres.PostgresModule
 import io.kotlintest.Spec
 import io.kotlintest.TestCase
 import io.kotlintest.TestResult

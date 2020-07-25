@@ -3,9 +3,9 @@ package com.freighttrust.as2.handlers
 import com.freighttrust.as2.ext.as2Context
 import com.freighttrust.as2.ext.extractDispositionNotification
 import com.freighttrust.jooq.tables.records.As2MdnRecord
-import com.freighttrust.postgres.repositories.As2MdnRepository
-import com.freighttrust.postgres.repositories.As2MessageRepository
-import com.freighttrust.s3.repositories.FileRepository
+import com.freighttrust.persistence.postgres.repositories.As2MdnRepository
+import com.freighttrust.persistence.postgres.repositories.As2MessageRepository
+import com.freighttrust.persistence.s3.repositories.FileRepository
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 

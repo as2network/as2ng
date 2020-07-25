@@ -2,8 +2,8 @@ package com.freighttrust.as2
 
 import com.freighttrust.as2.modules.As2ExchangeServerModule
 import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
-import com.freighttrust.s3.S3Module
+import com.freighttrust.persistence.postgres.PostgresModule
+import com.freighttrust.persistence.s3.S3Module
 import com.google.common.flogger.MetadataKey.single
 import io.vertx.core.Verticle
 import io.vertx.core.Vertx

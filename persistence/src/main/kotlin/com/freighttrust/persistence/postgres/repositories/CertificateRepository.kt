@@ -30,25 +30,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.postgres.repositories
+package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
+import com.freighttrust.jooq.tables.records.CertificateRecord
 import org.jooq.DSLContext
 
-class TradingChannelRepository(
+class CertificateRepository(
   private val dbCtx: DSLContext
 ) {
 
-  fun findOne(record: TradingChannelRecord): TradingChannelRecord? =
+  fun findOneById(partnerId: String): CertificateRecord? =
     dbCtx
-      .selectFrom(Tables.TRADING_CHANNEL)
-      .where(Tables.TRADING_CHANNEL.SENDER_ID.eq(record.senderId).and(Tables.TRADING_CHANNEL.RECIPIENT_ID.eq(record.recipientId)))
+      .selectFrom(Tables.CERTIFICATE)
+      .where(Tables.CERTIFICATE.TRADING_PARTNER_ID.eq(partnerId))
       .fetchOne()
 
-  fun findOne(senderId: String, recipientId: String): TradingChannelRecord? =
+  fun findOneByCertificate(certificate: String): CertificateRecord? =
     dbCtx
-      .selectFrom(Tables.TRADING_CHANNEL)
-      .where(Tables.TRADING_CHANNEL.SENDER_ID.eq(senderId).and(Tables.TRADING_CHANNEL.RECIPIENT_ID.eq(recipientId)))
+      .selectFrom(Tables.CERTIFICATE)
+      .where(Tables.CERTIFICATE.X509_CERTIFICATE.eq(certificate))
       .fetchOne()
+
+  fun insert(record: CertificateRecord): Int =
+    dbCtx
+      .insertInto(Tables.CERTIFICATE)
+      .set(record)
+      .execute()
 }

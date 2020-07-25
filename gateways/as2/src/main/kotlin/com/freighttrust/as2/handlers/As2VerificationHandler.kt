@@ -2,8 +2,8 @@ package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.ext.as2Context
 import com.freighttrust.as2.ext.isSigned
-import com.freighttrust.db.extensions.toX509
-import com.freighttrust.postgres.repositories.CertificateRepository
+import com.freighttrust.persistence.extensions.toX509
+import com.freighttrust.persistence.postgres.repositories.CertificateRepository
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
@@ -18,7 +18,6 @@ import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder
 import org.slf4j.LoggerFactory
 import java.security.SignatureException
 import javax.mail.internet.MimeMultipart
-import javax.mail.util.SharedFileInputStream
 
 class As2VerificationHandler(
   private val certificateRepository: CertificateRepository,
@@ -64,7 +63,7 @@ class As2VerificationHandler(
             bodyPart.content as MimeMultipart,
             "binary",
             ctx.newTempFile()
-          );
+          )
 
           val senderCertificate =
             if (useCertificateInBody) {

@@ -1,8 +1,8 @@
 package com.freighttrust.as2.controllers
 
 import com.freighttrust.as2.ext.as2Context
-import com.freighttrust.postgres.repositories.CertificateRepository
-import com.freighttrust.postgres.repositories.TradingChannelRepository
+import com.freighttrust.persistence.postgres.repositories.CertificateRepository
+import com.freighttrust.persistence.postgres.repositories.TradingChannelRepository
 import io.vertx.core.Vertx
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.dispatcher

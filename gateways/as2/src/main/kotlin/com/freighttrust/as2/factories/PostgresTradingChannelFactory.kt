@@ -34,7 +34,7 @@ package com.freighttrust.as2.factories
 
 import com.freighttrust.as2.ext.toPartnership
 import com.freighttrust.as2.ext.toTradingChannelRecord
-import com.freighttrust.postgres.repositories.TradingChannelRepository
+import com.freighttrust.persistence.postgres.repositories.TradingChannelRepository
 import com.helger.as2lib.AbstractDynamicComponent
 import com.helger.as2lib.message.IMessage
 import com.helger.as2lib.message.IMessageMDN

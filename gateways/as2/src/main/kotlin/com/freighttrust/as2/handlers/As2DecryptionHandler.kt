@@ -3,10 +3,10 @@ package com.freighttrust.as2.handlers
 import com.freighttrust.as2.ext.as2Context
 import com.freighttrust.as2.ext.bodyAsMimeBodyPart
 import com.freighttrust.as2.ext.isEncrypted
-import com.freighttrust.db.extensions.toPrivateKey
-import com.freighttrust.db.extensions.toX509
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.postgres.repositories.CertificateRepository
+import com.freighttrust.persistence.extensions.toPrivateKey
+import com.freighttrust.persistence.extensions.toX509
+import com.freighttrust.persistence.postgres.repositories.CertificateRepository
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule

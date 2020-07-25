@@ -30,46 +30,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.as2.ext
+package com.freighttrust.persistence.postgres.extensions
 
-import com.freighttrust.jooq.tables.records.As2MdnRecord
-import com.freighttrust.jooq.tables.records.As2MessageRecord
-import com.freighttrust.jooq.tables.records.FileRecord
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.persistence.postgres.extensions.toJSONB
-import com.helger.as2lib.message.AS2Message
-import com.helger.as2lib.message.AS2MessageMDN
-import com.helger.as2lib.partner.Partnership
-import org.jooq.tools.json.JSONObject
+import org.postgresql.util.Base64
+import java.io.ByteArrayInputStream
+import java.security.KeyFactory
+import java.security.PrivateKey
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
+import java.security.spec.PKCS8EncodedKeySpec
 
+private val x509Factory = CertificateFactory.getInstance("X.509")
 
+private val rsaKeyFactory = KeyFactory.getInstance("RSA")
 
-fun Partnership.toTradingChannelRecord(): TradingChannelRecord {
-  val self = this
-  return TradingChannelRecord()
-    .apply {
-      senderId = self.getSenderID("as2_id")
-      recipientId = self.getReceiverID("as2_id")
-      protocol = self.protocol
-      as2Url = self.aS2URL
-      as2MdnTo = self.aS2MDNTo
-      as2MdnOptions = self.aS2MDNOptions
-      encryptionAlgorithm = self.encryptAlgorithm
-      signingAlgorithm = self.signingAlgorithm
-    }
+fun String.toX509(): X509Certificate {
+  val bytesIn = ByteArrayInputStream(Base64.decode(this))
+  return x509Factory.generateCertificate(bytesIn) as X509Certificate
 }
 
-fun TradingChannelRecord.toPartnership(): Partnership {
-  val self = this
-  return Partnership(Partnership.DEFAULT_NAME)
-    .apply {
-      this.setSenderID("as2_id", senderId)
-      this.setReceiverID("as2_id", recipientId)
-      this.protocol = self.protocol
-      this.aS2URL = self.as2Url
-      this.aS2MDNTo = self.as2MdnTo
-      this.aS2MDNOptions = self.as2MdnOptions
-      this.encryptAlgorithm = self.encryptionAlgorithm
-      this.signingAlgorithm = self.signingAlgorithm
-    }
+fun String.toPrivateKey(): PrivateKey {
+  val keySpec = PKCS8EncodedKeySpec(Base64.decode(this))
+  return rsaKeyFactory.generatePrivate(keySpec)
 }

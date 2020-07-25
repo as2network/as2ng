@@ -30,12 +30,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.postgres
+package com.freighttrust.persistence.postgres
 
-import com.freighttrust.postgres.repositories.As2MdnRepository
-import com.freighttrust.postgres.repositories.As2MessageRepository
-import com.freighttrust.postgres.repositories.CertificateRepository
-import com.freighttrust.postgres.repositories.TradingChannelRepository
+import com.freighttrust.persistence.postgres.repositories.As2MdnRepository
+import com.freighttrust.persistence.postgres.repositories.As2MessageRepository
+import com.freighttrust.persistence.postgres.repositories.CertificateRepository
+import com.freighttrust.persistence.postgres.repositories.TradingChannelRepository
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

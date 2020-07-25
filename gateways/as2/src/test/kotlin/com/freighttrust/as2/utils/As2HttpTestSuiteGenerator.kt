@@ -38,7 +38,7 @@ import com.freighttrust.as2.AS2ClientModule
 import com.freighttrust.as2.HttpMockModule
 import com.freighttrust.as2.modules.HttpModule
 import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
+import com.freighttrust.persistence.postgres.PostgresModule
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientSettings

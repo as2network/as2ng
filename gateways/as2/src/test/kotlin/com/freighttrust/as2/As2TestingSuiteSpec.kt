@@ -45,8 +45,8 @@ import com.freighttrust.as2.utils.asOkHttpRequest
 import com.freighttrust.as2.utils.asPathResourceFile
 import com.freighttrust.as2.utils.ignoreExceptions
 import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
-import com.freighttrust.s3.S3Module
+import com.freighttrust.persistence.postgres.PostgresModule
+import com.freighttrust.persistence.s3.S3Module
 import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest

@@ -30,44 +30,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.s3.repositories
+package com.freighttrust.persistence.postgres.repositories
 
-import com.amazonaws.services.s3.model.ObjectMetadata
-import com.amazonaws.services.s3.model.PutObjectRequest
-import com.amazonaws.services.s3.transfer.TransferManager
-import com.freighttrust.jooq.Tables
-import com.freighttrust.jooq.tables.records.FileRecord
+import com.freighttrust.jooq.tables.records.As2MdnRecord
 import org.jooq.DSLContext
-import java.io.InputStream
-import javax.activation.DataHandler
 
-interface FileRepository {
+class As2MdnRepository(
+  private val dbCtx: DSLContext
+) {
 
-  fun insert(key: String, dataHandler: DataHandler): FileRecord
-}
-
-class S3FileRepository(
-  private val dbCtx: DSLContext,
-  private val transferManager: TransferManager,
-  private val bucket: String
-) : FileRepository {
-
-  // TODO large file support
-  override fun insert(key: String, dataHandler: DataHandler): FileRecord =
-
-    ObjectMetadata()
-      .apply { this.contentType = dataHandler.contentType }
-      .let { metadata -> PutObjectRequest(bucket, key, dataHandler.inputStream, metadata) }
-      .let(transferManager::upload)
-      .waitForUploadResult()
-      .let {
-
-        dbCtx
-          .insertInto(Tables.FILE, Tables.FILE.BUCKET, Tables.FILE.KEY)
-          .values(bucket, key)
-          .returningResult(Tables.FILE.ID, Tables.FILE.BUCKET, Tables.FILE.KEY)
-          .fetch()
-          .into(Tables.FILE)
-          .first()
-      }
+  fun insert(record: As2MdnRecord): As2MdnRecord {
+    dbCtx.executeInsert(record)
+    return record
+  }
 }

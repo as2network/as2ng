@@ -35,9 +35,9 @@ package com.freighttrust.as2.receivers
 import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.as2.ext.isRequestingSyncMDN
 import com.freighttrust.as2.ext.toHttpHeaderMap
-import com.freighttrust.postgres.repositories.As2MdnRepository
-import com.freighttrust.postgres.repositories.As2MessageRepository
-import com.freighttrust.s3.repositories.FileRepository
+import com.freighttrust.persistence.postgres.repositories.As2MdnRepository
+import com.freighttrust.persistence.postgres.repositories.As2MessageRepository
+import com.freighttrust.persistence.s3.repositories.FileRepository
 import com.helger.as2lib.cert.ECertificatePartnershipType
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.crypto.MIC
