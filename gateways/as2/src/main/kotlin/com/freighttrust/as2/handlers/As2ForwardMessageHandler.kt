@@ -23,8 +23,6 @@ class As2ForwardMessageHandler(
       // TODO make configurable
       request.headers().remove(AS2Header.ReceiptDeliveryOption.key)
       request.putHeader(AS2Header.ReceiptDeliveryOption.key, "http://localhost:8080/mdn")
-      request.headers().remove(AS2Header.DispositionNotificationTo.key)
-      request.putHeader(AS2Header.DispositionNotificationTo.key, "http://localhost:8080/mdn")
     }
 
     val response = request.sendBufferAwait(ctx.body)

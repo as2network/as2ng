@@ -46,7 +46,7 @@ build.dependsOn(tasks.shadowJar)
 val appJvmArgs = listOf("-Xms512m", "-Xmx512m")
 
 val vertxLauncher = "io.vertx.core.Launcher"
-val vertxDebug = getenv("VERTX_DEBUG")?.toBoolean() ?: true
+val vertxDebug = getenv("VERTX_DEBUG")?.toBoolean() ?: false
 
 fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   group = "application"
@@ -83,7 +83,7 @@ tasks {
     archiveClassifier.set("")
   }
 
-  create<JavaExec>("runAS2Server") { verticleTask(verticle = "com.freighttrust.as2.AS2Verticle", debugPort = "10000") }
+  create<JavaExec>("runAS2Server") { verticleTask(verticle = "as2:com.freighttrust.as2.As2ServerVerticle", debugPort = "10000") }
 
 }
 
@@ -120,6 +120,7 @@ dependencies {
   implementation("org.apache.logging.log4j:log4j-slf4j-impl")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
+  testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.koin:koin-test")
   testImplementation("io.mockk:mockk")
   testImplementation("com.opentable.components:otj-pg-embedded")

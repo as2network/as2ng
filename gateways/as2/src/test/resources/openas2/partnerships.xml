@@ -20,4 +20,5 @@
     <attribute name="encrypt" value="3des"/>
     <attribute name="sign" value="sha1"/>
   </partnership>
+
 </partnerships>

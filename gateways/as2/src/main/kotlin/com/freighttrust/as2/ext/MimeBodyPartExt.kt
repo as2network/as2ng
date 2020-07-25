@@ -1,5 +1,6 @@
 package com.freighttrust.as2.ext
 
+import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.domain.DispositionNotification
 import com.freighttrust.as2.util.AS2Header
 import com.helger.as2lib.message.AS2MessageMDN
@@ -80,7 +81,7 @@ fun MimeBodyPart.extractDispositionNotification(): DispositionNotification {
             headers.getAs2Header(AS2Header.OriginalRecipient),
             headers.getAs2Header(AS2Header.FinalRecipient),
             headers.getAs2Header(AS2Header.ReportingUA),
-            headers.getAs2Header(AS2Header.Disposition),
+            Disposition.parse(headers.getAs2Header(AS2Header.Disposition)),
             headers.getAs2Header(AS2Header.ReceivedContentMIC)
           )
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openas2 _CryptoVerifyUseCertificateInBodyPart="false"
+         _CryptoSignIncludeCertificateInBodyPart="false">
+
+  <certificates classname="com.helger.as2.app.cert.ServerCertificateFactory"
+                type="pkcs12"
+                filename="%home%/keystore.p12"
+                password="password"
+                interval="300"/>
+
+  <partnerships classname="com.helger.as2.app.partner.ServerXMLPartnershipFactory"
+                filename="%home%/partnerships.xml"/>
+
+  <processor classname="com.helger.as2lib.processor.DefaultMessageProcessor"
+             pendingMDN="as2-data/openas2b/data/pendingMDN3"
+             pendingMDNinfo="as2-data/pendinginfoMDN3">
+
+    <module classname="com.helger.as2lib.processor.receiver.AS2ReceiverModule"
+            port="10080"
+            errordir="as2-data/openas2b/data/inbox/error"
+            errorformat="$msg.sender.as2_id$, $msg.receiver.as2_id$, $msg.headers.message-id$"/>
+
+  </processor>
+</openas2>

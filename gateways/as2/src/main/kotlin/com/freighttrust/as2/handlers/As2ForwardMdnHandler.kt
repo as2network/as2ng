@@ -1,7 +1,6 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.ext.as2Context
-import com.freighttrust.as2.util.AS2Header
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
@@ -16,7 +15,7 @@ class As2ForwardMdnHandler(
     val originalMessage = as2Context.originalMessage!!
 
     val response = webClient
-      .postAbs(originalMessage.dispositionNotificationTo)
+      .postAbs(originalMessage.receiptDeliveryOption)
       .putHeaders(ctx.request().headers())
       .sendBufferAwait(ctx.body)
 
@@ -24,5 +23,7 @@ class As2ForwardMdnHandler(
     ctx.response()
       .setStatusCode(201)
       .end()
+
+
   }
 }

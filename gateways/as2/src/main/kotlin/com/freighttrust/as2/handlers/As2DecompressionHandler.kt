@@ -38,13 +38,14 @@ class As2DecompressionHandler : Handler<RoutingContext> {
         throw Error("Decompression has already occurred")
 
       // TODO configurable decompression override from trading channel
-      bodyPart.isCompressed() -> decompress(ctx, bodyPart)
-        .also { bodyPart ->
+      bodyPart.isCompressed() ->
+        decompress(ctx, bodyPart)
+          .also { decompressedBodyPart ->
 
-          as2Context.bodyPart = bodyPart
-          as2Context.decompressedContentType = bodyPart.contentType
+            as2Context.bodyPart = decompressedBodyPart
+            as2Context.decompressedContentType = decompressedBodyPart.contentType
 
-        }
+          }
     }
 
     ctx.next()

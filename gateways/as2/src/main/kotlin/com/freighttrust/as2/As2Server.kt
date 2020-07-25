@@ -32,7 +32,7 @@
 
 package com.freighttrust.as2
 
-import com.freighttrust.as2.modules.As2Module
+import com.freighttrust.as2.modules.As2ExchangeServerModule
 import com.freighttrust.as2.modules.CertsModule
 import com.freighttrust.as2.modules.HttpModule
 import com.freighttrust.common.modules.AppConfigModule
@@ -63,7 +63,7 @@ object As2Server {
         S3Module,
         HttpModule,
         CertsModule,
-        As2Module
+        As2ExchangeServerModule
       )
     }
 

@@ -1,47 +1,28 @@
 package com.freighttrust.as2
 
-import com.freighttrust.as2.controllers.AS2Controller
 import com.freighttrust.as2.handlers.*
-import com.freighttrust.as2.modules.As2Module
-import com.freighttrust.common.modules.AppConfigModule
-import com.freighttrust.postgres.PostgresModule
-import com.freighttrust.s3.S3Module
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
-import io.vertx.ext.web.handler.LoggerHandler
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.launch
 import org.jooq.DSLContext
+import org.koin.core.Koin
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
+import org.koin.core.module.Module
 import org.koin.dsl.module
 import org.slf4j.LoggerFactory
 
-class AS2Verticle : CoroutineVerticle() {
 
-  private val logger = LoggerFactory.getLogger(AS2Verticle::class.java)
+class As2ServerVerticle(
+  private val koin: Koin
+) : CoroutineVerticle() {
 
-  private lateinit var koinApp: KoinApplication
+  private val logger = LoggerFactory.getLogger(As2ServerVerticle::class.java)
 
   override suspend fun start() {
-
-    koinApp = startKoin {
-      printLogger()
-
-      modules(
-        module { single { vertx } },
-        AppConfigModule,
-        PostgresModule,
-        S3Module,
-        As2Module
-      )
-    }
-
-    val koin = koinApp.koin
-
-    val as2Controller = koin.get<AS2Controller>()
 
     val router = Router.router(vertx)
 
@@ -84,9 +65,8 @@ class AS2Verticle : CoroutineVerticle() {
   }
 
   override suspend fun stop() {
-    val dbCtx = koinApp.koin.get<DSLContext>()
+    val dbCtx = koin.get<DSLContext>()
     dbCtx.close()
-    koinApp.close()
   }
 
   private fun Route.coroutineHandler(fn: suspend (RoutingContext) -> Unit): Route {

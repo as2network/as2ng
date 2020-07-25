@@ -11,7 +11,6 @@ fun RoutingContext.newTempFile(): File =
         .also { file ->
           val tempFiles: List<File> = ctx.get(As2TempFileHandler.CTX_TEMP_FILES)
           ctx.put(As2TempFileHandler.CTX_TEMP_FILES, tempFiles + file)
-
         }
     }
 

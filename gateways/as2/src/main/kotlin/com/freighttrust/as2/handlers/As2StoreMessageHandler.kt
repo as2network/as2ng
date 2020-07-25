@@ -31,7 +31,7 @@ class As2StoreMessageHandler(
 
     // TODO improve concurrency
     val bodyFileRecord = fileRepository
-      .insert("${messageId}-body", as2Context.bodyPart.dataHandler)
+      .insert("${messageId}-body", as2Context.originalBodyPart.dataHandler)
 
     val messageRecord = As2MessageRecord()
       .apply {

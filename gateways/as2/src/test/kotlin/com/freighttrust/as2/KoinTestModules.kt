@@ -32,33 +32,31 @@
 
 package com.freighttrust.as2
 
-import com.freighttrust.as2.cert.NoneCertificateProvider
 import com.freighttrust.as2.factories.PostgresCertificateFactory
-import com.freighttrust.as2.factories.PostgresTradingChannelFactory
-import com.freighttrust.as2.receivers.AS2ForwardingReceiverModule
-import com.freighttrust.jooq.tables.records.FileRecord
-import com.freighttrust.postgres.repositories.TradingChannelRepository
-import com.freighttrust.s3.repositories.FileRepository
-import com.helger.as2lib.cert.ICertificateFactory
+import com.freighttrust.as2.utils.asPathResourceFile
+import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
-import com.helger.as2lib.partner.IPartnershipFactory
-import com.helger.as2lib.processor.DefaultMessageProcessor
-import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import com.helger.as2lib.session.AS2Session
+import com.helger.commons.io.resource.ClassPathResource
+import com.helger.security.keystore.EKeyStoreType
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
+import com.typesafe.config.Config
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.configuration.FluentConfiguration
-import org.jooq.DSLContext
-import org.jooq.SQLDialect
-import org.jooq.impl.DSL
 import org.koin.core.qualifier._q
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import java.io.InputStream
+import org.postgresql.Driver
 import java.util.concurrent.TimeUnit
-import javax.activation.DataHandler
+import javax.sql.DataSource
 
 val AS2ClientModule = module {
 
@@ -91,73 +89,82 @@ val HttpTestingModule = module {
   }
 }
 
-val PostgresMockModule = module(override = true) {
+val As2LibModule = module {
 
-  single { EmbeddedPostgres.builder().start() }
+  factory { MainOpenAS2Server() }
 
-  factory<DSLContext> {
-    val pg = get<EmbeddedPostgres>()
-    val ds = pg.postgresDatabase
+  factory { AS2Client() }
 
-    val config = FluentConfiguration()
-      .dataSource(ds)
-      .locations("classpath:/db/migration")
+  factory(_q("base")) {
+    AS2ClientSettings().apply {
+      messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+      setKeyStore(
+        EKeyStoreType.PKCS12,
+        ClassPathResource.getAsFile("/certificates/keystore.p12")!!,
+        "password"
+      )
+      setSenderData("OpenAS2A", "openas2a@email.com", "OpenAS2A")
+      setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:8080/message")
+      setPartnershipName("Partnership name")
 
-    Flyway(config).migrate()
-
-    DSL.using(ds, SQLDialect.POSTGRES)
+      connectTimeoutMS = 20000
+      readTimeoutMS = 20000
+    }
   }
+
+  factory(_q("A to B")) {
+    get<AS2ClientSettings>(_q("base"))
+      .apply {
+        setSenderData("OpenAS2A", "openas2a@email.com", "OpenAS2A")
+        setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:8080/message")
+        setPartnershipName("OpenAS2A-OpenAS2B")
+      }
+  }
+
+  factory(_q("B to A")) {
+    get<AS2ClientSettings>(_q("base"))
+      .apply {
+        setSenderData("OpenAS2A", "openas2a@email.com", "OpenAS2A")
+        setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:8080/message")
+        setPartnershipName("OpenAS2A-OpenAS2B")
+      }
+  }
+
 }
 
-val As2ExchangeServerModule = module {
+val EmbeddedPostgresModule = module(override = true) {
 
-  factory<FileRepository> {
-    val fr = object : FileRepository {
-      override fun insert(key: String, dataHandler: DataHandler): FileRecord = FileRecord()
-    }
-    fr
+  single {
+    EmbeddedPostgres.builder()
+      .start()
+      .also { db ->
+
+        // run the migrations first before anything else
+        FluentConfiguration()
+          .dataSource(db.postgresDatabase)
+          .locations("classpath:/db/migration")
+          .apply { Flyway(this).migrate() }
+
+      }
   }
 
-  factory<ICertificateFactory> {
-    PostgresCertificateFactory(get(), NoneCertificateProvider())
-  }
+  single<DataSource> {
 
-  factory<IPartnershipFactory> {
-    PostgresTradingChannelFactory(TradingChannelRepository(get()))
-  }
+    val config = get<Config>(named("postgres"))
+    val embeddedPostgres = get<EmbeddedPostgres>()
 
-  factory {
-    AS2ForwardingReceiverModule(get(), get(), get(), get(), "")
+    val dataSourceConfig = HikariConfig()
       .apply {
-        initDynamicComponent(get(), null)
+        driverClassName = Driver::class.java.name
+        dataSource = embeddedPostgres.postgresDatabase
+        isAutoCommit = config.getBoolean("isAutoCommit")
+        maximumPoolSize = config.getInt("maximumPoolSize")
+        addDataSourceProperty("cachePrepStmts", config.getBoolean("cachePrepStmts"))
+        addDataSourceProperty("prepStmtCacheSize", config.getInt("prepStmtCacheSize"))
+        addDataSourceProperty("prepStmtCacheSqlLimit", config.getInt("prepStmtCacheSqlLimit"))
       }
+
+    HikariDataSource(dataSourceConfig)
   }
 
-  factory {
-    AS2Session().apply {
-      val self = this
-
-      certificateFactory = get()
-      partnershipFactory = get()
-      messageProcessor = DefaultMessageProcessor().apply {
-        initDynamicComponent(self, attrs())
-
-        addModule(
-          AS2ForwardingReceiverModule(
-            get(),
-            get(),
-            get(),
-            get(),
-            ""
-          )
-            .apply {
-              attrs()[AbstractActiveNetModule.ATTR_PORT] = "10085"
-              attrs()[AbstractActiveNetModule.ATTR_ERROR_DIRECTORY] = "as2-data/proxy/inbox/error"
-              attrs()[AbstractActiveNetModule.ATTR_ERROR_FORMAT] = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
-              initDynamicComponent(self, attrs())
-            }
-        )
-      }
-    }
-  }
 }

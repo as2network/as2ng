@@ -35,7 +35,7 @@
 package com.freighttrust.as2.certs
 
 import com.freighttrust.as2.AS2ClientModule
-import com.freighttrust.as2.PostgresMockModule
+import com.freighttrust.as2.EmbeddedPostgresModule
 import com.freighttrust.as2.ext.isNotSuccessful
 import com.freighttrust.as2.modules.HttpModule
 import com.freighttrust.common.modules.AppConfigModule
@@ -68,7 +68,7 @@ class X509VaultCertificatesGenerationSpec : FunSpec(), KoinTest {
           listOf(
             AppConfigModule,
             PostgresModule,
-            PostgresMockModule,
+            EmbeddedPostgresModule,
             HttpModule,
             AS2ClientModule
           )

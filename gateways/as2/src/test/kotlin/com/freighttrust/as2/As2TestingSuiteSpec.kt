@@ -34,35 +34,40 @@
 
 package com.freighttrust.as2
 
+import com.freighttrust.as2.domain.Disposition
+import com.freighttrust.as2.domain.DispositionActionMode
+import com.freighttrust.as2.domain.DispositionSendingMode
+import com.freighttrust.as2.domain.DispositionType
+import com.freighttrust.as2.ext.disposition
+import com.freighttrust.as2.ext.isSigned
+import com.freighttrust.as2.modules.As2ExchangeServerModule
 import com.freighttrust.as2.utils.asOkHttpRequest
 import com.freighttrust.as2.utils.asPathResourceFile
 import com.freighttrust.as2.utils.ignoreExceptions
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.postgres.PostgresModule
+import com.freighttrust.s3.S3Module
+import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientSettings
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
+import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.session.AS2Session
-import com.helger.commons.io.resource.ClassPathResource
-import com.helger.security.keystore.EKeyStoreType
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
-import io.kotlintest.Spec
-import io.kotlintest.TestCase
-import io.kotlintest.TestResult
+import io.kotlintest.*
 import io.kotlintest.extensions.TopLevelTest
-import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.FunSpec
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import io.vertx.core.Vertx
+import io.vertx.kotlin.core.deployVerticleAwait
+import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.jooq.DSLContext
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.qualifier._q
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import java.nio.charset.Charset
@@ -71,46 +76,43 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
 
   private lateinit var pg: EmbeddedPostgres
   private lateinit var dsl: DSLContext
+  private lateinit var openAs2Job: Job
+
+  private val modules = listOf(
+    AppConfigModule,
+    PostgresModule,
+    S3Module,
+    As2ExchangeServerModule,
+    EmbeddedPostgresModule,
+    HttpTestingModule,
+    HttpMockModule,
+    As2LibModule
+  )
 
   private val k by lazy { getKoin() }
 
   override fun beforeSpecClass(spec: Spec, tests: List<TopLevelTest>) {
+
     startKoin {
       modules(
-        listOf(
-          AppConfigModule,
-          PostgresModule,
-          PostgresMockModule,
-          HttpTestingModule,
-          HttpMockModule,
-          AS2ClientModule,
-          As2ExchangeServerModule,
-          module {
-
-            factory {
-              AS2ClientSettings().apply {
-                messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
-                setKeyStore(
-                  EKeyStoreType.PKCS12,
-                  ClassPathResource.getAsFile("/certificates/keystore.p12")!!,
-                  "password"
-                )
-                setSenderData("OpenAS2C", "openas2c@email.com", "OpenAS2C")
-                setReceiverData("OpenAS2A", "OpenAS2A", "http://localhost:10085")
-                setPartnershipName("Partnership name")
-
-                connectTimeoutMS = 20000
-                readTimeoutMS = 20000
-              }
-            }
-
-          }
-        )
+        modules +
+          module { single { Vertx.vertx() } }
       )
     }
+
+    runBlocking {
+      As2ServerVerticle(k).apply { k.get<Vertx>().deployVerticleAwait(this) }
+    }
+
+    openAs2Job = GlobalScope
+      .launch(Dispatchers.IO) {
+        k.get<MainOpenAS2Server>()
+          .start("/openas2/config-b.xml".asPathResourceFile().absolutePath)
+      }
   }
 
   override fun afterSpecClass(spec: Spec, results: Map<TestCase, TestResult>) {
+    openAs2Job.cancel()
     stopKoin()
   }
 
@@ -128,39 +130,53 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
 
     context("Synchronous flow") {
 
-      test("1. Sender sends un-encrypted data and does not request a receipt")
-        .config(enabled = false) {
+      test("1. Sender sends un-encrypted data and does not request a receipt") {
 
-          // Prepare mock web server for OpenAS2B
-          val mockServerB = k.get<MockWebServer>()
-          with(mockServerB) {
-            start(port = 10080)
-            enqueue(MockResponse().setResponseCode(200))
+        val response = k.get<AS2ClientSettings>(_q("A to B"))
+          .let { settings ->
+            settings.isMDNRequested = false
+            AS2ClientRequest("Sender sends un-encrypted data and does not request a receipt")
+              .apply {
+                setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
+              }
+              .let { k.get<AS2Client>().sendSynchronous(settings, it) }
           }
 
-          // Start our proxy server
-          val session = k.get<AS2Session>()
-          session.messageProcessor.startActiveModules()
-
-          // Fire request
-          val client = k.get<OkHttpClient>()
-          val response = client
-            .newCall(
-              "/messages/text/plain/1-unencrypted-data-no-receipt"
-                .asOkHttpRequest("http://localhost:10085")
-            )
-            .execute()
-
-          // Assert
-          response shouldNotBe null
-          response.code shouldBe 200
+        response.apply {
+          hasException() shouldBe false
+          hasMDN() shouldBe false
         }
+
+      }
 
       test("2. Sender sends un-encrypted data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
         .config(enabled = false) {}
 
-      test("3. Sender sends un-encrypted data and requests a signed receipt. Receiver sends back the signed receipt.")
-        .config(enabled = false) {}
+
+
+
+      test("3. Sender sends un-encrypted data and requests a signed receipt. Receiver sends back the signed receipt.") {
+
+        val response = k.get<AS2ClientSettings>(_q("A to B"))
+          .let { settings ->
+            AS2ClientRequest("Sender sends un-encrypted data and does not request a receipt")
+              .apply { setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset()) }
+              .let { k.get<AS2Client>().sendSynchronous(settings, it) }
+          }
+
+        response.apply {
+          hasException() shouldBe false
+          hasMDN() shouldBe true
+          mdn!!.attrs()[AS2Message.ATTRIBUTE_RECEIVED_ENCRYPTED] shouldBe null
+          mdn!!.attrs()[AS2Message.ATTRIBUTE_RECEIVED_SIGNED] shouldBe "true"
+          mdnDisposition?.disposition() shouldBe Disposition(
+            DispositionActionMode.AutomaticAction,
+            DispositionSendingMode.SentAutomatically,
+            DispositionType.Processed
+          )
+        }
+
+      }
 
       test("4. Sender sends encrypted data and does not request a receipt.")
         .config(enabled = false) {}
@@ -174,47 +190,50 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
       test("7. Sender sends signed data and does not request a signed or unsigned receipt.")
         .config(enabled = false) {}
 
-      test("8. Sender sends signed data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
-        .config(enabled = true) {
-
-          // Prepare OpenAS2C server (the one receiving the MDN)
-          val mockServerC = k.get<MockWebServer>()
-          with(mockServerC) {
-            start(port = 10090)
-          }
-
-          // Prepare OpenAS2A server (the one receiving the AS2 message)
-          GlobalScope.launch(Dispatchers.IO) {
-            As2Server.startAs2LibServer("/as2/openas2a/config.xml".asPathResourceFile().absolutePath)
-          }
-
-          // Start our exchange server
-          val session = k.get<AS2Session>()
-          session.messageProcessor.startActiveModules()
-
-          // Obtain client
-          val as2Client = k.get<AS2Client>()
-
-          // Prepare client settings
-          val clientSettings = k.get<AS2ClientSettings>()
-            .apply {
-              setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
-              mdnOptions = null
-              isMDNRequested = true
-            }
-
-          // Prepare AS2 request
-          val request = AS2ClientRequest("Message")
-            .apply {
-              setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
-            }
-
-          // Send request
-          ignoreExceptions { as2Client.sendSynchronous(clientSettings, request) }
-
-          // Assert OpenAS2C received a correct MDN response
-          mockServerC.requestCount shouldBe 1
-        }
+//      test("8. Sender sends signed data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
+//        .config(enabled = true) {
+//
+//          // Prepare OpenAS2C server (the one receiving the MDN)
+//          val mockServerC = k.get<MockWebServer>()
+//          with(mockServerC) {
+//            start(port = 10090)
+//          }
+//
+//          // Prepare OpenAS2B server (the one receiving the AS2 message)
+//          GlobalScope.launch(Dispatchers.IO) {
+//            As2Server.startAs2LibServer("/as2/openas2b/config.xml".asPathResourceFile().absolutePath)
+//          }
+//
+//          // Start our exchange server
+//          val verticle = As2ServerVerticle(k)
+//            .apply { k.get<Vertx>().deployVerticleAwait(this) }
+//
+//          // Obtain client
+//          val as2Client = k.get<AS2Client>()
+//
+//          // Prepare client settings
+//          val clientSettings = k.get<AS2ClientSettings>()
+//            .apply {
+//              setEncryptAndSign(null, ECryptoAlgorithmSign.DIGEST_MD5)
+//              mdnOptions = null
+//              isMDNRequested = true
+//            }
+//
+//          // Prepare AS2 request
+//          val request = AS2ClientRequest("Message")
+//            .apply {
+//              setData("/messages/attachment.txt".asPathResourceFile(), Charset.defaultCharset())
+//            }
+//
+//          // Send request
+//          ignoreExceptions {
+//            val response = as2Client.sendSynchronous(clientSettings, request)
+//            response.mdn shouldNotBe null
+//          }
+//
+//          // Assert OpenAS2C received a correct MDN response
+////          mockServerC.requestCount shouldBe 1
+//        }
 
       test("9. Sender sends signed data and requests a signed receipt. Receiver sends back the signed receipt.")
         .config(enabled = false) {}

@@ -9,9 +9,7 @@ import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.postgres.repositories.TradingChannelRepository
 import io.vertx.core.Handler
 import io.vertx.core.MultiMap
-import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.RoutingContext
-import io.vertx.ext.web.client.HttpResponse
 import javax.mail.internet.MimeBodyPart
 
 class As2Context(
@@ -55,7 +53,7 @@ class As2Context(
   val signed: Boolean
     get() = verifiedContentType != null
 
-  val asyncMdn = !(dispositionNotificationTo == null && receiptDeliveryOption == null)
+  val asyncMdn = receiptDeliveryOption != null
 }
 
 class As2ContextHandler(

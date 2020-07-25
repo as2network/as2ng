@@ -44,7 +44,7 @@ import org.koin.core.qualifier._q
 import org.koin.dsl.module
 import java.net.URL
 
-val As2Module = module {
+val As2ExchangeServerModule = module {
 
   single(_q("as2")) {
     val config = get<Config>(_q("app"))
@@ -54,10 +54,6 @@ val As2Module = module {
   factory {
     val config = get<Config>(_q("app"))
     As2SessionFactory.create(_koin, config)
-  }
-
-  single {
-    OkHttpClient()
   }
 
   factory {
