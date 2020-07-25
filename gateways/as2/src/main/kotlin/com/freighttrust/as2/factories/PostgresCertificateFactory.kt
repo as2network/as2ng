@@ -43,6 +43,7 @@ import com.helger.as2lib.AbstractDynamicComponent
 import com.helger.as2lib.cert.ECertificatePartnershipType
 import com.helger.as2lib.cert.ICertificateFactory
 import com.helger.as2lib.message.IBaseMessage
+import kotlinx.coroutines.runBlocking
 import org.bouncycastle.util.encoders.Base64
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
@@ -58,10 +59,13 @@ class PostgresCertificateFactory(
       ECertificatePartnershipType.RECEIVER -> msg.partnership().receiverAS2ID
     }
 
-    val certificate = partnerId
-      ?.let { certificateRepository.findOneById(it) }
-      ?.x509Certificate
-      ?.toX509() ?: requestX509Certificate(partnerId)
+    val certificate = runBlocking {
+      partnerId
+        ?.let { id -> CertificateRecord().apply { tradingPartnerId = id }}
+        ?.let { record -> certificateRepository.findById(record) }
+        ?.x509Certificate
+        ?.toX509() ?: requestX509Certificate(partnerId)
+    }
 
     return requireNotNull(certificate) { "Certificate not found" }
   }
@@ -81,7 +85,11 @@ class PostgresCertificateFactory(
                 x509Certificate = value.x509Certificate
                 privateKey = value.privateKey
               }
-            certificateRepository.insert(certificateRecord)
+
+            runBlocking {
+              certificateRepository.insert(certificateRecord)
+            }
+
 
             return certificateRecord.x509Certificate.toX509()
           }
@@ -97,10 +105,12 @@ class PostgresCertificateFactory(
 
     val encoded = String(Base64.encode(certificate!!.encoded))
 
-    val privateKey = certificateRepository
-      .findOneByCertificate(encoded)
-      ?.privateKey
-      ?.toPrivateKey()
+    val privateKey = runBlocking {
+      certificateRepository
+        .findOneByCertificate(encoded)
+        ?.privateKey
+        ?.toPrivateKey()
+    }
 
     return requireNotNull(privateKey) { "Private key not found" }
   }

@@ -34,15 +34,34 @@ create table trading_partner
 (
     id    varchar(64) primary key,
     name  varchar(128) unique,
-    email varchar(128)
+    email varchar(128),
+    validity tstzrange default tstzrange(current_timestamp, null)
 );
+
+create table trading_partner_history (LIKE trading_partner);
+
+create trigger trading_partner_versioning_trigger
+    before insert or update or delete on trading_partner
+    for each row execute procedure versioning(
+        'validity', 'trading_partner_history', true
+    );
 
 create table certificate
 (
     trading_partner_id varchar(64) primary key references trading_partner (id),
     private_key        varchar(4096),
-    x509_certificate   varchar(4096)
+    x509_certificate   varchar(4096),
+    validity tstzrange default tstzrange(current_timestamp, null)
 );
+
+create table certificate_history (LIKE certificate);
+
+create trigger certificate_history_versioning_trigger
+    before insert or update or delete on certificate_history
+    for each row execute procedure versioning(
+        'validity', 'certificate_history', true
+    );
+
 
 create table trading_channel
 (
@@ -55,8 +74,18 @@ create table trading_channel
     encryption_algorithm            varchar(16)  null,
     signing_algorithm               varchar(16)  null,
     rfc_3851_mic_algorithms_enabled bool,
+    validity tstzrange default tstzrange(current_timestamp, null),
     primary key (sender_id, recipient_id)
 );
+
+create table trading_channel_history (LIKE trading_channel);
+
+create trigger trading_channel_versioning_trigger
+    before insert or update or delete on trading_channel
+    for each row execute procedure versioning(
+        'validity', 'trading_channel', true
+    );
+
 
 create table file
 (

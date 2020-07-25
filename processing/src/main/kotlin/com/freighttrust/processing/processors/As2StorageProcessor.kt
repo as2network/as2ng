@@ -39,6 +39,7 @@ import com.freighttrust.persistence.postgres.extensions.toAs2MessageRecord
 import com.freighttrust.persistence.postgres.repositories.As2MdnRepository
 import com.freighttrust.persistence.postgres.repositories.As2MessageRepository
 import com.google.common.flogger.FluentLogger
+import kotlinx.coroutines.runBlocking
 import java.nio.ByteBuffer
 import javax.jms.BytesMessage
 import javax.jms.Connection
@@ -82,7 +83,7 @@ class As2StorageProcessor(
         when (message.jmsType) {
           As2Message::class.qualifiedName -> {
             val record = As2Message.getRootAsAs2Message(buffer).toAs2MessageRecord()
-            as2MessageRepository.insert(record)
+            runBlocking { as2MessageRepository.insert(record) }
           }
           As2Mdn::class.qualifiedName -> {
             val record = As2Mdn.getRootAsAs2Mdn(buffer).toAs2MdnRecord()

@@ -4,13 +4,7 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.As2Mdn;
-import com.freighttrust.jooq.tables.As2Message;
-import com.freighttrust.jooq.tables.Certificate;
-import com.freighttrust.jooq.tables.File;
-import com.freighttrust.jooq.tables.FlywaySchemaHistory;
-import com.freighttrust.jooq.tables.TradingChannel;
-import com.freighttrust.jooq.tables.TradingPartner;
+import com.freighttrust.jooq.tables.*;
 
 import javax.annotation.processing.Generated;
 
@@ -44,6 +38,11 @@ public class Tables {
     public static final Certificate CERTIFICATE = Certificate.CERTIFICATE;
 
     /**
+     * The table <code>public.certificate_history</code>.
+     */
+    public static final CertificateHistory CERTIFICATE_HISTORY = CertificateHistory.CERTIFICATE_HISTORY;
+
+    /**
      * The table <code>public.file</code>.
      */
     public static final File FILE = File.FILE;
@@ -59,7 +58,17 @@ public class Tables {
     public static final TradingChannel TRADING_CHANNEL = TradingChannel.TRADING_CHANNEL;
 
     /**
+     * The table <code>public.trading_channel_history</code>.
+     */
+    public static final TradingChannelHistory TRADING_CHANNEL_HISTORY = TradingChannelHistory.TRADING_CHANNEL_HISTORY;
+
+    /**
      * The table <code>public.trading_partner</code>.
      */
     public static final TradingPartner TRADING_PARTNER = TradingPartner.TRADING_PARTNER;
+
+    /**
+     * The table <code>public.trading_partner_history</code>.
+     */
+    public static final TradingPartnerHistory TRADING_PARTNER_HISTORY = TradingPartnerHistory.TRADING_PARTNER_HISTORY;
 }

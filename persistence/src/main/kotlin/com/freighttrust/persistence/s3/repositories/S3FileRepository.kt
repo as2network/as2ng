@@ -35,39 +35,49 @@ package com.freighttrust.persistence.s3.repositories
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.services.s3.model.PutObjectRequest
 import com.amazonaws.services.s3.transfer.TransferManager
-import com.freighttrust.jooq.Tables
+import com.freighttrust.jooq.Tables.FILE
 import com.freighttrust.jooq.tables.records.FileRecord
+import com.freighttrust.persistence.postgres.repositories.AbstractJooqRepository
+import kotlinx.coroutines.coroutineScope
+import org.jooq.Condition
 import org.jooq.DSLContext
-import java.io.InputStream
 import javax.activation.DataHandler
 
 interface FileRepository {
 
-  fun insert(key: String, dataHandler: DataHandler): FileRecord
+  suspend fun insert(key: String, dataHandler: DataHandler): FileRecord
 }
 
 class S3FileRepository(
   private val dbCtx: DSLContext,
   private val transferManager: TransferManager,
   private val bucket: String
-) : FileRepository {
+) : AbstractJooqRepository<FileRecord>(
+  dbCtx, FILE, listOf(FILE.ID)
+), FileRepository {
+
+  override fun idQuery(record: FileRecord): Condition =
+    FILE.ID.let { field ->
+      field.eq(record.get(field))
+    }
 
   // TODO large file support
-  override fun insert(key: String, dataHandler: DataHandler): FileRecord =
+  override suspend fun insert(key: String, dataHandler: DataHandler): FileRecord =
+    coroutineScope {
+      ObjectMetadata()
+        .apply { this.contentType = dataHandler.contentType }
+        .let { metadata -> PutObjectRequest(bucket, key, dataHandler.inputStream, metadata) }
+        .let(transferManager::upload)
+        .waitForUploadResult()
+        .let {
+          dbCtx
+            .insertInto(FILE, FILE.BUCKET, FILE.KEY)
+            .values(bucket, key)
+            .returningResult(FILE.ID, FILE.BUCKET, FILE.KEY)
+            .fetch()
+            .into(FILE)
+            .first()
+        }
+    }
 
-    ObjectMetadata()
-      .apply { this.contentType = dataHandler.contentType }
-      .let { metadata -> PutObjectRequest(bucket, key, dataHandler.inputStream, metadata) }
-      .let(transferManager::upload)
-      .waitForUploadResult()
-      .let {
-
-        dbCtx
-          .insertInto(Tables.FILE, Tables.FILE.BUCKET, Tables.FILE.KEY)
-          .values(bucket, key)
-          .returningResult(Tables.FILE.ID, Tables.FILE.BUCKET, Tables.FILE.KEY)
-          .fetch()
-          .into(Tables.FILE)
-          .first()
-      }
 }

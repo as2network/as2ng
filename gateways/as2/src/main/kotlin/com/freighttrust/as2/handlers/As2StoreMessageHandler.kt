@@ -7,16 +7,15 @@ import com.freighttrust.jooq.tables.records.As2MessageRecord
 import com.freighttrust.persistence.postgres.extensions.toJSONB
 import com.freighttrust.persistence.postgres.repositories.As2MessageRepository
 import com.freighttrust.persistence.s3.repositories.FileRepository
-import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import org.jooq.tools.json.JSONObject
 
 class As2StoreMessageHandler(
   private val fileRepository: FileRepository,
   private val messageRepository: As2MessageRepository
-) : Handler<RoutingContext> {
+) : CoroutineRouteHandler() {
 
-  override fun handle(ctx: RoutingContext) {
+  override suspend fun coroutineHandle(ctx: RoutingContext) {
 
     val as2Context = ctx.as2Context()
     val messageId = as2Context.messageId
@@ -29,9 +28,9 @@ class As2StoreMessageHandler(
       else
         Pair(null, null)
 
-    // TODO improve concurrency
+    // TODO figure out a better id policy for files
     val bodyFileRecord = fileRepository
-      .insert("${messageId}-body", as2Context.originalBodyPart.dataHandler)
+      .insert("${messageId}-${System.nanoTime()}-body", as2Context.originalBodyPart.dataHandler)
 
     val messageRecord = As2MessageRecord()
       .apply {

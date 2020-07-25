@@ -8,24 +8,14 @@ import com.freighttrust.jooq.Indexes;
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.processing.Generated;
-
-import org.jooq.Field;
-import org.jooq.ForeignKey;
-import org.jooq.Index;
-import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row3;
-import org.jooq.Schema;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.UniqueKey;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
+
+import javax.annotation.processing.Generated;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -41,7 +31,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartner extends TableImpl<TradingPartnerRecord> {
 
-    private static final long serialVersionUID = -802135341;
+    private static final long serialVersionUID = 56223183;
 
     /**
      * The reference instance of <code>public.trading_partner</code>
@@ -70,6 +60,12 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
      * The column <code>public.trading_partner.email</code>.
      */
     public final TableField<TradingPartnerRecord, String> EMAIL = createField(DSL.name("email"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+
+    /**
+     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     */
+    @java.lang.Deprecated
+    public final TableField<TradingPartnerRecord, Object> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\"").defaultValue(org.jooq.impl.DSL.field("tstzrange(CURRENT_TIMESTAMP, NULL::timestamp with time zone)", org.jooq.impl.SQLDataType.OTHER)), this, "");
 
     /**
      * Create a <code>public.trading_partner</code> table reference
@@ -151,11 +147,11 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row3 type methods
+    // Row4 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<String, String, String> fieldsRow() {
-        return (Row3) super.fieldsRow();
+    public Row4<String, String, String, Object> fieldsRow() {
+        return (Row4) super.fieldsRow();
     }
 }

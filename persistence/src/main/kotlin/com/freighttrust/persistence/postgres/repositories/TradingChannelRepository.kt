@@ -32,23 +32,19 @@
 
 package com.freighttrust.persistence.postgres.repositories
 
-import com.freighttrust.jooq.Tables
+import com.freighttrust.jooq.Tables.TRADING_CHANNEL
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
+import org.jooq.Condition
 import org.jooq.DSLContext
 
 class TradingChannelRepository(
-  private val dbCtx: DSLContext
+  dbCtx: DSLContext
+) : AbstractJooqRepository<TradingChannelRecord>(
+  dbCtx, TRADING_CHANNEL, listOf(TRADING_CHANNEL.SENDER_ID, TRADING_CHANNEL.RECIPIENT_ID)
 ) {
 
-  fun findOne(record: TradingChannelRecord): TradingChannelRecord? =
-    dbCtx
-      .selectFrom(Tables.TRADING_CHANNEL)
-      .where(Tables.TRADING_CHANNEL.SENDER_ID.eq(record.senderId).and(Tables.TRADING_CHANNEL.RECIPIENT_ID.eq(record.recipientId)))
-      .fetchOne()
+  override fun idQuery(record: TradingChannelRecord): Condition =
+    TRADING_CHANNEL.SENDER_ID.eq(record.get(TRADING_CHANNEL.SENDER_ID))
+      .and(TRADING_CHANNEL.RECIPIENT_ID.eq(record.get(TRADING_CHANNEL.RECIPIENT_ID)))
 
-  fun findOne(senderId: String, recipientId: String): TradingChannelRecord? =
-    dbCtx
-      .selectFrom(Tables.TRADING_CHANNEL)
-      .where(Tables.TRADING_CHANNEL.SENDER_ID.eq(senderId).and(Tables.TRADING_CHANNEL.RECIPIENT_ID.eq(recipientId)))
-      .fetchOne()
 }

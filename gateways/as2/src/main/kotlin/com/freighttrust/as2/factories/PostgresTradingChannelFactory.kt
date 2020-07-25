@@ -33,7 +33,7 @@
 package com.freighttrust.as2.factories
 
 import com.freighttrust.as2.ext.toPartnership
-import com.freighttrust.as2.ext.toTradingChannelRecord
+import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.persistence.postgres.repositories.TradingChannelRepository
 import com.helger.as2lib.AbstractDynamicComponent
 import com.helger.as2lib.message.IMessage
@@ -46,6 +46,7 @@ import com.helger.commons.ValueEnforcer
 import com.helger.commons.collection.impl.ICommonsList
 import com.helger.commons.collection.impl.ICommonsSet
 import com.helger.commons.state.EChange
+import kotlinx.coroutines.runBlocking
 
 class PostgresTradingChannelFactory(
   private val tradingChannelRepository: TradingChannelRepository
@@ -93,10 +94,16 @@ class PostgresTradingChannelFactory(
   }
 
   override fun getPartnership(partnership: Partnership): Partnership {
-    val found = tradingChannelRepository
-      .findOne(partnership.toTradingChannelRecord())
-      ?: throw AS2PartnershipNotFoundException(partnership)
-
-    return found.toPartnership()
+    return runBlocking {
+      val found = partnership
+        .let { p ->
+          TradingChannelRecord().apply {
+            senderId = p.senderAS2ID
+            recipientId = p.receiverAS2ID
+          }
+        }.let { record -> tradingChannelRepository.findById(record) }
+        ?: throw AS2PartnershipNotFoundException(partnership)
+      found.toPartnership()
+    }
   }
 }

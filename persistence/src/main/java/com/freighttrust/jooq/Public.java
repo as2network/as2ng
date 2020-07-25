@@ -4,24 +4,16 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.As2Mdn;
-import com.freighttrust.jooq.tables.As2Message;
-import com.freighttrust.jooq.tables.Certificate;
-import com.freighttrust.jooq.tables.File;
-import com.freighttrust.jooq.tables.FlywaySchemaHistory;
-import com.freighttrust.jooq.tables.TradingChannel;
-import com.freighttrust.jooq.tables.TradingPartner;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.processing.Generated;
-
+import com.freighttrust.jooq.tables.*;
 import org.jooq.Catalog;
 import org.jooq.Sequence;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
+
+import javax.annotation.processing.Generated;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -37,7 +29,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1605697141;
+    private static final long serialVersionUID = -406757303;
 
     /**
      * The reference instance of <code>public</code>
@@ -60,6 +52,11 @@ public class Public extends SchemaImpl {
     public final Certificate CERTIFICATE = com.freighttrust.jooq.tables.Certificate.CERTIFICATE;
 
     /**
+     * The table <code>public.certificate_history</code>.
+     */
+    public final CertificateHistory CERTIFICATE_HISTORY = com.freighttrust.jooq.tables.CertificateHistory.CERTIFICATE_HISTORY;
+
+    /**
      * The table <code>public.file</code>.
      */
     public final File FILE = com.freighttrust.jooq.tables.File.FILE;
@@ -75,9 +72,19 @@ public class Public extends SchemaImpl {
     public final TradingChannel TRADING_CHANNEL = com.freighttrust.jooq.tables.TradingChannel.TRADING_CHANNEL;
 
     /**
+     * The table <code>public.trading_channel_history</code>.
+     */
+    public final TradingChannelHistory TRADING_CHANNEL_HISTORY = com.freighttrust.jooq.tables.TradingChannelHistory.TRADING_CHANNEL_HISTORY;
+
+    /**
      * The table <code>public.trading_partner</code>.
      */
     public final TradingPartner TRADING_PARTNER = com.freighttrust.jooq.tables.TradingPartner.TRADING_PARTNER;
+
+    /**
+     * The table <code>public.trading_partner_history</code>.
+     */
+    public final TradingPartnerHistory TRADING_PARTNER_HISTORY = com.freighttrust.jooq.tables.TradingPartnerHistory.TRADING_PARTNER_HISTORY;
 
     /**
      * No further instances allowed
@@ -116,9 +123,12 @@ public class Public extends SchemaImpl {
             As2Mdn.AS2_MDN,
             As2Message.AS2_MESSAGE,
             Certificate.CERTIFICATE,
+            CertificateHistory.CERTIFICATE_HISTORY,
             File.FILE,
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
             TradingChannel.TRADING_CHANNEL,
-            TradingPartner.TRADING_PARTNER);
+            TradingChannelHistory.TRADING_CHANNEL_HISTORY,
+            TradingPartner.TRADING_PARTNER,
+            TradingPartnerHistory.TRADING_PARTNER_HISTORY);
     }
 }

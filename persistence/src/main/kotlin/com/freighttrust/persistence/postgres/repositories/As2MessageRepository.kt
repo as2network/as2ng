@@ -34,30 +34,30 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.AS2_MESSAGE
 import com.freighttrust.jooq.tables.records.As2MessageRecord
+import kotlinx.coroutines.coroutineScope
+import org.jooq.Condition
 import org.jooq.DSLContext
 
 class As2MessageRepository(
   private val dbCtx: DSLContext
+) : AbstractJooqRepository<As2MessageRecord>(
+  dbCtx, AS2_MESSAGE, listOf(AS2_MESSAGE.ID)
 ) {
 
-  fun findById(id: String): As2MessageRecord? =
-    dbCtx
-      .selectFrom(AS2_MESSAGE)
-      .where(AS2_MESSAGE.ID.eq(id))
-      .fetch()
-      .firstOrNull()
+  override fun idQuery(record: As2MessageRecord): Condition =
+    AS2_MESSAGE.ID.let { field ->
+      field.eq(record.get(field))
+    }
 
-  fun findMicById(id: String): String? =
-    dbCtx
-      .select(AS2_MESSAGE.MIC)
-      .from(AS2_MESSAGE)
-      .where(AS2_MESSAGE.ID.eq(id))
-      .fetch()
-      .firstOrNull()
-      ?.value1()
+  suspend fun findMicById(id: String): String? =
+    coroutineScope {
+      dbCtx
+        .select(AS2_MESSAGE.MIC)
+        .from(AS2_MESSAGE)
+        .where(AS2_MESSAGE.ID.eq(id))
+        .fetch()
+        .firstOrNull()
+        ?.value1()
+    }
 
-  fun insert(record: As2MessageRecord): As2MessageRecord {
-    dbCtx.executeInsert(record)
-    return record
-  }
 }

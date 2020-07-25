@@ -61,6 +61,7 @@ import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
 import com.helger.commons.io.stream.StreamHelper
 import com.helger.mail.datasource.ByteArrayDataSource
+import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -274,7 +275,7 @@ class AS2MDNForwardingReceiverHandler(
       // from pendinginfo folder.
       val originalMessageId = message.mdn!!.attrs().getAsString(AS2MessageMDN.MDNA_ORIG_MESSAGEID)!!
 
-      val originalMICStr = as2MessageRepository.findMicById(originalMessageId)
+      val originalMICStr = runBlocking { as2MessageRepository.findMicById(originalMessageId) }
       val originalMIC = MIC.parse(originalMICStr)
 
       val dispositionStr = message.mdn!!.attrs().getAsString(AS2MessageMDN.MDNA_DISPOSITION)

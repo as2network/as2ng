@@ -32,12 +32,21 @@
 
 package com.freighttrust.persistence.postgres.repositories
 
+import com.freighttrust.jooq.Tables.AS2_MDN
 import com.freighttrust.jooq.tables.records.As2MdnRecord
+import org.jooq.Condition
 import org.jooq.DSLContext
 
 class As2MdnRepository(
   private val dbCtx: DSLContext
+) : AbstractJooqRepository<As2MdnRecord>(
+  dbCtx, AS2_MDN, listOf(AS2_MDN.MESSAGE_ID)
 ) {
+
+  override fun idQuery(record: As2MdnRecord): Condition =
+    AS2_MDN.MESSAGE_ID.let { field ->
+      field.eq(record.get(field))
+    }
 
   fun insert(record: As2MdnRecord): As2MdnRecord {
     dbCtx.executeInsert(record)

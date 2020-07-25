@@ -3,6 +3,7 @@ package com.freighttrust.as2.handlers
 import com.freighttrust.as2.ext.as2Context
 import com.freighttrust.as2.ext.bodyAsMimeBodyPart
 import com.freighttrust.as2.ext.isEncrypted
+import com.freighttrust.jooq.tables.records.CertificateRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
@@ -10,7 +11,6 @@ import com.freighttrust.persistence.postgres.repositories.CertificateRepository
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
-import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import org.bouncycastle.cms.CMSException
 import org.bouncycastle.cms.RecipientId
@@ -31,11 +31,11 @@ import javax.mail.internet.MimeBodyPart
 
 class As2DecryptionHandler(
   private val certificateRepository: CertificateRepository
-) : Handler<RoutingContext> {
+) : CoroutineRouteHandler() {
 
   private val logger = LoggerFactory.getLogger(As2DecryptionHandler::class.java)
 
-  override fun handle(ctx: RoutingContext) {
+  override suspend fun coroutineHandle(ctx: RoutingContext) {
     ctx.as2Context()
       .also { as2Context ->
 
@@ -51,7 +51,7 @@ class As2DecryptionHandler(
       }
   }
 
-  private fun decrypt(
+  private suspend fun decrypt(
     ctx: RoutingContext,
     tradingChannel: TradingChannelRecord,
     certificateRepository: CertificateRepository
@@ -84,8 +84,9 @@ class As2DecryptionHandler(
               } else if (logger.isDebugEnabled)
                 logger.debug("Decrypting")
 
-              val record = certificateRepository
-                .findOneById(tradingChannel.recipientId)
+              val record = tradingChannel.recipientId
+                .let { id -> CertificateRecord().apply { tradingPartnerId = id } }
+                .let { record -> certificateRepository.findById(record) }
                 ?: throw Error("Certificate not found")
 
               val receiverCertificate = record.x509Certificate.toX509()

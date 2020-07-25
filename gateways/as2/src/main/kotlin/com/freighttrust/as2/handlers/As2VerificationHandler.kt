@@ -2,12 +2,12 @@ package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.ext.as2Context
 import com.freighttrust.as2.ext.isSigned
+import com.freighttrust.jooq.tables.records.CertificateRecord
 import com.freighttrust.persistence.extensions.toX509
 import com.freighttrust.persistence.postgres.repositories.CertificateRepository
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
-import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import org.bouncycastle.cert.X509CertificateHolder
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
@@ -22,11 +22,11 @@ import javax.mail.internet.MimeMultipart
 class As2VerificationHandler(
   private val certificateRepository: CertificateRepository,
   private val useCertificateInBody: Boolean = true
-) : Handler<RoutingContext> {
+) : CoroutineRouteHandler() {
 
   private val logger = LoggerFactory.getLogger(As2VerificationHandler::class.java)
 
-  override fun handle(ctx: RoutingContext) {
+  override suspend fun coroutineHandle(ctx: RoutingContext) {
 
     val as2Context = ctx.as2Context()
     val bodyPart = as2Context.bodyPart
@@ -94,8 +94,9 @@ class As2VerificationHandler(
 
             } else {
 
-              certificateRepository
-                .findOneById(as2Context.senderId)
+              as2Context.senderId
+                .let { id -> CertificateRecord().apply { tradingPartnerId = id } }
+                .let { record -> certificateRepository.findById(record) }
                 ?.x509Certificate
                 ?.toX509()
 

@@ -8,24 +8,14 @@ import com.freighttrust.jooq.Indexes;
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.TradingChannelRecord;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.processing.Generated;
-
-import org.jooq.Field;
-import org.jooq.ForeignKey;
-import org.jooq.Index;
-import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row9;
-import org.jooq.Schema;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.UniqueKey;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
+
+import javax.annotation.processing.Generated;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -41,7 +31,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannel extends TableImpl<TradingChannelRecord> {
 
-    private static final long serialVersionUID = 691647206;
+    private static final long serialVersionUID = 521089579;
 
     /**
      * The reference instance of <code>public.trading_channel</code>
@@ -100,6 +90,12 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
      * The column <code>public.trading_channel.rfc_3851_mic_algorithms_enabled</code>.
      */
     public final TableField<TradingChannelRecord, Boolean> RFC_3851_MIC_ALGORITHMS_ENABLED = createField(DSL.name("rfc_3851_mic_algorithms_enabled"), org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     */
+    @java.lang.Deprecated
+    public final TableField<TradingChannelRecord, Object> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\"").defaultValue(org.jooq.impl.DSL.field("tstzrange(CURRENT_TIMESTAMP, NULL::timestamp with time zone)", org.jooq.impl.SQLDataType.OTHER)), this, "");
 
     /**
      * Create a <code>public.trading_channel</code> table reference
@@ -194,11 +190,11 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row9 type methods
+    // Row10 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row9<String, String, String, String, String, String, String, String, Boolean> fieldsRow() {
-        return (Row9) super.fieldsRow();
+    public Row10<String, String, String, String, String, String, String, String, Boolean, Object> fieldsRow() {
+        return (Row10) super.fieldsRow();
     }
 }

@@ -32,29 +32,30 @@
 
 package com.freighttrust.persistence.postgres.repositories
 
-import com.freighttrust.jooq.Tables
+import com.freighttrust.jooq.Tables.CERTIFICATE
 import com.freighttrust.jooq.tables.records.CertificateRecord
+import kotlinx.coroutines.coroutineScope
+import org.jooq.Condition
 import org.jooq.DSLContext
+
 
 class CertificateRepository(
   private val dbCtx: DSLContext
+) : AbstractJooqRepository<CertificateRecord>(
+  dbCtx, CERTIFICATE, listOf(CERTIFICATE.TRADING_PARTNER_ID)
 ) {
 
-  fun findOneById(partnerId: String): CertificateRecord? =
-    dbCtx
-      .selectFrom(Tables.CERTIFICATE)
-      .where(Tables.CERTIFICATE.TRADING_PARTNER_ID.eq(partnerId))
-      .fetchOne()
+  override fun idQuery(record: CertificateRecord): Condition =
+    CERTIFICATE.TRADING_PARTNER_ID.let { field ->
+      field.eq(record.get(field))
+    }
 
-  fun findOneByCertificate(certificate: String): CertificateRecord? =
-    dbCtx
-      .selectFrom(Tables.CERTIFICATE)
-      .where(Tables.CERTIFICATE.X509_CERTIFICATE.eq(certificate))
-      .fetchOne()
+  suspend fun findOneByCertificate(certificate: String, ctx: DSLContext = dbCtx): CertificateRecord? =
+    coroutineScope {
+      ctx
+        .selectFrom(CERTIFICATE)
+        .where(CERTIFICATE.X509_CERTIFICATE.eq(certificate))
+        .fetchOne()
+    }
 
-  fun insert(record: CertificateRecord): Int =
-    dbCtx
-      .insertInto(Tables.CERTIFICATE)
-      .set(record)
-      .execute()
 }

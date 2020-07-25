@@ -46,6 +46,9 @@ dependencies {
   implementation(project(":common"))
   implementation(project(":domain"))
 
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
+
   jooqGeneratorRuntime("org.postgresql:postgresql")
 
   api("com.amazonaws:aws-java-sdk-s3")

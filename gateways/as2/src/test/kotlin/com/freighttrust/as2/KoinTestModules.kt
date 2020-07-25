@@ -33,7 +33,6 @@
 package com.freighttrust.as2
 
 import com.freighttrust.as2.factories.PostgresCertificateFactory
-import com.freighttrust.as2.utils.asPathResourceFile
 import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
@@ -44,9 +43,6 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
 import org.flywaydb.core.Flyway
@@ -97,7 +93,7 @@ val As2LibModule = module {
 
   factory(_q("base")) {
     AS2ClientSettings().apply {
-      messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id$"
+      messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$_\$date.uuuu\$"
       setKeyStore(
         EKeyStoreType.PKCS12,
         ClassPathResource.getAsFile("/certificates/keystore.p12")!!,

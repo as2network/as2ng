@@ -7,7 +7,6 @@ import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.jooq.tables.records.As2MessageRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.persistence.postgres.repositories.TradingChannelRepository
-import io.vertx.core.Handler
 import io.vertx.core.MultiMap
 import io.vertx.ext.web.RoutingContext
 import javax.mail.internet.MimeBodyPart
@@ -58,24 +57,25 @@ class As2Context(
 
 class As2ContextHandler(
   private val tradingChannelRepository: TradingChannelRepository
-) : Handler<RoutingContext> {
+) : CoroutineRouteHandler() {
 
   companion object {
     const val CTX_AS2_CONTEXT = "as2-context"
   }
 
-  override fun handle(ctx: RoutingContext) {
+  override suspend fun coroutineHandle(ctx: RoutingContext) {
     ctx.request()
       .also { request ->
 
         val tradingChannel = request.headers()
           .let { headers ->
 
-            val senderId = headers.get(AS2Header.As2From)!!
-            val recipientId = headers.get(AS2Header.As2To)!!
-
-            tradingChannelRepository
-              .findOne(senderId, recipientId)
+            TradingChannelRecord()
+              .apply {
+                senderId = headers.get(AS2Header.As2From)!!
+                recipientId = headers.get(AS2Header.As2To)!!
+              }
+              .let { record -> tradingChannelRepository.findById(record) }
               ?: throw Error("Trading channel not found")
 
           }
