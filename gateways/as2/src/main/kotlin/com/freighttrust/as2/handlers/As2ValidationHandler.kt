@@ -1,6 +1,8 @@
 package com.freighttrust.as2.handlers
 
+import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.domain.DispositionNotification
+import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.bodyAsMimeBodyPart
 import com.freighttrust.as2.ext.exchangeContext
 import com.freighttrust.as2.ext.get
@@ -18,11 +20,15 @@ class As2Context(
   val request: HttpServerRequest,
   val tradingChannel: TradingChannelRecord,
   var bodyPart: MimeBodyPart? = null,
+  var encryptionAlgorithm: String? = null,
   var decryptedContentType: String? = null,
   var decompressedContentType: String? = null,
+  var signingAlgorithm: String? = null,
   var verifiedContentType: String? = null,
   var dispositionNotification: DispositionNotification? = null,
-  var originalExchange: MessageExchangeRecord? = null
+  var originalExchange: MessageExchangeRecord? = null,
+  var mic: String? = null,
+  var micAlgorithm: String? = null
 ) {
 
   val senderId = request.headers().get(AS2Header.As2From)!!
@@ -55,6 +61,7 @@ class As2Context(
 
   val asyncMdn = receiptDeliveryOption != null
   val mdnRequested = dispositionNotificationTo != null
+
 }
 
 class As2ValidationHandler(
@@ -78,7 +85,9 @@ class As2ValidationHandler(
                 recipientId = headers.get(AS2Header.As2To)!!
               }
               .let { record -> tradingChannelRepository.findById(record) }
-              ?: throw Error("Trading channel not found")
+              ?: throw DispositionException(
+                Disposition.automaticFailure("Trading channel not found for provided AS2-From and AS2-To")
+              )
 
           }
 

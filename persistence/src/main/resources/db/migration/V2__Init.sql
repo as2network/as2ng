@@ -118,28 +118,32 @@ create type message_exchange_type as enum (
 
 create table message_exchange
 (
-    id            uuid primary key,
-    type          message_exchange_type,
-    headers       jsonb,
-    started_at    timestamptz default current_timestamp,
-    finished_at   timestamptz                                 null,
-    elapsed_ms    bigint                                      null,
-    success       bool,
-    error_message varchar(1024)                               null,
-    error_trace   text                                        null,
-    sender_id     varchar(64) references trading_partner (id) null,
-    recipient_id  varchar(64) references trading_partner (id) null,
-    message_id    varchar(64)                                 null,
-    subject       varchar(128)                                null,
-    encrypted     bool                                        null,
-    compressed    bool                                        null,
-    signed        bool                                        null
+    id                   uuid primary key,
+    type                 message_exchange_type,
+    headers              jsonb,
+    started_at           timestamptz default current_timestamp,
+    finished_at          timestamptz                                 null,
+    elapsed_ms           bigint                                      null,
+    success              bool,
+    error_message        varchar(1024)                               null,
+    error_trace          text                                        null,
+    sender_id            varchar(64) references trading_partner (id) null,
+    recipient_id         varchar(64) references trading_partner (id) null,
+    message_id           varchar(64)                                 null,
+    subject              varchar(128)                                null,
+    encrypted            bool                                        null,
+    encryption_algorithm varchar(16)                                 null,
+    compressed           bool                                        null,
+    signed               bool                                        null,
+    signing_algorithm    varchar(16)                                 null,
+    mic                  varchar(32)                                 null,
+    mic_algorithm        varchar(16)                                 null
 );
 
-create index idx_message_exchange__type on message_exchange(type);
-create index idx_message_exchange__message_id on message_exchange(message_id);
-create index idx_message_exchange__sender_id on message_exchange(sender_id);
-create index idx_message_exchange__recipient_id on message_exchange(recipient_id);
+create index idx_message_exchange__type on message_exchange (type);
+create index idx_message_exchange__message_id on message_exchange (message_id);
+create index idx_message_exchange__sender_id on message_exchange (sender_id);
+create index idx_message_exchange__recipient_id on message_exchange (recipient_id);
 
 create type message_exchange_event_type as enum (
     'error',

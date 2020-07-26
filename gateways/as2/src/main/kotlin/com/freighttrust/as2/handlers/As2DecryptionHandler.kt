@@ -46,13 +46,18 @@ class As2DecryptionHandler(
           this.decrypt(ctx, as2Context.tradingChannel, certificateRepository)
 
         if (decrypted) {
+
+          as2Context.encryptionAlgorithm = as2Context.tradingChannel.encryptionAlgorithm
           as2Context.decryptedContentType = decryptedBodyPart.contentType
           as2Context.bodyPart = decryptedBodyPart
 
           ctx.exchangeContext()
             .newEvent(
               MessageExchangeEventRecord()
-                .asDecryptionEvent(decryptedBodyPart.contentType)
+                .asDecryptionEvent(
+                  as2Context.encryptionAlgorithm!!,
+                  decryptedBodyPart.contentType
+                )
             )
         }
 

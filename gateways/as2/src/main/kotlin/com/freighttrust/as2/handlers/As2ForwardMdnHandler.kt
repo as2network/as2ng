@@ -1,6 +1,7 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.ext.as2Context
+import com.freighttrust.as2.ext.exchangeContext
 import com.freighttrust.as2.util.AS2Header
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.parsetools.JsonParser
@@ -34,6 +35,9 @@ class As2ForwardMdnHandler(
       }
 
     requireNotNull(receiptDeliveryOption) { "receiptDeliveryOption cannot be null"}
+
+    ctx.exchangeContext()
+      .flushEvents()
 
     val response = webClient
       .postAbs(receiptDeliveryOption)

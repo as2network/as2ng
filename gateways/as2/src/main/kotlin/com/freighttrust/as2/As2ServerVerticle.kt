@@ -1,7 +1,11 @@
 package com.freighttrust.as2
 
+import com.freighttrust.as2.exceptions.DispositionException
+import com.freighttrust.as2.ext.as2Context
 import com.freighttrust.as2.handlers.*
+import com.freighttrust.as2.util.AS2Header
 import io.vertx.ext.web.Router
+import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.jooq.DSLContext
 import org.koin.core.Koin
@@ -18,16 +22,9 @@ class As2ServerVerticle(
 
     val router = Router.router(vertx)
 
-    // encryption must always occur first, compression can be done before or after signing
-
-    router
-      .errorHandler(500, { ctx ->
-        ctx.failure().printStackTrace()
-      })
-
-
     router
       .route()
+//      .failureHandler(this::handleFailure)
       .handler(koin.get<As2TempFileHandler>())
       .handler(koin.get<As2BodyHandler>())
       .handler(koin.get<As2MessageExchangeHandler>())
@@ -51,6 +48,39 @@ class As2ServerVerticle(
       .createHttpServer()
       .requestHandler(router)
       .listen(8080)
+  }
+
+  private fun handleFailure(ctx: RoutingContext) {
+
+    val as2Context = ctx.as2Context()
+
+    when(val failure = ctx.failure()) {
+      is DispositionException -> {
+        // respond with an MDN
+
+        ctx.response()
+          .apply {
+
+            putHeader(AS2Header.Version.key, "1.1")
+            // TODO add date
+            putHeader(AS2Header.Server.key, "FreightTrust") // TODO
+            putHeader(AS2Header.MimeVersion.key, "1.0")
+            putHeader(AS2Header.As2From.key, as2Context.senderId)
+            putHeader(AS2Header.As2To.key, as2Context.recipientId)
+
+            // TODO add from header
+            as2Context.subject?.apply { putHeader(AS2Header.Subject.key, this)}
+
+            // TODO should this be configurable per trading channel like in as2-lib
+            putHeader(AS2Header.ContentTransferEncoding.key, "binary")
+
+          }
+
+
+
+      }
+    }
+
   }
 
   override suspend fun stop() {

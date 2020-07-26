@@ -37,7 +37,8 @@ enum class DispositionType(val key: String) {
 enum class DispositionModifier(val key: String) {
 
   Error("error"),
-  Warning("warning");
+  Warning("warning"),
+  Failure("failure");
 
   companion object {
     fun parse(str: String) = values().firstOrNull { it.key == str }
@@ -45,19 +46,17 @@ enum class DispositionModifier(val key: String) {
 
 }
 
-
 data class Disposition(
   val actionMode: DispositionActionMode,
   val sendingMode: DispositionSendingMode,
   val type: DispositionType,
-  val error: String? = null,
-  val warning: String? = null,
-  val failure: String? = null
+  val modifier: DispositionModifier? = null,
+  val modifierText: String? = null
 ) {
 
   companion object {
 
-    val regex = Regex("(manual\\-action|automatic\\-action)\\/(MDN\\-sent\\-manually|MDN\\-sent\\-automatically); (processed|failed)(\\/(error|warning|failure): (.*))?")
+    val regex = Regex("(manual-action|automatic-action)/(MDN-sent-manually|MDN-sent-automatically); (processed|failed)(/(error|warning|failure): (.*))?")
 
     fun parse(str: String): Disposition {
       val matches = regex.findAll(str).toList()
@@ -68,21 +67,44 @@ data class Disposition(
           val sendingMode = DispositionSendingMode.parse(match.groups[2]!!.value)!!
           val type = DispositionType.parse(match.groups[3]!!.value)!!
 
-          val (typeExtension, message) = Pair(
+          val (modifierStr, modifierText) = Pair(
             match.groups[5]?.value,
             match.groups[6]?.value
           )
 
-          val error = if ("error" == typeExtension) message else null
-          val warning = if ("warning" == typeExtension) message else null
-          val failure = if ("failure" == typeExtension) message else null
+          val modifier = DispositionModifier.values().find{ it.key == modifierStr }
 
-          return Disposition(actionMode, sendingMode, type, error, warning, failure)
+          return Disposition(actionMode, sendingMode, type, modifier, modifierText)
         }
     }
 
+    fun automaticFailure(reason: String) = Disposition(
+      DispositionActionMode.AutomaticAction,
+      DispositionSendingMode.SentAutomatically,
+      DispositionType.Failed,
+      DispositionModifier.Failure,
+      reason
+    )
+
+    fun automaticError(reason: String) = Disposition(
+      DispositionActionMode.AutomaticAction,
+      DispositionSendingMode.SentAutomatically,
+      DispositionType.Failed,
+      DispositionModifier.Error,
+      reason
+    )
+
   }
 
+  override fun toString(): String = StringBuilder()
+    .apply {
+      append("${actionMode.key}/${sendingMode.key}; ${type.key}")
+
+      // TODO enforce only one error type is set
+      if(modifier != null) append("/${modifier.key}")
+      if(modifierText != null) append(": $modifierText")
+
+    }.toString()
 }
 
 data class DispositionNotification(

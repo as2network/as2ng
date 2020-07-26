@@ -41,11 +41,13 @@ fun MessageExchangeEventRecord.asStoreBodyEvent(
 }
 
 fun MessageExchangeEventRecord.asDecryptionEvent(
+  algorithm: String,
   contentType: String
 ): MessageExchangeEventRecord {
   type = MessageExchangeEventType.decryption
   data = JSONObject(
     mapOf(
+      "algorithm" to algorithm,
       "contentType" to contentType
       // TODO content length
     )
@@ -68,11 +70,13 @@ fun MessageExchangeEventRecord.asDecompressionEvent(
 }
 
 fun MessageExchangeEventRecord.asSignatureVerificationEvent(
+  algorithm: String,
   certificateFromBody: X509Certificate
 ): MessageExchangeEventRecord {
   type = MessageExchangeEventType.signature_verification
   data = JSONObject(
     mapOf(
+      "algorithm" to algorithm,
       "certificateFromBody" to String(Base64.encode(certificateFromBody.encoded))
     )
   ).toJSONB()
@@ -80,18 +84,35 @@ fun MessageExchangeEventRecord.asSignatureVerificationEvent(
 }
 
 fun MessageExchangeEventRecord.asSignatureVerificationEvent(
+  algorithm: String,
   certificateRecord: CertificateRecord
 ): MessageExchangeEventRecord {
   type = MessageExchangeEventType.signature_verification
   data = JSONObject(
     mapOf(
       // todo improve when certificate model is refined
+      "algorithm" to algorithm,
       "certificateId" to certificateRecord.tradingPartnerId
     )
   ).toJSONB()
   return this
 }
 
+fun MessageExchangeEventRecord.asForwardingEvent(
+  url: String,
+  mic: String? = null,
+  micAlgorithm: String? = null
+): MessageExchangeEventRecord {
+  type = MessageExchangeEventType.forwarding
+  data = JSONObject(
+    listOf(
+      "url" to url,
+      "mic" to mic,
+      "micAlgorithm" to micAlgorithm
+    ).filter { (_, v) -> v != null }.toMap()
+  ).toJSONB()
+  return this
+}
 
 
 

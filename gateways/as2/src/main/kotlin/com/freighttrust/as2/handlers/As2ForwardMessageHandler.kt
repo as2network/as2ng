@@ -1,8 +1,12 @@
 package com.freighttrust.as2.handlers
 
+import com.amazonaws.util.Base64
 import com.freighttrust.as2.ext.as2Context
+import com.freighttrust.as2.ext.calculateMic
 import com.freighttrust.as2.ext.exchangeContext
 import com.freighttrust.as2.util.AS2Header
+import com.freighttrust.jooq.tables.records.MessageExchangeEventRecord
+import com.freighttrust.persistence.postgres.extensions.asForwardingEvent
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
@@ -13,12 +17,30 @@ class As2ForwardMessageHandler(
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
-    // flush all pending events before we attempt to forward
-    ctx.exchangeContext().flushEvents()
-
     val as2Context = ctx.as2Context()
     val tradingChannel = as2Context.tradingChannel
 
+    // calculate mic for checking mdn's later
+    val (mic, micAlgorithm) = ctx.calculateMic()
+    as2Context.mic = String(Base64.encode(mic))
+    as2Context.micAlgorithm = micAlgorithm.id
+
+    ctx.exchangeContext()
+      .apply {
+
+        // forwarding event
+        newEvent(MessageExchangeEventRecord()
+          .asForwardingEvent(
+            tradingChannel.as2Url,
+            as2Context.mic,
+            as2Context.micAlgorithm
+          ))
+
+        // flush all pending event
+        flushEvents()
+      }
+
+    //
     val request = webClient
       .postAbs(tradingChannel.as2Url)
       .putHeaders(ctx.request().headers())
@@ -44,7 +66,7 @@ class As2ForwardMessageHandler(
 
         response
           .headers()
-          .forEach{ (key, value) -> syncResponse.putHeader(key, value) }
+          .forEach { (key, value) -> syncResponse.putHeader(key, value) }
 
         // send with received body
         syncResponse

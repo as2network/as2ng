@@ -68,7 +68,6 @@ class As2SignatureVerificationHandler(
             ctx.newTempFile()
           )
 
-
           val bodyCertificate =
             if (useCertificateInBody) {
 
@@ -128,6 +127,7 @@ class As2SignatureVerificationHandler(
 
           val verifiedBodyPart = parser.content
 
+          as2Context.signingAlgorithm = as2Context.tradingChannel.signingAlgorithm
           as2Context.verifiedContentType = verifiedBodyPart.contentType
           as2Context.bodyPart = verifiedBodyPart
 
@@ -135,13 +135,13 @@ class As2SignatureVerificationHandler(
             ctx.exchangeContext()
               .newEvent(
                 MessageExchangeEventRecord()
-                  .asSignatureVerificationEvent(bodyCertificate)
+                  .asSignatureVerificationEvent(as2Context.signingAlgorithm!!, bodyCertificate)
               )
           } else if (certificateRecord != null) {
             ctx.exchangeContext()
               .newEvent(
                 MessageExchangeEventRecord()
-                  .asSignatureVerificationEvent(certificateRecord)
+                  .asSignatureVerificationEvent(as2Context.signingAlgorithm!!, certificateRecord)
               )
           }
 

@@ -3,8 +3,6 @@ package com.freighttrust.as2.ext
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.domain.DispositionNotification
 import com.freighttrust.as2.util.AS2Header
-import com.helger.as2lib.message.AS2MessageMDN
-import com.helger.as2lib.util.AS2Helper
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.as2lib.util.AS2IOHelper
 import com.helger.commons.http.CHttpHeader
@@ -84,7 +82,6 @@ fun MimeBodyPart.extractDispositionNotification(): DispositionNotification {
             Disposition.parse(headers.getAs2Header(AS2Header.Disposition)),
             headers.getAs2Header(AS2Header.ReceivedContentMIC)
           )
-
 
         }
     }

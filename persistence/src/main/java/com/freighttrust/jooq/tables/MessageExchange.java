@@ -34,7 +34,7 @@ import java.util.UUID;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class MessageExchange extends TableImpl<MessageExchangeRecord> {
 
-    private static final long serialVersionUID = 524698301;
+    private static final long serialVersionUID = 1397061488;
 
     /**
      * The reference instance of <code>public.message_exchange</code>
@@ -120,6 +120,11 @@ public class MessageExchange extends TableImpl<MessageExchangeRecord> {
     public final TableField<MessageExchangeRecord, Boolean> ENCRYPTED = createField(DSL.name("encrypted"), org.jooq.impl.SQLDataType.BOOLEAN, this, "");
 
     /**
+     * The column <code>public.message_exchange.encryption_algorithm</code>.
+     */
+    public final TableField<MessageExchangeRecord, String> ENCRYPTION_ALGORITHM = createField(DSL.name("encryption_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
+
+    /**
      * The column <code>public.message_exchange.compressed</code>.
      */
     public final TableField<MessageExchangeRecord, Boolean> COMPRESSED = createField(DSL.name("compressed"), org.jooq.impl.SQLDataType.BOOLEAN, this, "");
@@ -128,6 +133,21 @@ public class MessageExchange extends TableImpl<MessageExchangeRecord> {
      * The column <code>public.message_exchange.signed</code>.
      */
     public final TableField<MessageExchangeRecord, Boolean> SIGNED = createField(DSL.name("signed"), org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>public.message_exchange.signing_algorithm</code>.
+     */
+    public final TableField<MessageExchangeRecord, String> SIGNING_ALGORITHM = createField(DSL.name("signing_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
+
+    /**
+     * The column <code>public.message_exchange.mic</code>.
+     */
+    public final TableField<MessageExchangeRecord, String> MIC = createField(DSL.name("mic"), org.jooq.impl.SQLDataType.VARCHAR(32), this, "");
+
+    /**
+     * The column <code>public.message_exchange.mic_algorithm</code>.
+     */
+    public final TableField<MessageExchangeRecord, String> MIC_ALGORITHM = createField(DSL.name("mic_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
 
     /**
      * Create a <code>public.message_exchange</code> table reference
@@ -169,7 +189,7 @@ public class MessageExchange extends TableImpl<MessageExchangeRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.MESSAGE_EXCHANGE_PKEY);
+        return Arrays.<Index>asList(Indexes.IDX_MESSAGE_EXCHANGE__MESSAGE_ID, Indexes.IDX_MESSAGE_EXCHANGE__RECIPIENT_ID, Indexes.IDX_MESSAGE_EXCHANGE__SENDER_ID, Indexes.IDX_MESSAGE_EXCHANGE__TYPE, Indexes.MESSAGE_EXCHANGE_PKEY);
     }
 
     @Override
@@ -222,11 +242,11 @@ public class MessageExchange extends TableImpl<MessageExchangeRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row16 type methods
+    // Row20 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row16<UUID, MessageExchangeType, JSONB, OffsetDateTime, OffsetDateTime, Long, Boolean, String, String, String, String, String, String, Boolean, Boolean, Boolean> fieldsRow() {
-        return (Row16) super.fieldsRow();
+    public Row20<UUID, MessageExchangeType, JSONB, OffsetDateTime, OffsetDateTime, Long, Boolean, String, String, String, String, String, String, Boolean, String, Boolean, Boolean, String, String, String> fieldsRow() {
+        return (Row20) super.fieldsRow();
     }
 }

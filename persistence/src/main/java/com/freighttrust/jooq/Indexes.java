@@ -36,6 +36,10 @@ public class Indexes {
     public static final Index FILE_PKEY = Indexes0.FILE_PKEY;
     public static final Index FLYWAY_SCHEMA_HISTORY_PK = Indexes0.FLYWAY_SCHEMA_HISTORY_PK;
     public static final Index FLYWAY_SCHEMA_HISTORY_S_IDX = Indexes0.FLYWAY_SCHEMA_HISTORY_S_IDX;
+    public static final Index IDX_MESSAGE_EXCHANGE__MESSAGE_ID = Indexes0.IDX_MESSAGE_EXCHANGE__MESSAGE_ID;
+    public static final Index IDX_MESSAGE_EXCHANGE__RECIPIENT_ID = Indexes0.IDX_MESSAGE_EXCHANGE__RECIPIENT_ID;
+    public static final Index IDX_MESSAGE_EXCHANGE__SENDER_ID = Indexes0.IDX_MESSAGE_EXCHANGE__SENDER_ID;
+    public static final Index IDX_MESSAGE_EXCHANGE__TYPE = Indexes0.IDX_MESSAGE_EXCHANGE__TYPE;
     public static final Index MESSAGE_EXCHANGE_PKEY = Indexes0.MESSAGE_EXCHANGE_PKEY;
     public static final Index MESSAGE_EXCHANGE_EVENT_PKEY = Indexes0.MESSAGE_EXCHANGE_EVENT_PKEY;
     public static final Index TRADING_CHANNEL_PKEY = Indexes0.TRADING_CHANNEL_PKEY;
@@ -54,6 +58,10 @@ public class Indexes {
         public static Index FILE_PKEY = Internal.createIndex("file_pkey", File.FILE, new OrderField[] { File.FILE.ID }, true);
         public static Index FLYWAY_SCHEMA_HISTORY_PK = Internal.createIndex("flyway_schema_history_pk", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
         public static Index FLYWAY_SCHEMA_HISTORY_S_IDX = Internal.createIndex("flyway_schema_history_s_idx", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.SUCCESS }, false);
+        public static Index IDX_MESSAGE_EXCHANGE__MESSAGE_ID = Internal.createIndex("idx_message_exchange__message_id", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.MESSAGE_ID }, false);
+        public static Index IDX_MESSAGE_EXCHANGE__RECIPIENT_ID = Internal.createIndex("idx_message_exchange__recipient_id", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.RECIPIENT_ID }, false);
+        public static Index IDX_MESSAGE_EXCHANGE__SENDER_ID = Internal.createIndex("idx_message_exchange__sender_id", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.SENDER_ID }, false);
+        public static Index IDX_MESSAGE_EXCHANGE__TYPE = Internal.createIndex("idx_message_exchange__type", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.TYPE }, false);
         public static Index MESSAGE_EXCHANGE_PKEY = Internal.createIndex("message_exchange_pkey", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.ID }, true);
         public static Index MESSAGE_EXCHANGE_EVENT_PKEY = Internal.createIndex("message_exchange_event_pkey", MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT, new OrderField[] { MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT.ID }, true);
         public static Index TRADING_CHANNEL_PKEY = Internal.createIndex("trading_channel_pkey", TradingChannel.TRADING_CHANNEL, new OrderField[] { TradingChannel.TRADING_CHANNEL.SENDER_ID, TradingChannel.TRADING_CHANNEL.RECIPIENT_ID }, true);

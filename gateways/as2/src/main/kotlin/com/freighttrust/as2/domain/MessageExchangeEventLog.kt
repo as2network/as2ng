@@ -55,8 +55,12 @@ class MessageExchangeEventLog(
               messageId = as2Context.messageId
               subject = as2Context.subject
               encrypted = as2Context.encrypted
+              encryptionAlgorithm = as2Context.encryptionAlgorithm
               compressed = as2Context.compressed
               signed = as2Context.signed
+              signingAlgorithm = as2Context.signingAlgorithm
+              mic = as2Context.mic
+              micAlgorithm = as2Context.micAlgorithm
               // TODO add algorithms for encryption and signing
 
             }

@@ -49,7 +49,7 @@ fun RoutingContext.bodyAsMimeBodyPart() =
       bodyPart
     }
 
-fun RoutingContext.mic(): Pair<ByteArray, ECryptoAlgorithmSign> {
+fun RoutingContext.calculateMic(): Pair<ByteArray, ECryptoAlgorithmSign> {
 
   val tradingChannel = as2Context().tradingChannel
   val bodyPart = as2Context().bodyPart!!
@@ -90,7 +90,6 @@ fun RoutingContext.mic(): Pair<ByteArray, ECryptoAlgorithmSign> {
         bodyPart.dataHandler.writeTo(encodedOut)
       }
     }
-
 
   // Build result digest array
   val mic = digest.digest()
