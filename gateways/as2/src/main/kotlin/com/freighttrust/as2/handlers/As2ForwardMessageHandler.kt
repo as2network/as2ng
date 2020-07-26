@@ -1,6 +1,7 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.ext.as2Context
+import com.freighttrust.as2.ext.exchangeContext
 import com.freighttrust.as2.util.AS2Header
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
@@ -11,6 +12,9 @@ class As2ForwardMessageHandler(
 ) : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
+
+    // flush all pending events before we attempt to forward
+    ctx.exchangeContext().flushEvents()
 
     val as2Context = ctx.as2Context()
     val tradingChannel = as2Context.tradingChannel
@@ -29,7 +33,7 @@ class As2ForwardMessageHandler(
 
     if (response.statusCode() == 200) {
 
-      if (as2Context.asyncMdn) {
+      if (!as2Context.mdnRequested || as2Context.asyncMdn) {
         ctx.response().end()
       } else {
 

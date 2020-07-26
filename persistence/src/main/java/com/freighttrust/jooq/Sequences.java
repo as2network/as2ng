@@ -4,10 +4,10 @@
 package com.freighttrust.jooq;
 
 
-import javax.annotation.processing.Generated;
-
 import org.jooq.Sequence;
 import org.jooq.impl.SequenceImpl;
+
+import javax.annotation.processing.Generated;
 
 
 /**
@@ -26,5 +26,5 @@ public class Sequences {
     /**
      * The sequence <code>public.file_id_seq</code>
      */
-    public static final Sequence<Integer> FILE_ID_SEQ = new SequenceImpl<Integer>("file_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.INTEGER.nullable(false));
+    public static final Sequence<Long> FILE_ID_SEQ = new SequenceImpl<Long>("file_id_seq", Public.PUBLIC, org.jooq.impl.SQLDataType.BIGINT.nullable(false));
 }

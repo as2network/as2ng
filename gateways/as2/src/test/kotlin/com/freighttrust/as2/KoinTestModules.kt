@@ -93,7 +93,7 @@ val As2LibModule = module {
 
   factory(_q("base")) {
     AS2ClientSettings().apply {
-      messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$_\$date.uuuu\$"
+      messageIDFormat = "\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
       setKeyStore(
         EKeyStoreType.PKCS12,
         ClassPathResource.getAsFile("/certificates/keystore.p12")!!,
@@ -130,7 +130,7 @@ val As2LibModule = module {
 
 val EmbeddedPostgresModule = module(override = true) {
 
-  single {
+  single(createdAtStart = true) {
     EmbeddedPostgres.builder()
       .start()
       .also { db ->

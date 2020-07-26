@@ -1,9 +1,12 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.ext.as2Context
+import com.freighttrust.as2.ext.exchangeContext
 import com.freighttrust.as2.ext.isSigned
 import com.freighttrust.jooq.tables.records.CertificateRecord
+import com.freighttrust.jooq.tables.records.MessageExchangeEventRecord
 import com.freighttrust.persistence.extensions.toX509
+import com.freighttrust.persistence.postgres.extensions.asSignatureVerificationEvent
 import com.freighttrust.persistence.postgres.repositories.CertificateRepository
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
@@ -19,17 +22,17 @@ import org.slf4j.LoggerFactory
 import java.security.SignatureException
 import javax.mail.internet.MimeMultipart
 
-class As2VerificationHandler(
+class As2SignatureVerificationHandler(
   private val certificateRepository: CertificateRepository,
   private val useCertificateInBody: Boolean = true
 ) : CoroutineRouteHandler() {
 
-  private val logger = LoggerFactory.getLogger(As2VerificationHandler::class.java)
+  private val logger = LoggerFactory.getLogger(As2SignatureVerificationHandler::class.java)
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
     val as2Context = ctx.as2Context()
-    val bodyPart = as2Context.bodyPart
+    val bodyPart = as2Context.bodyPart!!
 
     try {
       // todo configurable from trading channel
@@ -65,7 +68,8 @@ class As2VerificationHandler(
             ctx.newTempFile()
           )
 
-          val senderCertificate =
+
+          val bodyCertificate =
             if (useCertificateInBody) {
 
               val signerId = parser
@@ -92,16 +96,19 @@ class As2VerificationHandler(
                     }
                 }
 
-            } else {
+            } else null
 
-              as2Context.senderId
-                .let { id -> CertificateRecord().apply { tradingPartnerId = id } }
-                .let { record -> certificateRepository.findById(record) }
-                ?.x509Certificate
-                ?.toX509()
+          // fallback to to the certificate from the trading channel
 
-            }
+          val certificateRecord = if (!useCertificateInBody || bodyCertificate == null)
+            as2Context.senderId
+              .let { id -> CertificateRecord().apply { tradingPartnerId = id } }
+              .let { record -> certificateRepository.findById(record) }
+          else null
 
+          val senderCertificate = bodyCertificate ?: certificateRecord
+            ?.x509Certificate
+            ?.toX509()
 
           checkNotNull(senderCertificate) { "sender certificate is required" }
 
@@ -123,6 +130,20 @@ class As2VerificationHandler(
 
           as2Context.verifiedContentType = verifiedBodyPart.contentType
           as2Context.bodyPart = verifiedBodyPart
+
+          if (bodyCertificate != null) {
+            ctx.exchangeContext()
+              .newEvent(
+                MessageExchangeEventRecord()
+                  .asSignatureVerificationEvent(bodyCertificate)
+              )
+          } else if (certificateRecord != null) {
+            ctx.exchangeContext()
+              .newEvent(
+                MessageExchangeEventRecord()
+                  .asSignatureVerificationEvent(certificateRecord)
+              )
+          }
 
           logger.info("Successfully verified signature of incoming AS2 message")
         }

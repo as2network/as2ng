@@ -57,6 +57,8 @@ dependencyManagement {
 
     dependency 'com.typesafe:config:1.4.0'
 
+    dependency 'com.fasterxml.uuid:java-uuid-generator:4.0.1'
+
     // ------------------------------------------------------------------
     // Vertx
     // ------------------------------------------------------------------

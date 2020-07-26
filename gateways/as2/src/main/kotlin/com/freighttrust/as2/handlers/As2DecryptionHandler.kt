@@ -2,11 +2,14 @@ package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.ext.as2Context
 import com.freighttrust.as2.ext.bodyAsMimeBodyPart
+import com.freighttrust.as2.ext.exchangeContext
 import com.freighttrust.as2.ext.isEncrypted
 import com.freighttrust.jooq.tables.records.CertificateRecord
+import com.freighttrust.jooq.tables.records.MessageExchangeEventRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
+import com.freighttrust.persistence.postgres.extensions.asDecryptionEvent
 import com.freighttrust.persistence.postgres.repositories.CertificateRepository
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
@@ -45,6 +48,12 @@ class As2DecryptionHandler(
         if (decrypted) {
           as2Context.decryptedContentType = decryptedBodyPart.contentType
           as2Context.bodyPart = decryptedBodyPart
+
+          ctx.exchangeContext()
+            .newEvent(
+              MessageExchangeEventRecord()
+                .asDecryptionEvent(decryptedBodyPart.contentType)
+            )
         }
 
         ctx.next()

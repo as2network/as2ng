@@ -29,7 +29,7 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -406757303;
+    private static final long serialVersionUID = -674164489;
 
     /**
      * The reference instance of <code>public</code>
@@ -65,6 +65,16 @@ public class Public extends SchemaImpl {
      * The table <code>public.flyway_schema_history</code>.
      */
     public final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = com.freighttrust.jooq.tables.FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
+
+    /**
+     * The table <code>public.message_exchange</code>.
+     */
+    public final MessageExchange MESSAGE_EXCHANGE = com.freighttrust.jooq.tables.MessageExchange.MESSAGE_EXCHANGE;
+
+    /**
+     * The table <code>public.message_exchange_event</code>.
+     */
+    public final MessageExchangeEvent MESSAGE_EXCHANGE_EVENT = com.freighttrust.jooq.tables.MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT;
 
     /**
      * The table <code>public.trading_channel</code>.
@@ -126,6 +136,8 @@ public class Public extends SchemaImpl {
             CertificateHistory.CERTIFICATE_HISTORY,
             File.FILE,
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
+            MessageExchange.MESSAGE_EXCHANGE,
+            MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT,
             TradingChannel.TRADING_CHANNEL,
             TradingChannelHistory.TRADING_CHANNEL_HISTORY,
             TradingPartner.TRADING_PARTNER,

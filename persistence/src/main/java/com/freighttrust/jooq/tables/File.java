@@ -8,25 +8,14 @@ import com.freighttrust.jooq.Indexes;
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.FileRecord;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.processing.Generated;
-
-import org.jooq.Field;
-import org.jooq.ForeignKey;
-import org.jooq.Identity;
-import org.jooq.Index;
-import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row3;
-import org.jooq.Schema;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.UniqueKey;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.TableImpl;
+
+import javax.annotation.processing.Generated;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -42,7 +31,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class File extends TableImpl<FileRecord> {
 
-    private static final long serialVersionUID = 1876802401;
+    private static final long serialVersionUID = -1604929775;
 
     /**
      * The reference instance of <code>public.file</code>
@@ -60,7 +49,7 @@ public class File extends TableImpl<FileRecord> {
     /**
      * The column <code>public.file.id</code>.
      */
-    public final TableField<FileRecord, Integer> ID = createField(DSL.name("id"), org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('file_id_seq'::regclass)", org.jooq.impl.SQLDataType.INTEGER)), this, "");
+    public final TableField<FileRecord, Long> ID = createField(DSL.name("id"), org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('file_id_seq'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
      * The column <code>public.file.bucket</code>.
@@ -116,7 +105,7 @@ public class File extends TableImpl<FileRecord> {
     }
 
     @Override
-    public Identity<FileRecord, Integer> getIdentity() {
+    public Identity<FileRecord, Long> getIdentity() {
         return Keys.IDENTITY_FILE;
     }
 
@@ -161,7 +150,7 @@ public class File extends TableImpl<FileRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<Integer, String, String> fieldsRow() {
+    public Row3<Long, String, String> fieldsRow() {
         return (Row3) super.fieldsRow();
     }
 }

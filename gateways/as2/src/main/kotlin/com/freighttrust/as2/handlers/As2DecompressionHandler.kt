@@ -1,7 +1,10 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.ext.as2Context
+import com.freighttrust.as2.ext.exchangeContext
 import com.freighttrust.as2.ext.isCompressed
+import com.freighttrust.jooq.tables.records.MessageExchangeEventRecord
+import com.freighttrust.persistence.postgres.extensions.asDecompressionEvent
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
@@ -24,7 +27,7 @@ class As2DecompressionHandler : Handler<RoutingContext> {
 
     val as2Context = ctx.as2Context()
 
-    val bodyPart = as2Context.bodyPart
+    val bodyPart = as2Context.bodyPart!!
     val decompressedContentType = as2Context.decompressedContentType
 
     // TODO improve error handling
@@ -34,7 +37,7 @@ class As2DecompressionHandler : Handler<RoutingContext> {
 
     when {
 
-      decompressedContentType != null && as2Context.bodyPart.isCompressed() ->
+      decompressedContentType != null && bodyPart.isCompressed() ->
         throw Error("Decompression has already occurred")
 
       // TODO configurable decompression override from trading channel
@@ -44,6 +47,12 @@ class As2DecompressionHandler : Handler<RoutingContext> {
 
             as2Context.bodyPart = decompressedBodyPart
             as2Context.decompressedContentType = decompressedBodyPart.contentType
+
+            ctx.exchangeContext()
+              .newEvent(
+                MessageExchangeEventRecord()
+                  .asDecompressionEvent(decompressedBodyPart.contentType)
+              )
 
           }
     }

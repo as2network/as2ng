@@ -32,17 +32,22 @@
 
 create table trading_partner
 (
-    id    varchar(64) primary key,
-    name  varchar(128) unique,
-    email varchar(128),
+    id       varchar(64) primary key,
+    name     varchar(128) unique,
+    email    varchar(128),
     validity tstzrange default tstzrange(current_timestamp, null)
 );
 
-create table trading_partner_history (LIKE trading_partner);
+create table trading_partner_history
+(
+    LIKE trading_partner
+);
 
 create trigger trading_partner_versioning_trigger
-    before insert or update or delete on trading_partner
-    for each row execute procedure versioning(
+    before insert or update or delete
+    on trading_partner
+    for each row
+execute procedure versioning(
         'validity', 'trading_partner_history', true
     );
 
@@ -51,14 +56,19 @@ create table certificate
     trading_partner_id varchar(64) primary key references trading_partner (id),
     private_key        varchar(4096),
     x509_certificate   varchar(4096),
-    validity tstzrange default tstzrange(current_timestamp, null)
+    validity           tstzrange default tstzrange(current_timestamp, null)
 );
 
-create table certificate_history (LIKE certificate);
+create table certificate_history
+(
+    LIKE certificate
+);
 
 create trigger certificate_history_versioning_trigger
-    before insert or update or delete on certificate_history
-    for each row execute procedure versioning(
+    before insert or update or delete
+    on certificate_history
+    for each row
+execute procedure versioning(
         'validity', 'certificate_history', true
     );
 
@@ -74,44 +84,103 @@ create table trading_channel
     encryption_algorithm            varchar(16)  null,
     signing_algorithm               varchar(16)  null,
     rfc_3851_mic_algorithms_enabled bool,
-    validity tstzrange default tstzrange(current_timestamp, null),
+    validity                        tstzrange default tstzrange(current_timestamp, null),
     primary key (sender_id, recipient_id)
 );
 
-create table trading_channel_history (LIKE trading_channel);
+create table trading_channel_history
+(
+    LIKE trading_channel
+);
 
 create trigger trading_channel_versioning_trigger
-    before insert or update or delete on trading_channel
-    for each row execute procedure versioning(
+    before insert or update or delete
+    on trading_channel
+    for each row
+execute procedure versioning(
         'validity', 'trading_channel', true
     );
 
 
 create table file
 (
-    id     serial primary key,
+    id     bigserial primary key,
     bucket varchar(128),
     key    varchar(128),
     unique (bucket, key)
 );
 
+create type message_exchange_type as enum (
+    'message',
+    'mdn'
+    );
+
+
+create table message_exchange
+(
+    id            uuid primary key,
+    type          message_exchange_type,
+    headers       jsonb,
+    started_at    timestamptz default current_timestamp,
+    finished_at   timestamptz                                 null,
+    elapsed_ms    bigint                                      null,
+    success       bool,
+    error_message varchar(1024)                               null,
+    error_trace   text                                        null,
+    sender_id     varchar(64) references trading_partner (id) null,
+    recipient_id  varchar(64) references trading_partner (id) null,
+    message_id    varchar(64)                                 null,
+    subject       varchar(128)                                null,
+    encrypted     bool                                        null,
+    compressed    bool                                        null,
+    signed        bool                                        null
+);
+
+create index idx_message_exchange__type on message_exchange(type);
+create index idx_message_exchange__message_id on message_exchange(message_id);
+create index idx_message_exchange__sender_id on message_exchange(sender_id);
+create index idx_message_exchange__recipient_id on message_exchange(recipient_id);
+
+create type message_exchange_event_type as enum (
+    'error',
+    'validation',
+    'store_body',
+    'decryption',
+    'decompression',
+    'signature_verification',
+    'forwarding',
+    'mdn_receipt',
+    'mdn_forwarding'
+        'async_mdn_receipt',
+    'async_mdn_forwarding'
+    );
+
+create table message_exchange_event
+(
+    id                  uuid primary key,
+    type                message_exchange_event_type,
+    message_exchange_id uuid references message_exchange (id),
+    data                jsonb,
+    timestamp           timestamptz default current_timestamp
+);
+
 create table as2_message
 (
-    id                               varchar(64) primary key,
-    sender_id                        varchar(64) references trading_partner (id),
-    recipient_id                     varchar(64) references trading_partner (id),
-    subject                          varchar(128),
-    body_content_type                varchar(128),
-    body_file_id                     int references file (id),
-    encrypted                        bool,
-    compressed                       bool,
-    signed                           bool,
-    mic                              varchar(32)  null,
-    mic_algorithm                    varchar(32)  null,
-    receipt_delivery_option          varchar(128) null,
-    disposition_notification_to      varchar(128) null,
+    id                          varchar(64) primary key,
+    sender_id                   varchar(64) references trading_partner (id),
+    recipient_id                varchar(64) references trading_partner (id),
+    subject                     varchar(128),
+    body_content_type           varchar(128),
+    body_file_id                int references file (id),
+    encrypted                   bool,
+    compressed                  bool,
+    signed                      bool,
+    mic                         varchar(32)  null,
+    mic_algorithm               varchar(32)  null,
+    receipt_delivery_option     varchar(128) null,
+    disposition_notification_to varchar(128) null,
     /* store headers as jsonb to allow for free form data but make it queryable */
-    headers                          jsonb
+    headers                     jsonb
 );
 
 create table as2_mdn

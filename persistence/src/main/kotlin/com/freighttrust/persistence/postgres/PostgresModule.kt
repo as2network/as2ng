@@ -32,10 +32,7 @@
 
 package com.freighttrust.persistence.postgres
 
-import com.freighttrust.persistence.postgres.repositories.As2MdnRepository
-import com.freighttrust.persistence.postgres.repositories.As2MessageRepository
-import com.freighttrust.persistence.postgres.repositories.CertificateRepository
-import com.freighttrust.persistence.postgres.repositories.TradingChannelRepository
+import com.freighttrust.persistence.postgres.repositories.*
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -77,10 +74,10 @@ val PostgresModule = module {
   }
 
   factory { As2MessageRepository(get()) }
-
   factory { As2MdnRepository(get()) }
-
   factory { TradingChannelRepository(get()) }
-
   factory { CertificateRepository(get()) }
+  factory { MessageExchangeRepository(get()) }
+  factory { MessageExchangeEventRepository(get()) }
+
 }

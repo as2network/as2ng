@@ -53,6 +53,16 @@ public class Tables {
     public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
+     * The table <code>public.message_exchange</code>.
+     */
+    public static final MessageExchange MESSAGE_EXCHANGE = MessageExchange.MESSAGE_EXCHANGE;
+
+    /**
+     * The table <code>public.message_exchange_event</code>.
+     */
+    public static final MessageExchangeEvent MESSAGE_EXCHANGE_EVENT = MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT;
+
+    /**
      * The table <code>public.trading_channel</code>.
      */
     public static final TradingChannel TRADING_CHANNEL = TradingChannel.TRADING_CHANNEL;

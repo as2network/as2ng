@@ -32,9 +32,11 @@
 
 package com.freighttrust.as2.modules
 
+import com.fasterxml.uuid.Generators
 import com.freighttrust.as2.cert.VaultCertificateProvider
 import com.freighttrust.as2.cert.VaultConfigOptions
 import com.freighttrust.as2.controllers.AS2Controller
+import com.freighttrust.as2.domain.MessageExchangeEventLog
 import com.freighttrust.as2.handlers.*
 import com.freighttrust.as2.session.As2SessionFactory
 import com.typesafe.config.Config
@@ -56,19 +58,23 @@ val As2ExchangeServerModule = module {
     As2SessionFactory.create(_koin, config)
   }
 
+  factory { Generators.timeBasedGenerator() }
+
   factory {
     AS2Controller(get(), get(), get())
   }
 
+  single { MessageExchangeEventLog(get(), get(), get()) }
   single { As2BodyHandler() }
   single { As2TempFileHandler() }
-  single { As2ContextHandler(get()) }
+  single { As2StoreBodyHandler(get()) }
+  single { As2DispositionNotificationHandler(get()) }
+  single { As2MessageExchangeHandler(get(), get()) }
+  single { As2ValidationHandler(get()) }
   single { As2DecompressionHandler() }
   single { As2DecryptionHandler(get()) }
   // TODO integrate verification handler with config
-  single { As2VerificationHandler(get(), true)}
-  single { As2StoreMessageHandler(get(), get()) }
-  single { As2StoreMdnHandler(get(), get(), get()) }
+  single { As2SignatureVerificationHandler(get(), true)}
   single { As2ForwardMessageHandler(get()) }
   single { As2ForwardMdnHandler(get()) }
 

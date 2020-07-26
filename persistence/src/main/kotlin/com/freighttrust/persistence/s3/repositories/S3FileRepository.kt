@@ -38,18 +38,20 @@ import com.amazonaws.services.s3.transfer.TransferManager
 import com.freighttrust.jooq.Tables.FILE
 import com.freighttrust.jooq.tables.records.FileRecord
 import com.freighttrust.persistence.postgres.repositories.AbstractJooqRepository
+import com.freighttrust.persistence.shared.Repository
 import kotlinx.coroutines.coroutineScope
 import org.jooq.Condition
 import org.jooq.DSLContext
 import javax.activation.DataHandler
 
-interface FileRepository {
+interface FileRepository : Repository<FileRecord> {
 
-  suspend fun insert(key: String, dataHandler: DataHandler): FileRecord
+  suspend fun insert(key: String, dataHandler: DataHandler, ctx: Repository.Context? = null): FileRecord
+
 }
 
 class S3FileRepository(
-  private val dbCtx: DSLContext,
+  dbCtx: DSLContext,
   private val transferManager: TransferManager,
   private val bucket: String
 ) : AbstractJooqRepository<FileRecord>(
@@ -62,7 +64,7 @@ class S3FileRepository(
     }
 
   // TODO large file support
-  override suspend fun insert(key: String, dataHandler: DataHandler): FileRecord =
+  override suspend fun insert(key: String, dataHandler: DataHandler, ctx: Repository.Context?): FileRecord =
     coroutineScope {
       ObjectMetadata()
         .apply { this.contentType = dataHandler.contentType }
@@ -70,7 +72,7 @@ class S3FileRepository(
         .let(transferManager::upload)
         .waitForUploadResult()
         .let {
-          dbCtx
+          jooqContext(ctx)
             .insertInto(FILE, FILE.BUCKET, FILE.KEY)
             .values(bucket, key)
             .returningResult(FILE.ID, FILE.BUCKET, FILE.KEY)

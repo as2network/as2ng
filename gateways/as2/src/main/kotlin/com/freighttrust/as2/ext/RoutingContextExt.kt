@@ -1,10 +1,10 @@
 package com.freighttrust.as2.ext
 
 import com.freighttrust.as2.handlers.As2Context
-import com.freighttrust.as2.handlers.As2ContextHandler.Companion.CTX_AS2_CONTEXT
-import com.helger.as2lib.crypto.BCCryptoHelper
+import com.freighttrust.as2.handlers.As2MessageExchangeHandler.Companion.CTX_EXCHANGE_CONTEXT
+import com.freighttrust.as2.handlers.As2ValidationHandler.Companion.CTX_AS2_CONTEXT
+import com.freighttrust.as2.handlers.ExchangeContext
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
-import com.helger.as2lib.crypto.MIC
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.as2lib.util.AS2IOHelper
 import com.helger.commons.http.CHttp
@@ -18,6 +18,9 @@ import java.security.MessageDigest
 import javax.activation.DataHandler
 import javax.activation.DataSource
 import javax.mail.internet.MimeBodyPart
+
+fun RoutingContext.exchangeContext() =
+  get(CTX_EXCHANGE_CONTEXT) as ExchangeContext
 
 fun RoutingContext.as2Context() =
   get(CTX_AS2_CONTEXT) as As2Context
@@ -49,7 +52,7 @@ fun RoutingContext.bodyAsMimeBodyPart() =
 fun RoutingContext.mic(): Pair<ByteArray, ECryptoAlgorithmSign> {
 
   val tradingChannel = as2Context().tradingChannel
-  val bodyPart = as2Context().bodyPart
+  val bodyPart = as2Context().bodyPart!!
 
   // Calculate and get the original mic
   val includeHeadersInMIC =
