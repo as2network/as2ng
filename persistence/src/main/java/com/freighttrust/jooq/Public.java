@@ -4,16 +4,28 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.*;
+import com.freighttrust.jooq.tables.Certificate;
+import com.freighttrust.jooq.tables.CertificateHistory;
+import com.freighttrust.jooq.tables.File;
+import com.freighttrust.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.jooq.tables.Message;
+import com.freighttrust.jooq.tables.MessageDispositionNotification;
+import com.freighttrust.jooq.tables.Request;
+import com.freighttrust.jooq.tables.TradingChannel;
+import com.freighttrust.jooq.tables.TradingChannelHistory;
+import com.freighttrust.jooq.tables.TradingPartner;
+import com.freighttrust.jooq.tables.TradingPartnerHistory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.annotation.processing.Generated;
+
 import org.jooq.Catalog;
 import org.jooq.Sequence;
 import org.jooq.Table;
 import org.jooq.impl.SchemaImpl;
-
-import javax.annotation.processing.Generated;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -29,22 +41,12 @@ import java.util.List;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -674164489;
+    private static final long serialVersionUID = -1760424545;
 
     /**
      * The reference instance of <code>public</code>
      */
     public static final Public PUBLIC = new Public();
-
-    /**
-     * The table <code>public.as2_mdn</code>.
-     */
-    public final As2Mdn AS2_MDN = com.freighttrust.jooq.tables.As2Mdn.AS2_MDN;
-
-    /**
-     * The table <code>public.as2_message</code>.
-     */
-    public final As2Message AS2_MESSAGE = com.freighttrust.jooq.tables.As2Message.AS2_MESSAGE;
 
     /**
      * The table <code>public.certificate</code>.
@@ -67,14 +69,19 @@ public class Public extends SchemaImpl {
     public final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = com.freighttrust.jooq.tables.FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
-     * The table <code>public.message_exchange</code>.
+     * The table <code>public.message</code>.
      */
-    public final MessageExchange MESSAGE_EXCHANGE = com.freighttrust.jooq.tables.MessageExchange.MESSAGE_EXCHANGE;
+    public final Message MESSAGE = com.freighttrust.jooq.tables.Message.MESSAGE;
 
     /**
-     * The table <code>public.message_exchange_event</code>.
+     * The table <code>public.message_disposition_notification</code>.
      */
-    public final MessageExchangeEvent MESSAGE_EXCHANGE_EVENT = com.freighttrust.jooq.tables.MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT;
+    public final MessageDispositionNotification MESSAGE_DISPOSITION_NOTIFICATION = com.freighttrust.jooq.tables.MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION;
+
+    /**
+     * The table <code>public.request</code>.
+     */
+    public final Request REQUEST = com.freighttrust.jooq.tables.Request.REQUEST;
 
     /**
      * The table <code>public.trading_channel</code>.
@@ -130,14 +137,13 @@ public class Public extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
-            As2Mdn.AS2_MDN,
-            As2Message.AS2_MESSAGE,
             Certificate.CERTIFICATE,
             CertificateHistory.CERTIFICATE_HISTORY,
             File.FILE,
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
-            MessageExchange.MESSAGE_EXCHANGE,
-            MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT,
+            Message.MESSAGE,
+            MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION,
+            Request.REQUEST,
             TradingChannel.TRADING_CHANNEL,
             TradingChannelHistory.TRADING_CHANNEL_HISTORY,
             TradingPartner.TRADING_PARTNER,

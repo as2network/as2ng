@@ -1,36 +1,32 @@
 package com.freighttrust.as2.handlers
 
+import com.freighttrust.as2.handlers.As2TempFileHandler.Companion.CTX_TEMP_FILE_HELPER
+import com.freighttrust.as2.util.TempFileHelper
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import java.io.File
 
-fun RoutingContext.newTempFile(): File =
-  this
-    .let { ctx ->
-      File.createTempFile("as2", ".tmp")
-        .also { file ->
-          val tempFiles: List<File> = ctx.get(As2TempFileHandler.CTX_TEMP_FILES)
-          ctx.put(As2TempFileHandler.CTX_TEMP_FILES, tempFiles + file)
-        }
-    }
-
-fun RoutingContext.tempFiles(): List<File> =
-  get(As2TempFileHandler.CTX_TEMP_FILES)
+val RoutingContext.tempFileHelper
+  get(): TempFileHelper = get(CTX_TEMP_FILE_HELPER)
 
 class As2TempFileHandler : Handler<RoutingContext> {
 
   companion object {
-    const val CTX_TEMP_FILES = "temp-files"
+    const val CTX_TEMP_FILE_HELPER = "temp_file_helper"
   }
 
   override fun handle(ctx: RoutingContext) {
-    ctx.put(CTX_TEMP_FILES, emptyList<File>())
+    TempFileHelper()
+      .also { helper ->
 
-    // Remove temp files after request completes or fails
-    ctx.addEndHandler {
-      ctx.tempFiles().forEach { it.delete() }
-    }
+        ctx.put(CTX_TEMP_FILE_HELPER, TempFileHelper())
 
-    ctx.next()
+        // Remove temp files after request completes or fails
+        ctx.addEndHandler {
+          helper.deleteAll()
+        }
+
+        ctx.next()
+      }
   }
 }

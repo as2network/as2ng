@@ -46,7 +46,7 @@ build.dependsOn(tasks.shadowJar)
 val appJvmArgs = listOf("-Xms512m", "-Xmx512m")
 
 val vertxLauncher = "io.vertx.core.Launcher"
-val vertxDebug = getenv("VERTX_DEBUG")?.toBoolean() ?: false
+val vertxDebug = getenv("VERTX_DEBUG")?.toBoolean() ?: true
 
 fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   group = "application"

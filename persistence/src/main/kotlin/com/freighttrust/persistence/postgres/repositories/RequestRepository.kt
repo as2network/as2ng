@@ -30,46 +30,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.as2.ext
+package com.freighttrust.persistence.postgres.repositories
 
-import com.freighttrust.jooq.tables.records.As2MdnRecord
-import com.freighttrust.jooq.tables.records.As2MessageRecord
-import com.freighttrust.jooq.tables.records.FileRecord
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.persistence.postgres.extensions.toJSONB
-import com.helger.as2lib.message.AS2Message
-import com.helger.as2lib.message.AS2MessageMDN
-import com.helger.as2lib.partner.Partnership
-import org.jooq.tools.json.JSONObject
+import com.freighttrust.jooq.Tables.REQUEST
+import com.freighttrust.jooq.tables.records.RequestRecord
+import com.freighttrust.persistence.shared.Repository
+import kotlinx.coroutines.coroutineScope
+import org.jooq.Condition
+import org.jooq.DSLContext
+import java.util.*
 
 
+class RequestRepository(
+  dbCtx: DSLContext
+) : AbstractJooqRepository<RequestRecord>(
+  dbCtx, REQUEST, listOf(REQUEST.ID)
+) {
 
-fun Partnership.toTradingChannelRecord(): TradingChannelRecord {
-  val self = this
-  return TradingChannelRecord()
-    .apply {
-      senderId = self.getSenderID("as2_id")
-      recipientId = self.getReceiverID("as2_id")
-      protocol = self.protocol
-      as2Url = self.aS2URL
-      as2MdnTo = self.aS2MDNTo
-      as2MdnOptions = self.aS2MDNOptions
-      encryptionAlgorithm = self.encryptAlgorithm
-      signingAlgorithm = self.signingAlgorithm
+  override fun idQuery(record: RequestRecord): Condition =
+    REQUEST.ID.let { field ->
+      field.eq(record.get(field))
     }
-}
 
-fun TradingChannelRecord.toPartnership(): Partnership {
-  val self = this
-  return Partnership(Partnership.DEFAULT_NAME)
-    .apply {
-      this.setSenderID("as2_id", senderId)
-      this.setReceiverID("as2_id", recipientId)
-      this.protocol = self.protocol
-      this.aS2URL = self.as2Url
-      this.aS2MDNTo = self.as2MdnTo
-      this.aS2MDNOptions = self.as2MdnOptions
-      this.encryptAlgorithm = self.encryptionAlgorithm
-      this.signingAlgorithm = self.signingAlgorithm
+  suspend fun findRequestIdByMessageId(messageId: String, ctx: Repository.Context? = null): UUID? =
+    coroutineScope {
+      jooqContext(ctx)
+        .select(REQUEST.ID)
+        .from(REQUEST)
+        .where(REQUEST.MESSAGE_ID.eq(messageId))
+        .fetchOne()
+        ?.value1()
     }
+
+
 }

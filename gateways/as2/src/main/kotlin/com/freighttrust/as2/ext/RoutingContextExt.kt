@@ -1,33 +1,24 @@
 package com.freighttrust.as2.ext
 
-import com.freighttrust.as2.handlers.As2Context
-import com.freighttrust.as2.handlers.As2MessageExchangeHandler.Companion.CTX_EXCHANGE_CONTEXT
-import com.freighttrust.as2.handlers.As2ValidationHandler.Companion.CTX_AS2_CONTEXT
-import com.freighttrust.as2.handlers.ExchangeContext
+import com.freighttrust.as2.domain.Disposition
+import com.freighttrust.as2.handlers.message
+import com.freighttrust.as2.util.AS2Header
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
+import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.util.AS2HttpHelper
-import com.helger.as2lib.util.AS2IOHelper
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
-import com.helger.commons.io.stream.NullOutputStream
 import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.web.RoutingContext
-import org.bouncycastle.jce.provider.BouncyCastleProvider
-import java.security.DigestOutputStream
-import java.security.MessageDigest
 import javax.activation.DataHandler
 import javax.activation.DataSource
+import javax.mail.internet.InternetHeaders
 import javax.mail.internet.MimeBodyPart
-
-fun RoutingContext.exchangeContext() =
-  get(CTX_EXCHANGE_CONTEXT) as ExchangeContext
-
-fun RoutingContext.as2Context() =
-  get(CTX_AS2_CONTEXT) as As2Context
+import javax.mail.internet.MimeMultipart
 
 fun RoutingContext.bodyDataSource(): DataSource =
   request()
-    .let{ request ->
+    .let { request ->
       body.dataSource(
         request.getHeader(HttpHeaders.CONTENT_TYPE),
         request.getHeader(HttpHeaders.CONTENT_TRANSFER_ENCODING)
@@ -49,51 +40,78 @@ fun RoutingContext.bodyAsMimeBodyPart() =
       bodyPart
     }
 
-fun RoutingContext.calculateMic(): Pair<ByteArray, ECryptoAlgorithmSign> {
+fun RoutingContext.createMDN(text: String, disposition: Disposition): MimeBodyPart =
+  MimeMultipart()
+    .apply {
 
-  val tradingChannel = as2Context().tradingChannel
-  val bodyPart = as2Context().bodyPart!!
+      val textPart = MimeBodyPart()
+        .apply {
+          setContent("$text${CHttp.EOL}", "text/plain")
+          setHeader(HttpHeaders.CONTENT_TYPE.toString(), "text/plain")
+        }
 
-  // Calculate and get the original mic
-  val includeHeadersInMIC =
-    tradingChannel.signingAlgorithm != null || tradingChannel.encryptionAlgorithm != null
+      val reportPart = dispositionNotificationBodyPart(disposition)
 
-  // For sending, we need to use the Signing algorithm defined in the partnership
+      addBodyPart(textPart)
+      addBodyPart(reportPart)
 
-  val digestAlgorithm = ECryptoAlgorithmSign.getFromIDOrNull(tradingChannel.signingAlgorithm)
-    ?: if (tradingChannel.rfc_3851MicAlgorithmsEnabled)
-      ECryptoAlgorithmSign.DEFAULT_RFC_3851
-    else
-      ECryptoAlgorithmSign.DEFAULT_RFC_5751
-
-  val digest = MessageDigest.getInstance(digestAlgorithm.oid.id, BouncyCastleProvider())
-
-  val endOfLineBytes = AS2IOHelper.getAllAsciiBytes(CHttp.EOL)
-
-  if (includeHeadersInMIC) {
-    for (headerLine in bodyPart.allHeaderLines) {
-      digest.update(AS2IOHelper.getAllAsciiBytes(headerLine))
-      digest.update(endOfLineBytes)
+      setSubType("report; report-type=disposition-notification")
     }
-    // The CRLF separator between header and content
-    digest.update(endOfLineBytes)
-  }
+    .let { multipart ->
 
-  val micEncoding = bodyPart.encoding
+      MimeBodyPart()
+        .apply {
+          setContent(multipart)
+          setHeader(HttpHeaders.CONTENT_TYPE.toString(), multipart.contentType)
+        }
 
-  // No need to canonicalize here - see issue #12
-  DigestOutputStream(NullOutputStream(), digest)
-    .use { digestOut ->
-      AS2IOHelper.getContentTransferEncodingAwareOutputStream(
-        digestOut, micEncoding
-      ).use { encodedOut ->
-        bodyPart.dataHandler.writeTo(encodedOut)
+    }
+
+fun RoutingContext.dispositionNotificationBodyPart(disposition: Disposition): MimeBodyPart =
+  InternetHeaders()
+    .apply {
+
+
+      // TODO determine correct reporting ua
+      setAs2Header(AS2Header.ReportingUA, "fright-trust")
+      // todo review original and final recipient logic
+      setAs2Header(AS2Header.OriginalRecipient, "rfc822; ${message.recipientId}")
+      setAs2Header(AS2Header.FinalRecipient, "rfc822; ${message.recipientId}")
+      setAs2Header(AS2Header.OriginalMessageID, message.messageId)
+      setAs2Header(AS2Header.Disposition, disposition.toString())
+
+      val dispositionOptions = request()
+        .getAS2Header(AS2Header.DispositionNotificationOptions)
+        .let { DispositionOptions.createFromString(it) }
+
+      val signingAlgorithm = dispositionOptions.firstMICAlg
+      // fallback to the the signature algorithm configured in the trading channel
+        ?: ECryptoAlgorithmSign.getFromIDOrNull(message.tradingChannel.signingAlgorithm)
+
+      val includeHeaders =
+        message.context
+          .let { context ->
+            context.wasEncrypted || context.wasSigned || context.wasCompressed
+          }
+
+      signingAlgorithm?.apply {
+        val mic = message.body.calculateMic(includeHeaders, signingAlgorithm)
+        setAs2Header(AS2Header.ReceivedContentMIC, mic)
       }
+
+    }
+    .let { headers ->
+      val builder = StringBuilder()
+      for (line in headers.allHeaderLines) {
+        builder
+          .append(line)
+          .append(CHttp.EOL)
+      }
+      val content = builder.append(CHttp.EOL).toString()
+      MimeBodyPart()
+        .apply {
+          setContent(content, "message/disposition-notification")
+          setHeader(HttpHeaders.CONTENT_TYPE.toString(), "message/disposition-notification")
+        }
     }
 
-  // Build result digest array
-  val mic = digest.digest()
-
-  // Perform Base64 encoding and append algorithm ID
-  return Pair(mic, digestAlgorithm)
-}

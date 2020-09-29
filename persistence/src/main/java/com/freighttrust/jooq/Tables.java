@@ -4,7 +4,17 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.*;
+import com.freighttrust.jooq.tables.Certificate;
+import com.freighttrust.jooq.tables.CertificateHistory;
+import com.freighttrust.jooq.tables.File;
+import com.freighttrust.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.jooq.tables.Message;
+import com.freighttrust.jooq.tables.MessageDispositionNotification;
+import com.freighttrust.jooq.tables.Request;
+import com.freighttrust.jooq.tables.TradingChannel;
+import com.freighttrust.jooq.tables.TradingChannelHistory;
+import com.freighttrust.jooq.tables.TradingPartner;
+import com.freighttrust.jooq.tables.TradingPartnerHistory;
 
 import javax.annotation.processing.Generated;
 
@@ -21,16 +31,6 @@ import javax.annotation.processing.Generated;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
-
-    /**
-     * The table <code>public.as2_mdn</code>.
-     */
-    public static final As2Mdn AS2_MDN = As2Mdn.AS2_MDN;
-
-    /**
-     * The table <code>public.as2_message</code>.
-     */
-    public static final As2Message AS2_MESSAGE = As2Message.AS2_MESSAGE;
 
     /**
      * The table <code>public.certificate</code>.
@@ -53,14 +53,19 @@ public class Tables {
     public static final FlywaySchemaHistory FLYWAY_SCHEMA_HISTORY = FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY;
 
     /**
-     * The table <code>public.message_exchange</code>.
+     * The table <code>public.message</code>.
      */
-    public static final MessageExchange MESSAGE_EXCHANGE = MessageExchange.MESSAGE_EXCHANGE;
+    public static final Message MESSAGE = Message.MESSAGE;
 
     /**
-     * The table <code>public.message_exchange_event</code>.
+     * The table <code>public.message_disposition_notification</code>.
      */
-    public static final MessageExchangeEvent MESSAGE_EXCHANGE_EVENT = MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT;
+    public static final MessageDispositionNotification MESSAGE_DISPOSITION_NOTIFICATION = MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION;
+
+    /**
+     * The table <code>public.request</code>.
+     */
+    public static final Request REQUEST = Request.REQUEST;
 
     /**
      * The table <code>public.trading_channel</code>.

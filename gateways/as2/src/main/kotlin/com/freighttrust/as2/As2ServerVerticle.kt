@@ -1,9 +1,8 @@
 package com.freighttrust.as2
 
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.as2Context
+import com.freighttrust.as2.ext.createMDN
 import com.freighttrust.as2.handlers.*
-import com.freighttrust.as2.util.AS2Header
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -22,24 +21,32 @@ class As2ServerVerticle(
 
     val router = Router.router(vertx)
 
+    router.errorHandler(500, { event ->
+
+      event.failure().printStackTrace()
+
+
+    })
+
     router
       .route()
 //      .failureHandler(this::handleFailure)
       .handler(koin.get<As2TempFileHandler>())
       .handler(koin.get<As2BodyHandler>())
-      .handler(koin.get<As2MessageExchangeHandler>())
-      .handler(koin.get<As2ValidationHandler>())
-      .handler(koin.get<As2StoreBodyHandler>())
+      .handler(koin.get<As2RequestHandler>())
       .handler(koin.get<As2DecryptionHandler>())
       .handler(koin.get<As2DecompressionHandler>())
-      .handler(koin.get<As2SignatureVerificationHandler>())
+      .handler(koin.get<As2VerificationHandler>())
       .handler(koin.get<As2DecompressionHandler>())
 
     router.post("/message")
+      .handler(koin.get<As2MessageReceivedHandler>())
+      .handler(koin.get<As2RequestProcessedHandler>())
       .handler(koin.get<As2ForwardMessageHandler>())
 
     router.post("/mdn")
-      .handler(koin.get<As2DispositionNotificationHandler>())
+      .handler(koin.get<As2MdnReceivedHandler>())
+      .handler(koin.get<As2RequestProcessedHandler>())
       .handler(koin.get<As2ForwardMdnHandler>())
 
     logger.info("Mounting router")
@@ -52,29 +59,12 @@ class As2ServerVerticle(
 
   private fun handleFailure(ctx: RoutingContext) {
 
-    val as2Context = ctx.as2Context()
 
     when(val failure = ctx.failure()) {
       is DispositionException -> {
         // respond with an MDN
 
-        ctx.response()
-          .apply {
-
-            putHeader(AS2Header.Version.key, "1.1")
-            // TODO add date
-            putHeader(AS2Header.Server.key, "FreightTrust") // TODO
-            putHeader(AS2Header.MimeVersion.key, "1.0")
-            putHeader(AS2Header.As2From.key, as2Context.senderId)
-            putHeader(AS2Header.As2To.key, as2Context.recipientId)
-
-            // TODO add from header
-            as2Context.subject?.apply { putHeader(AS2Header.Subject.key, this)}
-
-            // TODO should this be configurable per trading channel like in as2-lib
-            putHeader(AS2Header.ContentTransferEncoding.key, "binary")
-
-          }
+        ctx.createMDN("A failure occurred", failure.disposition)
 
 
 

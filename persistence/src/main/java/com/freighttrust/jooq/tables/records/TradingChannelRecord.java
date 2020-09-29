@@ -5,13 +5,14 @@ package com.freighttrust.jooq.tables.records;
 
 
 import com.freighttrust.jooq.tables.TradingChannel;
+
+import javax.annotation.processing.Generated;
+
 import org.jooq.Field;
 import org.jooq.Record10;
 import org.jooq.Record2;
 import org.jooq.Row10;
 import org.jooq.impl.UpdatableRecordImpl;
-
-import javax.annotation.processing.Generated;
 
 
 /**

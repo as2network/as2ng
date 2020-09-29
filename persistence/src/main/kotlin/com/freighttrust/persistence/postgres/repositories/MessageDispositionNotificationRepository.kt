@@ -30,16 +30,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package com.freighttrust.processing.modules
+package com.freighttrust.persistence.postgres.repositories
 
-import com.freighttrust.processing.processors.As2StorageProcessor
-import com.typesafe.config.Config
-import org.koin.core.qualifier.named
-import org.koin.dsl.module
+import com.freighttrust.jooq.Tables.MESSAGE_DISPOSITION_NOTIFICATION
+import com.freighttrust.jooq.tables.records.MessageDispositionNotificationRecord
+import org.jooq.Condition
+import org.jooq.DSLContext
 
-val ProcessingModule = module {
 
-  single { get<Config>(named("app")).getConfig("processing") }
+class MessageDispositionNotificationRepository(
+  dbCtx: DSLContext
+) : AbstractJooqRepository<MessageDispositionNotificationRecord>(
+  dbCtx, MESSAGE_DISPOSITION_NOTIFICATION, listOf(MESSAGE_DISPOSITION_NOTIFICATION.REQUEST_ID)
+) {
 
-  factory { As2StorageProcessor(get(), get(), get()) }
+  override fun idQuery(record: MessageDispositionNotificationRecord): Condition =
+    MESSAGE_DISPOSITION_NOTIFICATION.REQUEST_ID.let { field ->
+      field.eq(record.get(field))
+    }
+
 }

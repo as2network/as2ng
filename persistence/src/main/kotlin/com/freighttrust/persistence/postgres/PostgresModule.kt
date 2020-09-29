@@ -73,11 +73,11 @@ val PostgresModule = module {
     DSL.using(dataSource, SQLDialect.POSTGRES)
   }
 
-  factory { As2MessageRepository(get()) }
-  factory { As2MdnRepository(get()) }
+
   factory { TradingChannelRepository(get()) }
   factory { CertificateRepository(get()) }
-  factory { MessageExchangeRepository(get()) }
-  factory { MessageExchangeEventRepository(get()) }
+  factory { RequestRepository(get()) }
+  factory { MessageRepository(get()) }
+  factory { MessageDispositionNotificationRepository(get()) }
 
 }

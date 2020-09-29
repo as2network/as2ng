@@ -32,7 +32,6 @@
 
 package com.freighttrust.as2
 
-import com.freighttrust.as2.factories.PostgresCertificateFactory
 import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
@@ -58,14 +57,6 @@ val AS2ClientModule = module {
 
   single { AS2Client() }
 
-  single<AS2Client>(_q("as2client-postgres")) {
-    val client = object : AS2Client() {
-      override fun initCertificateFactory(aSettings: AS2ClientSettings, aSession: AS2Session) {
-        aSession.certificateFactory = PostgresCertificateFactory(get(), get())
-      }
-    }
-    client
-  }
 }
 
 val HttpMockModule = module {

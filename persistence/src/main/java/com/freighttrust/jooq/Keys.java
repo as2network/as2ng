@@ -4,18 +4,33 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.*;
-import com.freighttrust.jooq.tables.records.*;
+import com.freighttrust.jooq.tables.Certificate;
+import com.freighttrust.jooq.tables.File;
+import com.freighttrust.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.jooq.tables.Message;
+import com.freighttrust.jooq.tables.MessageDispositionNotification;
+import com.freighttrust.jooq.tables.Request;
+import com.freighttrust.jooq.tables.TradingChannel;
+import com.freighttrust.jooq.tables.TradingPartner;
+import com.freighttrust.jooq.tables.records.CertificateRecord;
+import com.freighttrust.jooq.tables.records.FileRecord;
+import com.freighttrust.jooq.tables.records.FlywaySchemaHistoryRecord;
+import com.freighttrust.jooq.tables.records.MessageDispositionNotificationRecord;
+import com.freighttrust.jooq.tables.records.MessageRecord;
+import com.freighttrust.jooq.tables.records.RequestRecord;
+import com.freighttrust.jooq.tables.records.TradingChannelRecord;
+import com.freighttrust.jooq.tables.records.TradingPartnerRecord;
+
+import javax.annotation.processing.Generated;
+
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.UniqueKey;
 import org.jooq.impl.Internal;
 
-import javax.annotation.processing.Generated;
-
 
 /**
- * A class modelling foreign key relationships and constraints of tables of
+ * A class modelling foreign key relationships and constraints of tables of 
  * the <code>public</code> schema.
  */
 @Generated(
@@ -38,14 +53,14 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final UniqueKey<As2MdnRecord> AS2_MDN_PKEY = UniqueKeys0.AS2_MDN_PKEY;
-    public static final UniqueKey<As2MessageRecord> AS2_MESSAGE_PKEY = UniqueKeys0.AS2_MESSAGE_PKEY;
     public static final UniqueKey<CertificateRecord> CERTIFICATE_PKEY = UniqueKeys0.CERTIFICATE_PKEY;
     public static final UniqueKey<FileRecord> FILE_PKEY = UniqueKeys0.FILE_PKEY;
     public static final UniqueKey<FileRecord> FILE_BUCKET_KEY_KEY = UniqueKeys0.FILE_BUCKET_KEY_KEY;
     public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = UniqueKeys0.FLYWAY_SCHEMA_HISTORY_PK;
-    public static final UniqueKey<MessageExchangeRecord> MESSAGE_EXCHANGE_PKEY = UniqueKeys0.MESSAGE_EXCHANGE_PKEY;
-    public static final UniqueKey<MessageExchangeEventRecord> MESSAGE_EXCHANGE_EVENT_PKEY = UniqueKeys0.MESSAGE_EXCHANGE_EVENT_PKEY;
+    public static final UniqueKey<MessageRecord> MESSAGE_PKEY = UniqueKeys0.MESSAGE_PKEY;
+    public static final UniqueKey<MessageDispositionNotificationRecord> MESSAGE_DISPOSITION_NOTIFICATION_PKEY = UniqueKeys0.MESSAGE_DISPOSITION_NOTIFICATION_PKEY;
+    public static final UniqueKey<RequestRecord> REQUEST_PKEY = UniqueKeys0.REQUEST_PKEY;
+    public static final UniqueKey<RequestRecord> REQUEST_MESSAGE_ID_KEY = UniqueKeys0.REQUEST_MESSAGE_ID_KEY;
     public static final UniqueKey<TradingChannelRecord> TRADING_CHANNEL_PKEY = UniqueKeys0.TRADING_CHANNEL_PKEY;
     public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_PKEY = UniqueKeys0.TRADING_PARTNER_PKEY;
     public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_NAME_KEY = UniqueKeys0.TRADING_PARTNER_NAME_KEY;
@@ -54,15 +69,12 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
-    public static final ForeignKey<As2MdnRecord, As2MessageRecord> AS2_MDN__AS2_MDN_MESSAGE_ID_FKEY = ForeignKeys0.AS2_MDN__AS2_MDN_MESSAGE_ID_FKEY;
-    public static final ForeignKey<As2MdnRecord, FileRecord> AS2_MDN__AS2_MDN_BODY_FILE_ID_FKEY = ForeignKeys0.AS2_MDN__AS2_MDN_BODY_FILE_ID_FKEY;
-    public static final ForeignKey<As2MessageRecord, TradingPartnerRecord> AS2_MESSAGE__AS2_MESSAGE_SENDER_ID_FKEY = ForeignKeys0.AS2_MESSAGE__AS2_MESSAGE_SENDER_ID_FKEY;
-    public static final ForeignKey<As2MessageRecord, TradingPartnerRecord> AS2_MESSAGE__AS2_MESSAGE_RECIPIENT_ID_FKEY = ForeignKeys0.AS2_MESSAGE__AS2_MESSAGE_RECIPIENT_ID_FKEY;
-    public static final ForeignKey<As2MessageRecord, FileRecord> AS2_MESSAGE__AS2_MESSAGE_BODY_FILE_ID_FKEY = ForeignKeys0.AS2_MESSAGE__AS2_MESSAGE_BODY_FILE_ID_FKEY;
     public static final ForeignKey<CertificateRecord, TradingPartnerRecord> CERTIFICATE__CERTIFICATE_TRADING_PARTNER_ID_FKEY = ForeignKeys0.CERTIFICATE__CERTIFICATE_TRADING_PARTNER_ID_FKEY;
-    public static final ForeignKey<MessageExchangeRecord, TradingPartnerRecord> MESSAGE_EXCHANGE__MESSAGE_EXCHANGE_SENDER_ID_FKEY = ForeignKeys0.MESSAGE_EXCHANGE__MESSAGE_EXCHANGE_SENDER_ID_FKEY;
-    public static final ForeignKey<MessageExchangeRecord, TradingPartnerRecord> MESSAGE_EXCHANGE__MESSAGE_EXCHANGE_RECIPIENT_ID_FKEY = ForeignKeys0.MESSAGE_EXCHANGE__MESSAGE_EXCHANGE_RECIPIENT_ID_FKEY;
-    public static final ForeignKey<MessageExchangeEventRecord, MessageExchangeRecord> MESSAGE_EXCHANGE_EVENT__MESSAGE_EXCHANGE_EVENT_MESSAGE_EXCHANGE_ID_FKEY = ForeignKeys0.MESSAGE_EXCHANGE_EVENT__MESSAGE_EXCHANGE_EVENT_MESSAGE_EXCHANGE_ID_FKEY;
+    public static final ForeignKey<MessageRecord, RequestRecord> MESSAGE__MESSAGE_REQUEST_ID_FKEY = ForeignKeys0.MESSAGE__MESSAGE_REQUEST_ID_FKEY;
+    public static final ForeignKey<MessageDispositionNotificationRecord, RequestRecord> MESSAGE_DISPOSITION_NOTIFICATION__MESSAGE_DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY = ForeignKeys0.MESSAGE_DISPOSITION_NOTIFICATION__MESSAGE_DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY;
+    public static final ForeignKey<RequestRecord, TradingPartnerRecord> REQUEST__REQUEST_SENDER_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_SENDER_ID_FKEY;
+    public static final ForeignKey<RequestRecord, TradingPartnerRecord> REQUEST__REQUEST_RECIPIENT_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_RECIPIENT_ID_FKEY;
+    public static final ForeignKey<RequestRecord, RequestRecord> REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY;
     public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY = ForeignKeys0.TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY;
     public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY = ForeignKeys0.TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY;
 
@@ -75,29 +87,26 @@ public class Keys {
     }
 
     private static class UniqueKeys0 {
-        public static final UniqueKey<As2MdnRecord> AS2_MDN_PKEY = Internal.createUniqueKey(As2Mdn.AS2_MDN, "as2_mdn_pkey", As2Mdn.AS2_MDN.MESSAGE_ID);
-        public static final UniqueKey<As2MessageRecord> AS2_MESSAGE_PKEY = Internal.createUniqueKey(As2Message.AS2_MESSAGE, "as2_message_pkey", As2Message.AS2_MESSAGE.ID);
         public static final UniqueKey<CertificateRecord> CERTIFICATE_PKEY = Internal.createUniqueKey(Certificate.CERTIFICATE, "certificate_pkey", Certificate.CERTIFICATE.TRADING_PARTNER_ID);
         public static final UniqueKey<FileRecord> FILE_PKEY = Internal.createUniqueKey(File.FILE, "file_pkey", File.FILE.ID);
         public static final UniqueKey<FileRecord> FILE_BUCKET_KEY_KEY = Internal.createUniqueKey(File.FILE, "file_bucket_key_key", File.FILE.BUCKET, File.FILE.KEY);
         public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = Internal.createUniqueKey(FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, "flyway_schema_history_pk", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK);
-        public static final UniqueKey<MessageExchangeRecord> MESSAGE_EXCHANGE_PKEY = Internal.createUniqueKey(MessageExchange.MESSAGE_EXCHANGE, "message_exchange_pkey", MessageExchange.MESSAGE_EXCHANGE.ID);
-        public static final UniqueKey<MessageExchangeEventRecord> MESSAGE_EXCHANGE_EVENT_PKEY = Internal.createUniqueKey(MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT, "message_exchange_event_pkey", MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT.ID);
+        public static final UniqueKey<MessageRecord> MESSAGE_PKEY = Internal.createUniqueKey(Message.MESSAGE, "message_pkey", Message.MESSAGE.REQUEST_ID);
+        public static final UniqueKey<MessageDispositionNotificationRecord> MESSAGE_DISPOSITION_NOTIFICATION_PKEY = Internal.createUniqueKey(MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION, "message_disposition_notification_pkey", MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION.REQUEST_ID);
+        public static final UniqueKey<RequestRecord> REQUEST_PKEY = Internal.createUniqueKey(Request.REQUEST, "request_pkey", Request.REQUEST.ID);
+        public static final UniqueKey<RequestRecord> REQUEST_MESSAGE_ID_KEY = Internal.createUniqueKey(Request.REQUEST, "request_message_id_key", Request.REQUEST.MESSAGE_ID);
         public static final UniqueKey<TradingChannelRecord> TRADING_CHANNEL_PKEY = Internal.createUniqueKey(TradingChannel.TRADING_CHANNEL, "trading_channel_pkey", TradingChannel.TRADING_CHANNEL.SENDER_ID, TradingChannel.TRADING_CHANNEL.RECIPIENT_ID);
         public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_PKEY = Internal.createUniqueKey(TradingPartner.TRADING_PARTNER, "trading_partner_pkey", TradingPartner.TRADING_PARTNER.ID);
         public static final UniqueKey<TradingPartnerRecord> TRADING_PARTNER_NAME_KEY = Internal.createUniqueKey(TradingPartner.TRADING_PARTNER, "trading_partner_name_key", TradingPartner.TRADING_PARTNER.NAME);
     }
 
     private static class ForeignKeys0 {
-        public static final ForeignKey<As2MdnRecord, As2MessageRecord> AS2_MDN__AS2_MDN_MESSAGE_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.AS2_MESSAGE_PKEY, As2Mdn.AS2_MDN, "as2_mdn__as2_mdn_message_id_fkey", As2Mdn.AS2_MDN.MESSAGE_ID);
-        public static final ForeignKey<As2MdnRecord, FileRecord> AS2_MDN__AS2_MDN_BODY_FILE_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.FILE_PKEY, As2Mdn.AS2_MDN, "as2_mdn__as2_mdn_body_file_id_fkey", As2Mdn.AS2_MDN.BODY_FILE_ID);
-        public static final ForeignKey<As2MessageRecord, TradingPartnerRecord> AS2_MESSAGE__AS2_MESSAGE_SENDER_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, As2Message.AS2_MESSAGE, "as2_message__as2_message_sender_id_fkey", As2Message.AS2_MESSAGE.SENDER_ID);
-        public static final ForeignKey<As2MessageRecord, TradingPartnerRecord> AS2_MESSAGE__AS2_MESSAGE_RECIPIENT_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, As2Message.AS2_MESSAGE, "as2_message__as2_message_recipient_id_fkey", As2Message.AS2_MESSAGE.RECIPIENT_ID);
-        public static final ForeignKey<As2MessageRecord, FileRecord> AS2_MESSAGE__AS2_MESSAGE_BODY_FILE_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.FILE_PKEY, As2Message.AS2_MESSAGE, "as2_message__as2_message_body_file_id_fkey", As2Message.AS2_MESSAGE.BODY_FILE_ID);
         public static final ForeignKey<CertificateRecord, TradingPartnerRecord> CERTIFICATE__CERTIFICATE_TRADING_PARTNER_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, Certificate.CERTIFICATE, "certificate__certificate_trading_partner_id_fkey", Certificate.CERTIFICATE.TRADING_PARTNER_ID);
-        public static final ForeignKey<MessageExchangeRecord, TradingPartnerRecord> MESSAGE_EXCHANGE__MESSAGE_EXCHANGE_SENDER_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, MessageExchange.MESSAGE_EXCHANGE, "message_exchange__message_exchange_sender_id_fkey", MessageExchange.MESSAGE_EXCHANGE.SENDER_ID);
-        public static final ForeignKey<MessageExchangeRecord, TradingPartnerRecord> MESSAGE_EXCHANGE__MESSAGE_EXCHANGE_RECIPIENT_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, MessageExchange.MESSAGE_EXCHANGE, "message_exchange__message_exchange_recipient_id_fkey", MessageExchange.MESSAGE_EXCHANGE.RECIPIENT_ID);
-        public static final ForeignKey<MessageExchangeEventRecord, MessageExchangeRecord> MESSAGE_EXCHANGE_EVENT__MESSAGE_EXCHANGE_EVENT_MESSAGE_EXCHANGE_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.MESSAGE_EXCHANGE_PKEY, MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT, "message_exchange_event__message_exchange_event_message_exchange_id_fkey", MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT.MESSAGE_EXCHANGE_ID);
+        public static final ForeignKey<MessageRecord, RequestRecord> MESSAGE__MESSAGE_REQUEST_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.REQUEST_PKEY, Message.MESSAGE, "message__message_request_id_fkey", Message.MESSAGE.REQUEST_ID);
+        public static final ForeignKey<MessageDispositionNotificationRecord, RequestRecord> MESSAGE_DISPOSITION_NOTIFICATION__MESSAGE_DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.REQUEST_PKEY, MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION, "message_disposition_notification__message_disposition_notification_request_id_fkey", MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION.REQUEST_ID);
+        public static final ForeignKey<RequestRecord, TradingPartnerRecord> REQUEST__REQUEST_SENDER_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, Request.REQUEST, "request__request_sender_id_fkey", Request.REQUEST.SENDER_ID);
+        public static final ForeignKey<RequestRecord, TradingPartnerRecord> REQUEST__REQUEST_RECIPIENT_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, Request.REQUEST, "request__request_recipient_id_fkey", Request.REQUEST.RECIPIENT_ID);
+        public static final ForeignKey<RequestRecord, RequestRecord> REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.REQUEST_PKEY, Request.REQUEST, "request__request_original_request_id_fkey", Request.REQUEST.ORIGINAL_REQUEST_ID);
         public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, TradingChannel.TRADING_CHANNEL, "trading_channel__trading_channel_sender_id_fkey", TradingChannel.TRADING_CHANNEL.SENDER_ID);
         public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_PARTNER_PKEY, TradingChannel.TRADING_CHANNEL, "trading_channel__trading_channel_recipient_id_fkey", TradingChannel.TRADING_CHANNEL.RECIPIENT_ID);
     }

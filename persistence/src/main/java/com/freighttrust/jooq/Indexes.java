@@ -4,12 +4,20 @@
 package com.freighttrust.jooq;
 
 
-import com.freighttrust.jooq.tables.*;
+import com.freighttrust.jooq.tables.Certificate;
+import com.freighttrust.jooq.tables.File;
+import com.freighttrust.jooq.tables.FlywaySchemaHistory;
+import com.freighttrust.jooq.tables.Message;
+import com.freighttrust.jooq.tables.MessageDispositionNotification;
+import com.freighttrust.jooq.tables.Request;
+import com.freighttrust.jooq.tables.TradingChannel;
+import com.freighttrust.jooq.tables.TradingPartner;
+
+import javax.annotation.processing.Generated;
+
 import org.jooq.Index;
 import org.jooq.OrderField;
 import org.jooq.impl.Internal;
-
-import javax.annotation.processing.Generated;
 
 
 /**
@@ -29,19 +37,15 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
-    public static final Index AS2_MDN_PKEY = Indexes0.AS2_MDN_PKEY;
-    public static final Index AS2_MESSAGE_PKEY = Indexes0.AS2_MESSAGE_PKEY;
     public static final Index CERTIFICATE_PKEY = Indexes0.CERTIFICATE_PKEY;
     public static final Index FILE_BUCKET_KEY_KEY = Indexes0.FILE_BUCKET_KEY_KEY;
     public static final Index FILE_PKEY = Indexes0.FILE_PKEY;
     public static final Index FLYWAY_SCHEMA_HISTORY_PK = Indexes0.FLYWAY_SCHEMA_HISTORY_PK;
     public static final Index FLYWAY_SCHEMA_HISTORY_S_IDX = Indexes0.FLYWAY_SCHEMA_HISTORY_S_IDX;
-    public static final Index IDX_MESSAGE_EXCHANGE__MESSAGE_ID = Indexes0.IDX_MESSAGE_EXCHANGE__MESSAGE_ID;
-    public static final Index IDX_MESSAGE_EXCHANGE__RECIPIENT_ID = Indexes0.IDX_MESSAGE_EXCHANGE__RECIPIENT_ID;
-    public static final Index IDX_MESSAGE_EXCHANGE__SENDER_ID = Indexes0.IDX_MESSAGE_EXCHANGE__SENDER_ID;
-    public static final Index IDX_MESSAGE_EXCHANGE__TYPE = Indexes0.IDX_MESSAGE_EXCHANGE__TYPE;
-    public static final Index MESSAGE_EXCHANGE_PKEY = Indexes0.MESSAGE_EXCHANGE_PKEY;
-    public static final Index MESSAGE_EXCHANGE_EVENT_PKEY = Indexes0.MESSAGE_EXCHANGE_EVENT_PKEY;
+    public static final Index MESSAGE_PKEY = Indexes0.MESSAGE_PKEY;
+    public static final Index MESSAGE_DISPOSITION_NOTIFICATION_PKEY = Indexes0.MESSAGE_DISPOSITION_NOTIFICATION_PKEY;
+    public static final Index REQUEST_MESSAGE_ID_KEY = Indexes0.REQUEST_MESSAGE_ID_KEY;
+    public static final Index REQUEST_PKEY = Indexes0.REQUEST_PKEY;
     public static final Index TRADING_CHANNEL_PKEY = Indexes0.TRADING_CHANNEL_PKEY;
     public static final Index TRADING_PARTNER_NAME_KEY = Indexes0.TRADING_PARTNER_NAME_KEY;
     public static final Index TRADING_PARTNER_PKEY = Indexes0.TRADING_PARTNER_PKEY;
@@ -51,19 +55,15 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     private static class Indexes0 {
-        public static Index AS2_MDN_PKEY = Internal.createIndex("as2_mdn_pkey", As2Mdn.AS2_MDN, new OrderField[] { As2Mdn.AS2_MDN.MESSAGE_ID }, true);
-        public static Index AS2_MESSAGE_PKEY = Internal.createIndex("as2_message_pkey", As2Message.AS2_MESSAGE, new OrderField[] { As2Message.AS2_MESSAGE.ID }, true);
         public static Index CERTIFICATE_PKEY = Internal.createIndex("certificate_pkey", Certificate.CERTIFICATE, new OrderField[] { Certificate.CERTIFICATE.TRADING_PARTNER_ID }, true);
         public static Index FILE_BUCKET_KEY_KEY = Internal.createIndex("file_bucket_key_key", File.FILE, new OrderField[] { File.FILE.BUCKET, File.FILE.KEY }, true);
         public static Index FILE_PKEY = Internal.createIndex("file_pkey", File.FILE, new OrderField[] { File.FILE.ID }, true);
         public static Index FLYWAY_SCHEMA_HISTORY_PK = Internal.createIndex("flyway_schema_history_pk", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
         public static Index FLYWAY_SCHEMA_HISTORY_S_IDX = Internal.createIndex("flyway_schema_history_s_idx", FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, new OrderField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.SUCCESS }, false);
-        public static Index IDX_MESSAGE_EXCHANGE__MESSAGE_ID = Internal.createIndex("idx_message_exchange__message_id", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.MESSAGE_ID }, false);
-        public static Index IDX_MESSAGE_EXCHANGE__RECIPIENT_ID = Internal.createIndex("idx_message_exchange__recipient_id", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.RECIPIENT_ID }, false);
-        public static Index IDX_MESSAGE_EXCHANGE__SENDER_ID = Internal.createIndex("idx_message_exchange__sender_id", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.SENDER_ID }, false);
-        public static Index IDX_MESSAGE_EXCHANGE__TYPE = Internal.createIndex("idx_message_exchange__type", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.TYPE }, false);
-        public static Index MESSAGE_EXCHANGE_PKEY = Internal.createIndex("message_exchange_pkey", MessageExchange.MESSAGE_EXCHANGE, new OrderField[] { MessageExchange.MESSAGE_EXCHANGE.ID }, true);
-        public static Index MESSAGE_EXCHANGE_EVENT_PKEY = Internal.createIndex("message_exchange_event_pkey", MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT, new OrderField[] { MessageExchangeEvent.MESSAGE_EXCHANGE_EVENT.ID }, true);
+        public static Index MESSAGE_PKEY = Internal.createIndex("message_pkey", Message.MESSAGE, new OrderField[] { Message.MESSAGE.REQUEST_ID }, true);
+        public static Index MESSAGE_DISPOSITION_NOTIFICATION_PKEY = Internal.createIndex("message_disposition_notification_pkey", MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION, new OrderField[] { MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION.REQUEST_ID }, true);
+        public static Index REQUEST_MESSAGE_ID_KEY = Internal.createIndex("request_message_id_key", Request.REQUEST, new OrderField[] { Request.REQUEST.MESSAGE_ID }, true);
+        public static Index REQUEST_PKEY = Internal.createIndex("request_pkey", Request.REQUEST, new OrderField[] { Request.REQUEST.ID }, true);
         public static Index TRADING_CHANNEL_PKEY = Internal.createIndex("trading_channel_pkey", TradingChannel.TRADING_CHANNEL, new OrderField[] { TradingChannel.TRADING_CHANNEL.SENDER_ID, TradingChannel.TRADING_CHANNEL.RECIPIENT_ID }, true);
         public static Index TRADING_PARTNER_NAME_KEY = Internal.createIndex("trading_partner_name_key", TradingPartner.TRADING_PARTNER, new OrderField[] { TradingPartner.TRADING_PARTNER.NAME }, true);
         public static Index TRADING_PARTNER_PKEY = Internal.createIndex("trading_partner_pkey", TradingPartner.TRADING_PARTNER, new OrderField[] { TradingPartner.TRADING_PARTNER.ID }, true);

@@ -14,7 +14,7 @@ import java.nio.channels.FileChannel
 class As2BodyHandler : Handler<RoutingContext> {
 
   private fun newFileOutputStream(ctx: RoutingContext): Pair<File, FileOutputStream> =
-    ctx.newTempFile()
+    ctx.tempFileHelper.newFile()
       .let { file ->
         Pair(file, FileOutputStream(file))
       }

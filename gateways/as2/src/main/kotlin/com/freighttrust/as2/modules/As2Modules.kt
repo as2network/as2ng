@@ -35,10 +35,7 @@ package com.freighttrust.as2.modules
 import com.fasterxml.uuid.Generators
 import com.freighttrust.as2.cert.VaultCertificateProvider
 import com.freighttrust.as2.cert.VaultConfigOptions
-import com.freighttrust.as2.controllers.AS2Controller
-import com.freighttrust.as2.domain.MessageExchangeEventLog
 import com.freighttrust.as2.handlers.*
-import com.freighttrust.as2.session.As2SessionFactory
 import com.typesafe.config.Config
 import io.vertx.ext.web.client.WebClient
 import okhttp3.OkHttpClient
@@ -53,29 +50,19 @@ val As2ExchangeServerModule = module {
     config.getConfig("as2")
   }
 
-  factory {
-    val config = get<Config>(_q("app"))
-    As2SessionFactory.create(_koin, config)
-  }
-
   factory { Generators.timeBasedGenerator() }
 
-  factory {
-    AS2Controller(get(), get(), get())
-  }
-
-  single { MessageExchangeEventLog(get(), get(), get()) }
   single { As2BodyHandler() }
   single { As2TempFileHandler() }
-  single { As2StoreBodyHandler(get()) }
-  single { As2DispositionNotificationHandler(get()) }
-  single { As2MessageExchangeHandler(get(), get()) }
-  single { As2ValidationHandler(get()) }
+  single { As2RequestHandler(get(), get(), get(), get(), get()) }
   single { As2DecompressionHandler() }
   single { As2DecryptionHandler(get()) }
+  single { As2RequestProcessedHandler(get()) }
+  single { As2MdnReceivedHandler(get(), get(), get()) }
+  single { As2MessageReceivedHandler(get()) }
   // TODO integrate verification handler with config
-  single { As2SignatureVerificationHandler(get(), true)}
-  single { As2ForwardMessageHandler(get()) }
+  single { As2VerificationHandler(get(), true) }
+  single { As2ForwardMessageHandler(get(), get()) }
   single { As2ForwardMdnHandler(get()) }
 
   single { WebClient.create(get()) }

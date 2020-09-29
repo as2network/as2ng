@@ -110,88 +110,50 @@ create table file
     unique (bucket, key)
 );
 
-create type message_exchange_type as enum (
-    'message',
-    'mdn'
-    );
 
-
-create table message_exchange
+create table request
 (
-    id                   uuid primary key,
-    type                 message_exchange_type,
-    headers              jsonb,
-    started_at           timestamptz default current_timestamp,
-    finished_at          timestamptz                                 null,
-    elapsed_ms           bigint                                      null,
-    success              bool,
-    error_message        varchar(1024)                               null,
-    error_trace          text                                        null,
-    sender_id            varchar(64) references trading_partner (id) null,
-    recipient_id         varchar(64) references trading_partner (id) null,
-    message_id           varchar(64)                                 null,
-    subject              varchar(128)                                null,
-    encrypted            bool                                        null,
-    encryption_algorithm varchar(16)                                 null,
-    compressed           bool                                        null,
-    signed               bool                                        null,
-    signing_algorithm    varchar(16)                                 null,
-    mic                  varchar(32)                                 null,
-    mic_algorithm        varchar(16)                                 null
+    id                       uuid primary key,
+    headers                  jsonb,
+    body_file_id             bigint                       not null,
+    sender_id                varchar(64) references trading_partner (id),
+    recipient_id             varchar(64) references trading_partner (id),
+    message_id               varchar(64) unique,
+    subject                  varchar(128),
+    received_at              timestamptz default current_timestamp,
+
+    original_request_id      uuid references request (id) null,
+
+    processed_at             timestamptz                  null,
+    processing_error         bool,
+    processing_error_message varchar(128)                 null,
+
+    delivered_at             timestamptz                  null,
+    delivered_to             varchar(128)                 null
 );
 
-create index idx_message_exchange__type on message_exchange (type);
-create index idx_message_exchange__message_id on message_exchange (message_id);
-create index idx_message_exchange__sender_id on message_exchange (sender_id);
-create index idx_message_exchange__recipient_id on message_exchange (recipient_id);
 
-create type message_exchange_event_type as enum (
-    'error',
-    'validation',
-    'store_body',
-    'decryption',
-    'decompression',
-    'signature_verification',
-    'forwarding',
-    'mdn_receipt',
-    'mdn_forwarding'
-        'async_mdn_receipt',
-    'async_mdn_forwarding'
-    );
-
-create table message_exchange_event
+create table message
 (
-    id                  uuid primary key,
-    type                message_exchange_event_type,
-    message_exchange_id uuid references message_exchange (id),
-    data                jsonb,
-    timestamp           timestamptz default current_timestamp
+    request_id              uuid primary key references request (id),
+
+    encryption_algorithm    varchar(16)  null,
+    compression_algorithm   varchar(16)  null,
+    mic                     varchar(64)  null,
+
+    is_mdn_requested        bool,
+    is_mdn_async            bool,
+    receipt_delivery_option varchar(128) null
 );
 
-create table as2_message
+create table message_disposition_notification
 (
-    id                          varchar(64) primary key,
-    sender_id                   varchar(64) references trading_partner (id),
-    recipient_id                varchar(64) references trading_partner (id),
-    subject                     varchar(128),
-    body_content_type           varchar(128),
-    body_file_id                int references file (id),
-    encrypted                   bool,
-    compressed                  bool,
-    signed                      bool,
-    mic                         varchar(32)  null,
-    mic_algorithm               varchar(32)  null,
-    receipt_delivery_option     varchar(128) null,
-    disposition_notification_to varchar(128) null,
-    /* store headers as jsonb to allow for free form data but make it queryable */
-    headers                     jsonb
-);
+    request_id           uuid primary key references request (id),
 
-create table as2_mdn
-(
-    message_id   varchar(64) primary key references as2_message (id),
-    signed       bool,
-    mic          varchar(32) null,
-    body_file_id int references file (id)
+    original_message_id  varchar(64),
+    original_recipient   varchar(64),
+    final_recipient      varchar(64),
+    reporting_ua         varchar(64),
+    disposition          varchar(128),
+    received_content_mic varchar(64) null
 );
-
