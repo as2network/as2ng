@@ -1,7 +1,7 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.util.AS2Header
-import com.freighttrust.persistence.shared.MessageRepository
+import com.freighttrust.persistence.MessageRepository
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
@@ -18,7 +18,7 @@ class As2ForwardMessageHandler(
 
     //
     val request = webClient
-      .postAbs(tradingChannel.as2Url)
+      .postAbs(tradingChannel.recipientMessageUrl)
       .putHeaders(ctx.request().headers())
 
     if (message.isMdnRequested && message.isMdnAsynchronous) {

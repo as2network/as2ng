@@ -2,8 +2,8 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.REQUEST
 import com.freighttrust.jooq.tables.records.RequestRecord
-import com.freighttrust.persistence.shared.Repository
-import com.freighttrust.persistence.shared.RequestRepository
+import com.freighttrust.persistence.Repository
+import com.freighttrust.persistence.RequestRepository
 import kotlinx.coroutines.coroutineScope
 import org.jooq.Condition
 import org.jooq.DSLContext

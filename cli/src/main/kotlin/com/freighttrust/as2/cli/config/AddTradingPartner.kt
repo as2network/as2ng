@@ -1,7 +1,7 @@
 package com.freighttrust.as2.cli.config
 
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
-import com.freighttrust.persistence.shared.TradingPartnerRepository
+import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -28,13 +28,12 @@ class AddTradingPartner : KoinComponent, Runnable {
   )
   lateinit var email: String
 
-  val repository: TradingPartnerRepository by inject()
+  private val repository: TradingPartnerRepository by inject()
 
   override fun run() {
 
     val record = TradingPartnerRecord()
       .apply {
-        id = "foo"
         name = this@AddTradingPartner.name
         email = this@AddTradingPartner.email
       }

@@ -1,6 +1,7 @@
-package com.freighttrust.persistence.shared
+package com.freighttrust.persistence
 
 import com.freighttrust.jooq.tables.records.*
+import java.security.cert.X509Certificate
 import java.util.*
 import javax.activation.DataHandler
 
@@ -20,13 +21,21 @@ interface Repository<T> {
 
 }
 
-interface CertificateRepository: Repository<CertificateRecord>
+interface KeyPairRepository : Repository<KeyPairRecord> {
+
+  suspend fun findIdByCertificate(certificate: X509Certificate, ctx: Repository.Context? = null): Long?
+
+}
 
 interface MessageRepository : Repository<MessageRecord>
 
 interface MessageDispositionNotificationRepository : Repository<MessageDispositionNotificationRecord>
 
-interface TradingChannelRepository : Repository<TradingChannelRecord>
+interface TradingChannelRepository : Repository<TradingChannelRecord> {
+
+  suspend fun findByAs2Identifiers(senderId: String, recipientId: String, ctx: Repository.Context? = null): TradingChannelRecord?
+
+}
 
 interface TradingPartnerRepository : Repository<TradingPartnerRecord>
 

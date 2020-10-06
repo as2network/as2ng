@@ -28,8 +28,9 @@ val As2ExchangeServerModule = module {
   single { As2RequestProcessedHandler(get()) }
   single { As2MdnReceivedHandler(get(), get(), get()) }
   single { As2MessageReceivedHandler(get()) }
+  single { As2VerificationHandler() }
+  single { As2SignatureCaptureHandler(get()) }
   // TODO integrate verification handler with config
-  single { As2VerificationHandler(get(), true) }
   single { As2ForwardMessageHandler(get(), get()) }
   single { As2ForwardMdnHandler(get()) }
 

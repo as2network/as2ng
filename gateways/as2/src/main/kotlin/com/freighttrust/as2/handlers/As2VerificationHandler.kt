@@ -1,21 +1,15 @@
 package com.freighttrust.as2.handlers
 
-import com.freighttrust.as2.domain.MessageType
 import com.freighttrust.as2.ext.signatureCertificateFromBody
-import com.freighttrust.jooq.tables.records.CertificateRecord
-import com.freighttrust.persistence.extensions.toX509
-import com.freighttrust.persistence.shared.CertificateRepository
-import com.helger.as2lib.crypto.ECryptoAlgorithmSign
+import com.freighttrust.persistence.KeyPairRepository
+import com.freighttrust.persistence.MessageRepository
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
 import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.LoggerFactory
 
-class As2VerificationHandler(
-  private val certificateRepository: CertificateRepository,
-  private val useCertificateInBody: Boolean = true
-) : CoroutineRouteHandler() {
+class As2VerificationHandler() : CoroutineRouteHandler() {
 
   private val logger = LoggerFactory.getLogger(As2VerificationHandler::class.java)
 
@@ -27,37 +21,14 @@ class As2VerificationHandler(
 
     try {
 
-      val bodyCertificate = message.body.signatureCertificateFromBody(ctx.tempFileHelper)
+      val certificate = message.body.signatureCertificateFromBody(ctx.tempFileHelper) ?:
+        throw Error("Body certificate not found")
 
-      // fallback to to the certificate from the trading channel
+      certificate.checkValidity()
 
-      val certificateRecord = if (!useCertificateInBody || bodyCertificate == null)
-        CertificateRecord().apply { tradingPartnerId = message.senderId }
-          .let { record -> certificateRepository.findById(record) }
-      else null
-
-      val senderCertificate = bodyCertificate ?: certificateRecord
-        ?.x509Certificate
-        ?.toX509()
-
-      checkNotNull(senderCertificate) { "sender certificate is required" }
-
-      senderCertificate.checkValidity()
-
-      val tradingChannel = message.tradingChannel
-
-      ctx.message = message.verify(senderCertificate, ctx.tempFileHelper)
+      ctx.message = message.verify(certificate, ctx.tempFileHelper)
 
       logger.info("Successfully verified signature of incoming AS2 message")
-
-      // calculate mic if this is a normal message
-
-      if (message.type == MessageType.Message) {
-        ctx.message = ctx.message.withMic(
-          ECryptoAlgorithmSign.getFromIDOrNull(tradingChannel.signingAlgorithm),
-          tradingChannel.rfc_3851MicAlgorithmsEnabled
-        )
-      }
 
       ctx.next()
 

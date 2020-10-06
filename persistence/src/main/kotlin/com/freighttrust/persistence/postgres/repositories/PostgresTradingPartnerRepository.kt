@@ -2,7 +2,7 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.TRADING_PARTNER
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
-import com.freighttrust.persistence.shared.TradingPartnerRepository
+import com.freighttrust.persistence.TradingPartnerRepository
 import org.jooq.Condition
 import org.jooq.DSLContext
 

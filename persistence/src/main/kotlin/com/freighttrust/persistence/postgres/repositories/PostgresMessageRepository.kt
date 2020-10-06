@@ -2,7 +2,7 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.MESSAGE
 import com.freighttrust.jooq.tables.records.MessageRecord
-import com.freighttrust.persistence.shared.MessageRepository
+import com.freighttrust.persistence.MessageRepository
 import org.jooq.Condition
 import org.jooq.DSLContext
 

@@ -34,15 +34,16 @@ class As2ServerVerticle(
       .handler(koin.get<As2TempFileHandler>())
       .handler(koin.get<As2BodyHandler>())
       .handler(koin.get<As2RequestHandler>())
+      .handler(koin.get<As2DecompressionHandler>())
       .handler(koin.get<As2DecryptionHandler>())
       .handler(koin.get<As2DecompressionHandler>())
       .handler(koin.get<As2VerificationHandler>())
-      .handler(koin.get<As2DecompressionHandler>())
 
     router.post("/message")
+      .handler(koin.get<As2SignatureCaptureHandler>())
       .handler(koin.get<As2MessageReceivedHandler>())
-      .handler(koin.get<As2RequestProcessedHandler>())
       .handler(koin.get<As2ForwardMessageHandler>())
+      .handler(koin.get<As2RequestProcessedHandler>())
 
     router.post("/mdn")
       .handler(koin.get<As2MdnReceivedHandler>())

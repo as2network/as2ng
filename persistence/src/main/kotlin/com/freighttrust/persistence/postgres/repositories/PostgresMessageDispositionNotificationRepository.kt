@@ -2,7 +2,7 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.MESSAGE_DISPOSITION_NOTIFICATION
 import com.freighttrust.jooq.tables.records.MessageDispositionNotificationRecord
-import com.freighttrust.persistence.shared.MessageDispositionNotificationRepository
+import com.freighttrust.persistence.MessageDispositionNotificationRepository
 import org.jooq.Condition
 import org.jooq.DSLContext
 

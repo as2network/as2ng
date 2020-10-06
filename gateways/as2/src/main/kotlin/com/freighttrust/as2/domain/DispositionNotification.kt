@@ -113,5 +113,6 @@ data class DispositionNotification(
   val finalRecipient: String,
   val reportingUA: String,
   val disposition: Disposition,
-  val receivedContentMic: String?
+  val receivedContentMic: String?,
+  val digestAlgorithmId: String?
 )
