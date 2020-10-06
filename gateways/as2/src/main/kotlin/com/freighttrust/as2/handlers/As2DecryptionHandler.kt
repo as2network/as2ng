@@ -1,38 +1,44 @@
 package com.freighttrust.as2.handlers
 
-import com.freighttrust.jooq.tables.records.CertificateRecord
+import com.freighttrust.as2.domain.Disposition
+import com.freighttrust.as2.exceptions.DispositionException
+import com.freighttrust.jooq.tables.records.KeyPairRecord
+import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
-import com.freighttrust.persistence.postgres.repositories.CertificateRepository
+
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.LoggerFactory
 
 class As2DecryptionHandler(
-  private val certificateRepository: CertificateRepository
+  private val keyPairRepository: KeyPairRepository
 ) : CoroutineRouteHandler() {
 
   private val logger = LoggerFactory.getLogger(As2DecryptionHandler::class.java)
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
-    val message = ctx.message
+    with(ctx.message) {
 
-    if (!message.isEncrypted) return ctx.next()
+      if(!isEncrypted) return ctx.next()
 
-    ctx.message = message.context.tradingChannel
-      .let { tradingChannel ->
+      with(tradingChannel) {
 
-        val record = message.context.tradingChannel
-          .recipientId
-          .let { id -> CertificateRecord().apply { tradingPartnerId = id } }
-          .let { record -> certificateRepository.findById(record) }
-          ?: throw Error("Certificate not found")
+        if (encryptionKeyPairId == null) throw DispositionException(
+          Disposition.automaticFailure("Encryption has not been configured for this trading channel")
+        )
 
-        val certificate = record.x509Certificate.toX509()
-        val privateKey = record.privateKey.toPrivateKey()
+        val keyPair = keyPairRepository.findById(
+          KeyPairRecord().apply {
+            id = encryptionKeyPairId
+          }
+        ) ?: throw  Error("Key pair not found for id = $encryptionKeyPairId")
 
-        message.decrypt(
-          tradingChannel.encryptionAlgorithm,
+        val certificate = keyPair.certificate.toX509()
+        val privateKey = keyPair.privateKey.toPrivateKey()
+
+        ctx.message = decrypt(
+          encryptionAlgorithm,
           certificate,
           privateKey,
           ctx.tempFileHelper
@@ -40,8 +46,10 @@ class As2DecryptionHandler(
 
       }
 
+    }
 
     ctx.next()
+
   }
 
 }

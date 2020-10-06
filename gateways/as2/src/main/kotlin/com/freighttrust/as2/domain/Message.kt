@@ -9,6 +9,7 @@ import com.freighttrust.jooq.tables.records.MessageRecord
 import com.freighttrust.jooq.tables.records.RequestRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
+import com.helger.as2lib.disposition.DispositionOptions
 import io.vertx.core.MultiMap
 import org.slf4j.LoggerFactory
 import java.security.PrivateKey
@@ -22,6 +23,8 @@ data class MessageContext(
   val dispositionNotification: DispositionNotification? = null,
   val decryptedBody: Pair<MimeBodyPart, String>? = null,
   val decompressedBody: Pair<MimeBodyPart, String>? = null,
+  val signatureKeyId: Long? = null,
+  val signatureCertificate: X509Certificate? = null,
   val verifiedBody: MimeBodyPart? = null,
   val mic: String? = null
 ) {
@@ -46,8 +49,6 @@ data class Message(
   val context: MessageContext
 ) {
 
-  private val logger = LoggerFactory.getLogger(Message::class.java)
-
   val messageId = headers.get(AS2Header.MessageId)!!
   val senderId = headers.get(AS2Header.As2From)!!
   val recipientId = headers.get(AS2Header.As2To)!!
@@ -60,6 +61,9 @@ data class Message(
 
   val receiptDeliveryOption = headers.get(AS2Header.ReceiptDeliveryOption)
   val dispositionNotificationTo = headers.get(AS2Header.DispositionNotificationTo)
+
+  val dispositionNotificationOptions = headers.get(AS2Header.DispositionNotificationOptions)
+    ?.let { DispositionOptions.createFromString(it) }
 
   val isMdnRequested = dispositionNotificationTo != null
   val isMdnAsynchronous = receiptDeliveryOption != null
@@ -85,16 +89,16 @@ data class Message(
 
 
   fun verify(
-    senderCertificate: X509Certificate,
+    certificate: X509Certificate,
     tempFileHelper: TempFileHelper
   ): Message =
     require(isSigned) { "message is not signed" }
       .let {
-        body.verifiedContent(senderCertificate, tempFileHelper)
+        body.verifiedContent(certificate, tempFileHelper)
           .let { verifiedBody ->
             copy(
               body = verifiedBody,
-              context = context.copy(verifiedBody = verifiedBody)
+              context = context.copy(verifiedBody = verifiedBody, signatureCertificate = certificate)
             )
           }
 

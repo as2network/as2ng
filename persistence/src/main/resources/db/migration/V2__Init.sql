@@ -1,8 +1,23 @@
 
+/*****************************************************************************/
+/* Key Pair                                                                  */
+/*****************************************************************************/
+
+create table key_pair
+(
+    id              bigserial primary key,
+    private_key     varchar(4096) null,
+    certificate     varchar(4096),
+    expires_at      timestamptz
+);
+
+/*****************************************************************************/
+/* Trading Partner                                                           */
+/*****************************************************************************/
 
 create table trading_partner
 (
-    id       varchar(64) primary key,
+    id       bigserial primary key,
     name     varchar(128) unique,
     email    varchar(128),
     validity tstzrange default tstzrange(current_timestamp, null)
@@ -21,41 +36,28 @@ execute procedure versioning(
         'validity', 'trading_partner_history', true
     );
 
-create table certificate
-(
-    trading_partner_id varchar(64) primary key references trading_partner (id),
-    private_key        varchar(4096),
-    x509_certificate   varchar(4096),
-    validity           tstzrange default tstzrange(current_timestamp, null)
-);
-
-create table certificate_history
-(
-    LIKE certificate
-);
-
-create trigger certificate_history_versioning_trigger
-    before insert or update or delete
-    on certificate_history
-    for each row
-execute procedure versioning(
-        'validity', 'certificate_history', true
-    );
-
+/*****************************************************************************/
+/* Trading Channel                                                           */
+/*****************************************************************************/
 
 create table trading_channel
 (
-    sender_id                       varchar(64) references trading_partner (id),
-    recipient_id                    varchar(64) references trading_partner (id),
-    protocol                        varchar(16),
-    as2_url                         varchar(128),
-    as2_mdn_to                      varchar(128) null,
-    as2_mdn_options                 varchar(128),
-    encryption_algorithm            varchar(16)  null,
-    signing_algorithm               varchar(16)  null,
-    rfc_3851_mic_algorithms_enabled bool,
+    id                              bigserial primary key,
+    name                            varchar (64),
+
+    sender_id                       bigint references trading_partner (id),
+    sender_as2_identifier           varchar (64),
+
+    recipient_id                    bigint references trading_partner (id),
+    recipient_as2_identifier        varchar (64),
+    recipient_message_url           varchar (128),
+
+    encryption_algorithm            varchar(16) null,
+    encryption_key_pair_id          bigint null references key_pair(id),
+
     validity                        tstzrange default tstzrange(current_timestamp, null),
-    primary key (sender_id, recipient_id)
+    unique (sender_id, recipient_id),
+    unique (sender_as2_identifier, recipient_as2_identifier)
 );
 
 create table trading_channel_history
@@ -72,6 +74,10 @@ execute procedure versioning(
     );
 
 
+/*****************************************************************************/
+/* File                                                                      */
+/*****************************************************************************/
+
 create table file
 (
     id     bigserial primary key,
@@ -80,14 +86,16 @@ create table file
     unique (bucket, key)
 );
 
+/*****************************************************************************/
+/* Request                                                                   */
+/*****************************************************************************/
 
 create table request
 (
     id                       uuid primary key,
     headers                  jsonb,
     body_file_id             bigint                       not null,
-    sender_id                varchar(64) references trading_partner (id),
-    recipient_id             varchar(64) references trading_partner (id),
+    trading_channel_id       bigint references trading_channel(id),
     message_id               varchar(64) unique,
     subject                  varchar(128),
     received_at              timestamptz default current_timestamp,
@@ -102,19 +110,28 @@ create table request
     delivered_to             varchar(128)                 null
 );
 
+/*****************************************************************************/
+/* Message                                                                   */
+/*****************************************************************************/
 
 create table message
 (
     request_id              uuid primary key references request (id),
 
+    signature_id            bigint null references key_pair(id),
     encryption_algorithm    varchar(16)  null,
     compression_algorithm   varchar(16)  null,
+
     mic                     varchar(64)  null,
 
     is_mdn_requested        bool,
     is_mdn_async            bool,
     receipt_delivery_option varchar(128) null
 );
+
+/*****************************************************************************/
+/* Message Disposition Notification                                          */
+/*****************************************************************************/
 
 create table message_disposition_notification
 (

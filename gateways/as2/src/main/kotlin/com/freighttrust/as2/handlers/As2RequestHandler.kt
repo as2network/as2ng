@@ -6,20 +6,20 @@ import com.freighttrust.as2.domain.Message
 import com.freighttrust.as2.domain.MessageContext
 import com.freighttrust.as2.domain.MessageType
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.*
+import com.freighttrust.as2.ext.bodyAsMimeBodyPart
+import com.freighttrust.as2.ext.get
+import com.freighttrust.as2.ext.getAS2Header
+import com.freighttrust.as2.ext.toMap
 import com.freighttrust.as2.handlers.As2RequestHandler.Companion.CTX_AS2_MESSAGE
 import com.freighttrust.as2.util.AS2Header
-import com.freighttrust.jooq.tables.records.MessageRecord
 import com.freighttrust.jooq.tables.records.RequestRecord
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.persistence.extensions.toJSONB
-import com.freighttrust.persistence.postgres.repositories.MessageRepository
-import com.freighttrust.persistence.postgres.repositories.RequestRepository
-import com.freighttrust.persistence.postgres.repositories.TradingChannelRepository
-import com.freighttrust.persistence.s3.repositories.FileRepository
+import com.freighttrust.persistence.FileRepository
+import com.freighttrust.persistence.MessageRepository
+import com.freighttrust.persistence.RequestRepository
+import com.freighttrust.persistence.TradingChannelRepository
 import io.vertx.ext.web.RoutingContext
 import org.jooq.tools.json.JSONObject
-import java.lang.IllegalStateException
 import java.time.OffsetDateTime
 
 var RoutingContext.message: Message
@@ -30,8 +30,8 @@ var RoutingContext.message: Message
 
 class As2RequestHandler(
   private val uuidGenerator: TimeBasedGenerator,
-  private val requestRepository: RequestRepository,
   private val tradingChannelRepository: TradingChannelRepository,
+  private val requestRepository: RequestRepository,
   private val fileRepository: FileRepository,
   private val messageRepository: MessageRepository
 ) : CoroutineRouteHandler() {
@@ -59,29 +59,26 @@ class As2RequestHandler(
           request.headers()
             .let { headers ->
 
-              TradingChannelRecord()
-                .apply {
+              val (senderId, recipientId) = when (messageType) {
 
-                  when (messageType) {
+                MessageType.Message ->
+                  Pair(
+                    headers.get(AS2Header.As2From)!!,
+                    headers.get(AS2Header.As2To)!!
+                  )
 
-                    MessageType.Message -> {
-                      senderId = headers.get(AS2Header.As2From)!!
-                      recipientId = headers.get(AS2Header.As2To)!!
-                    }
 
-                    // invert when processing mdn
-                    MessageType.MessageDispositionNotification -> {
-                      senderId = headers.get(AS2Header.As2From)!!
-                      recipientId = headers.get(AS2Header.As2To)!!
-                    }
-
-                  }
-
-                }
-                .let { record -> tradingChannelRepository.findById(record) }
-                ?: throw DispositionException(
-                  Disposition.automaticFailure("Trading channel not found for provided AS2-From and AS2-To")
+                // invert when processing mdn
+                MessageType.MessageDispositionNotification -> Pair(
+                  headers.get(AS2Header.As2To)!!,
+                  headers.get(AS2Header.As2From)!!
                 )
+
+              }
+
+              tradingChannelRepository.findByAs2Identifiers(senderId, recipientId) ?: throw throw DispositionException(
+                Disposition.automaticFailure("Trading channel not found for provided AS2-From and AS2-To")
+              )
 
             }
 
@@ -97,8 +94,7 @@ class As2RequestHandler(
           RequestRecord()
             .apply {
               this.id = uuidGenerator.generate()
-              this.senderId = request.getAS2Header(AS2Header.As2From)
-              this.recipientId = request.getAS2Header(AS2Header.As2To)
+              this.tradingChannelId = tradingChannel.id
               this.messageId = messageId
               this.subject = request.getAS2Header(AS2Header.Subject)
               this.receivedAt = OffsetDateTime.now()

@@ -2,14 +2,14 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.MESSAGE
 import com.freighttrust.jooq.tables.records.MessageRecord
-import com.freighttrust.persistence.shared.Repository
+import com.freighttrust.persistence.MessageRepository
 import org.jooq.Condition
 import org.jooq.DSLContext
 
 
-class MessageRepository(
+class PostgresMessageRepository(
   dbCtx: DSLContext
-) : AbstractJooqRepository<MessageRecord>(
+) : MessageRepository, AbstractJooqRepository<MessageRecord>(
   dbCtx, MESSAGE, listOf(MESSAGE.REQUEST_ID)
 ) {
 
@@ -17,6 +17,5 @@ class MessageRepository(
     MESSAGE.REQUEST_ID.let { field ->
       field.eq(record.get(field))
     }
-
 
 }

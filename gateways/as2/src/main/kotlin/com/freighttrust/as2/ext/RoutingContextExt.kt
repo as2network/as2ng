@@ -85,8 +85,6 @@ fun RoutingContext.dispositionNotificationBodyPart(disposition: Disposition): Mi
         .let { DispositionOptions.createFromString(it) }
 
       val signingAlgorithm = dispositionOptions.firstMICAlg
-      // fallback to the the signature algorithm configured in the trading channel
-        ?: ECryptoAlgorithmSign.getFromIDOrNull(message.tradingChannel.signingAlgorithm)
 
       val includeHeaders =
         message.context

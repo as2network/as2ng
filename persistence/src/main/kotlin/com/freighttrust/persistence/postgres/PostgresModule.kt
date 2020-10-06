@@ -1,6 +1,17 @@
 package com.freighttrust.persistence.postgres
 
-import com.freighttrust.persistence.postgres.repositories.*
+import com.freighttrust.persistence.postgres.repositories.PostgresMessageDispositionNotificationRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresMessageRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresRequestRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresTradingChannelRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresTradingPartnerRepository
+import com.freighttrust.persistence.KeyPairRepository
+import com.freighttrust.persistence.MessageDispositionNotificationRepository
+import com.freighttrust.persistence.MessageRepository
+import com.freighttrust.persistence.RequestRepository
+import com.freighttrust.persistence.TradingChannelRepository
+import com.freighttrust.persistence.TradingPartnerRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresKeyPairRepository
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -41,11 +52,12 @@ val PostgresModule = module {
     DSL.using(dataSource, SQLDialect.POSTGRES)
   }
 
+  factory<TradingPartnerRepository> { PostgresTradingPartnerRepository(get()) }
+  factory<TradingChannelRepository> { PostgresTradingChannelRepository(get()) }
+  factory<KeyPairRepository> { PostgresKeyPairRepository(get()) }
+  factory<RequestRepository> { PostgresRequestRepository(get()) }
+  factory<MessageRepository> { PostgresMessageRepository(get()) }
+  factory<MessageDispositionNotificationRepository> { PostgresMessageDispositionNotificationRepository(get()) }
 
-  factory { TradingChannelRepository(get()) }
-  factory { CertificateRepository(get()) }
-  factory { RequestRepository(get()) }
-  factory { MessageRepository(get()) }
-  factory { MessageDispositionNotificationRepository(get()) }
 
 }

@@ -4,9 +4,9 @@ import com.freighttrust.as2.ext.extractDispositionNotification
 import com.freighttrust.jooq.tables.records.MessageDispositionNotificationRecord
 import com.freighttrust.jooq.tables.records.MessageRecord
 import com.freighttrust.jooq.tables.records.RequestRecord
-import com.freighttrust.persistence.postgres.repositories.MessageDispositionNotificationRepository
-import com.freighttrust.persistence.postgres.repositories.MessageRepository
-import com.freighttrust.persistence.postgres.repositories.RequestRepository
+import com.freighttrust.persistence.MessageDispositionNotificationRepository
+import com.freighttrust.persistence.MessageRepository
+import com.freighttrust.persistence.RequestRepository
 import io.vertx.ext.web.RoutingContext
 
 class As2MdnReceivedHandler(
@@ -59,7 +59,8 @@ class As2MdnReceivedHandler(
 
     ctx.message = message.copy(
       context = message.context.copy(
-        originalMessageRecord = originalMessageRecord
+        originalMessageRecord = originalMessageRecord,
+        dispositionNotification = notification
       )
     )
 

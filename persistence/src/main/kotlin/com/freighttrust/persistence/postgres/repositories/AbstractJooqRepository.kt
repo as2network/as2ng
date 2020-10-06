@@ -1,6 +1,6 @@
 package com.freighttrust.persistence.postgres.repositories
 
-import com.freighttrust.persistence.shared.Repository
+import com.freighttrust.persistence.Repository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope

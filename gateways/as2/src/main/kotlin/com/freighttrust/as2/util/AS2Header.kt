@@ -34,6 +34,7 @@ enum class AS2Header(val key: String) {
   EdiintFeatures("EDIINT-Features"),
 
   // disposition notification related
+  DigestAlgorithmnId("digest-alg-id"),
   ReceivedContentMIC("Received-Content-MIC"),
   Disposition("Disposition"),
   OriginalMessageID("Original-Message-ID"),
