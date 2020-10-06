@@ -4,7 +4,7 @@ import com.freighttrust.as2.domain.MessageType
 import com.freighttrust.as2.ext.signatureCertificateFromBody
 import com.freighttrust.jooq.tables.records.CertificateRecord
 import com.freighttrust.persistence.extensions.toX509
-import com.freighttrust.persistence.postgres.repositories.CertificateRepository
+import com.freighttrust.persistence.shared.CertificateRepository
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType

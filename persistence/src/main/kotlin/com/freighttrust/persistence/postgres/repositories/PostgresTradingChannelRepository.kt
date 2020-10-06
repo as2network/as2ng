@@ -2,12 +2,14 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.TRADING_CHANNEL
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
+import com.freighttrust.persistence.shared.TradingChannelRepository
 import org.jooq.Condition
 import org.jooq.DSLContext
 
-class TradingChannelRepository(
+
+class PostgresTradingChannelRepository(
   dbCtx: DSLContext
-) : AbstractJooqRepository<TradingChannelRecord>(
+) : TradingChannelRepository, AbstractJooqRepository<TradingChannelRecord>(
   dbCtx, TRADING_CHANNEL, listOf(TRADING_CHANNEL.SENDER_ID, TRADING_CHANNEL.RECIPIENT_ID)
 ) {
 

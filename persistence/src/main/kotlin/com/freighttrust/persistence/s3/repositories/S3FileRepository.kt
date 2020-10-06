@@ -6,17 +6,13 @@ import com.amazonaws.services.s3.transfer.TransferManager
 import com.freighttrust.jooq.Tables.FILE
 import com.freighttrust.jooq.tables.records.FileRecord
 import com.freighttrust.persistence.postgres.repositories.AbstractJooqRepository
+import com.freighttrust.persistence.shared.FileRepository
 import com.freighttrust.persistence.shared.Repository
 import kotlinx.coroutines.coroutineScope
 import org.jooq.Condition
 import org.jooq.DSLContext
 import javax.activation.DataHandler
 
-interface FileRepository : Repository<FileRecord> {
-
-  suspend fun insert(key: String, dataHandler: DataHandler, ctx: Repository.Context? = null): FileRecord
-
-}
 
 class S3FileRepository(
   dbCtx: DSLContext,

@@ -1,6 +1,17 @@
 package com.freighttrust.persistence.postgres
 
-import com.freighttrust.persistence.postgres.repositories.*
+import com.freighttrust.persistence.postgres.repositories.PostgresCertificateRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresMessageDispositionNotificationRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresMessageRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresRequestRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresTradingChannelRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresTradingPartnerRepository
+import com.freighttrust.persistence.shared.CertificateRepository
+import com.freighttrust.persistence.shared.MessageDispositionNotificationRepository
+import com.freighttrust.persistence.shared.MessageRepository
+import com.freighttrust.persistence.shared.RequestRepository
+import com.freighttrust.persistence.shared.TradingChannelRepository
+import com.freighttrust.persistence.shared.TradingPartnerRepository
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -36,12 +47,17 @@ val PostgresModule = module {
     HikariDataSource(dataSourceConfig)
   }
 
-  factory<DSLContext> { (ds: DataSource) -> DSL.using(ds, SQLDialect.POSTGRES) }
+  factory<DSLContext> {
+    val dataSource = get<DataSource>()
+    DSL.using(dataSource, SQLDialect.POSTGRES)
+  }
 
-  factory { (ctx: DSLContext) -> TradingChannelRepository(ctx) }
-  factory { (ctx: DSLContext) -> CertificateRepository(ctx) }
-  factory { (ctx: DSLContext) -> RequestRepository(ctx) }
-  factory { (ctx: DSLContext) -> MessageRepository(ctx) }
-  factory { (ctx: DSLContext) -> MessageDispositionNotificationRepository(ctx) }
+  factory<TradingPartnerRepository> { PostgresTradingPartnerRepository(get()) }
+  factory<TradingChannelRepository> { PostgresTradingChannelRepository(get()) }
+  factory<CertificateRepository> { PostgresCertificateRepository(get()) }
+  factory<RequestRepository> { PostgresRequestRepository(get()) }
+  factory<MessageRepository> { PostgresMessageRepository(get()) }
+  factory<MessageDispositionNotificationRepository> { PostgresMessageDispositionNotificationRepository(get()) }
+
 
 }

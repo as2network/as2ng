@@ -1,8 +1,7 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.jooq.tables.records.MessageRecord
-import com.freighttrust.persistence.postgres.repositories.MessageDispositionNotificationRepository
-import com.freighttrust.persistence.postgres.repositories.MessageRepository
+import com.freighttrust.persistence.shared.MessageRepository
 import io.vertx.ext.web.RoutingContext
 
 class As2MessageReceivedHandler(

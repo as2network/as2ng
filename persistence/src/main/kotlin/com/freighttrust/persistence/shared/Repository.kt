@@ -1,5 +1,9 @@
 package com.freighttrust.persistence.shared
 
+import com.freighttrust.jooq.tables.records.*
+import java.util.*
+import javax.activation.DataHandler
+
 interface Repository<T> {
 
   interface Context
@@ -15,3 +19,27 @@ interface Repository<T> {
   suspend fun deleteById(record: T, ctx: Context? = null): Int
 
 }
+
+interface CertificateRepository: Repository<CertificateRecord>
+
+interface MessageRepository : Repository<MessageRecord>
+
+interface MessageDispositionNotificationRepository : Repository<MessageDispositionNotificationRecord>
+
+interface TradingChannelRepository : Repository<TradingChannelRecord>
+
+interface TradingPartnerRepository : Repository<TradingPartnerRecord>
+
+interface RequestRepository : Repository<RequestRecord> {
+
+  suspend fun findRequestIdByMessageId(messageId: String, ctx: Repository.Context? = null): UUID?
+
+}
+
+
+interface FileRepository : Repository<FileRecord> {
+
+  suspend fun insert(key: String, dataHandler: DataHandler, ctx: Repository.Context? = null): FileRecord
+
+}
+

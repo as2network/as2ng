@@ -6,8 +6,8 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder
-import com.freighttrust.persistence.s3.repositories.FileRepository
 import com.freighttrust.persistence.s3.repositories.S3FileRepository
+import com.freighttrust.persistence.shared.FileRepository
 import com.typesafe.config.Config
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

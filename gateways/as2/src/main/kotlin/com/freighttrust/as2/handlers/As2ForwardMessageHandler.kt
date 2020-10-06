@@ -1,7 +1,7 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.util.AS2Header
-import com.freighttrust.persistence.postgres.repositories.MessageRepository
+import com.freighttrust.persistence.shared.MessageRepository
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait

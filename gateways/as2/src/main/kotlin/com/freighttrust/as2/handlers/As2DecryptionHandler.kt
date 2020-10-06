@@ -3,7 +3,8 @@ package com.freighttrust.as2.handlers
 import com.freighttrust.jooq.tables.records.CertificateRecord
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
-import com.freighttrust.persistence.postgres.repositories.CertificateRepository
+import com.freighttrust.persistence.shared.CertificateRepository
+
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.LoggerFactory
 

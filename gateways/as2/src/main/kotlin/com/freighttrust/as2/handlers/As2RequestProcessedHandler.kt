@@ -1,7 +1,8 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.jooq.tables.records.RequestRecord
-import com.freighttrust.persistence.postgres.repositories.RequestRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresRequestRepository
+import com.freighttrust.persistence.shared.RequestRepository
 import io.vertx.ext.web.RoutingContext
 import java.time.OffsetDateTime
 
