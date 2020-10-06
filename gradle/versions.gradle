@@ -18,7 +18,7 @@ dependencyManagement {
     // Dependency injection & config
     // ------------------------------------------------------------------
 
-    dependencySet(group: 'org.koin', version: '2.1.5') {
+    dependencySet(group: 'org.koin', version: '2.1.6') {
       entry 'koin-core'
       entry 'koin-test'
     }

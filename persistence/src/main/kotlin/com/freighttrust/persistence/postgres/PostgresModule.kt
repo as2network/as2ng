@@ -36,16 +36,12 @@ val PostgresModule = module {
     HikariDataSource(dataSourceConfig)
   }
 
-  factory<DSLContext> {
-    val dataSource = get<DataSource>()
-    DSL.using(dataSource, SQLDialect.POSTGRES)
-  }
+  factory<DSLContext> { (ds: DataSource) -> DSL.using(ds, SQLDialect.POSTGRES) }
 
-
-  factory { TradingChannelRepository(get()) }
-  factory { CertificateRepository(get()) }
-  factory { RequestRepository(get()) }
-  factory { MessageRepository(get()) }
-  factory { MessageDispositionNotificationRepository(get()) }
+  factory { (ctx: DSLContext) -> TradingChannelRepository(ctx) }
+  factory { (ctx: DSLContext) -> CertificateRepository(ctx) }
+  factory { (ctx: DSLContext) -> RequestRepository(ctx) }
+  factory { (ctx: DSLContext) -> MessageRepository(ctx) }
+  factory { (ctx: DSLContext) -> MessageDispositionNotificationRepository(ctx) }
 
 }
