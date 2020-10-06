@@ -17,7 +17,7 @@ class As2DecryptionHandler(
 
     val message = ctx.message
 
-    if(!message.isEncrypted) return ctx.next()
+    if (!message.isEncrypted) return ctx.next()
 
     ctx.message = message.context.tradingChannel
       .let { tradingChannel ->

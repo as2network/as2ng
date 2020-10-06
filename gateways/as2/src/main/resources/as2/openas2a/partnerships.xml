@@ -12,7 +12,8 @@
     <attribute name="as2_url" value="http://localhost:8080/message"/>
     <attribute name="as2_mdn_to" value="http://localhost:10081"/>
     <attribute name="as2_receipt_option" value="http://localhost:10081"/>
-    <attribute name="as2_mdn_options" value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5"/>
+    <attribute name="as2_mdn_options"
+               value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5"/>
     <attribute name="encrypt" value="3des"/>
     <attribute name="sign" value="md5"/>
   </partnership>
@@ -22,11 +23,12 @@
     <receiver name="OpenAS2A"/>
     <attribute name="protocol" value="as2"/>
     <attribute name="subject" value="From OpenAS2B to OpenAS2A"/>
-<!--    <attribute name="as2_url" value="http://localhost:10080"/>-->
+    <!--    <attribute name="as2_url" value="http://localhost:10080"/>-->
     <attribute name="as2_url" value="http://localhost:10085"/>
     <attribute name="as2_mdn_to" value="http://localhost:10083"/>
-<!--    <attribute name="as2_receipt_option" value="http://localhost:10083"/>-->
-    <attribute name="as2_mdn_options" value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, sha1"/>
+    <!--    <attribute name="as2_receipt_option" value="http://localhost:10083"/>-->
+    <attribute name="as2_mdn_options"
+               value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, sha1"/>
     <attribute name="encrypt" value="3des"/>
     <attribute name="sign" value="sha1"/>
   </partnership>
@@ -40,6 +42,6 @@
     <attribute name="as2_mdn_to" value="http://localhost:10083"/>
     <attribute name="encrypt" value="3des"/>
     <attribute name="sign" value="sha1"/>
-    <attribute name="verify_use_cert_in_body_part" value="true" />
+    <attribute name="verify_use_cert_in_body_part" value="true"/>
   </partnership>
 </partnerships>

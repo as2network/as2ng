@@ -8,9 +8,9 @@ class TempFileHelper {
 
   fun newFile() =
     File.createTempFile("as2", ".tmp")
-    .also { file ->
-      tempFiles = tempFiles + file
-    }
+      .also { file ->
+        tempFiles = tempFiles + file
+      }
 
   fun deleteAll() {
     tempFiles.forEach { it.delete() }

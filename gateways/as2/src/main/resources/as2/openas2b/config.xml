@@ -33,13 +33,13 @@
             defaults="sender.as2_id=OpenAS2B, receiver.as2_id=OpenAS2A"
             mimetype="text/plain"/>
     <!--  Special directory for sending messages to "OpenAS2B" -->
-<!--    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"-->
-<!--            outboxdir="as2-data/openas2b/data/toOpenAS2B"-->
-<!--            errordir="as2-data/openas2b/data/toOpenAS2B/error"-->
-<!--            interval="5"-->
-<!--            defaults="sender.as2_id=OpenAS2A, receiver.as2_id=OpenAS2B"-->
-<!--            sendFilename="true"-->
-<!--            mimetype="text/plain"/>-->
+    <!--    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"-->
+    <!--            outboxdir="as2-data/openas2b/data/toOpenAS2B"-->
+    <!--            errordir="as2-data/openas2b/data/toOpenAS2B/error"-->
+    <!--            interval="5"-->
+    <!--            defaults="sender.as2_id=OpenAS2A, receiver.as2_id=OpenAS2B"-->
+    <!--            sendFilename="true"-->
+    <!--            mimetype="text/plain"/>-->
     <module classname="com.helger.as2lib.processor.storage.MDNFileModule"
             filename="as2-data/openas2b/data/mdn/$date.uuuu$/$date.MM$/$mdn.msg.sender.as2_id$-$mdn.msg.receiver.as2_id$-$mdn.msg.headers.message-id$"
             protocol="as2"
@@ -61,6 +61,6 @@
             resenddir="as2-data/openas2b/data/resend"
             errordir="as2-data/openas2b/data/resend/error"
             resenddelay="60"/>
-    <module classname="com.helger.as2lib.processor.sender.AsynchMDNSenderModule" />
+    <module classname="com.helger.as2lib.processor.sender.AsynchMDNSenderModule"/>
   </processor>
 </openas2>

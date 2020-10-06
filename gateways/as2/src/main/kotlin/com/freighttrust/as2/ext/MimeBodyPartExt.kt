@@ -156,31 +156,31 @@ fun MimeBodyPart.verifiedContent(
   securityProvider: Provider = BouncyCastleProvider()
 ): MimeBodyPart =
   require(isSigned()) { "Body must be signed" }
-  .let {
+    .let {
 
-    val verifier = JcaSimpleSignerInfoVerifierBuilder()
-      .setProvider(BouncyCastleProvider())
-      .build(certificate.publicKey)
+      val verifier = JcaSimpleSignerInfoVerifierBuilder()
+        .setProvider(BouncyCastleProvider())
+        .build(certificate.publicKey)
 
-    SMIMESignedParser(
-      JcaDigestCalculatorProviderBuilder()
-        .setProvider(securityProvider)
-        .build(),
-      content as MimeMultipart,
-      "binary",
-      tempFileHelper.newFile()
-    ).let { parser ->
+      SMIMESignedParser(
+        JcaDigestCalculatorProviderBuilder()
+          .setProvider(securityProvider)
+          .build(),
+        content as MimeMultipart,
+        "binary",
+        tempFileHelper.newFile()
+      ).let { parser ->
 
-      parser.signerInfos.signers
-        .forEach { signer ->
-          if (!signer.verify(verifier)) throw SignatureException("Verification failed")
-        }
+        parser.signerInfos.signers
+          .forEach { signer ->
+            if (!signer.verify(verifier)) throw SignatureException("Verification failed")
+          }
 
-      parser.close()
+        parser.close()
 
-      parser.content
+        parser.content
+      }
     }
-  }
 
 
 fun MimeBodyPart.calculateMic(

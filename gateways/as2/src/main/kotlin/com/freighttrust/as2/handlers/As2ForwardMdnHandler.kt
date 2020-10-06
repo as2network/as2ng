@@ -15,7 +15,7 @@ class As2ForwardMdnHandler(
 
     val receiptDeliveryOption: String? = originalMessage.receiptDeliveryOption
 
-    requireNotNull(receiptDeliveryOption) { "receiptDeliveryOption cannot be null"}
+    requireNotNull(receiptDeliveryOption) { "receiptDeliveryOption cannot be null" }
 
     val response = webClient
       .postAbs(receiptDeliveryOption)

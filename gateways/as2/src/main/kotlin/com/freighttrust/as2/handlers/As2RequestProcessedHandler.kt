@@ -19,7 +19,7 @@ class As2RequestProcessedHandler(
         id = messageContext.requestRecord.id
         processedAt = OffsetDateTime.now()
         processingError = false
-      }.also{ record -> requestRepository.update(record) }
+      }.also { record -> requestRepository.update(record) }
 
     ctx.next()
 

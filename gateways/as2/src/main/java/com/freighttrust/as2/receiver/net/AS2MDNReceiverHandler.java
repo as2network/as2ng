@@ -68,7 +68,7 @@ public class AS2MDNReceiverHandler extends AbstractReceiverHandler {
 
   /**
    * @return The receiver module passed in the constructor. Never
-   *         <code>null</code>.
+   * <code>null</code>.
    */
   @Nonnull
   public final AS2MDNReceiverModule getModule() {
@@ -80,110 +80,96 @@ public class AS2MDNReceiverHandler extends AbstractReceiverHandler {
    * @since 4.4.0
    */
   @Nonnull
-  public final IMICMatchingHandler getMICMatchingHandler ()
-  {
+  public final IMICMatchingHandler getMICMatchingHandler() {
     return m_aMICMatchingHandler;
   }
 
   /**
    * Set the MIC matching handler to used.
    *
-   * @param aMICMatchingHandler
-   *        The new handler. May not be <code>null</code>.
+   * @param aMICMatchingHandler The new handler. May not be <code>null</code>.
    * @since 4.4.0
    */
-  public final void setMICMatchingHandler (@Nonnull final IMICMatchingHandler aMICMatchingHandler)
-  {
-    ValueEnforcer.notNull (aMICMatchingHandler, "MICMatchingHandler");
+  public final void setMICMatchingHandler(@Nonnull final IMICMatchingHandler aMICMatchingHandler) {
+    ValueEnforcer.notNull(aMICMatchingHandler, "MICMatchingHandler");
     m_aMICMatchingHandler = aMICMatchingHandler;
   }
 
-  public void handle (@Nonnull final AbstractActiveNetModule aOwner, @Nonnull final Socket aSocket)
-  {
-    final String sClientInfo = getClientInfo (aSocket);
+  public void handle(@Nonnull final AbstractActiveNetModule aOwner, @Nonnull final Socket aSocket) {
+    final String sClientInfo = getClientInfo(aSocket);
 
-    if (LOGGER.isInfoEnabled ())
-      LOGGER.info ("incoming connection [" + sClientInfo + "]");
+    if (LOGGER.isInfoEnabled())
+      LOGGER.info("incoming connection [" + sClientInfo + "]");
 
-    final AS2Message aMsg = new AS2Message ();
+    final AS2Message aMsg = new AS2Message();
 
-    final boolean bQuoteHeaderValues = m_aModule.isQuoteHeaderValues ();
-    final IAS2HttpResponseHandler aResponseHandler = new AS2HttpResponseHandlerSocket (aSocket, bQuoteHeaderValues);
+    final boolean bQuoteHeaderValues = m_aModule.isQuoteHeaderValues();
+    final IAS2HttpResponseHandler aResponseHandler = new AS2HttpResponseHandlerSocket(aSocket, bQuoteHeaderValues);
 
-    byte [] aData = null;
+    byte[] aData = null;
 
     // Read in the message request, headers, and data
-    try (final AS2ResourceHelper aResHelper = new AS2ResourceHelper ())
-    {
-      final IHTTPIncomingDumper aIncomingDumper = getEffectiveHttpIncomingDumper ();
-      final DataSource aDataSourceBody = readAndDecodeHttpRequest (new AS2InputStreamProviderSocket (aSocket),
-                                                                   aResponseHandler,
-                                                                   aMsg,
-                                                                   aIncomingDumper);
-      aData = StreamHelper.getAllBytes (aDataSourceBody.getInputStream ());
+    try (final AS2ResourceHelper aResHelper = new AS2ResourceHelper()) {
+      final IHTTPIncomingDumper aIncomingDumper = getEffectiveHttpIncomingDumper();
+      final DataSource aDataSourceBody = readAndDecodeHttpRequest(new AS2InputStreamProviderSocket(aSocket),
+        aResponseHandler,
+        aMsg,
+        aIncomingDumper);
+      aData = StreamHelper.getAllBytes(aDataSourceBody.getInputStream());
 
       // Asynch MDN 2007-03-12
       // check if the requested URL is defined in attribute "as2_receipt_option"
       // in one of partnerships, if yes, then process incoming AsyncMDN
-      if (LOGGER.isInfoEnabled ())
-        LOGGER.info ("incoming connection for receiving AsyncMDN" + " [" + sClientInfo + "]" + aMsg.getLoggingText ());
+      if (LOGGER.isInfoEnabled())
+        LOGGER.info("incoming connection for receiving AsyncMDN" + " [" + sClientInfo + "]" + aMsg.getLoggingText());
 
-      final String sReceivedContentType = AS2HttpHelper.getCleanContentType (aMsg.getHeader (CHttpHeader.CONTENT_TYPE));
+      final String sReceivedContentType = AS2HttpHelper.getCleanContentType(aMsg.getHeader(CHttpHeader.CONTENT_TYPE));
 
-      final MimeBodyPart aReceivedPart = new MimeBodyPart (AS2HttpHelper.getAsInternetHeaders (aMsg.headers ()), aData);
-      aMsg.setData (aReceivedPart);
+      final MimeBodyPart aReceivedPart = new MimeBodyPart(AS2HttpHelper.getAsInternetHeaders(aMsg.headers()), aData);
+      aMsg.setData(aReceivedPart);
 
       // MimeBodyPart receivedPart = new MimeBodyPart();
-      aReceivedPart.setDataHandler (new ByteArrayDataSource (aData, sReceivedContentType, null).getAsDataHandler ());
+      aReceivedPart.setDataHandler(new ByteArrayDataSource(aData, sReceivedContentType, null).getAsDataHandler());
       // Must be set AFTER the DataHandler!
-      aReceivedPart.setHeader (CHttpHeader.CONTENT_TYPE, sReceivedContentType);
+      aReceivedPart.setHeader(CHttpHeader.CONTENT_TYPE, sReceivedContentType);
 
-      aMsg.setData (aReceivedPart);
+      aMsg.setData(aReceivedPart);
 
-      receiveMDN (aMsg, aData, aResponseHandler, aResHelper);
-    }
-    catch (final Exception ex)
-    {
-      final AS2NetException ne = new AS2NetException (aSocket.getInetAddress (), aSocket.getPort (), ex);
-      ne.terminate ();
+      receiveMDN(aMsg, aData, aResponseHandler, aResHelper);
+    } catch (final Exception ex) {
+      final AS2NetException ne = new AS2NetException(aSocket.getInetAddress(), aSocket.getPort(), ex);
+      ne.terminate();
     }
   }
 
   // Asynch MDN 2007-03-12
+
   /**
    * method for receiving and processing Async MDN sent from receiver.
    *
-   * @param aMsg
-   *        The MDN message
-   * @param aData
-   *        The MDN content
-   * @param aResponseHandler
-   *        The HTTP response handler for setting the correct HTTP response code
-   * @param aResHelper
-   *        Resource helper
-   * @throws AS2Exception
-   *         In case of error
-   * @throws IOException
-   *         In case of IO error
+   * @param aMsg             The MDN message
+   * @param aData            The MDN content
+   * @param aResponseHandler The HTTP response handler for setting the correct HTTP response code
+   * @param aResHelper       Resource helper
+   * @throws AS2Exception In case of error
+   * @throws IOException  In case of IO error
    */
-  protected final void receiveMDN (@Nonnull final AS2Message aMsg,
-                                   final byte [] aData,
-                                   @Nonnull final IAS2HttpResponseHandler aResponseHandler,
-                                   @Nonnull final AS2ResourceHelper aResHelper) throws AS2Exception, IOException
-  {
-    try
-    {
+  protected final void receiveMDN(@Nonnull final AS2Message aMsg,
+                                  final byte[] aData,
+                                  @Nonnull final IAS2HttpResponseHandler aResponseHandler,
+                                  @Nonnull final AS2ResourceHelper aResHelper) throws AS2Exception, IOException {
+    try {
       // Create a MessageMDN and copy HTTP headers
-      final IMessageMDN aMDN = new AS2MessageMDN (aMsg);
+      final IMessageMDN aMDN = new AS2MessageMDN(aMsg);
       // copy headers from msg to MDN from msg
-      aMDN.headers ().setAllHeaders (aMsg.headers ());
+      aMDN.headers().setAllHeaders(aMsg.headers());
 
-      final MimeBodyPart aPart = new MimeBodyPart (AS2HttpHelper.getAsInternetHeaders (aMDN.headers ()), aData);
-      aMsg.getMDN ().setData (aPart);
+      final MimeBodyPart aPart = new MimeBodyPart(AS2HttpHelper.getAsInternetHeaders(aMDN.headers()), aData);
+      aMsg.getMDN().setData(aPart);
 
       // get the MDN partnership info
-      aMDN.partnership ().setSenderAS2ID (aMDN.getHeader (CHttpHeader.AS2_FROM));
-      aMDN.partnership ().setReceiverAS2ID (aMDN.getHeader (CHttpHeader.AS2_TO));
+      aMDN.partnership().setSenderAS2ID(aMDN.getHeader(CHttpHeader.AS2_FROM));
+      aMDN.partnership().setReceiverAS2ID(aMDN.getHeader(CHttpHeader.AS2_TO));
 
       // TODO: Impossible to obtain here the receiver alias as this request is created from scratch
       // Set the appropriate keystore aliases
@@ -191,231 +177,197 @@ public class AS2MDNReceiverHandler extends AbstractReceiverHandler {
       //aMDN.partnership ().setReceiverX509Alias (aMsg.partnership ().getSenderX509Alias ());
 
       // Update the partnership
-      getModule ().getSession ().getPartnershipFactory ().updatePartnership (aMDN, false);
+      getModule().getSession().getPartnershipFactory().updatePartnership(aMDN, false);
 
-      final ICertificateFactory aCertFactory = getModule ().getSession ().getCertificateFactory ();
-      final X509Certificate aSenderCert = aCertFactory.getCertificate (aMDN, ECertificatePartnershipType.SENDER);
+      final ICertificateFactory aCertFactory = getModule().getSession().getCertificateFactory();
+      final X509Certificate aSenderCert = aCertFactory.getCertificate(aMDN, ECertificatePartnershipType.SENDER);
 
       boolean bUseCertificateInBodyPart;
-      final ETriState eUseCertificateInBodyPart = aMsg.partnership ().getVerifyUseCertificateInBodyPart ();
-      if (eUseCertificateInBodyPart.isDefined ())
-      {
+      final ETriState eUseCertificateInBodyPart = aMsg.partnership().getVerifyUseCertificateInBodyPart();
+      if (eUseCertificateInBodyPart.isDefined()) {
         // Use per partnership
-        bUseCertificateInBodyPart = eUseCertificateInBodyPart.getAsBooleanValue ();
-      }
-      else
-      {
+        bUseCertificateInBodyPart = eUseCertificateInBodyPart.getAsBooleanValue();
+      } else {
         // Use global value
-        bUseCertificateInBodyPart = getModule ().getSession ().isCryptoVerifyUseCertificateInBodyPart ();
+        bUseCertificateInBodyPart = getModule().getSession().isCryptoVerifyUseCertificateInBodyPart();
       }
 
-      AS2Helper.parseMDN (aMsg,
-                          aSenderCert,
-                          bUseCertificateInBodyPart,
-                          getVerificationCertificateConsumer (),
-                          aResHelper);
+      AS2Helper.parseMDN(aMsg,
+        aSenderCert,
+        bUseCertificateInBodyPart,
+        getVerificationCertificateConsumer(),
+        aResHelper);
 
       // in order to name & save the mdn with the original AS2-From + AS2-To +
       // Message id.,
       // the 3 msg attributes have to be reset before calling MDNFileModule
-      aMsg.partnership ().setSenderAS2ID (aMDN.getHeader (CHttpHeader.AS2_TO));
-      aMsg.partnership ().setReceiverAS2ID (aMDN.getHeader (CHttpHeader.AS2_FROM));
-      getModule ().getSession ().getPartnershipFactory ().updatePartnership (aMsg, false);
-      aMsg.setMessageID (aMsg.getMDN ().attrs ().getAsString (AS2MessageMDN.MDNA_ORIG_MESSAGEID));
-      try
-      {
-        getModule ().getSession ().getMessageProcessor ().handle (IProcessorStorageModule.DO_STOREMDN, aMsg, null);
-      }
-      catch (final AS2ComponentNotFoundException | AS2NoModuleException ex)
-      {
+      aMsg.partnership().setSenderAS2ID(aMDN.getHeader(CHttpHeader.AS2_TO));
+      aMsg.partnership().setReceiverAS2ID(aMDN.getHeader(CHttpHeader.AS2_FROM));
+      getModule().getSession().getPartnershipFactory().updatePartnership(aMsg, false);
+      aMsg.setMessageID(aMsg.getMDN().attrs().getAsString(AS2MessageMDN.MDNA_ORIG_MESSAGEID));
+      try {
+        getModule().getSession().getMessageProcessor().handle(IProcessorStorageModule.DO_STOREMDN, aMsg, null);
+      } catch (final AS2ComponentNotFoundException | AS2NoModuleException ex) {
         // No message processor found
         // Or no module found in message processor
       }
 
       // check if the mic (message integrity check) is correct
-      if (checkAsyncMDN (aMsg))
-        HTTPHelper.sendSimpleHTTPResponse (aResponseHandler, CHttp.HTTP_OK);
+      if (checkAsyncMDN(aMsg))
+        HTTPHelper.sendSimpleHTTPResponse(aResponseHandler, CHttp.HTTP_OK);
       else
-        HTTPHelper.sendSimpleHTTPResponse (aResponseHandler, CHttp.HTTP_NOT_FOUND);
+        HTTPHelper.sendSimpleHTTPResponse(aResponseHandler, CHttp.HTTP_NOT_FOUND);
 
-      final String sDisposition = aMsg.getMDN ().attrs ().getAsString (AS2MessageMDN.MDNA_DISPOSITION);
-      try
-      {
-        DispositionType.createFromString (sDisposition).validate ();
-      }
-      catch (final AS2DispositionException ex)
-      {
-        ex.setText (aMsg.getMDN ().getText ());
-        if (ex.getDisposition ().isWarning ())
-        {
+      final String sDisposition = aMsg.getMDN().attrs().getAsString(AS2MessageMDN.MDNA_DISPOSITION);
+      try {
+        DispositionType.createFromString(sDisposition).validate();
+      } catch (final AS2DispositionException ex) {
+        ex.setText(aMsg.getMDN().getText());
+        if (ex.getDisposition().isWarning()) {
           // Warning
-          ex.setSourceMsg (aMsg).terminate ();
-        }
-        else
-        {
+          ex.setSourceMsg(aMsg).terminate();
+        } else {
           // Error
           throw ex;
         }
       }
-    }
-    catch (final IOException ex)
-    {
-      HTTPHelper.sendSimpleHTTPResponse (aResponseHandler, CHttp.HTTP_BAD_REQUEST);
+    } catch (final IOException ex) {
+      HTTPHelper.sendSimpleHTTPResponse(aResponseHandler, CHttp.HTTP_BAD_REQUEST);
       throw ex;
-    }
-    catch (final Exception ex)
-    {
-      HTTPHelper.sendSimpleHTTPResponse (aResponseHandler, CHttp.HTTP_BAD_REQUEST);
-      throw WrappedAS2Exception.wrap (ex).setSourceMsg (aMsg);
+    } catch (final Exception ex) {
+      HTTPHelper.sendSimpleHTTPResponse(aResponseHandler, CHttp.HTTP_BAD_REQUEST);
+      throw WrappedAS2Exception.wrap(ex).setSourceMsg(aMsg);
     }
   }
 
   // Asynch MDN 2007-03-12
+
   /**
    * verify if the mic is matched.
    *
-   * @param aMsg
-   *        Message
+   * @param aMsg Message
    * @return true if mdn processed
-   * @throws AS2Exception
-   *         In case of error; e.g. MIC mismatch
+   * @throws AS2Exception In case of error; e.g. MIC mismatch
    */
-  public boolean checkAsyncMDN (@Nonnull final AS2Message aMsg) throws AS2Exception
-  {
-    try
-    {
+  public boolean checkAsyncMDN(@Nonnull final AS2Message aMsg) throws AS2Exception {
+    try {
       // get the returned mic from mdn object
-      final String sReturnMIC = aMsg.getMDN ().attrs ().getAsString (AS2MessageMDN.MDNA_MIC);
-      final MIC aReturnMIC = MIC.parse (sReturnMIC);
+      final String sReturnMIC = aMsg.getMDN().attrs().getAsString(AS2MessageMDN.MDNA_MIC);
+      final MIC aReturnMIC = MIC.parse(sReturnMIC);
 
       // use original message id. to open the pending information file
       // from pendinginfo folder.
-      final String sOrigMessageID = aMsg.getMDN ().attrs ().getAsString (AS2MessageMDN.MDNA_ORIG_MESSAGEID);
+      final String sOrigMessageID = aMsg.getMDN().attrs().getAsString(AS2MessageMDN.MDNA_ORIG_MESSAGEID);
 
-      final String sPendingInfoFolder = AS2IOHelper.getSafeFileAndFolderName (getModule ().getSession ()
-                                                                                          .getMessageProcessor ()
-                                                                                          .attrs ()
-                                                                                          .getAsString (IMessageProcessor.ATTR_PENDINGMDNINFO));
+      final String sPendingInfoFolder = AS2IOHelper.getSafeFileAndFolderName(getModule().getSession()
+        .getMessageProcessor()
+        .attrs()
+        .getAsString(IMessageProcessor.ATTR_PENDINGMDNINFO));
       final String sPendingInfoFile = sPendingInfoFolder +
-                                      FilenameHelper.UNIX_SEPARATOR_STR +
-                                      AS2IOHelper.getFilenameFromMessageID (sOrigMessageID);
+        FilenameHelper.UNIX_SEPARATOR_STR +
+        AS2IOHelper.getFilenameFromMessageID(sOrigMessageID);
 
       final String sOriginalMIC;
       final MIC aOriginalMIC;
       final File aPendingFile;
-      try (final NonBlockingBufferedReader aPendingInfoReader = FileHelper.getBufferedReader (new File (sPendingInfoFile),
-                                                                                              StandardCharsets.ISO_8859_1))
-      {
+      try (final NonBlockingBufferedReader aPendingInfoReader = FileHelper.getBufferedReader(new File(sPendingInfoFile),
+        StandardCharsets.ISO_8859_1)) {
         // Get the original mic from the first line of pending information
         // file
-        sOriginalMIC = aPendingInfoReader.readLine ();
-        aOriginalMIC = MIC.parse (sOriginalMIC);
+        sOriginalMIC = aPendingInfoReader.readLine();
+        aOriginalMIC = MIC.parse(sOriginalMIC);
 
         // Get the original pending file from the second line of pending
         // information file
-        aPendingFile = new File (aPendingInfoReader.readLine ());
+        aPendingFile = new File(aPendingInfoReader.readLine());
       }
 
-      final String sDisposition = aMsg.getMDN ().attrs ().getAsString (AS2MessageMDN.MDNA_DISPOSITION);
+      final String sDisposition = aMsg.getMDN().attrs().getAsString(AS2MessageMDN.MDNA_DISPOSITION);
 
-      if (LOGGER.isInfoEnabled ())
-        LOGGER.info ("received MDN [" + sDisposition + "]" + aMsg.getLoggingText ());
+      if (LOGGER.isInfoEnabled())
+        LOGGER.info("received MDN [" + sDisposition + "]" + aMsg.getLoggingText());
 
-      if (aOriginalMIC == null || aReturnMIC == null || !aReturnMIC.equals (aOriginalMIC))
-      {
-        m_aMICMatchingHandler.onMICMismatch (aMsg, sOriginalMIC, sReturnMIC);
+      if (aOriginalMIC == null || aReturnMIC == null || !aReturnMIC.equals(aOriginalMIC)) {
+        m_aMICMatchingHandler.onMICMismatch(aMsg, sOriginalMIC, sReturnMIC);
         return false;
       }
 
-      m_aMICMatchingHandler.onMICMatch (aMsg, sReturnMIC);
+      m_aMICMatchingHandler.onMICMatch(aMsg, sReturnMIC);
 
       // delete the pendinginfo & pending file if mic is matched
 
-      final File aPendingInfoFile = new File (sPendingInfoFile);
-      if (LOGGER.isInfoEnabled ())
-        LOGGER.info ("delete pendinginfo file : " +
-                     aPendingInfoFile.getName () +
-                     " from pending folder : " +
-                     sPendingInfoFolder +
-                     aMsg.getLoggingText ());
-      if (!aPendingInfoFile.delete ())
-      {
-        if (LOGGER.isErrorEnabled ())
-          LOGGER.error ("Error delete pendinginfo file " + aPendingFile);
+      final File aPendingInfoFile = new File(sPendingInfoFile);
+      if (LOGGER.isInfoEnabled())
+        LOGGER.info("delete pendinginfo file : " +
+          aPendingInfoFile.getName() +
+          " from pending folder : " +
+          sPendingInfoFolder +
+          aMsg.getLoggingText());
+      if (!aPendingInfoFile.delete()) {
+        if (LOGGER.isErrorEnabled())
+          LOGGER.error("Error delete pendinginfo file " + aPendingFile);
       }
 
-      if (LOGGER.isInfoEnabled ())
-        LOGGER.info ("delete pending file : " +
-                     aPendingFile.getName () +
-                     " from pending folder : " +
-                     aPendingFile.getParent () +
-                     aMsg.getLoggingText ());
-      if (!aPendingFile.delete ())
-      {
-        if (LOGGER.isErrorEnabled ())
-          LOGGER.error ("Error delete pending file " + aPendingFile);
+      if (LOGGER.isInfoEnabled())
+        LOGGER.info("delete pending file : " +
+          aPendingFile.getName() +
+          " from pending folder : " +
+          aPendingFile.getParent() +
+          aMsg.getLoggingText());
+      if (!aPendingFile.delete()) {
+        if (LOGGER.isErrorEnabled())
+          LOGGER.error("Error delete pending file " + aPendingFile);
       }
-    }
-    catch (final IOException | AS2ComponentNotFoundException ex)
-    {
-      LOGGER.error ("Error checking async MDN", ex);
+    } catch (final IOException | AS2ComponentNotFoundException ex) {
+      LOGGER.error("Error checking async MDN", ex);
       return false;
     }
     return true;
   }
 
-  public void reparse (@Nonnull final AS2Message aMsg,
-                       @Nonnull final AS2HttpClient aHttpClient,
-                       @Nullable final IHTTPIncomingDumper aIncomingDumper) throws AS2Exception
-  {
+  public void reparse(@Nonnull final AS2Message aMsg,
+                      @Nonnull final AS2HttpClient aHttpClient,
+                      @Nullable final IHTTPIncomingDumper aIncomingDumper) throws AS2Exception {
     // Create a MessageMDN and copy HTTP headers
-    final IMessageMDN aMDN = new AS2MessageMDN (aMsg);
+    final IMessageMDN aMDN = new AS2MessageMDN(aMsg);
     // Bug in ph-commons 9.1.3 in addAllHeaders!
-    aMDN.headers ().addAllHeaders (aHttpClient.getResponseHeaderFields ());
+    aMDN.headers().addAllHeaders(aHttpClient.getResponseHeaderFields());
 
     // Receive the MDN data
     NonBlockingByteArrayOutputStream aMDNStream = null;
-    try
-    {
-      final InputStream aIS = aHttpClient.getInputStream ();
-      aMDNStream = new NonBlockingByteArrayOutputStream ();
+    try {
+      final InputStream aIS = aHttpClient.getInputStream();
+      aMDNStream = new NonBlockingByteArrayOutputStream();
 
       // Retrieve the message content
-      final long nContentLength = StringParser.parseLong (aMDN.getHeader (CHttpHeader.CONTENT_LENGTH), -1);
+      final long nContentLength = StringParser.parseLong(aMDN.getHeader(CHttpHeader.CONTENT_LENGTH), -1);
       if (nContentLength >= 0)
-        StreamHelper.copyInputStreamToOutputStreamWithLimit (aIS, aMDNStream, nContentLength);
+        StreamHelper.copyInputStreamToOutputStreamWithLimit(aIS, aMDNStream, nContentLength);
       else
-        StreamHelper.copyInputStreamToOutputStream (aIS, aMDNStream);
-    }
-    catch (final IOException ex)
-    {
-      LOGGER.error ("Error reparsing", ex);
-    }
-    finally
-    {
-      StreamHelper.close (aMDNStream);
+        StreamHelper.copyInputStreamToOutputStream(aIS, aMDNStream);
+    } catch (final IOException ex) {
+      LOGGER.error("Error reparsing", ex);
+    } finally {
+      StreamHelper.close(aMDNStream);
     }
 
     if (aIncomingDumper != null)
-      aIncomingDumper.dumpIncomingRequest (aMDN.headers ().getAllHeaderLines (true),
-                                           aMDNStream != null ? aMDNStream.toByteArray ()
-                                                              : ArrayHelper.EMPTY_BYTE_ARRAY,
-                                           aMDN);
+      aIncomingDumper.dumpIncomingRequest(aMDN.headers().getAllHeaderLines(true),
+        aMDNStream != null ? aMDNStream.toByteArray()
+          : ArrayHelper.EMPTY_BYTE_ARRAY,
+        aMDN);
 
     MimeBodyPart aPart = null;
     if (aMDNStream != null)
-      try
-      {
-        aPart = new MimeBodyPart (AS2HttpHelper.getAsInternetHeaders (aMDN.headers ()), aMDNStream.toByteArray ());
+      try {
+        aPart = new MimeBodyPart(AS2HttpHelper.getAsInternetHeaders(aMDN.headers()), aMDNStream.toByteArray());
+      } catch (final MessagingException ex) {
+        LOGGER.error("Error creating MimeBodyPart", ex);
       }
-      catch (final MessagingException ex)
-      {
-        LOGGER.error ("Error creating MimeBodyPart", ex);
-      }
-    aMsg.getMDN ().setData (aPart);
+    aMsg.getMDN().setData(aPart);
 
     // get the MDN partnership info
-    aMDN.partnership ().setSenderAS2ID (aMDN.getHeader (CHttpHeader.AS2_FROM));
-    aMDN.partnership ().setReceiverAS2ID (aMDN.getHeader (CHttpHeader.AS2_TO));
+    aMDN.partnership().setSenderAS2ID(aMDN.getHeader(CHttpHeader.AS2_FROM));
+    aMDN.partnership().setReceiverAS2ID(aMDN.getHeader(CHttpHeader.AS2_TO));
   }
 }

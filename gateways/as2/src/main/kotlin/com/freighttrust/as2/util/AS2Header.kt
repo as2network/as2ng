@@ -20,8 +20,8 @@ enum class AS2Header(val key: String) {
    *Indicates whether or not the mdn should be signed and which mic algorithm to use
    * e.g.:
    * Disposition-notification-options:
-        signed-receipt-protocol=optional,pkcs7-signature;
-        signed-receipt-micalg=optional,sha1,md5
+  signed-receipt-protocol=optional,pkcs7-signature;
+  signed-receipt-micalg=optional,sha1,md5
    */
   DispositionNotificationOptions("Disposition-Notification-Options"),
 

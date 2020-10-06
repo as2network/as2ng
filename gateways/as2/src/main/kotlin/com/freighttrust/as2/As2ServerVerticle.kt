@@ -60,12 +60,11 @@ class As2ServerVerticle(
   private fun handleFailure(ctx: RoutingContext) {
 
 
-    when(val failure = ctx.failure()) {
+    when (val failure = ctx.failure()) {
       is DispositionException -> {
         // respond with an MDN
 
         ctx.createMDN("A failure occurred", failure.disposition)
-
 
 
       }

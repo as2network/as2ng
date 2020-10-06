@@ -11,5 +11,5 @@ fun MultiMap.getAll(header: AS2Header): List<String>? = getAll(header.key)
 
 fun MultiMap.toMap(): Map<String, List<String>> =
   names()
-    .map { key -> Pair(key, getAll(key))}
+    .map { key -> Pair(key, getAll(key)) }
     .toMap()

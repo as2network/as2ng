@@ -72,7 +72,7 @@ data class Disposition(
             match.groups[6]?.value
           )
 
-          val modifier = DispositionModifier.values().find{ it.key == modifierStr }
+          val modifier = DispositionModifier.values().find { it.key == modifierStr }
 
           return Disposition(actionMode, sendingMode, type, modifier, modifierText)
         }
@@ -101,8 +101,8 @@ data class Disposition(
       append("${actionMode.key}/${sendingMode.key}; ${type.key}")
 
       // TODO enforce only one error type is set
-      if(modifier != null) append("/${modifier.key}")
-      if(modifierText != null) append(": $modifierText")
+      if (modifier != null) append("/${modifier.key}")
+      if (modifierText != null) append(": $modifierText")
 
     }.toString()
 }

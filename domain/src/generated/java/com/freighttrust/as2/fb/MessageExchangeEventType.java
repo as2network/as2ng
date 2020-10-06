@@ -3,7 +3,9 @@
 package com.freighttrust.as2.fb;
 
 public final class MessageExchangeEventType {
-  private MessageExchangeEventType() { }
+  private MessageExchangeEventType() {
+  }
+
   public static final byte Validation = 0;
   public static final byte BodyReceipt = 1;
   public static final byte Decryption = 2;
@@ -11,8 +13,10 @@ public final class MessageExchangeEventType {
   public static final byte SignatureVerification = 4;
   public static final byte Forwarding = 5;
 
-  public static final String[] names = { "Validation", "BodyReceipt", "Decryption", "Decompression", "SignatureVerification", "Forwarding", };
+  public static final String[] names = {"Validation", "BodyReceipt", "Decryption", "Decompression", "SignatureVerification", "Forwarding",};
 
-  public static String name(int e) { return names[e]; }
+  public static String name(int e) {
+    return names[e];
+  }
 }
 
