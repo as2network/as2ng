@@ -74,3 +74,23 @@ services:
       MINIO_HTTP_TRACE: "/var/log/minio/minio.log"
       MINIO_ACCESS_KEY: "${AWS_ACCESS_KEY_ID}"
       MINIO_SECRET_KEY: "${AWS_SECRET_ACCESS_KEY}"
+
+  OpenAS2A:
+    image: gradle:6.6
+    working_dir: /opt/as2
+    user: "${USER_ID}:${GROUP_ID}"
+    volumes:
+      - ./testing/as2:/opt/as2
+      - ./testing/as2/data/openas2a:/data
+    network_mode: host
+    command: "gradle --no-daemon :runOpenAS2A"
+
+  OpenAS2B:
+    image: gradle:6.6
+    working_dir: /opt/as2
+    user: "${USER_ID}:${GROUP_ID}"
+    volumes:
+      - ./testing/as2:/opt/as2
+      - ./testing/as2/data/openas2b:/data
+    network_mode: host
+    command: "gradle --no-daemon :runOpenAS2B"
