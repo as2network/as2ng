@@ -1,0 +1,136 @@
+package com.freighttrust.as2.cli.config.channel
+
+import com.freighttrust.jooq.tables.records.KeyPairRecord
+import com.freighttrust.jooq.tables.records.TradingChannelRecord
+import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.persistence.KeyPairRepository
+import com.freighttrust.persistence.TradingChannelRepository
+import com.freighttrust.persistence.TradingPartnerRepository
+import kotlinx.coroutines.runBlocking
+import org.koin.core.KoinComponent
+import org.koin.core.inject
+import picocli.CommandLine
+import picocli.CommandLine.Command
+import picocli.CommandLine.Option
+
+@Command(
+  name = "update",
+  description = ["update a trading channel"]
+)
+class TradingChannelUpdate : KoinComponent, Runnable {
+
+  @CommandLine.Option(
+    names = ["-i", "--id"],
+    description = ["id of the trading channel to update"],
+    required = true
+  )
+  var id: Long = -1
+
+  @Option(
+    names = ["-n", "--name"],
+    description = ["name of the new trading channel"]
+  )
+  var name: String? = null
+
+  @Option(
+    names = ["-spi", "--sender-partner-id"],
+    description = ["partner id of the sending side of the channel"]
+  )
+  var senderPartnerId: Long? = null
+
+  @Option(
+    names = ["-sai", "--sender-as2-id"],
+    description = ["as2 identifier of the sending side of the channel"]
+  )
+  var senderAs2Id: String? = null
+
+  @Option(
+    names = ["-rpi", "--recipient-partner-id"],
+    description = ["partner id of the receiving side of the channel"]
+  )
+  var recipientPartnerId: Long? = null
+
+  @Option(
+    names = ["-rai", "--recipient-as2-id"],
+    description = ["as2 identifier of the receiving side of the channel"]
+  )
+  var recipientAs2Id: String? = null
+
+  @Option(
+    names = ["-u", "--recipient-message-url"],
+    description = ["recipient's url for receiving messages"]
+  )
+  var recipientMessageUrl: String? = null
+
+  @Option(
+    names = ["-ekid", "--encryption-keypair-id"],
+    description = ["optional keypair id for use with encryption"]
+  )
+  var encryptionKeyPairId: Long? = null
+
+  private val keyPairRepository: KeyPairRepository by inject()
+  private val partnerRepository: TradingPartnerRepository by inject()
+  private val channelRepository: TradingChannelRepository by inject()
+
+  override fun run() {
+
+    runBlocking {
+
+      channelRepository.transaction { tx ->
+
+        // check that sender exists
+
+        senderPartnerId
+          ?.also {
+            val senderExists = partnerRepository
+              .exists(TradingPartnerRecord().apply { id = it }, tx)
+            if (!senderExists) throw Error("Sender trading partner with id = $senderPartnerId not found")
+          }
+
+        // check that recipient exists
+
+        recipientPartnerId
+          ?.also {
+            val recipientExists = partnerRepository
+              .exists(TradingPartnerRecord().apply { id = recipientPartnerId }, tx)
+
+            if (!recipientExists) throw Error("Sender trading partner with id = $recipientPartnerId not found")
+          }
+
+        // check that encryption keypair exists if specified
+
+        encryptionKeyPairId
+          ?.also {
+            val exists = keyPairRepository.exists(KeyPairRecord().apply { id = it }, tx)
+            if (!exists) throw Error("Encryption key pair not found with id = $it")
+          }
+
+        // add the trading channel
+
+        val record = channelRepository.findById(TradingChannelRecord().apply { id = this@TradingChannelUpdate.id })
+          ?: throw Error("Trading channel not found with id = $id")
+
+        channelRepository.update(
+          TradingChannelRecord()
+            .apply {
+              id = this@TradingChannelUpdate.id
+              name = this@TradingChannelUpdate.name ?: record.name
+              senderId = this@TradingChannelUpdate.senderPartnerId ?: record.senderId
+              senderAs2Identifier = this@TradingChannelUpdate.senderAs2Id ?: record.senderAs2Identifier
+              recipientId = this@TradingChannelUpdate.recipientPartnerId ?: record.recipientId
+              recipientAs2Identifier = this@TradingChannelUpdate.recipientAs2Id ?: record.recipientAs2Identifier
+              recipientMessageUrl = this@TradingChannelUpdate.recipientMessageUrl ?: record.recipientMessageUrl
+              encryptionKeyPairId = this@TradingChannelUpdate.encryptionKeyPairId ?: record.encryptionKeyPairId
+            },
+          tx
+        )
+      }
+
+    }
+
+    TradingChannelDetail()
+      .apply { id = this@TradingChannelUpdate.id }
+      .run()
+  }
+
+}

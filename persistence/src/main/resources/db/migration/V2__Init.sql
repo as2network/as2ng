@@ -52,7 +52,6 @@ create table trading_channel
     recipient_as2_identifier        varchar (64),
     recipient_message_url           varchar (128),
 
-    encryption_algorithm            varchar(16) null,
     encryption_key_pair_id          bigint null references key_pair(id),
 
     validity                        tstzrange default tstzrange(current_timestamp, null),
@@ -70,7 +69,7 @@ create trigger trading_channel_versioning_trigger
     on trading_channel
     for each row
 execute procedure versioning(
-        'validity', 'trading_channel', true
+        'validity', 'trading_channel_history', true
     );
 
 

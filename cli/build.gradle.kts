@@ -14,6 +14,7 @@ dependencies {
 
   implementation(project(":common"))
   implementation(project(":persistence"))
+  implementation(project(":crypto"))
 
   implementation("info.picocli:picocli")
 

@@ -1,4 +1,4 @@
-package com.freighttrust.as2.cli.config
+package com.freighttrust.as2.cli.config.partner
 
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.TradingPartnerRepository
@@ -9,20 +9,20 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
 @Command(
-  name = "add-trading-partner",
+  name = "add",
   description = ["add a new trading partner"]
 )
-class AddTradingPartner : KoinComponent, Runnable {
+class TradingPartnerAdd : KoinComponent, Runnable {
 
   @Option(
-    names = ["-n", "name"],
+    names = ["-n", "--name"],
     description = ["name of the new trading partner"],
     required = true
   )
   lateinit var name: String
 
   @Option(
-    names = ["-e", "email"],
+    names = ["-e", "--email"],
     description = ["contact email"],
     required = true
   )
@@ -34,13 +34,12 @@ class AddTradingPartner : KoinComponent, Runnable {
 
     val record = TradingPartnerRecord()
       .apply {
-        name = this@AddTradingPartner.name
-        email = this@AddTradingPartner.email
+        name = this@TradingPartnerAdd.name
+        email = this@TradingPartnerAdd.email
       }
 
     val inserted = runBlocking { repository.insert(record) }
-
-    println("Success: $inserted")
+    println(inserted)
   }
 
 }

@@ -27,7 +27,7 @@ values (1,
 alter sequence key_pair_id_seq restart with 5;
 
 insert into trading_channel
-values (1, 'OpenAS2A -> OpenAS2B', 1, 'OpenAS2A', 2, 'OpenAS2B', 'http://localhost:10082', '3des', 2, default),
-       (2, 'OpenAS2B -> OpenAS2A', 2, 'OpenAS2B', 1, 'OpenAS2A', 'http://localhost:10080', '3des', 1, default);
+values (1, 'OpenAS2A -> OpenAS2B', 1, 'OpenAS2A', 2, 'OpenAS2B', 'http://localhost:10082', 2, default),
+       (2, 'OpenAS2B -> OpenAS2A', 2, 'OpenAS2B', 1, 'OpenAS2A', 'http://localhost:10080', 1, default);
 
 alter sequence trading_channel_id_seq restart with 3;

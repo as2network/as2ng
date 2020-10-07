@@ -1,6 +1,7 @@
 package com.freighttrust.as2.cli
 
 import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.crypto.VaultCryptoModule
 import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.persistence.s3.S3Module
 import org.koin.core.context.startKoin
@@ -24,7 +25,7 @@ class CliCommand {
 private fun koinExecutionStrategy(parseResult: CommandLine.ParseResult): Int {
   // ensure koin di has started up before command execution
   startKoin {
-    modules(AppConfigModule, PostgresModule, S3Module)
+    modules(AppConfigModule, PostgresModule, S3Module, VaultCryptoModule)
   }
   // default execution strategy
   return CommandLine.RunLast().execute(parseResult)
@@ -32,7 +33,11 @@ private fun koinExecutionStrategy(parseResult: CommandLine.ParseResult): Int {
 
 fun main(args: Array<String>) {
 
+  // configure log4j2 backend for flogger framework
+  System.setProperty("flogger.backend_factory", "com.google.common.flogger.backend.log4j2.Log4j2BackendFactory#getInstance")
+
   val exitCode = CommandLine(CliCommand())
+    .setCaseInsensitiveEnumValuesAllowed(true)
     .setExecutionStrategy { parseResult -> koinExecutionStrategy(parseResult) }
     .execute(*args)
 

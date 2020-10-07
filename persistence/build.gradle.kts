@@ -44,7 +44,7 @@ flyway {
 
 jooqGenerator {
   jooqEdition = JooqEdition.OpenSource
-  jooqVersion = "3.12.3"
+  jooqVersion = "3.13.5"
   attachToCompileJava = false
 
   configuration("primary", project.sourceSets["main"]) {

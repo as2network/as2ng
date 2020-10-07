@@ -71,7 +71,7 @@ dependencyManagement {
     // ------------------------------------------------------------------
 
     dependency 'org.postgresql:postgresql:42.2.12'
-    dependency 'org.jooq:jooq:3.12.3'
+    dependency 'org.jooq:jooq:3.13.5'
     dependency 'com.zaxxer:HikariCP:3.4.5'
     dependency 'org.flywaydb:flyway-core:6.4.2'
 
@@ -83,6 +83,7 @@ dependencyManagement {
 
     dependency 'com.google.flogger:flogger:0.5.1'
     dependency 'com.google.flogger:flogger-slf4j-backend:0.5.1'
+    dependency 'com.google.flogger:flogger-log4j2-backend:0.5.1'
 
     dependency 'org.apache.logging.log4j:log4j:2.13.3'
     dependency 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.3'
@@ -93,6 +94,7 @@ dependencyManagement {
     // ------------------------------------------------------------------
 
     dependency 'info.picocli:picocli:4.5.1'
+    dependency 'com.bettercloud:vault-java-driver:5.1.0'
 
     // ------------------------------------------------------------------
     // Testing

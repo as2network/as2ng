@@ -11,6 +11,10 @@ interface Repository<T> {
 
   suspend fun <U> transaction(run: suspend (Context) -> U?): U?
 
+  suspend fun exists(record: T, ctx: Context? = null): Boolean
+
+  suspend fun findAll(ctx: Context? = null): List<T>
+
   suspend fun findById(record: T, ctx: Context? = null): T?
 
   suspend fun insert(record: T, ctx: Context? = null): T
@@ -32,12 +36,13 @@ interface MessageRepository : Repository<MessageRecord>
 interface MessageDispositionNotificationRepository : Repository<MessageDispositionNotificationRecord>
 
 interface TradingChannelRepository : Repository<TradingChannelRecord> {
-
+  suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingChannelRecord?
   suspend fun findByAs2Identifiers(senderId: String, recipientId: String, ctx: Repository.Context? = null): TradingChannelRecord?
-
 }
 
-interface TradingPartnerRepository : Repository<TradingPartnerRecord>
+interface TradingPartnerRepository : Repository<TradingPartnerRecord> {
+  suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingPartnerRecord?
+}
 
 interface RequestRepository : Repository<RequestRecord> {
 
