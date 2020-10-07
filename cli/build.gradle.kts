@@ -17,6 +17,11 @@ dependencies {
 
   implementation("info.picocli:picocli")
 
+  implementation("org.apache.logging.log4j:log4j")
+  implementation("org.apache.logging.log4j:log4j-slf4j-impl")
+  implementation("com.google.flogger:flogger-slf4j-backend")
+
+
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
