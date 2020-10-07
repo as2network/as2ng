@@ -7,7 +7,11 @@
   </Appenders>
   <Loggers>
 
-    <Root level="INFO">
+    <Logger name="com.freighttrust" level="info" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Root level="WARN">
       <AppenderRef ref="Console"/>
     </Root>
 
