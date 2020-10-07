@@ -22,7 +22,7 @@ class KeyPairDetail : KoinComponent, Runnable {
     description = ["id of the key pair to display"],
     required = true
   )
-  var keyPairId: Long = -1L
+  var id: Long = -1L
 
   override fun run() {
 
@@ -30,10 +30,10 @@ class KeyPairDetail : KoinComponent, Runnable {
       requireNotNull(
         runBlocking {
           repository.findById(
-            KeyPairRecord().apply { id = keyPairId }
+            KeyPairRecord().apply { id = this@KeyPairDetail.id }
           )
         }
-      ) { "Key pair not found with id = $keyPairId" }
+      ) { "Key pair not found with id = $id" }
 
     println("Key Pair")
     println("--------\n")

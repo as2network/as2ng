@@ -10,7 +10,7 @@ import picocli.CommandLine.Command
   name = "list",
   description = ["list all key pairs"]
 )
-class ListKeyPairs : KoinComponent, Runnable {
+class KeyPairList : KoinComponent, Runnable {
 
   private val repository: KeyPairRepository by inject()
 

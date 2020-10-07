@@ -1,4 +1,4 @@
-package com.freighttrust.as2.cli.config
+package com.freighttrust.as2.cli.config.partner
 
 import com.freighttrust.persistence.TradingPartnerRepository
 import com.google.common.flogger.FluentLogger
@@ -8,10 +8,10 @@ import org.koin.core.inject
 import picocli.CommandLine.Command
 
 @Command(
-  name = "list-trading-partners",
+  name = "list",
   description = ["list all trading partners"]
 )
-class ListTradingPartners : KoinComponent, Runnable {
+class TradingPartnerList : KoinComponent, Runnable {
 
   private val repository: TradingPartnerRepository by inject()
 

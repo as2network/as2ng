@@ -22,7 +22,7 @@ class KeyPairDelete : KoinComponent, Runnable {
     description = ["id of the key pair to display"],
     required = true
   )
-  var keyPairId: Long = -1L
+  var id: Long = -1L
 
   override fun run() {
 
@@ -32,14 +32,14 @@ class KeyPairDelete : KoinComponent, Runnable {
         requireNotNull(
 
           repository.findById(
-            KeyPairRecord().apply { id = keyPairId }
+            KeyPairRecord().apply { id = this@KeyPairDelete.id }
           )
 
-        ) { "Key pair not found with id = $keyPairId" }
+        ) { "Key pair not found with id = $id" }
 
       repository.deleteById(record)
 
-      println("Key Pair with id = $keyPairId successfully deleted")
+      println("Key Pair with id = $id successfully deleted")
     }
   }
 }

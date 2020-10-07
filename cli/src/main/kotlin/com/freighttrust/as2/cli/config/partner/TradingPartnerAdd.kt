@@ -1,8 +1,7 @@
-package com.freighttrust.as2.cli.config
+package com.freighttrust.as2.cli.config.partner
 
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.TradingPartnerRepository
-import com.google.common.flogger.FluentLogger
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -10,10 +9,10 @@ import picocli.CommandLine.Command
 import picocli.CommandLine.Option
 
 @Command(
-  name = "add-trading-partner",
+  name = "add",
   description = ["add a new trading partner"]
 )
-class AddTradingPartner : KoinComponent, Runnable {
+class TradingPartnerAdd : KoinComponent, Runnable {
 
   @Option(
     names = ["-n", "name"],
@@ -35,8 +34,8 @@ class AddTradingPartner : KoinComponent, Runnable {
 
     val record = TradingPartnerRecord()
       .apply {
-        name = this@AddTradingPartner.name
-        email = this@AddTradingPartner.email
+        name = this@TradingPartnerAdd.name
+        email = this@TradingPartnerAdd.email
       }
 
     val inserted = runBlocking { repository.insert(record) }

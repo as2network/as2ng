@@ -1,16 +1,14 @@
 package com.freighttrust.as2.cli
 
-import com.freighttrust.as2.cli.config.AddTradingPartner
 import com.freighttrust.as2.cli.config.KeyPair
-import com.freighttrust.as2.cli.config.ListTradingPartners
+import com.freighttrust.as2.cli.config.TradingPartner
 import picocli.CommandLine.Command
 
 @Command(
   name = "config",
   description = ["Configuration related commands"],
   subcommands = [
-    ListTradingPartners::class,
-    AddTradingPartner::class,
+    TradingPartner::class,
     KeyPair::class
   ]
 )
