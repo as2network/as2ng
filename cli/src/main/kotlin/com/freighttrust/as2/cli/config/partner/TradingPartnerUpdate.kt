@@ -54,14 +54,9 @@ class TradingPartnerUpdate : KoinComponent, Runnable {
 
     val updated = runBlocking { repository.update(update) }
 
-    // TODO extract common code from add and detail commands
-
-    println("Trading Partner")
-    println("--------\n")
-    println("id:\t\t\t${updated.id}")
-    println("name:\t\t${updated.name}")
-    println("email:\t\t${updated.email}")
-    println("validity:\t${updated.validity}")
+    TradingPartnerDetail()
+      .apply { id = this@TradingPartnerUpdate.id }
+      .run()
 
   }
 

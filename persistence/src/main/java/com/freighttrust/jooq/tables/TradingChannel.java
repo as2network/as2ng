@@ -18,7 +18,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row10;
+import org.jooq.Row9;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannel extends TableImpl<TradingChannelRecord> {
 
-    private static final long serialVersionUID = -1461038546;
+    private static final long serialVersionUID = -706752743;
 
     /**
      * The reference instance of <code>public.trading_channel</code>
@@ -90,11 +90,6 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
      * The column <code>public.trading_channel.recipient_message_url</code>.
      */
     public final TableField<TradingChannelRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
-
-    /**
-     * The column <code>public.trading_channel.encryption_algorithm</code>.
-     */
-    public final TableField<TradingChannelRecord, String> ENCRYPTION_ALGORITHM = createField(DSL.name("encryption_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
 
     /**
      * The column <code>public.trading_channel.encryption_key_pair_id</code>.
@@ -204,11 +199,11 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row10 type methods
+    // Row9 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row10<Long, String, Long, String, Long, String, String, String, Long, Object> fieldsRow() {
-        return (Row10) super.fieldsRow();
+    public Row9<Long, String, Long, String, Long, String, String, Long, Object> fieldsRow() {
+        return (Row9) super.fieldsRow();
     }
 }

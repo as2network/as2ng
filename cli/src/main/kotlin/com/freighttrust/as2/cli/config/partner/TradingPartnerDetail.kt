@@ -19,14 +19,14 @@ class TradingPartnerDetail : KoinComponent, Runnable {
 
   @CommandLine.Option(
     names = ["-i", "--id"],
-    description = ["id of the trading partner to delete"],
+    description = ["id of the trading partner"],
     required = false
   )
   var id: Long? = null
 
   @CommandLine.Option(
     names = ["-n", "--name"],
-    description = ["name of the trading partner to delete"],
+    description = ["name of the trading partner"],
     required = false
   )
   var name: String? = null

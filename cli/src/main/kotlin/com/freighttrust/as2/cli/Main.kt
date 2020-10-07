@@ -37,6 +37,7 @@ fun main(args: Array<String>) {
   System.setProperty("flogger.backend_factory", "com.google.common.flogger.backend.log4j2.Log4j2BackendFactory#getInstance")
 
   val exitCode = CommandLine(CliCommand())
+    .setCaseInsensitiveEnumValuesAllowed(true)
     .setExecutionStrategy { parseResult -> koinExecutionStrategy(parseResult) }
     .execute(*args)
 

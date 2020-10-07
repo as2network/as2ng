@@ -21,7 +21,7 @@ data class MessageContext(
   val requestRecord: RequestRecord,
   val originalMessageRecord: MessageRecord? = null,
   val dispositionNotification: DispositionNotification? = null,
-  val decryptedBody: Pair<MimeBodyPart, String>? = null,
+  val decryptedBody: MimeBodyPart? = null,
   val decompressedBody: Pair<MimeBodyPart, String>? = null,
   val signatureKeyId: Long? = null,
   val signatureCertificate: X509Certificate? = null,
@@ -30,12 +30,10 @@ data class MessageContext(
 ) {
 
   val wasEncrypted: Boolean = decryptedBody != null
-  val encryptionAlgorithm: String? = decryptedBody?.second
-
   val wasCompressed: Boolean = decompressedBody != null
-  val compressionAlgorithm: String? = decompressedBody?.second
-
   val wasSigned: Boolean = verifiedBody != null
+
+  val compressionAlgorithm: String? = decompressedBody?.second
 }
 
 enum class MessageType {
@@ -69,14 +67,13 @@ data class Message(
   val isMdnAsynchronous = receiptDeliveryOption != null
 
   fun decrypt(
-    encryptionAlgorithm: String,
     certificate: X509Certificate,
     privateKey: PrivateKey,
     tempFileHelper: TempFileHelper
   ): Message =
     require(isEncrypted) { "message is not encrypted" }
       .let {
-        CryptoUtil.decrypt(this, encryptionAlgorithm, certificate, privateKey, tempFileHelper)
+        CryptoUtil.decrypt(this, certificate, privateKey, tempFileHelper)
       }
 
   fun decompress(

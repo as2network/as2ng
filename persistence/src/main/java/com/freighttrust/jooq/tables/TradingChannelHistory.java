@@ -13,7 +13,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row10;
+import org.jooq.Row9;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord> {
 
-    private static final long serialVersionUID = -856241569;
+    private static final long serialVersionUID = 753325927;
 
     /**
      * The reference instance of <code>public.trading_channel_history</code>
@@ -84,11 +84,6 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
      * The column <code>public.trading_channel_history.recipient_message_url</code>.
      */
     public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
-
-    /**
-     * The column <code>public.trading_channel_history.encryption_algorithm</code>.
-     */
-    public final TableField<TradingChannelHistoryRecord, String> ENCRYPTION_ALGORITHM = createField(DSL.name("encryption_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
 
     /**
      * The column <code>public.trading_channel_history.encryption_key_pair_id</code>.
@@ -166,11 +161,11 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     }
 
     // -------------------------------------------------------------------------
-    // Row10 type methods
+    // Row9 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row10<Long, String, Long, String, Long, String, String, String, Long, Object> fieldsRow() {
-        return (Row10) super.fieldsRow();
+    public Row9<Long, String, Long, String, Long, String, String, Long, Object> fieldsRow() {
+        return (Row9) super.fieldsRow();
     }
 }

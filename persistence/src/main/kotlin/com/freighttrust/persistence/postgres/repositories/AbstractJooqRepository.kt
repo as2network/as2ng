@@ -41,6 +41,12 @@ abstract class AbstractJooqRepository<R : Record>(
     return result
   }
 
+  override suspend fun exists(record: R, ctx: Repository.Context?): Boolean =
+    coroutineScope {
+      jooqContext(ctx)
+        .fetchCount(table, idQuery(record)) == 1
+    }
+
   override suspend fun findAll(ctx: Repository.Context?): List<R> =
     coroutineScope {
       jooqContext(ctx)

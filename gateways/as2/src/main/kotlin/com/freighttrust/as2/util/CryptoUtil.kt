@@ -19,7 +19,6 @@ object CryptoUtil {
 
   fun decrypt(
     message: Message,
-    encryptionAlgorithm: String,
     certificate: X509Certificate,
     privateKey: PrivateKey,
     tempFileHelper: TempFileHelper
@@ -56,7 +55,7 @@ object CryptoUtil {
 
       message.copy(
         body = body,
-        context = message.context.copy(decryptedBody = Pair(body, encryptionAlgorithm))
+        context = message.context.copy(decryptedBody = body)
       )
     }
 

@@ -19,7 +19,6 @@ class As2MessageReceivedHandler(
       .apply {
 
         this.requestId = messageContext.requestRecord.id
-        this.encryptionAlgorithm = messageContext.encryptionAlgorithm
         this.compressionAlgorithm = messageContext.compressionAlgorithm
 
         if(messageContext.mics != null) {

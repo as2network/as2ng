@@ -1,6 +1,8 @@
-package com.freighttrust.as2.cli.config.partner
+package com.freighttrust.as2.cli.config.channel
 
+import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
@@ -11,22 +13,22 @@ import picocli.CommandLine.Command
 
 @Command(
   name = "delete",
-  description = ["delete a given trading partner"]
+  description = ["delete a given trading channel"]
 )
-class TradingPartnerDelete : KoinComponent, Runnable {
+class TradingChannelDelete : KoinComponent, Runnable {
 
-  private val repository: TradingPartnerRepository by inject()
+  private val repository: TradingChannelRepository by inject()
 
   @CommandLine.Option(
     names = ["-i", "--id"],
-    description = ["id of the trading partner to delete"],
+    description = ["id of the trading channel to delete"],
     required = false
   )
   var id: Long? = null
 
   @CommandLine.Option(
     names = ["-n", "--name"],
-    description = ["name of the trading partner to delete"],
+    description = ["name of the trading channel to delete"],
     required = false
   )
   var name: String? = null
@@ -39,21 +41,21 @@ class TradingPartnerDelete : KoinComponent, Runnable {
       requireNotNull(
         runBlocking {
 
-          val id = this@TradingPartnerDelete.id
-          val name = this@TradingPartnerDelete.name
+          val id = this@TradingChannelDelete.id
+          val name = this@TradingChannelDelete.name
 
           require((id != null).xor(name != null)) { "Either a name or an id must be provided" }
 
           when {
-            id != null -> repository.findById(TradingPartnerRecord().apply { this.id = id })
+            id != null -> repository.findById(TradingChannelRecord().apply { this.id = id })
             name != null -> repository.findByName(name)
             else -> throw IllegalStateException("This code should not be able to execute")
           }
         }
-      ) { "Trading partner not found with $identifier" }
+      ) { "Trading channel not found with $identifier" }
 
     runBlocking { repository.deleteById(record) }
 
-    println("Trading partner with $identifier successfully deleted")
+    println("Trading channel with $identifier successfully deleted")
   }
 }

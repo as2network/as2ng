@@ -38,7 +38,6 @@ class As2DecryptionHandler(
         val privateKey = keyPair.privateKey.toPrivateKey()
 
         ctx.message = decrypt(
-          encryptionAlgorithm,
           certificate,
           privateKey,
           ctx.tempFileHelper

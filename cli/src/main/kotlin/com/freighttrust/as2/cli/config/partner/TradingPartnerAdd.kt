@@ -15,7 +15,7 @@ import picocli.CommandLine.Option
 class TradingPartnerAdd : KoinComponent, Runnable {
 
   @Option(
-    names = ["-n", "name"],
+    names = ["-n", "--name"],
     description = ["name of the new trading partner"],
     required = true
   )
