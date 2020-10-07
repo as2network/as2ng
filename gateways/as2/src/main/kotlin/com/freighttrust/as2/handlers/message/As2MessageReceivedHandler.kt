@@ -1,5 +1,7 @@
-package com.freighttrust.as2.handlers
+package com.freighttrust.as2.handlers.message
 
+import com.freighttrust.as2.handlers.CoroutineRouteHandler
+import com.freighttrust.as2.handlers.message
 import com.freighttrust.jooq.tables.records.MessageRecord
 import com.freighttrust.persistence.MessageRepository
 import io.vertx.ext.web.RoutingContext
@@ -20,7 +22,9 @@ class As2MessageReceivedHandler(
         this.encryptionAlgorithm = messageContext.encryptionAlgorithm
         this.compressionAlgorithm = messageContext.compressionAlgorithm
 
-        this.signatureId = messageContext.signatureKeyId
+        if(messageContext.mics != null) {
+          setMics(*messageContext.mics.toTypedArray())
+        }
 
         this.isMdnRequested = message.isMdnRequested
         this.isMdnAsync = message.isMdnAsynchronous

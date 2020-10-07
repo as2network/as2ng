@@ -26,7 +26,7 @@ data class MessageContext(
   val signatureKeyId: Long? = null,
   val signatureCertificate: X509Certificate? = null,
   val verifiedBody: MimeBodyPart? = null,
-  val mic: String? = null
+  val mics: List<String>? = null
 ) {
 
   val wasEncrypted: Boolean = decryptedBody != null
@@ -104,27 +104,16 @@ data class Message(
 
       }
 
-  fun withMic(algorithm: ECryptoAlgorithmSign?, rfc385MicAlgorithmsEnabled: Boolean): Message {
-
-    val signingAlgorithm =
-      requireNotNull(
-        algorithm
-          ?: if (rfc385MicAlgorithmsEnabled)
-            ECryptoAlgorithmSign.DEFAULT_RFC_3851
-          else
-            ECryptoAlgorithmSign.DEFAULT_RFC_5751
-
-      ) { "signature cannot be null" }
+  fun withMics(): Message {
 
     val includeHeaders =
       context.wasEncrypted || context.wasSigned || context.wasCompressed
 
-    return copy(
-      context = context.copy(
-        mic = body.calculateMic(includeHeaders, signingAlgorithm)
-      )
-    )
+    val mics = dispositionNotificationOptions
+      ?.allMICAlgs?.map { algorithm -> body.calculateMic(includeHeaders, algorithm) }
+      ?: emptyList()
 
+    return copy(context = context.copy(mics = mics))
   }
 
 
