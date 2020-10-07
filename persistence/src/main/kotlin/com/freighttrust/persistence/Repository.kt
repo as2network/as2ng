@@ -39,7 +39,9 @@ interface TradingChannelRepository : Repository<TradingChannelRecord> {
 
 }
 
-interface TradingPartnerRepository : Repository<TradingPartnerRecord>
+interface TradingPartnerRepository : Repository<TradingPartnerRecord> {
+  suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingPartnerRecord?
+}
 
 interface RequestRepository : Repository<RequestRecord> {
 
