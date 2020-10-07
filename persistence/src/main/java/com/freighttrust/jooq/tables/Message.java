@@ -20,7 +20,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Index;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row8;
+import org.jooq.Row7;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Message extends TableImpl<MessageRecord> {
 
-    private static final long serialVersionUID = 582817504;
+    private static final long serialVersionUID = -1549531211;
 
     /**
      * The reference instance of <code>public.message</code>
@@ -63,11 +63,6 @@ public class Message extends TableImpl<MessageRecord> {
     public final TableField<MessageRecord, UUID> REQUEST_ID = createField(DSL.name("request_id"), org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
 
     /**
-     * The column <code>public.message.signature_id</code>.
-     */
-    public final TableField<MessageRecord, Long> SIGNATURE_ID = createField(DSL.name("signature_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
-
-    /**
      * The column <code>public.message.encryption_algorithm</code>.
      */
     public final TableField<MessageRecord, String> ENCRYPTION_ALGORITHM = createField(DSL.name("encryption_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
@@ -78,9 +73,9 @@ public class Message extends TableImpl<MessageRecord> {
     public final TableField<MessageRecord, String> COMPRESSION_ALGORITHM = createField(DSL.name("compression_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
 
     /**
-     * The column <code>public.message.mic</code>.
+     * The column <code>public.message.mics</code>.
      */
-    public final TableField<MessageRecord, String> MIC = createField(DSL.name("mic"), org.jooq.impl.SQLDataType.VARCHAR(64), this, "");
+    public final TableField<MessageRecord, String[]> MICS = createField(DSL.name("mics"), org.jooq.impl.SQLDataType.VARCHAR(64).getArrayDataType(), this, "");
 
     /**
      * The column <code>public.message.is_mdn_requested</code>.
@@ -152,15 +147,11 @@ public class Message extends TableImpl<MessageRecord> {
 
     @Override
     public List<ForeignKey<MessageRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<MessageRecord, ?>>asList(Keys.MESSAGE__MESSAGE_REQUEST_ID_FKEY, Keys.MESSAGE__MESSAGE_SIGNATURE_ID_FKEY);
+        return Arrays.<ForeignKey<MessageRecord, ?>>asList(Keys.MESSAGE__MESSAGE_REQUEST_ID_FKEY);
     }
 
     public Request request() {
         return new Request(this, Keys.MESSAGE__MESSAGE_REQUEST_ID_FKEY);
-    }
-
-    public KeyPair keyPair() {
-        return new KeyPair(this, Keys.MESSAGE__MESSAGE_SIGNATURE_ID_FKEY);
     }
 
     @Override
@@ -190,11 +181,11 @@ public class Message extends TableImpl<MessageRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row8 type methods
+    // Row7 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<UUID, Long, String, String, String, Boolean, Boolean, String> fieldsRow() {
-        return (Row8) super.fieldsRow();
+    public Row7<UUID, String, String, String[], Boolean, Boolean, String> fieldsRow() {
+        return (Row7) super.fieldsRow();
     }
 }

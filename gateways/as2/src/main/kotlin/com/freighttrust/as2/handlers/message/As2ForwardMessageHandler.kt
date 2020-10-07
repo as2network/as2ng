@@ -1,5 +1,7 @@
-package com.freighttrust.as2.handlers
+package com.freighttrust.as2.handlers.message
 
+import com.freighttrust.as2.handlers.CoroutineRouteHandler
+import com.freighttrust.as2.handlers.message
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.persistence.MessageRepository
 import io.vertx.ext.web.RoutingContext

@@ -118,11 +118,10 @@ create table message
 (
     request_id              uuid primary key references request (id),
 
-    signature_id            bigint null references key_pair(id),
     encryption_algorithm    varchar(16)  null,
     compression_algorithm   varchar(16)  null,
 
-    mic                     varchar(64)  null,
+    mics                    varchar(64)[]  null,
 
     is_mdn_requested        bool,
     is_mdn_async            bool,

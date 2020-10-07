@@ -75,7 +75,6 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final ForeignKey<MessageRecord, RequestRecord> MESSAGE__MESSAGE_REQUEST_ID_FKEY = ForeignKeys0.MESSAGE__MESSAGE_REQUEST_ID_FKEY;
-    public static final ForeignKey<MessageRecord, KeyPairRecord> MESSAGE__MESSAGE_SIGNATURE_ID_FKEY = ForeignKeys0.MESSAGE__MESSAGE_SIGNATURE_ID_FKEY;
     public static final ForeignKey<MessageDispositionNotificationRecord, RequestRecord> MESSAGE_DISPOSITION_NOTIFICATION__MESSAGE_DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY = ForeignKeys0.MESSAGE_DISPOSITION_NOTIFICATION__MESSAGE_DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY;
     public static final ForeignKey<RequestRecord, TradingChannelRecord> REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY;
     public static final ForeignKey<RequestRecord, RequestRecord> REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY;
@@ -112,7 +111,6 @@ public class Keys {
 
     private static class ForeignKeys0 {
         public static final ForeignKey<MessageRecord, RequestRecord> MESSAGE__MESSAGE_REQUEST_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.REQUEST_PKEY, Message.MESSAGE, "message__message_request_id_fkey", Message.MESSAGE.REQUEST_ID);
-        public static final ForeignKey<MessageRecord, KeyPairRecord> MESSAGE__MESSAGE_SIGNATURE_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.KEY_PAIR_PKEY, Message.MESSAGE, "message__message_signature_id_fkey", Message.MESSAGE.SIGNATURE_ID);
         public static final ForeignKey<MessageDispositionNotificationRecord, RequestRecord> MESSAGE_DISPOSITION_NOTIFICATION__MESSAGE_DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.REQUEST_PKEY, MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION, "message_disposition_notification__message_disposition_notification_request_id_fkey", MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION.REQUEST_ID);
         public static final ForeignKey<RequestRecord, TradingChannelRecord> REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.TRADING_CHANNEL_PKEY, Request.REQUEST, "request__request_trading_channel_id_fkey", Request.REQUEST.TRADING_CHANNEL_ID);
         public static final ForeignKey<RequestRecord, RequestRecord> REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY = Internal.createForeignKey(com.freighttrust.jooq.Keys.REQUEST_PKEY, Request.REQUEST, "request__request_original_request_id_fkey", Request.REQUEST.ORIGINAL_REQUEST_ID);
