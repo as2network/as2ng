@@ -52,8 +52,14 @@ class VaultCertificateFactory(
             return with(json.getJsonObject("data")) {
               Either.Success(
                 KeyPairX509(
+                  caChain = getJsonArray("ca_chain").let { array ->
+                    0.until(array.size()).map { idx -> array.getString(idx) }
+                  },
+                  issuingCA = getString("issuing_ca"),
                   certificate = getString("certificate"),
                   privateKey = getString("private_key"),
+                  privateKeyType = getString("private_key_type"),
+                  serialNumber = getString("serial_number"),
                   expiresAt = Instant.ofEpochSecond(getLong("expiration"))
                 )
               )

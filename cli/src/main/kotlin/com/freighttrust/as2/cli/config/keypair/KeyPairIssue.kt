@@ -37,8 +37,12 @@ class KeyPairIssue : KoinComponent, Runnable {
             repository.insert(
               KeyPairRecord()
                 .apply {
+                  setCaChain(*value.caChain.toTypedArray())
+                  issuingCa = value.issuingCA
                   certificate = value.certificate
                   privateKey = value.privateKey
+                  privateKeyType = value.privateKeyType
+                  serialNumber = value.serialNumber
                   expiresAt = value.expiresAt.atOffset(ZoneOffset.UTC)
                 }
             )
