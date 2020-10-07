@@ -15,10 +15,6 @@ import picocli.CommandLine.Option
 )
 class AddTradingPartner : KoinComponent, Runnable {
 
-  companion object {
-    val logger = FluentLogger.forEnclosingClass()
-  }
-
   @Option(
     names = ["-n", "name"],
     description = ["name of the new trading partner"],
@@ -43,11 +39,8 @@ class AddTradingPartner : KoinComponent, Runnable {
         email = this@AddTradingPartner.email
       }
 
-    logger.atInfo().log("Adding trading partner")
-
     val inserted = runBlocking { repository.insert(record) }
-
-    logger.atInfo().log("Successfully inserted trading partner: %s\n\n", inserted)
+    println(inserted)
   }
 
 }

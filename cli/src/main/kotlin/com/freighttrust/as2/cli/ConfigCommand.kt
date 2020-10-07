@@ -1,6 +1,7 @@
 package com.freighttrust.as2.cli
 
 import com.freighttrust.as2.cli.config.AddTradingPartner
+import com.freighttrust.as2.cli.config.ListTradingPartners
 import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.persistence.s3.S3Module
 import org.koin.core.Koin
@@ -12,7 +13,7 @@ import picocli.CommandLine.Command
 @Command(
   name = "config",
   description = ["Configuration related commands"],
-  subcommands = [AddTradingPartner::class, CommandLine.HelpCommand::class]
+  subcommands = [ListTradingPartners::class, AddTradingPartner::class]
 )
 class ConfigCommand {
 
@@ -21,7 +22,5 @@ class ConfigCommand {
       modules(PostgresModule, S3Module)
     }
   }
-
-  protected val koin: Koin by lazy { koinApplication.koin }
 
 }

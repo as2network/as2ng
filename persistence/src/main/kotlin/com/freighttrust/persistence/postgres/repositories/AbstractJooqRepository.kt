@@ -41,6 +41,13 @@ abstract class AbstractJooqRepository<R : Record>(
     return result
   }
 
+  override suspend fun findAll(ctx: Repository.Context?): List<R> =
+    coroutineScope {
+      jooqContext(ctx)
+        .selectFrom(table)
+        .fetch()
+        .toList()
+    }
 
   override suspend fun findById(record: R, ctx: Repository.Context?): R? =
     coroutineScope {

@@ -11,6 +11,8 @@ interface Repository<T> {
 
   suspend fun <U> transaction(run: suspend (Context) -> U?): U?
 
+  suspend fun findAll(ctx: Context? = null): List<T>
+
   suspend fun findById(record: T, ctx: Context? = null): T?
 
   suspend fun insert(record: T, ctx: Context? = null): T
