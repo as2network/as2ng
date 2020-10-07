@@ -11,7 +11,9 @@ rootProject.name = "customs-gateway"
 
 include(":common")
 include(":domain")
+include(":crypto")
 include(":messaging")
 include(":persistence")
 include(":gateways:as2")
-include("cli")
+include(":cli")
+

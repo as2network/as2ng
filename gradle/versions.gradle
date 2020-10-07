@@ -94,6 +94,7 @@ dependencyManagement {
     // ------------------------------------------------------------------
 
     dependency 'info.picocli:picocli:4.5.1'
+    dependency 'com.bettercloud:vault-java-driver:5.1.0'
 
     // ------------------------------------------------------------------
     // Testing

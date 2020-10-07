@@ -13,12 +13,9 @@ dependencies {
   implementation("com.typesafe:config")
 
   implementation(project(":common"))
-  implementation(project(":persistence"))
-  implementation(project(":crypto"))
+  implementation("com.squareup.okhttp3:okhttp")
+  implementation("io.vertx:vertx-core")
 
-  implementation("info.picocli:picocli")
-
-  testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
 tasks {
