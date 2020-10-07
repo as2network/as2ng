@@ -16,11 +16,4 @@ import picocli.CommandLine.Command
   subcommands = [ListTradingPartners::class, AddTradingPartner::class]
 )
 class ConfigCommand {
-
-  protected val koinApplication: KoinApplication by lazy {
-    startKoin {
-      modules(PostgresModule, S3Module)
-    }
-  }
-
 }
