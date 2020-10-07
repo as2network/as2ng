@@ -9,8 +9,8 @@ import org.koin.dsl.module
 
 val AppConfigModule = module {
 
-  // configure slf4j backend for flogger framework
-  System.setProperty("flogger.backend_factory", "com.google.common.flogger.backend.slf4j.Slf4jBackendFactory#getInstance")
+  // configure log4j2 backend for flogger framework
+  System.setProperty("flogger.backend_factory", "com.google.common.flogger.backend.log4j2.Log4j2BackendFactory#getInstance")
 
   single<Config>(named("app")) { ConfigFactory.load() }
 }

@@ -2,6 +2,7 @@ package com.freighttrust.as2.cli.config
 
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.TradingPartnerRepository
+import com.google.common.flogger.FluentLogger
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -13,6 +14,10 @@ import picocli.CommandLine.Option
   description = ["add a new trading partner"]
 )
 class AddTradingPartner : KoinComponent, Runnable {
+
+  companion object {
+    val logger = FluentLogger.forEnclosingClass()
+  }
 
   @Option(
     names = ["-n", "name"],
@@ -38,9 +43,11 @@ class AddTradingPartner : KoinComponent, Runnable {
         email = this@AddTradingPartner.email
       }
 
+    logger.atInfo().log("Adding trading partner")
+
     val inserted = runBlocking { repository.insert(record) }
 
-    println("Success: $inserted")
+    logger.atInfo().log("Successfully inserted trading partner: %s\n\n", inserted)
   }
 
 }

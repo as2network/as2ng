@@ -83,6 +83,7 @@ dependencyManagement {
 
     dependency 'com.google.flogger:flogger:0.5.1'
     dependency 'com.google.flogger:flogger-slf4j-backend:0.5.1'
+    dependency 'com.google.flogger:flogger-log4j2-backend:0.5.1'
 
     dependency 'org.apache.logging.log4j:log4j:2.13.3'
     dependency 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.3'

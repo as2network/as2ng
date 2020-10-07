@@ -19,7 +19,8 @@ dependencies {
 
   implementation("org.apache.logging.log4j:log4j")
   implementation("org.apache.logging.log4j:log4j-slf4j-impl")
-  implementation("com.google.flogger:flogger-slf4j-backend")
+
+  implementation("com.google.flogger:flogger-log4j2-backend")
 
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")
