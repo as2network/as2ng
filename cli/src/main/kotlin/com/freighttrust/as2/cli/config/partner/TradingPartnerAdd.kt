@@ -22,7 +22,7 @@ class TradingPartnerAdd : KoinComponent, Runnable {
   lateinit var name: String
 
   @Option(
-    names = ["-e", "email"],
+    names = ["-e", "--email"],
     description = ["contact email"],
     required = true
   )
