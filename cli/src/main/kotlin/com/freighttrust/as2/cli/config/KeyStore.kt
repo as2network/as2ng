@@ -27,8 +27,10 @@ class KeyStore : KoinComponent {
 
   @Command(name = "export")
   fun export(
-    @Option(names = ["-pid", "--partner-id"], required = true) partnerId: Long
-  ) {
+    @Option(names = ["-o", "--output-file"], required = true, defaultValue = "keystore.p12") filePath: String,
+    @Option(names = ["-pid", "--partner-id"], required = true) partnerId: Long,
+    @Option(names = ["-p", "--password"], required = true, interactive = true, arity = "0..1") password: String
+    ) {
 
     val (
       sendingKeyPair,
@@ -88,8 +90,8 @@ class KeyStore : KoinComponent {
     KeyStore.getInstance("pkcs12")
       .apply {
 
-        val password = "password".toCharArray()
-        load(null, password)
+        val passwordBytes = password.toCharArray()
+        load(null, passwordBytes)
 
         val sendingPrivateKey = sendingKeyPair.privateKey.toPrivateKey()
         val sendingCaChain = sendingKeyPair.caChain.map { it.toX509() }
@@ -97,7 +99,7 @@ class KeyStore : KoinComponent {
 
         sendingIdentifiers.forEach { alias ->
           println("Setting key entry for alias = $alias")
-          setKeyEntry(alias, sendingPrivateKey, password, sendingChain)
+          setKeyEntry(alias, sendingPrivateKey, passwordBytes, sendingChain)
         }
 
         counterpartIdentifiersWithKeyPairs.forEach { (alias, keyPair) ->
@@ -105,16 +107,13 @@ class KeyStore : KoinComponent {
           setCertificateEntry(alias, keyPair.certificate.toX509())
         }
 
-        FileOutputStream(File("keystore.p12"))
+        FileOutputStream(File(filePath))
           .apply {
-            store(this, password)
+            store(this, passwordBytes)
             flush()
             close()
           }
-
       }
-
-
   }
 
 }
