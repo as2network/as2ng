@@ -95,4 +95,4 @@ node_modules/
 .envrc.local
 
 # keystores
-*.p12
+**/*.p12
