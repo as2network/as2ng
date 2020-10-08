@@ -93,4 +93,6 @@ node_modules/
 ##############################
 .env.local
 .envrc.local
-as2-data/
+
+# keystores
+*.p12
