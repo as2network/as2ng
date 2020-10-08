@@ -55,6 +55,7 @@ class TradingPartnerDetail : KoinComponent, Runnable {
     println("id:\t\t\t${record.id}")
     println("name:\t\t${record.name}")
     println("email:\t\t${record.email}")
+    println("keyPairId:\t\t${record.keyPairId}")
     println("validity:\t${record.validity}")
 
   }

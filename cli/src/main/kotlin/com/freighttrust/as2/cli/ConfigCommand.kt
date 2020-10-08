@@ -1,6 +1,7 @@
 package com.freighttrust.as2.cli
 
 import com.freighttrust.as2.cli.config.KeyPair
+import com.freighttrust.as2.cli.config.KeyStore
 import com.freighttrust.as2.cli.config.TradingChannel
 import com.freighttrust.as2.cli.config.TradingPartner
 import picocli.CommandLine.Command
@@ -11,7 +12,8 @@ import picocli.CommandLine.Command
   subcommands = [
     TradingChannel::class,
     TradingPartner::class,
-    KeyPair::class
+    KeyPair::class,
+    KeyStore::class
   ]
 )
 class ConfigCommand {

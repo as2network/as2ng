@@ -19,7 +19,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row4;
+import org.jooq.Row8;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class KeyPair extends TableImpl<KeyPairRecord> {
 
-    private static final long serialVersionUID = -1519578190;
+    private static final long serialVersionUID = -317979078;
 
     /**
      * The reference instance of <code>public.key_pair</code>
@@ -63,14 +63,34 @@ public class KeyPair extends TableImpl<KeyPairRecord> {
     public final TableField<KeyPairRecord, Long> ID = createField(DSL.name("id"), org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('key_pair_id_seq'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
-     * The column <code>public.key_pair.private_key</code>.
+     * The column <code>public.key_pair.serial_number</code>.
      */
-    public final TableField<KeyPairRecord, String> PRIVATE_KEY = createField(DSL.name("private_key"), org.jooq.impl.SQLDataType.VARCHAR(4096), this, "");
+    public final TableField<KeyPairRecord, String> SERIAL_NUMBER = createField(DSL.name("serial_number"), org.jooq.impl.SQLDataType.VARCHAR(60), this, "");
 
     /**
      * The column <code>public.key_pair.certificate</code>.
      */
     public final TableField<KeyPairRecord, String> CERTIFICATE = createField(DSL.name("certificate"), org.jooq.impl.SQLDataType.VARCHAR(4096), this, "");
+
+    /**
+     * The column <code>public.key_pair.private_key</code>.
+     */
+    public final TableField<KeyPairRecord, String> PRIVATE_KEY = createField(DSL.name("private_key"), org.jooq.impl.SQLDataType.VARCHAR(4096), this, "");
+
+    /**
+     * The column <code>public.key_pair.private_key_type</code>.
+     */
+    public final TableField<KeyPairRecord, String> PRIVATE_KEY_TYPE = createField(DSL.name("private_key_type"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
+
+    /**
+     * The column <code>public.key_pair.issuing_ca</code>.
+     */
+    public final TableField<KeyPairRecord, String> ISSUING_CA = createField(DSL.name("issuing_ca"), org.jooq.impl.SQLDataType.VARCHAR(4096), this, "");
+
+    /**
+     * The column <code>public.key_pair.ca_chain</code>.
+     */
+    public final TableField<KeyPairRecord, String[]> CA_CHAIN = createField(DSL.name("ca_chain"), org.jooq.impl.SQLDataType.VARCHAR(4096).getArrayDataType(), this, "");
 
     /**
      * The column <code>public.key_pair.expires_at</code>.
@@ -157,11 +177,11 @@ public class KeyPair extends TableImpl<KeyPairRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row4 type methods
+    // Row8 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row4<Long, String, String, OffsetDateTime> fieldsRow() {
-        return (Row4) super.fieldsRow();
+    public Row8<Long, String, String, String, String, String, String[], OffsetDateTime> fieldsRow() {
+        return (Row8) super.fieldsRow();
     }
 }

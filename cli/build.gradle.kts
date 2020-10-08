@@ -16,6 +16,7 @@ dependencies {
   implementation(project(":persistence"))
   implementation(project(":crypto"))
 
+  implementation("org.bouncycastle:bcpkix-jdk15on")
   implementation("info.picocli:picocli")
 
   testImplementation("io.kotlintest:kotlintest-runner-junit5")

@@ -6,6 +6,10 @@ import java.time.Instant
 class KeyPairX509(
   val certificate: String,
   val privateKey: String,
+  val privateKeyType: String,
+  val serialNumber: String,
+  val issuingCA: String,
+  val caChain: List<String>,
   val expiresAt: Instant
 )
 
