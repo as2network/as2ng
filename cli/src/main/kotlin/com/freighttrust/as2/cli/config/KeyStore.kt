@@ -30,7 +30,7 @@ class KeyStore : KoinComponent {
     @Option(names = ["-o", "--output-file"], required = true, defaultValue = "keystore.p12") filePath: String,
     @Option(names = ["-pid", "--partner-id"], required = true) partnerId: Long,
     @Option(names = ["-p", "--password"], required = true, interactive = true, arity = "0..1") password: String
-    ) {
+  ) {
 
     val (
       sendingKeyPair,
@@ -97,10 +97,12 @@ class KeyStore : KoinComponent {
         val sendingCaChain = sendingKeyPair.caChain.map { it.toX509() }
         val sendingChain = (listOf(sendingKeyPair.certificate.toX509()) + sendingCaChain).toTypedArray()
 
-        sendingIdentifiers.forEach { alias ->
-          println("Setting key entry for alias = $alias")
-          setKeyEntry(alias, sendingPrivateKey, passwordBytes, sendingChain)
-        }
+        sendingIdentifiers
+          .toSet()
+          .forEach { alias ->
+            println("Setting key entry for alias = $alias")
+            setKeyEntry(alias, sendingPrivateKey, passwordBytes, sendingChain)
+          }
 
         counterpartIdentifiersWithKeyPairs.forEach { (alias, keyPair) ->
           println("Setting certificate entry for alias = $alias")

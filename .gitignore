@@ -96,3 +96,5 @@ node_modules/
 
 # keystores
 **/*.p12
+
+vault

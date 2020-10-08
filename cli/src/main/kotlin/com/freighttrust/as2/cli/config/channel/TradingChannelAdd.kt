@@ -1,9 +1,7 @@
 package com.freighttrust.as2.cli.config.channel
 
-import com.freighttrust.jooq.tables.records.KeyPairRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
-import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
