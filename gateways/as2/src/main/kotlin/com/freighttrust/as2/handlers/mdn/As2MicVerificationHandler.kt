@@ -22,7 +22,7 @@ class As2MicVerificationHandler : CoroutineRouteHandler() {
 
         originalMessage.mics
           ?.find { calculatedMic -> calculatedMic == mdn.receivedContentMic }
-          ?: throw Error("Failed to match received content mic. Expected one of ${originalMessage.mics}, received ${mdn.receivedContentMic}")
+          ?: throw Error("Failed to match received content mic. Expected one of ${originalMessage.mics.joinToString(";")}, received ${mdn.receivedContentMic}")
 
         logger.info("Successfully verified received content mic: ${mdn.receivedContentMic}")
       }

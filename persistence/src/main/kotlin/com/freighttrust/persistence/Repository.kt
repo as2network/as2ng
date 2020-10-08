@@ -38,6 +38,8 @@ interface MessageDispositionNotificationRepository : Repository<MessageDispositi
 interface TradingChannelRepository : Repository<TradingChannelRecord> {
   suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingChannelRecord?
   suspend fun findByAs2Identifiers(senderId: String, recipientId: String, ctx: Repository.Context? = null): TradingChannelRecord?
+  suspend fun findBySenderId(senderId: Long, ctx: Repository.Context? = null): List<TradingChannelRecord>
+  suspend fun findByRecipientId(senderId: Long, ctx: Repository.Context? = null): List<TradingChannelRecord>
 }
 
 interface TradingPartnerRepository : Repository<TradingPartnerRecord> {

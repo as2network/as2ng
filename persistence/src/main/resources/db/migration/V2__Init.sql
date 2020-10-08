@@ -21,10 +21,12 @@ create table key_pair
 
 create table trading_partner
 (
-    id       bigserial primary key,
-    name     varchar(128) unique,
-    email    varchar(128),
-    validity tstzrange default tstzrange(current_timestamp, null)
+    id              bigserial primary key,
+    name            varchar(128) unique,
+    email           varchar(128),
+    key_pair_id     bigint references key_pair(id),
+    validity        tstzrange default tstzrange(current_timestamp, null),
+    unique(key_pair_id)
 );
 
 create table trading_partner_history
@@ -55,8 +57,6 @@ create table trading_channel
     recipient_id                    bigint references trading_partner (id),
     recipient_as2_identifier        varchar (64),
     recipient_message_url           varchar (128),
-
-    encryption_key_pair_id          bigint null references key_pair(id),
 
     validity                        tstzrange default tstzrange(current_timestamp, null),
     unique (sender_id, recipient_id),

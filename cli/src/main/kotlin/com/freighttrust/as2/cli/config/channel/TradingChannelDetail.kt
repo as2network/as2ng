@@ -63,7 +63,6 @@ class TradingChannelDetail : KoinComponent, Runnable {
     println("recipientId:\t\t\t${record.recipientId}")
     println("recipientAsIdentifier:\t${record.recipientAs2Identifier}")
     println("recipientMessageUrl:\t${record.recipientMessageUrl}")
-    println("encryptionKeyPairId:\t${record.encryptionKeyPairId}")
     println("validity:\t\t\t\t${record.validity}")
 
   }

@@ -18,7 +18,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row9;
+import org.jooq.Row8;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannel extends TableImpl<TradingChannelRecord> {
 
-    private static final long serialVersionUID = -706752743;
+    private static final long serialVersionUID = 1327274290;
 
     /**
      * The reference instance of <code>public.trading_channel</code>
@@ -90,11 +90,6 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
      * The column <code>public.trading_channel.recipient_message_url</code>.
      */
     public final TableField<TradingChannelRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
-
-    /**
-     * The column <code>public.trading_channel.encryption_key_pair_id</code>.
-     */
-    public final TableField<TradingChannelRecord, Long> ENCRYPTION_KEY_PAIR_ID = createField(DSL.name("encryption_key_pair_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
@@ -157,7 +152,7 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
 
     @Override
     public List<ForeignKey<TradingChannelRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<TradingChannelRecord, ?>>asList(Keys.TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY, Keys.TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY, Keys.TRADING_CHANNEL__TRADING_CHANNEL_ENCRYPTION_KEY_PAIR_ID_FKEY);
+        return Arrays.<ForeignKey<TradingChannelRecord, ?>>asList(Keys.TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY, Keys.TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY);
     }
 
     public TradingPartner tradingChannelSenderIdFkey() {
@@ -166,10 +161,6 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
 
     public TradingPartner tradingChannelRecipientIdFkey() {
         return new TradingPartner(this, Keys.TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY);
-    }
-
-    public KeyPair keyPair() {
-        return new KeyPair(this, Keys.TRADING_CHANNEL__TRADING_CHANNEL_ENCRYPTION_KEY_PAIR_ID_FKEY);
     }
 
     @Override
@@ -199,11 +190,11 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row9 type methods
+    // Row8 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row9<Long, String, Long, String, Long, String, String, Long, Object> fieldsRow() {
-        return (Row9) super.fieldsRow();
+    public Row8<Long, String, Long, String, Long, String, String, Object> fieldsRow() {
+        return (Row8) super.fieldsRow();
     }
 }

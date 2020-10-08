@@ -13,6 +13,8 @@ dependencies {
   implementation("com.typesafe:config")
 
   implementation(project(":common"))
+
+  implementation("org.bouncycastle:bcpkix-jdk15on")
   implementation("com.squareup.okhttp3:okhttp")
   implementation("io.vertx:vertx-core")
 

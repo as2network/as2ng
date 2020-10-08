@@ -60,13 +60,6 @@ class TradingChannelAdd : KoinComponent, Runnable {
   )
   lateinit var recipientMessageUrl: String
 
-  @Option(
-    names = ["-ekid", "--encryption-keypair-id"],
-    description = ["optional keypair id for use with encryption"]
-  )
-  var encryptionKeyPairId: Long? = null
-
-  private val keyPairRepository: KeyPairRepository by inject()
   private val partnerRepository: TradingPartnerRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
 
@@ -90,14 +83,6 @@ class TradingChannelAdd : KoinComponent, Runnable {
 
         if (!recipientExists) throw Error("Sender trading partner with id = $recipientPartnerId not found")
 
-        // check that encryption keypair exists if specified
-
-        encryptionKeyPairId
-          ?.also {
-            val exists = keyPairRepository.exists(KeyPairRecord().apply { id = it }, tx)
-            if (!exists) throw Error("Encryption key pair not found with id = $it")
-          }
-
         // add the trading channel
 
         channelRepository.insert(
@@ -109,7 +94,6 @@ class TradingChannelAdd : KoinComponent, Runnable {
               recipientId = this@TradingChannelAdd.recipientPartnerId
               recipientAs2Identifier = this@TradingChannelAdd.recipientAs2Id
               recipientMessageUrl = this@TradingChannelAdd.recipientMessageUrl
-              encryptionKeyPairId = this@TradingChannelAdd.encryptionKeyPairId
             },
           tx
         )

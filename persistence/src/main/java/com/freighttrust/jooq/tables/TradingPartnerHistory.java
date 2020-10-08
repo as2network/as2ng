@@ -13,7 +13,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row4;
+import org.jooq.Row5;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -35,7 +35,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartnerHistory extends TableImpl<TradingPartnerHistoryRecord> {
 
-    private static final long serialVersionUID = 529456972;
+    private static final long serialVersionUID = -942677935;
 
     /**
      * The reference instance of <code>public.trading_partner_history</code>
@@ -64,6 +64,11 @@ public class TradingPartnerHistory extends TableImpl<TradingPartnerHistoryRecord
      * The column <code>public.trading_partner_history.email</code>.
      */
     public final TableField<TradingPartnerHistoryRecord, String> EMAIL = createField(DSL.name("email"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+
+    /**
+     * The column <code>public.trading_partner_history.key_pair_id</code>.
+     */
+    public final TableField<TradingPartnerHistoryRecord, Long> KEY_PAIR_ID = createField(DSL.name("key_pair_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
@@ -136,11 +141,11 @@ public class TradingPartnerHistory extends TableImpl<TradingPartnerHistoryRecord
     }
 
     // -------------------------------------------------------------------------
-    // Row4 type methods
+    // Row5 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row4<Long, String, String, Object> fieldsRow() {
-        return (Row4) super.fieldsRow();
+    public Row5<Long, String, String, Long, Object> fieldsRow() {
+        return (Row5) super.fieldsRow();
     }
 }

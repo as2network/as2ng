@@ -2,7 +2,6 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.TRADING_CHANNEL
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.Repository
 import com.freighttrust.persistence.TradingChannelRepository
 import kotlinx.coroutines.coroutineScope
@@ -40,4 +39,19 @@ class PostgresTradingChannelRepository(
         .fetchOne()
     }
 
+  override suspend fun findBySenderId(senderId: Long, ctx: Repository.Context?): List<TradingChannelRecord> =
+    coroutineScope {
+      jooqContext(ctx)
+        .selectFrom(table)
+        .where(TRADING_CHANNEL.SENDER_ID.eq(senderId))
+        .fetch()
+    }
+
+  override suspend fun findByRecipientId(senderId: Long, ctx: Repository.Context?): List<TradingChannelRecord> =
+    coroutineScope {
+      jooqContext(ctx)
+        .selectFrom(table)
+        .where(TRADING_CHANNEL.RECIPIENT_ID.eq(senderId))
+        .fetch()
+    }
 }

@@ -18,7 +18,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row4;
+import org.jooq.Row5;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartner extends TableImpl<TradingPartnerRecord> {
 
-    private static final long serialVersionUID = -406499954;
+    private static final long serialVersionUID = -1039438901;
 
     /**
      * The reference instance of <code>public.trading_partner</code>
@@ -70,6 +70,11 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
      * The column <code>public.trading_partner.email</code>.
      */
     public final TableField<TradingPartnerRecord, String> EMAIL = createField(DSL.name("email"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+
+    /**
+     * The column <code>public.trading_partner.key_pair_id</code>.
+     */
+    public final TableField<TradingPartnerRecord, Long> KEY_PAIR_ID = createField(DSL.name("key_pair_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
@@ -131,6 +136,15 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
     }
 
     @Override
+    public List<ForeignKey<TradingPartnerRecord, ?>> getReferences() {
+        return Arrays.<ForeignKey<TradingPartnerRecord, ?>>asList(Keys.TRADING_PARTNER__TRADING_PARTNER_KEY_PAIR_ID_FKEY);
+    }
+
+    public KeyPair keyPair() {
+        return new KeyPair(this, Keys.TRADING_PARTNER__TRADING_PARTNER_KEY_PAIR_ID_FKEY);
+    }
+
+    @Override
     public TradingPartner as(String alias) {
         return new TradingPartner(DSL.name(alias), this);
     }
@@ -157,11 +171,11 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row4 type methods
+    // Row5 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row4<Long, String, String, Object> fieldsRow() {
-        return (Row4) super.fieldsRow();
+    public Row5<Long, String, String, Long, Object> fieldsRow() {
+        return (Row5) super.fieldsRow();
     }
 }

@@ -1,6 +1,8 @@
 package com.freighttrust.as2.cli.config.partner
 
+import com.freighttrust.jooq.tables.records.KeyPairRecord
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
@@ -15,7 +17,8 @@ import picocli.CommandLine.Option
 )
 class TradingPartnerUpdate : KoinComponent, Runnable {
 
-  private val repository: TradingPartnerRepository by inject()
+  private val keyPairRepository: KeyPairRepository by inject()
+  private val partnerRepository: TradingPartnerRepository by inject()
 
   @CommandLine.Option(
     names = ["-i", "--id"],
@@ -36,12 +39,18 @@ class TradingPartnerUpdate : KoinComponent, Runnable {
   )
   var email: String? = null
 
+  @Option(
+    names = ["-k", "--key-pair-id"],
+    description = ["optional keypair id for use with encryption"]
+  )
+  var keyPairId: Long? = null
+
   override fun run() {
 
     val record =
       requireNotNull(
         runBlocking {
-          repository.findById(TradingPartnerRecord().apply { this.id = this@TradingPartnerUpdate.id })
+          partnerRepository.findById(TradingPartnerRecord().apply { this.id = this@TradingPartnerUpdate.id })
         }
       ) { "Trading partner not found" }
 
@@ -50,9 +59,19 @@ class TradingPartnerUpdate : KoinComponent, Runnable {
       id = record.id
       name = this@TradingPartnerUpdate.name ?: record.name
       email = this@TradingPartnerUpdate.email ?: record.email
+      keyPairId = this@TradingPartnerUpdate.keyPairId ?: record.keyPairId
     }
 
-    val updated = runBlocking { repository.update(update) }
+    runBlocking {
+
+      keyPairId
+        ?.also {
+          val exists = keyPairRepository.exists(KeyPairRecord().apply { id = it })
+          if (!exists) throw Error("Encryption key pair not found with id = $it")
+        }
+
+      partnerRepository.update(update)
+    }
 
     TradingPartnerDetail()
       .apply { id = this@TradingPartnerUpdate.id }
