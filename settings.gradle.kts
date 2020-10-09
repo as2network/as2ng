@@ -17,3 +17,5 @@ include(":persistence")
 include(":gateways:as2")
 include(":cli")
 
+include(":as2-lib:openas2a")
+include(":as2-lib:openas2b")

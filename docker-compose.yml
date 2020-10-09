@@ -19,12 +19,12 @@ volumes:
 
 services:
 
-  activemq:
-    image: rmohr/activemq:5.15.9-alpine
-    restart: unless-stopped
-    network_mode: host
-    volumes:
-      - activemq-data:/opt/activemq/data
+#  activemq:
+#    image: rmohr/activemq:5.15.9-alpine
+#    restart: unless-stopped
+#    network_mode: host
+#    volumes:
+#      - activemq-data:/opt/activemq/data
 
   postgres:
     image: postgres:12
@@ -72,25 +72,23 @@ services:
       MINIO_DOMAIN:
       MINIO_REGION: "${AWS_DEFAULT_REGION}"
       MINIO_HTTP_TRACE: "/var/log/minio/minio.log"
-      MINIO_ACCESS_KEY: "${AWS_ACCESS_KEY_ID}"
-      MINIO_SECRET_KEY: "${AWS_SECRET_ACCESS_KEY}"
+      MINIO_ACCESS_KEY:
+      MINIO_SECRET_KEY:
 
   OpenAS2A:
-    image: gradle:6.6
+    image: gradle:jdk14
     working_dir: /opt/as2
     user: "${USER_ID}:${GROUP_ID}"
     volumes:
-      - ./testing/as2:/opt/as2
-      - ./testing/as2/data/openas2a:/data
+      - ./:/opt/as2
     network_mode: host
-    command: "gradle --no-daemon :runOpenAS2A"
+    command: "gradle --no-daemon :as2-lib:openas2a:run"
 
   OpenAS2B:
-    image: gradle:6.6
+    image: gradle:jdk14
     working_dir: /opt/as2
     user: "${USER_ID}:${GROUP_ID}"
     volumes:
-      - ./testing/as2:/opt/as2
-      - ./testing/as2/data/openas2b:/data
+      - ./:/opt/as2
     network_mode: host
-    command: "gradle --no-daemon :runOpenAS2B"
+    command: "gradle --no-daemon :as2-lib:openas2b:run"

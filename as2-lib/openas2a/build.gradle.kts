@@ -30,11 +30,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-pluginManagement {
+plugins {
+  `java-library`
+}
 
-  repositories {
-    gradlePluginPortal()
-    jcenter()
-    maven(url = "https://dl.bintray.com/gradle/gradle-plugins")
-  }
+val appJvmArgs = listOf("-Xms512m", "-Xmx512m")
+
+fun JavaExec.serverTask(configPath: String) {
+  group = "application"
+  workingDir = project.projectDir
+
+  classpath = sourceSets["main"].runtimeClasspath
+
+  main = "com.helger.as2.app.MainOpenAS2Server"
+  jvmArgs = appJvmArgs
+
+  args(configPath)
+}
+
+tasks {
+  create<JavaExec>("run") { serverTask("src/config/config.xml") }
+}
+
+dependencies {
+  implementation("com.helger.as2:as2-server")
 }

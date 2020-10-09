@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -o errexit
+# set -o nounset
+# set -o xtrace
+# set -o verbose
+
+BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+COMMAND="docker run --rm \
+          --network host -it \
+          -u ${USER_ID}:${GROUP_ID} \
+          -v ${BIN_DIR}/.mc:/opt/.mc \
+          --entrypoint=/usr/bin/mc \
+          minio/mc -C /opt/.mc ${@}"
+
+eval "${COMMAND}"
+
+

@@ -32,15 +32,6 @@
 
 plugins {
   `java-library`
-  id("org.jetbrains.kotlin.jvm") version "1.4.10"
-}
-
-repositories {
-  jcenter()
-  maven(url = "https://packages.confluent.io/maven/")
-  maven(url = "https://repo.spring.io/libs-release")
-  maven(url = "https://kotlin.bintray.com/kotlinx")
-  maven(url = "http://dl.bintray.com/kotlin/kotlin-dev")
 }
 
 val appJvmArgs = listOf("-Xms512m", "-Xmx512m")
@@ -57,12 +48,10 @@ fun JavaExec.serverTask(configPath: String) {
   args(configPath)
 }
 
-
 tasks {
-  create<JavaExec>("runOpenAS2A") { serverTask("src/main/resources/openas2a/config.xml") }
-  create<JavaExec>("runOpenAS2B") { serverTask("src/main/resources/openas2b/config.xml") }
+  create<JavaExec>("run") { serverTask("src/config/config.xml") }
 }
 
 dependencies {
-  implementation("com.helger:as2-server:4.5.5")
+  implementation("com.helger.as2:as2-server")
 }

@@ -30,7 +30,7 @@ buildNumber.properties
 ##############################
 ## Gradle
 ##############################
-bin/
+
 build/
 .gradle
 .gradletasknamecache
@@ -96,5 +96,3 @@ node_modules/
 
 # keystores
 **/*.p12
-
-vault
