@@ -96,3 +96,6 @@ node_modules/
 
 # keystores
 **/*.p12
+
+
+as2-lib/*/data
