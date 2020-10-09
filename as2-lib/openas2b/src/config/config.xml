@@ -12,54 +12,54 @@
                 filename="%home%/partnerships.xml"/>
 
   <processor classname="com.helger.as2lib.processor.DefaultMessageProcessor"
-             pendingMDN="/data/pendingMDN3"
-             pendingMDNinfo="/data/pendinginfoMDN3">
+             pendingMDN="%home%/../../data/pendingMDN3"
+             pendingMDNinfo="%home%/../../data/pendinginfoMDN3">
     <module classname="com.helger.as2lib.processor.sender.AS2SenderModule"/>
 
     <!-- This will parse the filename to get a sender and receiver. For instance a file
       named openas2b-OpenAS2B.1234 would be sent from openas2b to OpenAS2B. -->
     <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
-            outboxdir="/data/toAny"
-            errordir="/data/toAny/error"
+            outboxdir="%home%/../../data/toAny"
+            errordir="%home%/../../data/toAny/error"
             interval="5"
             delimiters="-."
             format="sender.as2_id, receiver.as2_id, attributes.fileid"
             mimetype="text/plain"/>
     <!--  Special directory for sending messages to "OpenAS2A" -->
     <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
-            outboxdir="/data/toOpenAS2A/"
-            errordir="/data/toOpenAS2A/error"
+            outboxdir="%home%/../../data/toOpenAS2A/"
+            errordir="%home%/../../data/toOpenAS2A/error"
             interval="5"
             defaults="sender.as2_id=OpenAS2B, receiver.as2_id=OpenAS2A"
             mimetype="text/plain"/>
     <!--  Special directory for sending messages to "OpenAS2B" -->
     <!--    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"-->
-    <!--            outboxdir="/data/toOpenAS2B"-->
-    <!--            errordir="/data/toOpenAS2B/error"-->
+    <!--            outboxdir="%home%/../../data/toOpenAS2B"-->
+    <!--            errordir="%home%/../../data/toOpenAS2B/error"-->
     <!--            interval="5"-->
     <!--            defaults="sender.as2_id=OpenAS2A, receiver.as2_id=OpenAS2B"-->
     <!--            sendFilename="true"-->
     <!--            mimetype="text/plain"/>-->
     <module classname="com.helger.as2lib.processor.storage.MDNFileModule"
-            filename="/data/mdn/$date.uuuu$/$date.MM$/$mdn.msg.sender.as2_id$-$mdn.msg.receiver.as2_id$-$mdn.msg.headers.message-id$"
+            filename="%home%/../../data/mdn/$date.uuuu$/$date.MM$/$mdn.msg.sender.as2_id$-$mdn.msg.receiver.as2_id$-$mdn.msg.headers.message-id$"
             protocol="as2"
-            tempdir="/data/temp"
+            tempdir="%home%/../../data/temp"
             charset="utf-8"/>
     <module classname="com.helger.as2lib.processor.storage.MessageFileModule"
-            filename="/data/inbox/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
-            header="/data/inbox/msgheaders/$date.uuuu$/$date.MM$/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
+            filename="%home%/../../data/inbox/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
+            header="%home%/../../data/inbox/msgheaders/$date.uuuu$/$date.MM$/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
             protocol="as2"
-            tempdir="/data/temp"
+            tempdir="%home%/../../data/temp"
             charset="utf-8"/>
     <module classname="com.helger.as2lib.processor.receiver.AS2ReceiverModule"
             port="10082"
-            errordir="/data/inbox/error"
+            errordir="%home%/../../data/inbox/error"
             errorformat="$msg.sender.as2_id$, $msg.receiver.as2_id$, $msg.headers.message-id$"/>
     <module classname="com.freighttrust.as2.receiver.net.AS2MDNReceiverModule"
             port="10083"/>
     <module classname="com.helger.as2lib.processor.resender.DirectoryResenderModule"
-            resenddir="/data/resend"
-            errordir="/data/resend/error"
+            resenddir="%home%/../../data/resend"
+            errordir="%home%/../../data/resend/error"
             resenddelay="60"/>
     <module classname="com.helger.as2lib.processor.sender.AsynchMDNSenderModule"/>
   </processor>

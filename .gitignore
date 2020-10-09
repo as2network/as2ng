@@ -30,6 +30,7 @@ buildNumber.properties
 ##############################
 ## Gradle
 ##############################
+
 build/
 .gradle
 .gradletasknamecache
@@ -95,3 +96,6 @@ node_modules/
 
 # keystores
 **/*.p12
+
+
+as2-lib/*/data

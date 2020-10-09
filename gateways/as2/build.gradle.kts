@@ -69,7 +69,7 @@ dependencies {
   implementation(project(":persistence"))
 
   implementation("com.fasterxml.uuid:java-uuid-generator")
-  implementation("com.helger:as2-server")
+  implementation("com.helger.as2:as2-server")
 
   implementation("com.google.guava:guava")
 

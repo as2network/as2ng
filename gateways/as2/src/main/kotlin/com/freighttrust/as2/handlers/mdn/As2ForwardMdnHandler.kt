@@ -19,7 +19,7 @@ class As2ForwardMdnHandler(
 
     requireNotNull(receiptDeliveryOption) { "receiptDeliveryOption cannot be null" }
 
-    val response = webClient
+    webClient
       .postAbs(receiptDeliveryOption)
       .putHeaders(ctx.request().headers())
       .sendBufferAwait(ctx.body)

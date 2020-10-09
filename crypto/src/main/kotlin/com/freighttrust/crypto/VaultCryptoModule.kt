@@ -17,7 +17,7 @@ val VaultCryptoModule = module {
   // export as both implementation class and as the default certificate factory
   factory {
     val config = get<Config>(named("vault"))
-    VaultCertificateFactory(OkHttpClient(), config.getString("url"), config.getString("authToken"))
+    VaultCertificateFactory(OkHttpClient(), config.getString("issueUrl"), config.getString("authToken"))
   }.bind(CertificateFactory::class)
 
 }
