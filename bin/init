@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -o errexit
+# set -o nounset
+# set -o xtrace
+# set -o verbose
+
+BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$( cd ${BIN_DIR}/.. && pwd)"
+
+VAULT_DIR="${ROOT_DIR}/.vault"
+
+cli () {
+  eval "${BIN_DIR}/cli ${@}"
+}
+
+flyway () {
+  eval "${BIN_DIR}/flyway ${@}"
+}
+
+# initialise vault
+cd $ROOT_DIR && docker-compose exec vault sh /init.sh
+
+# migrate the database
+flyway migrate
+
+# create some key pairs
+cli config key-pair issue
+cli config key-pair issue
+
+# create some trading partners
+
+cli config trading-partner add -n OpenAS2A -e openas2a@example.com -k 1
+cli config trading-partner add -n OpenAS2B -e openas2b@example.com -k 2
+
+# create some trading channels
+
+cli config trading-channel add \
+  --name OpenAS2A__OpenAS2B \
+  --sender-partner-id 1 \
+  --sender-as2-id OpenAS2A \
+  --recipient-partner-id 2 \
+  --recipient-as2-id OpenAS2B \
+  --recipient-message-url http://localhost:10082
+
+#cli config trading-channel add \
+#  --name "OpenAS2B__OpenAS2A" \
+#  --sender-partner-id 2 \
+#  --sender-as2-id OpenAS2B \
+#  --recipient-partner-id 1 \
+#  --recipient-as2-id OpenAS2A \
+#  --recipient-message-url http://localhost:10080
+#
+# export key stores for test as2 servers
+
+cli config key-store export -pid 1 -p password -o ${ROOT_DIR}/testing/as2/src/main/resources/openas2a/keystore.p12
+cli config key-store export -pid 2 -p password -o ${ROOT_DIR}/testing/as2/src/main/resources/openas2b/keystore.p12
+
+cd ${ROOT_DIR} && docker-compose restart OpenAS2A OpenAS2B

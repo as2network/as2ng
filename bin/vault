@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -o errexit
+# set -o nounset
+# set -o xtrace
+# set -o verbose
+
+BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$( cd ${BIN_DIR}/.. && pwd)"
+
+# temp dir for a volume mount
+mkdir -p ${ROOT_DIR}/.vault
+
+COMMAND="docker run --rm \
+    --network host \
+    --privileged \
+    -e VAULT_ADDR=${VAULT_ADDR} \
+    -e VAULT_TOKEN=${VAULT_TOKEN} \
+    --workdir /opt/vault \
+    -v ${ROOT_DIR}/.vault:/opt/vault \
+     depop/vault-cli:1.2.3 ${@}"
+
+eval "${COMMAND}"
