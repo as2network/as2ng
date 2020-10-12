@@ -92,7 +92,7 @@ fun MimeBodyPart.extractDispositionNotification(): DispositionNotification {
             headers.getAs2Header(AS2Header.ReportingUA),
             Disposition.parse(headers.getAs2Header(AS2Header.Disposition)),
             headers.getAs2Header(AS2Header.ReceivedContentMIC),
-            headers.getAs2Header(AS2Header.DigestAlgorithmnId)
+            headers.getAs2Header(AS2Header.DigestAlgorithmId)
           )
 
         }
