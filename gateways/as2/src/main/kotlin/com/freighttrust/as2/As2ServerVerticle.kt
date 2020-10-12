@@ -28,15 +28,12 @@ class As2ServerVerticle(
     val router = Router.router(vertx)
 
     router.errorHandler(500, { event ->
-
       event.failure().printStackTrace()
-
-
     })
 
     router
       .route()
-//      .failureHandler(this::handleFailure)
+      .failureHandler(this::handleFailure)
       .handler(koin.get<As2TempFileHandler>())
       .handler(koin.get<As2BodyHandler>())
       .handler(koin.get<As2RequestHandler>())
