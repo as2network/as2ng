@@ -58,7 +58,5 @@ cli config trading-channel add \
 
 # export key stores for test as2 servers
 
-cli config key-store export -pid 1 -p password -o ${ROOT_DIR}/as2-lib/openas2a/src/config/keystore.p12
-cli config key-store export -pid 2 -p password -o ${ROOT_DIR}/as2-lib/openas2b/src/config/keystore.p12
-
-cd ${ROOT_DIR} && docker-compose restart OpenAS2A OpenAS2B
+cli config key-store export -pid 1 -p password -o ${ROOT_DIR}/as2-lib/config/openas2a/keystore.p12
+cli config key-store export -pid 2 -p password -o ${ROOT_DIR}/as2-lib/config/openas2b/keystore.p12
