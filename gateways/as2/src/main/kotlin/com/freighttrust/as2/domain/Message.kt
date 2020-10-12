@@ -3,7 +3,6 @@ package com.freighttrust.as2.domain
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.*
 import com.freighttrust.as2.util.AS2Header
-import com.freighttrust.as2.util.CryptoUtil
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.jooq.tables.records.MessageRecord
 import com.freighttrust.jooq.tables.records.RequestRecord
