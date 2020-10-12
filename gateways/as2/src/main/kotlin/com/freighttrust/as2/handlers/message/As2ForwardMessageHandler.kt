@@ -1,5 +1,7 @@
 package com.freighttrust.as2.handlers.message
 
+import com.freighttrust.as2.domain.Disposition
+import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.message
 import com.freighttrust.as2.util.AS2Header
@@ -7,6 +9,8 @@ import com.freighttrust.persistence.MessageRepository
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
+import java.net.ConnectException
+import java.util.concurrent.TimeoutException
 
 class As2ForwardMessageHandler(
   private val messageRepository: MessageRepository,
@@ -22,6 +26,7 @@ class As2ForwardMessageHandler(
     val request = webClient
       .postAbs(tradingChannel.recipientMessageUrl)
       .putHeaders(ctx.request().headers())
+      .timeout(10000)
 
     if (message.isMdnRequested && message.isMdnAsynchronous) {
       // TODO make configurable
@@ -30,9 +35,15 @@ class As2ForwardMessageHandler(
     }
 
     // we send the original requested body
-    val response = request.sendBufferAwait(ctx.body)
+    try {
 
-    if (response.statusCode() == 200) {
+      val response = request.sendBufferAwait(ctx.body)
+
+      if (response.statusCode() != 200) {
+        throw DispositionException(
+          Disposition.automaticFailure("non-200-response")
+        )
+      }
 
       if (!message.isMdnRequested || message.isMdnAsynchronous) {
         ctx.response().end()
@@ -54,9 +65,20 @@ class As2ForwardMessageHandler(
 
       }
 
-    } else {
 
-      TODO()
+    } catch (ex: Exception) {
+
+      when (ex) {
+        is ConnectException -> throw DispositionException(
+          Disposition.automaticFailure("receiver-connect-exception"),
+          ex
+        )
+        is TimeoutException -> DispositionException(
+          Disposition.automaticFailure("receiver-timeout-exception"),
+          ex
+        )
+      }
     }
+
   }
 }

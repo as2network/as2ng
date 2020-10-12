@@ -40,7 +40,10 @@ fun RoutingContext.bodyAsMimeBodyPart() =
       bodyPart
     }
 
-fun RoutingContext.createMDN(text: String, disposition: Disposition): MimeBodyPart =
+fun RoutingContext.createMDN(
+  text: String, disposition:
+  Disposition
+): MimeBodyPart =
   MimeMultipart()
     .apply {
 

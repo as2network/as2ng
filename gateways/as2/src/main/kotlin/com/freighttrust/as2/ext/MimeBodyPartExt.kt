@@ -10,15 +10,25 @@ import com.helger.as2lib.util.AS2IOHelper
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
 import com.helger.commons.io.stream.NullOutputStream
+import com.helger.mail.cte.EContentTransferEncoding
+import org.apache.http.HttpHeaders
+import org.bouncycastle.asn1.ASN1EncodableVector
+import org.bouncycastle.asn1.cms.AttributeTable
+import org.bouncycastle.asn1.smime.SMIMECapabilitiesAttribute
+import org.bouncycastle.asn1.smime.SMIMECapabilityVector
 import org.bouncycastle.cert.X509CertificateHolder
+import org.bouncycastle.cert.jcajce.JcaCertStore
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.mail.smime.SMIMESignedGenerator
 import org.bouncycastle.mail.smime.SMIMESignedParser
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder
 import org.slf4j.LoggerFactory
 import java.security.DigestOutputStream
 import java.security.MessageDigest
+import java.security.PrivateKey
 import java.security.Provider
 import java.security.SignatureException
 import java.security.cert.X509Certificate
@@ -106,6 +116,54 @@ fun MimeBodyPart.setHeader(header: AS2Header, value: String) =
 fun MimeBodyPart.isSigned(): Boolean {
   val contentType = AS2HttpHelper.parseContentType(this.contentType) ?: return false
   return contentType.baseType.equals("multipart/signed", ignoreCase = true)
+}
+
+fun MimeBodyPart.sign(
+  privateKey: PrivateKey,
+  certificate: X509Certificate,
+  algorithm: ECryptoAlgorithmSign,
+  encoding: EContentTransferEncoding
+): MimeBodyPart {
+
+  // check the certificate is valid
+  certificate.checkValidity()
+
+  // create a CertStore containing the certificates we want carried in the signature
+  val certificateStore = JcaCertStore(listOf(certificate))
+
+  // create some SMIME capabilities in case someone wants to respond
+  val aSignedAttrs = ASN1EncodableVector()
+    .apply {
+      val capabilities =
+      add(
+        SMIMECapabilitiesAttribute(
+          SMIMECapabilityVector()
+            .apply {
+              addCapability(algorithm.oid)
+            }
+        )
+      )
+    }
+
+  val generator = SMIMESignedGenerator(SMIMESignedGenerator.RFC5751_MICALGS)
+    .apply {
+      setContentTransferEncoding(encoding.id)
+      addSignerInfoGenerator(
+        JcaSimpleSignerInfoGeneratorBuilder()
+          .setProvider(BouncyCastleProvider())
+          .build(algorithm.signAlgorithmName, privateKey, certificate)
+      )
+      addCertificates(certificateStore)
+    }
+
+  return generator.generate(this)
+    .let { signed -> MimeBodyPart()
+      .apply {
+        setContent(signed)
+        setHeader(HttpHeaders.CONTENT_TYPE, signed.contentType)
+      }
+    }
+
 }
 
 fun MimeBodyPart.signatureCertificateFromBody(

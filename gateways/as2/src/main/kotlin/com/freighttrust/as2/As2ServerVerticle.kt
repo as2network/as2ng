@@ -1,17 +1,15 @@
 package com.freighttrust.as2
 
-import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.createMDN
 import com.freighttrust.as2.handlers.*
+import com.freighttrust.as2.handlers.failure.As2ForwardingFailureHandler
 import com.freighttrust.as2.handlers.mdn.As2ForwardMdnHandler
 import com.freighttrust.as2.handlers.mdn.As2MdnReceivedHandler
 import com.freighttrust.as2.handlers.mdn.As2MicVerificationHandler
 import com.freighttrust.as2.handlers.message.As2ForwardMessageHandler
 import com.freighttrust.as2.handlers.message.As2MessageReceivedHandler
 import com.freighttrust.as2.handlers.message.As2MicGenerationHandler
-import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.jooq.DSLContext
 import org.koin.core.Koin
@@ -24,6 +22,8 @@ class As2ServerVerticle(
 
   private val logger = LoggerFactory.getLogger(As2ServerVerticle::class.java)
 
+  private val webClient: WebClient = koin.get()
+
   override suspend fun start() {
 
     val router = Router.router(vertx)
@@ -34,7 +34,7 @@ class As2ServerVerticle(
 
     router
       .route()
-      .failureHandler(this::handleFailure)
+      .failureHandler(koin.get<As2ForwardingFailureHandler>())
       .handler(koin.get<As2TempFileHandler>())
       .handler(koin.get<As2BodyHandler>())
       .handler(koin.get<As2RequestHandler>())
@@ -61,18 +61,6 @@ class As2ServerVerticle(
       .createHttpServer()
       .requestHandler(router)
       .listen(8080)
-  }
-
-  private fun handleFailure(ctx: RoutingContext) {
-
-    when (val failure = ctx.failure()) {
-      is DispositionException -> {
-        // respond with an MDN
-        val mdn = ctx.createMDN("A failure occurred", failure.disposition)
-        ctx.response().end(Buffer.buffer(mdn.inputStream.readAllBytes()))
-      }
-    }
-
   }
 
   override suspend fun stop() {
