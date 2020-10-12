@@ -1,5 +1,7 @@
 package com.freighttrust.as2.handlers
 
+import com.freighttrust.as2.domain.Disposition
+import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.signatureCertificateFromBody
 import com.helger.as2lib.disposition.AS2DispositionException
 import com.helger.as2lib.disposition.DispositionType
@@ -34,12 +36,9 @@ class As2SignatureVerificationHandler : CoroutineRouteHandler() {
 
       } catch (ex: Exception) {
         logger.error("Error verifying signature: ${ex.message}")
-        ctx.fail(
-          AS2DispositionException(
-            DispositionType.createError("integrity-check-failed"),
-            AbstractActiveNetModule.DISP_VERIFY_SIGNATURE_FAILED,
-            ex
-          )
+        throw DispositionException(
+          Disposition.automaticError("integrity-check-failed"),
+          ex
         )
       }
 

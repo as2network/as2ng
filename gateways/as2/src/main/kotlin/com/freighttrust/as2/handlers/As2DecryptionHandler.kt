@@ -14,8 +14,6 @@ class As2DecryptionHandler(
   private val keyPairRepository: KeyPairRepository
 ) : CoroutineRouteHandler() {
 
-  private val logger = LoggerFactory.getLogger(As2DecryptionHandler::class.java)
-
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
     with(ctx.message) {
