@@ -77,13 +77,19 @@ class As2ForwardingFailureHandler(
           when (isMdnAsynchronous) {
 
             // synchronous response
-            false -> ctx.response().end(buffer)
+            false -> ctx
+              .response()
+              .setStatusCode(200)
+              .end(buffer)
 
             // async response
             true -> {
 
               // close the connection
-              ctx.response().end()
+              ctx
+                .response()
+                .setStatusCode(204)
+                .end()
 
               // send the mdn separately to the async endpoint provided in the headers
 
@@ -91,10 +97,10 @@ class As2ForwardingFailureHandler(
                 "Receipt delivery option must be specified for an async mdn"
               }
 
-
               // TODO some of these headers should be configurable
+              // TODO support compression
 
-              webClient
+              val response = webClient
                 .postAbs(url)
                 .putHeader(As2From, recipientId)
                 .putHeader(As2To, senderId)
@@ -105,8 +111,11 @@ class As2ForwardingFailureHandler(
                 .putHeader(HttpHeaders.USER_AGENT, "FreightTrustAS2/1.0")
                 .putHeader(HttpHeaders.CONTENT_TYPE, responseBody.contentType)
                 .putHeader(HttpHeaders.CONTENT_ENCODING, responseBody.encoding)
-                .putHeader(HttpHeaders.CONTENT_LENGTH, buffer.length().toString())
                 .sendBufferAwait(buffer)
+
+              with(response) {
+                require(statusCode() == 200) { "Unexpected status code in MDN response: ${statusCode()}"}
+              }
 
             }
           }
