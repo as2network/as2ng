@@ -109,6 +109,7 @@ fun RoutingContext.dispositionNotificationBodyPart(disposition: Disposition): Mi
       MimeBodyPart()
         .apply {
           setContent(content, "message/disposition-notification")
+          // TODO is this necessary in addition to above?
           setHeader(HttpHeaders.CONTENT_TYPE.toString(), "message/disposition-notification")
         }
     }

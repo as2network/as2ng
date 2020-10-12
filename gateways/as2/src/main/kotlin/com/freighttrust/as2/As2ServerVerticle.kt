@@ -9,6 +9,7 @@ import com.freighttrust.as2.handlers.mdn.As2MicVerificationHandler
 import com.freighttrust.as2.handlers.message.As2ForwardMessageHandler
 import com.freighttrust.as2.handlers.message.As2MessageReceivedHandler
 import com.freighttrust.as2.handlers.message.As2MicGenerationHandler
+import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -64,14 +65,11 @@ class As2ServerVerticle(
 
   private fun handleFailure(ctx: RoutingContext) {
 
-
     when (val failure = ctx.failure()) {
       is DispositionException -> {
         // respond with an MDN
-
-        ctx.createMDN("A failure occurred", failure.disposition)
-
-
+        val mdn = ctx.createMDN("A failure occurred", failure.disposition)
+        ctx.response().end(Buffer.buffer(mdn.inputStream.readAllBytes()))
       }
     }
 
