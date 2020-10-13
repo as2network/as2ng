@@ -1,6 +1,21 @@
 package com.freighttrust.as2.domain
 
+import com.freighttrust.as2.ext.calculateMic
+import com.freighttrust.as2.ext.getAS2Header
+import com.freighttrust.as2.ext.getAs2Header
+import com.freighttrust.as2.ext.setAs2Header
+import com.freighttrust.as2.handlers.message
+import com.freighttrust.as2.util.AS2Header
+import com.helger.as2lib.disposition.DispositionOptions
+import com.helger.as2lib.util.AS2IOHelper
+import com.helger.commons.http.CHttp
+import com.helger.commons.http.CHttpHeader
+import io.vertx.core.http.HttpHeaders
+import io.vertx.ext.web.RoutingContext
 import java.text.ParseException
+import javax.mail.internet.InternetHeaders
+import javax.mail.internet.MimeBodyPart
+import javax.mail.internet.MimeMultipart
 
 /**
  * Use an action-mode of "automatic-action" when the disposition
@@ -187,4 +202,103 @@ data class DispositionNotification(
   val disposition: Disposition,
   val receivedContentMic: String?,
   val digestAlgorithmId: String?
-)
+) {
+
+  companion object {
+
+    fun from(bodyPart: MimeBodyPart): DispositionNotification =
+
+      with(bodyPart) {
+
+        require(isMimeType("multipart/report")) { "Must be a multipart/report body part" }
+
+        val multipartBody = (content as MimeMultipart)
+
+        var dispositionBodyPart: MimeBodyPart? = null
+
+        for (idx in 0..multipartBody.count) {
+          val bodyPart = multipartBody.getBodyPart(idx) as MimeBodyPart
+          if (bodyPart.isMimeType("message/disposition-notification")) {
+            dispositionBodyPart = bodyPart
+            break
+          }
+        }
+
+        requireNotNull(dispositionBodyPart) { "disposition body part not found" }
+
+        return dispositionBodyPart
+          .getHeader(CHttpHeader.CONTENT_TRANSFER_ENCODING, null)
+          .let { contentTransferEncoding ->
+            AS2IOHelper.getContentTransferEncodingAwareInputStream(
+              dispositionBodyPart.inputStream,
+              contentTransferEncoding
+            )
+          }.use { inputStream ->
+
+            InternetHeaders(inputStream)
+              .let { headers ->
+
+                DispositionNotification(
+                  headers.getAs2Header(AS2Header.OriginalMessageID),
+                  headers.getAs2Header(AS2Header.OriginalRecipient),
+                  headers.getAs2Header(AS2Header.FinalRecipient),
+                  headers.getAs2Header(AS2Header.ReportingUA),
+                  Disposition.parse(headers.getAs2Header(AS2Header.Disposition)),
+                  headers.getAs2Header(AS2Header.ReceivedContentMIC),
+                  headers.getAs2Header(AS2Header.DigestAlgorithmId)
+                )
+
+              }
+          }
+      }
+
+
+  }
+
+  fun toMimeBodyPart(ctx: RoutingContext): MimeBodyPart =
+    with(ctx) {
+      InternetHeaders()
+        .apply {
+          setAs2Header(AS2Header.ReportingUA, reportingUA)
+          setAs2Header(AS2Header.OriginalRecipient, "rfc822; $originalRecipient")
+          setAs2Header(AS2Header.FinalRecipient, "rfc822; $finalRecipient")
+          setAs2Header(AS2Header.OriginalMessageID, originalMessageId)
+          setAs2Header(AS2Header.Disposition, disposition.toString())
+
+          val dispositionOptions = request()
+            .getAS2Header(AS2Header.DispositionNotificationOptions)
+            .let { DispositionOptions.createFromString(it) }
+
+          val signingAlgorithm = dispositionOptions.firstMICAlg
+
+          val includeHeaders =
+            message.context
+              .let { context ->
+                context.wasEncrypted || context.wasSigned || context.wasCompressed
+              }
+
+          signingAlgorithm?.apply {
+            val mic = message.body.calculateMic(includeHeaders, signingAlgorithm)
+            setAs2Header(AS2Header.ReceivedContentMIC, mic)
+          }
+
+        }
+        .let { headers ->
+          val builder = StringBuilder()
+          for (line in headers.allHeaderLines) {
+            builder
+              .append(line)
+              .append(CHttp.EOL)
+          }
+          val content = builder.append(CHttp.EOL).toString()
+          MimeBodyPart()
+            .apply {
+              setContent(content, "message/disposition-notification")
+              // TODO is this necessary in addition to above?
+              setHeader(HttpHeaders.CONTENT_TYPE.toString(), "message/disposition-notification")
+            }
+        }
+
+    }
+
+}

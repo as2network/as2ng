@@ -6,6 +6,7 @@ package com.freighttrust.jooq.tables;
 
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
+import com.freighttrust.jooq.enums.RequestType;
 import com.freighttrust.jooq.tables.records.RequestRecord;
 
 import java.time.OffsetDateTime;
@@ -43,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Request extends TableImpl<RequestRecord> {
 
-    private static final long serialVersionUID = -356646381;
+    private static final long serialVersionUID = 1627749746;
 
     /**
      * The reference instance of <code>public.request</code>
@@ -64,6 +65,11 @@ public class Request extends TableImpl<RequestRecord> {
     public final TableField<RequestRecord, UUID> ID = createField(DSL.name("id"), org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
 
     /**
+     * The column <code>public.request.type</code>.
+     */
+    public final TableField<RequestRecord, RequestType> TYPE = createField(DSL.name("type"), org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.freighttrust.jooq.enums.RequestType.class), this, "");
+
+    /**
      * The column <code>public.request.headers</code>.
      */
     public final TableField<RequestRecord, JSONB> HEADERS = createField(DSL.name("headers"), org.jooq.impl.SQLDataType.JSONB, this, "");
@@ -72,11 +78,6 @@ public class Request extends TableImpl<RequestRecord> {
      * The column <code>public.request.body_file_id</code>.
      */
     public final TableField<RequestRecord, Long> BODY_FILE_ID = createField(DSL.name("body_file_id"), org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
-
-    /**
-     * The column <code>public.request.trading_channel_id</code>.
-     */
-    public final TableField<RequestRecord, Long> TRADING_CHANNEL_ID = createField(DSL.name("trading_channel_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.request.message_id</code>.
@@ -89,9 +90,9 @@ public class Request extends TableImpl<RequestRecord> {
     public final TableField<RequestRecord, String> SUBJECT = createField(DSL.name("subject"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
 
     /**
-     * The column <code>public.request.received_at</code>.
+     * The column <code>public.request.trading_channel_id</code>.
      */
-    public final TableField<RequestRecord, OffsetDateTime> RECEIVED_AT = createField(DSL.name("received_at"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.defaultValue(org.jooq.impl.DSL.field("CURRENT_TIMESTAMP", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<RequestRecord, Long> TRADING_CHANNEL_ID = createField(DSL.name("trading_channel_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.request.original_request_id</code>.
@@ -99,19 +100,9 @@ public class Request extends TableImpl<RequestRecord> {
     public final TableField<RequestRecord, UUID> ORIGINAL_REQUEST_ID = createField(DSL.name("original_request_id"), org.jooq.impl.SQLDataType.UUID, this, "");
 
     /**
-     * The column <code>public.request.processed_at</code>.
+     * The column <code>public.request.received_at</code>.
      */
-    public final TableField<RequestRecord, OffsetDateTime> PROCESSED_AT = createField(DSL.name("processed_at"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
-
-    /**
-     * The column <code>public.request.processing_error</code>.
-     */
-    public final TableField<RequestRecord, Boolean> PROCESSING_ERROR = createField(DSL.name("processing_error"), org.jooq.impl.SQLDataType.BOOLEAN, this, "");
-
-    /**
-     * The column <code>public.request.processing_error_message</code>.
-     */
-    public final TableField<RequestRecord, String> PROCESSING_ERROR_MESSAGE = createField(DSL.name("processing_error_message"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+    public final TableField<RequestRecord, OffsetDateTime> RECEIVED_AT = createField(DSL.name("received_at"), org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.defaultValue(org.jooq.impl.DSL.field("CURRENT_TIMESTAMP", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.request.delivered_at</code>.
@@ -122,6 +113,16 @@ public class Request extends TableImpl<RequestRecord> {
      * The column <code>public.request.delivered_to</code>.
      */
     public final TableField<RequestRecord, String> DELIVERED_TO = createField(DSL.name("delivered_to"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+
+    /**
+     * The column <code>public.request.error_message</code>.
+     */
+    public final TableField<RequestRecord, String> ERROR_MESSAGE = createField(DSL.name("error_message"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+
+    /**
+     * The column <code>public.request.error_stack_trace</code>.
+     */
+    public final TableField<RequestRecord, String> ERROR_STACK_TRACE = createField(DSL.name("error_stack_trace"), org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>public.request</code> table reference
@@ -215,7 +216,7 @@ public class Request extends TableImpl<RequestRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row13<UUID, JSONB, Long, Long, String, String, OffsetDateTime, UUID, OffsetDateTime, Boolean, String, OffsetDateTime, String> fieldsRow() {
+    public Row13<UUID, RequestType, JSONB, Long, String, String, Long, UUID, OffsetDateTime, OffsetDateTime, String, String, String> fieldsRow() {
         return (Row13) super.fieldsRow();
     }
 }

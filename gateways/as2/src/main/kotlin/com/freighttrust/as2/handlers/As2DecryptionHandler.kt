@@ -1,5 +1,7 @@
 package com.freighttrust.as2.handlers
 
+import com.freighttrust.as2.domain.Disposition
+import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.jooq.tables.records.KeyPairRecord
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.KeyPairRepository
@@ -7,7 +9,8 @@ import com.freighttrust.persistence.TradingPartnerRepository
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
 import io.vertx.ext.web.RoutingContext
-import org.slf4j.LoggerFactory
+import java.security.GeneralSecurityException
+
 
 class As2DecryptionHandler(
   private val partnerRepository: TradingPartnerRepository,
@@ -16,38 +19,45 @@ class As2DecryptionHandler(
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
-    with(ctx.message) {
+    try {
+      with(ctx.message) {
 
-      if (!isEncrypted) return ctx.next()
+        if (!isEncrypted) return ctx.next()
 
-      with(tradingChannel) {
+        with(tradingChannel) {
 
-        // todo replace with a join
+          // todo replace with a join
 
-        val partner = partnerRepository.findById(
-          TradingPartnerRecord().apply { id = recipientId }
-        ) ?: throw Error("Partner not found with id = $recipientId")
+          val partner = partnerRepository.findById(
+            TradingPartnerRecord().apply { id = recipientId }
+          ) ?: throw Error("Partner not found with id = $recipientId")
 
-        val keyPair = keyPairRepository.findById(
-          KeyPairRecord().apply {
-            id = partner.keyPairId
-          }
-        ) ?: throw  Error("Key pair not found for id = ${partner.keyPairId}")
+          val keyPair = keyPairRepository.findById(
+            KeyPairRecord().apply {
+              id = partner.keyPairId
+            }
+          ) ?: throw  Error("Key pair not found for id = ${partner.keyPairId}")
 
-        val certificate = keyPair.certificate.toX509()
-        val privateKey = keyPair.privateKey.toPrivateKey()
+          val certificate = keyPair.certificate.toX509()
+          val privateKey = keyPair.privateKey.toPrivateKey()
 
-        ctx.message = decrypt(
-          certificate,
-          privateKey,
-          ctx.tempFileHelper
-        )
+          ctx.message = decrypt(
+            certificate,
+            privateKey,
+            ctx.tempFileHelper
+          )
+
+        }
 
       }
 
-    }
+      ctx.next()
 
-    ctx.next()
+    } catch (ex: GeneralSecurityException) {
+      throw DispositionException(
+        Disposition.automaticError("decryption-failed")
+      )
+    }
 
   }
 

@@ -4,11 +4,11 @@
 package com.freighttrust.jooq;
 
 
+import com.freighttrust.jooq.tables.DispositionNotification;
 import com.freighttrust.jooq.tables.File;
 import com.freighttrust.jooq.tables.FlywaySchemaHistory;
 import com.freighttrust.jooq.tables.KeyPair;
 import com.freighttrust.jooq.tables.Message;
-import com.freighttrust.jooq.tables.MessageDispositionNotification;
 import com.freighttrust.jooq.tables.Request;
 import com.freighttrust.jooq.tables.TradingChannel;
 import com.freighttrust.jooq.tables.TradingChannelHistory;
@@ -39,12 +39,17 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Public extends SchemaImpl {
 
-    private static final long serialVersionUID = -1064449082;
+    private static final long serialVersionUID = 678334942;
 
     /**
      * The reference instance of <code>public</code>
      */
     public static final Public PUBLIC = new Public();
+
+    /**
+     * The table <code>public.disposition_notification</code>.
+     */
+    public final DispositionNotification DISPOSITION_NOTIFICATION = DispositionNotification.DISPOSITION_NOTIFICATION;
 
     /**
      * The table <code>public.file</code>.
@@ -65,11 +70,6 @@ public class Public extends SchemaImpl {
      * The table <code>public.message</code>.
      */
     public final Message MESSAGE = Message.MESSAGE;
-
-    /**
-     * The table <code>public.message_disposition_notification</code>.
-     */
-    public final MessageDispositionNotification MESSAGE_DISPOSITION_NOTIFICATION = MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION;
 
     /**
      * The table <code>public.request</code>.
@@ -121,11 +121,11 @@ public class Public extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.<Table<?>>asList(
+            DispositionNotification.DISPOSITION_NOTIFICATION,
             File.FILE,
             FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY,
             KeyPair.KEY_PAIR,
             Message.MESSAGE,
-            MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION,
             Request.REQUEST,
             TradingChannel.TRADING_CHANNEL,
             TradingChannelHistory.TRADING_CHANNEL_HISTORY,

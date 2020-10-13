@@ -1,12 +1,12 @@
 package com.freighttrust.persistence.postgres
 
-import com.freighttrust.persistence.postgres.repositories.PostgresMessageDispositionNotificationRepository
+import com.freighttrust.persistence.postgres.repositories.PostgresDispositionNotificationRepository
 import com.freighttrust.persistence.postgres.repositories.PostgresMessageRepository
 import com.freighttrust.persistence.postgres.repositories.PostgresRequestRepository
 import com.freighttrust.persistence.postgres.repositories.PostgresTradingChannelRepository
 import com.freighttrust.persistence.postgres.repositories.PostgresTradingPartnerRepository
 import com.freighttrust.persistence.KeyPairRepository
-import com.freighttrust.persistence.MessageDispositionNotificationRepository
+import com.freighttrust.persistence.DispositionNotificationRepository
 import com.freighttrust.persistence.MessageRepository
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingChannelRepository
@@ -57,7 +57,7 @@ val PostgresModule = module {
   factory<KeyPairRepository> { PostgresKeyPairRepository(get()) }
   factory<RequestRepository> { PostgresRequestRepository(get()) }
   factory<MessageRepository> { PostgresMessageRepository(get()) }
-  factory<MessageDispositionNotificationRepository> { PostgresMessageDispositionNotificationRepository(get()) }
+  factory<DispositionNotificationRepository> { PostgresDispositionNotificationRepository(get()) }
 
 
 }

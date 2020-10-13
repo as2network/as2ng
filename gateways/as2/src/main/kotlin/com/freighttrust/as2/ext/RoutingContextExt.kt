@@ -1,18 +1,16 @@
 package com.freighttrust.as2.ext
 
 import com.freighttrust.as2.domain.Disposition
+import com.freighttrust.as2.domain.DispositionNotification
 import com.freighttrust.as2.handlers.message
-import com.freighttrust.as2.util.AS2Header
-import com.helger.as2lib.crypto.ECryptoAlgorithmSign
-import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
 import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.web.RoutingContext
+
 import javax.activation.DataHandler
 import javax.activation.DataSource
-import javax.mail.internet.InternetHeaders
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMultipart
 
@@ -40,10 +38,7 @@ fun RoutingContext.bodyAsMimeBodyPart() =
       bodyPart
     }
 
-fun RoutingContext.createMDN(
-  text: String, disposition:
-  Disposition
-): MimeBodyPart =
+fun RoutingContext.createMDN(text: String, notification: DispositionNotification): MimeBodyPart =
   MimeMultipart()
     .apply {
 
@@ -53,7 +48,7 @@ fun RoutingContext.createMDN(
           setHeader(HttpHeaders.CONTENT_TYPE.toString(), "text/plain")
         }
 
-      val reportPart = dispositionNotificationBodyPart(disposition)
+      val reportPart = notification.toMimeBodyPart(this@createMDN)
 
       addBodyPart(textPart)
       addBodyPart(reportPart)
@@ -70,50 +65,31 @@ fun RoutingContext.createMDN(
 
     }
 
-fun RoutingContext.dispositionNotificationBodyPart(disposition: Disposition): MimeBodyPart =
-  InternetHeaders()
-    .apply {
 
 
-      // TODO determine correct reporting ua
-      setAs2Header(AS2Header.ReportingUA, "fright-trust")
+fun RoutingContext.dispositionNotification(disposition: Disposition): DispositionNotification =
+  with(message) {
+    DispositionNotification(
+      messageId,
       // todo review original and final recipient logic
-      setAs2Header(AS2Header.OriginalRecipient, "rfc822; ${message.recipientId}")
-      setAs2Header(AS2Header.FinalRecipient, "rfc822; ${message.recipientId}")
-      setAs2Header(AS2Header.OriginalMessageID, message.messageId)
-      setAs2Header(AS2Header.Disposition, disposition.toString())
+      recipientId,
+      recipientId,
+      // TODO determine correct reporting ua
+      "FreightTrustAS2/1.0",
+      disposition,
+      dispositionNotificationOptions
+        ?.firstMICAlg
+        ?.let { signingAlgorithm ->
 
-      val dispositionOptions = request()
-        .getAS2Header(AS2Header.DispositionNotificationOptions)
-        .let { DispositionOptions.createFromString(it) }
+          val includeHeaders =
+            context
+              .let { context ->
+                context.wasEncrypted || context.wasSigned || context.wasCompressed
+              }
 
-      val signingAlgorithm = dispositionOptions.firstMICAlg
-
-      val includeHeaders =
-        message.context
-          .let { context ->
-            context.wasEncrypted || context.wasSigned || context.wasCompressed
-          }
-
-      signingAlgorithm?.apply {
-        val mic = message.body.calculateMic(includeHeaders, signingAlgorithm)
-        setAs2Header(AS2Header.ReceivedContentMIC, mic)
-      }
-
-    }
-    .let { headers ->
-      val builder = StringBuilder()
-      for (line in headers.allHeaderLines) {
-        builder
-          .append(line)
-          .append(CHttp.EOL)
-      }
-      val content = builder.append(CHttp.EOL).toString()
-      MimeBodyPart()
-        .apply {
-          setContent(content, "message/disposition-notification")
-          // TODO is this necessary in addition to above?
-          setHeader(HttpHeaders.CONTENT_TYPE.toString(), "message/disposition-notification")
-        }
-    }
-
+          body.calculateMic(includeHeaders, signingAlgorithm)
+        },
+      dispositionNotificationOptions
+        ?.firstMICAlg?.id
+    )
+  }

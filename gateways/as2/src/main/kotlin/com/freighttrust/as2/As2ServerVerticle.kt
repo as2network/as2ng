@@ -1,7 +1,7 @@
 package com.freighttrust.as2
 
 import com.freighttrust.as2.handlers.*
-import com.freighttrust.as2.handlers.failure.As2ForwardingFailureHandler
+import com.freighttrust.as2.handlers.As2FailureHandler
 import com.freighttrust.as2.handlers.mdn.As2ForwardMdnHandler
 import com.freighttrust.as2.handlers.mdn.As2MdnReceivedHandler
 import com.freighttrust.as2.handlers.mdn.As2MicVerificationHandler
@@ -34,7 +34,7 @@ class As2ServerVerticle(
 
     router
       .route()
-      .failureHandler(koin.get<As2ForwardingFailureHandler>())
+      .failureHandler(koin.get<As2FailureHandler>())
       .handler(koin.get<As2TempFileHandler>())
       .handler(koin.get<As2BodyHandler>())
       .handler(koin.get<As2RequestHandler>())
@@ -47,13 +47,11 @@ class As2ServerVerticle(
       .handler(koin.get<As2MicGenerationHandler>())
       .handler(koin.get<As2MessageReceivedHandler>())
       .handler(koin.get<As2ForwardMessageHandler>())
-      .handler(koin.get<As2RequestProcessedHandler>())
 
     router.post("/mdn")
       .handler(koin.get<As2MdnReceivedHandler>())
       .handler(koin.get<As2MicVerificationHandler>())
       .handler(koin.get<As2ForwardMdnHandler>())
-      .handler(koin.get<As2RequestProcessedHandler>())
 
     logger.info("Mounting router")
 

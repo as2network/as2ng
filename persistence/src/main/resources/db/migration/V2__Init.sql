@@ -1,18 +1,17 @@
-
 /*****************************************************************************/
 /* Key Pair                                                                  */
 /*****************************************************************************/
 
 create table key_pair
 (
-    id                  bigserial primary key,
-    serial_number       varchar(60),
-    certificate         varchar(4096),
-    private_key         varchar(4096) null,
-    private_key_type    varchar(16),
-    issuing_ca          varchar(4096),
-    ca_chain            varchar(4096)[],
-    expires_at          timestamptz
+    id               bigserial primary key,
+    serial_number    varchar(60),
+    certificate      varchar(4096),
+    private_key      varchar(4096) null,
+    private_key_type varchar(16),
+    issuing_ca       varchar(4096),
+    ca_chain         varchar(4096)[],
+    expires_at       timestamptz
 );
 
 /*****************************************************************************/
@@ -21,12 +20,12 @@ create table key_pair
 
 create table trading_partner
 (
-    id              bigserial primary key,
-    name            varchar(128) unique,
-    email           varchar(128),
-    key_pair_id     bigint references key_pair(id),
-    validity        tstzrange default tstzrange(current_timestamp, null),
-    unique(key_pair_id)
+    id          bigserial primary key,
+    name        varchar(128) unique,
+    email       varchar(128),
+    key_pair_id bigint references key_pair (id),
+    validity    tstzrange default tstzrange(current_timestamp, null),
+    unique (key_pair_id)
 );
 
 create table trading_partner_history
@@ -48,17 +47,17 @@ execute procedure versioning(
 
 create table trading_channel
 (
-    id                              bigserial primary key,
-    name                            varchar (64),
+    id                       bigserial primary key,
+    name                     varchar(64),
 
-    sender_id                       bigint references trading_partner (id),
-    sender_as2_identifier           varchar (64),
+    sender_id                bigint references trading_partner (id),
+    sender_as2_identifier    varchar(64),
 
-    recipient_id                    bigint references trading_partner (id),
-    recipient_as2_identifier        varchar (64),
-    recipient_message_url           varchar (128),
+    recipient_id             bigint references trading_partner (id),
+    recipient_as2_identifier varchar(64),
+    recipient_message_url    varchar(128),
 
-    validity                        tstzrange default tstzrange(current_timestamp, null),
+    validity                 tstzrange default tstzrange(current_timestamp, null),
     unique (sender_id, recipient_id),
     unique (sender_as2_identifier, recipient_as2_identifier)
 );
@@ -93,24 +92,29 @@ create table file
 /* Request                                                                   */
 /*****************************************************************************/
 
+create type request_type as enum ('message', 'mdn');
+
 create table request
 (
-    id                       uuid primary key,
-    headers                  jsonb,
-    body_file_id             bigint                       not null,
-    trading_channel_id       bigint references trading_channel(id),
-    message_id               varchar(64) unique,
-    subject                  varchar(128),
-    received_at              timestamptz default current_timestamp,
+    id                  uuid primary key,
 
-    original_request_id      uuid references request (id) null,
+    type                request_type,
+    headers             jsonb,
+    body_file_id        bigint                       not null,
 
-    processed_at             timestamptz                  null,
-    processing_error         bool,
-    processing_error_message varchar(128)                 null,
+    message_id          varchar(64) unique,
+    subject             varchar(128),
 
-    delivered_at             timestamptz                  null,
-    delivered_to             varchar(128)                 null
+    trading_channel_id  bigint references trading_channel (id),
+    original_request_id uuid references request (id) null,
+
+    received_at         timestamptz default current_timestamp,
+
+    delivered_at        timestamptz                  null,
+    delivered_to        varchar(128)                 null,
+
+    error_message       varchar(128)                 null,
+    error_stack_trace   text                         null
 );
 
 /*****************************************************************************/
@@ -121,21 +125,21 @@ create table message
 (
     request_id              uuid primary key references request (id),
 
-    encryption_algorithm    varchar(16)  null,
-    compression_algorithm   varchar(16)  null,
+    encryption_algorithm    varchar(16)   null,
+    compression_algorithm   varchar(16)   null,
 
-    mics                    varchar(64)[]  null,
+    mics                    varchar(64)[] null,
 
     is_mdn_requested        bool,
     is_mdn_async            bool,
-    receipt_delivery_option varchar(128) null
+    receipt_delivery_option varchar(128)  null
 );
 
 /*****************************************************************************/
 /* Message Disposition Notification                                          */
 /*****************************************************************************/
 
-create table message_disposition_notification
+create table disposition_notification
 (
     request_id           uuid primary key references request (id),
 

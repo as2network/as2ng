@@ -48,7 +48,7 @@ data class MessageContext(
 }
 
 enum class MessageType {
-  Message, MessageDispositionNotification
+  Message, DispositionNotification
 }
 
 data class Message(

@@ -4,7 +4,7 @@ import com.fasterxml.uuid.Generators
 import com.freighttrust.as2.cert.VaultCertificateProvider
 import com.freighttrust.as2.cert.VaultConfigOptions
 import com.freighttrust.as2.handlers.*
-import com.freighttrust.as2.handlers.failure.As2ForwardingFailureHandler
+import com.freighttrust.as2.handlers.As2FailureHandler
 import com.freighttrust.as2.handlers.mdn.As2ForwardMdnHandler
 import com.freighttrust.as2.handlers.mdn.As2MdnReceivedHandler
 import com.freighttrust.as2.handlers.mdn.As2MicVerificationHandler
@@ -32,15 +32,14 @@ val As2ExchangeServerModule = module {
   single { As2RequestHandler(get(), get(), get(), get(), get()) }
   single { As2DecompressionHandler() }
   single { As2DecryptionHandler(get(), get()) }
-  single { As2RequestProcessedHandler(get()) }
   single { As2MdnReceivedHandler(get(), get(), get()) }
   single { As2MessageReceivedHandler(get()) }
-  single { As2ForwardingFailureHandler(get(), get(), get())}
+  single { As2FailureHandler(get(), get(), get(), get(), get()) }
   single { As2SignatureVerificationHandler() }
   single { As2MicVerificationHandler() }
   single { As2MicGenerationHandler() }
   single { As2ForwardMessageHandler(get(), get()) }
-  single { As2ForwardMdnHandler(get()) }
+  single { As2ForwardMdnHandler(get(), get()) }
 
   single { WebClient.create(get()) }
 

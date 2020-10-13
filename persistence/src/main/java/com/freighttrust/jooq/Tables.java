@@ -4,11 +4,11 @@
 package com.freighttrust.jooq;
 
 
+import com.freighttrust.jooq.tables.DispositionNotification;
 import com.freighttrust.jooq.tables.File;
 import com.freighttrust.jooq.tables.FlywaySchemaHistory;
 import com.freighttrust.jooq.tables.KeyPair;
 import com.freighttrust.jooq.tables.Message;
-import com.freighttrust.jooq.tables.MessageDispositionNotification;
 import com.freighttrust.jooq.tables.Request;
 import com.freighttrust.jooq.tables.TradingChannel;
 import com.freighttrust.jooq.tables.TradingChannelHistory;
@@ -32,6 +32,11 @@ import javax.annotation.processing.Generated;
 public class Tables {
 
     /**
+     * The table <code>public.disposition_notification</code>.
+     */
+    public static final DispositionNotification DISPOSITION_NOTIFICATION = DispositionNotification.DISPOSITION_NOTIFICATION;
+
+    /**
      * The table <code>public.file</code>.
      */
     public static final File FILE = File.FILE;
@@ -50,11 +55,6 @@ public class Tables {
      * The table <code>public.message</code>.
      */
     public static final Message MESSAGE = Message.MESSAGE;
-
-    /**
-     * The table <code>public.message_disposition_notification</code>.
-     */
-    public static final MessageDispositionNotification MESSAGE_DISPOSITION_NOTIFICATION = MessageDispositionNotification.MESSAGE_DISPOSITION_NOTIFICATION;
 
     /**
      * The table <code>public.request</code>.
