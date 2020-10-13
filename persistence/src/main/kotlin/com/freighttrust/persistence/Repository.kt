@@ -2,6 +2,7 @@ package com.freighttrust.persistence
 
 import com.freighttrust.jooq.tables.records.*
 import java.security.cert.X509Certificate
+import java.time.Instant
 import java.util.*
 import javax.activation.DataHandler
 
@@ -33,7 +34,7 @@ interface KeyPairRepository : Repository<KeyPairRecord> {
 
 interface MessageRepository : Repository<MessageRecord>
 
-interface MessageDispositionNotificationRepository : Repository<MessageDispositionNotificationRecord>
+interface DispositionNotificationRepository : Repository<DispositionNotificationRecord>
 
 interface TradingChannelRepository : Repository<TradingChannelRecord> {
   suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingChannelRecord?
@@ -50,6 +51,8 @@ interface RequestRepository : Repository<RequestRecord> {
 
   suspend fun findRequestIdByMessageId(messageId: String, ctx: Repository.Context? = null): UUID?
 
+  suspend fun setAsDeliveredTo(id: UUID, url: String, timestamp: Instant, ctx: Repository.Context? = null)
+  suspend fun setAsFailed(id: UUID, message: String?, stackTrace: String, ctx: Repository.Context? = null)
 }
 
 

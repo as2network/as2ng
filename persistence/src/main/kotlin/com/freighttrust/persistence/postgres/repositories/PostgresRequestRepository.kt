@@ -7,6 +7,8 @@ import com.freighttrust.persistence.RequestRepository
 import kotlinx.coroutines.coroutineScope
 import org.jooq.Condition
 import org.jooq.DSLContext
+import java.time.Instant
+import java.time.ZoneOffset
 import java.util.*
 
 class PostgresRequestRepository(
@@ -30,5 +32,25 @@ class PostgresRequestRepository(
         ?.value1()
     }
 
+  override suspend fun setAsDeliveredTo(id: UUID, url: String, timestamp: Instant, ctx: Repository.Context?) {
+    coroutineScope {
+      jooqContext(ctx)
+        .update(REQUEST)
+        .set(REQUEST.DELIVERED_TO, url)
+        .set(REQUEST.DELIVERED_AT, timestamp.atOffset(ZoneOffset.UTC))
+        .where(REQUEST.ID.eq(id))
+        .execute()
+    }
+  }
 
+  override suspend fun setAsFailed(id: UUID, error: String?, stackTrace: String, ctx: Repository.Context?) {
+    coroutineScope {
+      jooqContext(ctx)
+        .update(REQUEST)
+        .set(REQUEST.ERROR_MESSAGE, error)
+        .set(REQUEST.ERROR_STACK_TRACE, stackTrace)
+        .where(REQUEST.ID.eq(id))
+        .execute()
+    }
+  }
 }

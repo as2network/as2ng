@@ -49,7 +49,8 @@ fun JavaExec.serverTask(configPath: String) {
 }
 
 tasks {
-  create<JavaExec>("run") { serverTask("src/config/config.xml") }
+  create<JavaExec>("runOpenAS2A") { serverTask("config/openas2a/config.xml") }
+  create<JavaExec>("runOpenAS2B") { serverTask("config/openas2b/config.xml") }
 }
 
 dependencies {

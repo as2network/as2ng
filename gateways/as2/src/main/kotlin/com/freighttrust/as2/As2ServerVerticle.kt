@@ -1,8 +1,7 @@
 package com.freighttrust.as2
 
-import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.createMDN
 import com.freighttrust.as2.handlers.*
+import com.freighttrust.as2.handlers.As2FailureHandler
 import com.freighttrust.as2.handlers.mdn.As2ForwardMdnHandler
 import com.freighttrust.as2.handlers.mdn.As2MdnReceivedHandler
 import com.freighttrust.as2.handlers.mdn.As2MicVerificationHandler
@@ -10,7 +9,7 @@ import com.freighttrust.as2.handlers.message.As2ForwardMessageHandler
 import com.freighttrust.as2.handlers.message.As2MessageReceivedHandler
 import com.freighttrust.as2.handlers.message.As2MicGenerationHandler
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.jooq.DSLContext
 import org.koin.core.Koin
@@ -23,20 +22,19 @@ class As2ServerVerticle(
 
   private val logger = LoggerFactory.getLogger(As2ServerVerticle::class.java)
 
+  private val webClient: WebClient = koin.get()
+
   override suspend fun start() {
 
     val router = Router.router(vertx)
 
     router.errorHandler(500, { event ->
-
       event.failure().printStackTrace()
-
-
     })
 
     router
       .route()
-//      .failureHandler(this::handleFailure)
+      .failureHandler(koin.get<As2FailureHandler>())
       .handler(koin.get<As2TempFileHandler>())
       .handler(koin.get<As2BodyHandler>())
       .handler(koin.get<As2RequestHandler>())
@@ -49,13 +47,11 @@ class As2ServerVerticle(
       .handler(koin.get<As2MicGenerationHandler>())
       .handler(koin.get<As2MessageReceivedHandler>())
       .handler(koin.get<As2ForwardMessageHandler>())
-      .handler(koin.get<As2RequestProcessedHandler>())
 
     router.post("/mdn")
       .handler(koin.get<As2MdnReceivedHandler>())
       .handler(koin.get<As2MicVerificationHandler>())
       .handler(koin.get<As2ForwardMdnHandler>())
-      .handler(koin.get<As2RequestProcessedHandler>())
 
     logger.info("Mounting router")
 
@@ -63,21 +59,6 @@ class As2ServerVerticle(
       .createHttpServer()
       .requestHandler(router)
       .listen(8080)
-  }
-
-  private fun handleFailure(ctx: RoutingContext) {
-
-
-    when (val failure = ctx.failure()) {
-      is DispositionException -> {
-        // respond with an MDN
-
-        ctx.createMDN("A failure occurred", failure.disposition)
-
-
-      }
-    }
-
   }
 
   override suspend fun stop() {

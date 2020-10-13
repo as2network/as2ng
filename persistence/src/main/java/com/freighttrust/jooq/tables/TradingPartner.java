@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartner extends TableImpl<TradingPartnerRecord> {
 
-    private static final long serialVersionUID = -1039438901;
+    private static final long serialVersionUID = 1041835184;
 
     /**
      * The reference instance of <code>public.trading_partner</code>
@@ -132,7 +132,7 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
 
     @Override
     public List<UniqueKey<TradingPartnerRecord>> getKeys() {
-        return Arrays.<UniqueKey<TradingPartnerRecord>>asList(Keys.TRADING_PARTNER_PKEY, Keys.TRADING_PARTNER_NAME_KEY);
+        return Arrays.<UniqueKey<TradingPartnerRecord>>asList(Keys.TRADING_PARTNER_PKEY, Keys.TRADING_PARTNER_NAME_KEY, Keys.TRADING_PARTNER_KEY_PAIR_ID_KEY);
     }
 
     @Override

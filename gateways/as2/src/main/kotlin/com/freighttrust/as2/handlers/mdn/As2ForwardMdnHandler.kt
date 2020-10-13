@@ -2,33 +2,36 @@ package com.freighttrust.as2.handlers.mdn
 
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.message
+import com.freighttrust.persistence.RequestRepository
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
+import java.time.Instant
 
 class As2ForwardMdnHandler(
-  private val webClient: WebClient
+  private val webClient: WebClient,
+  private val requestRepository: RequestRepository
 ) : CoroutineRouteHandler() {
 
-  override suspend fun coroutineHandle(ctx: RoutingContext) {
+  override suspend fun coroutineHandle(ctx: RoutingContext): Unit =
+    with(ctx.message) {
 
-    val message = ctx.message
-    val originalMessage = message.context.originalMessageRecord!!
+      val originalMessage = context.originalMessageRecord ?: throw Error("Original message record cannot be null")
+      val url: String = originalMessage.receiptDeliveryOption ?: throw Error("Receipt delivery option cannot be null")
 
-    val receiptDeliveryOption: String? = originalMessage.receiptDeliveryOption
+      // forward the mdn
+      webClient
+        .postAbs(url)
+        .putHeaders(ctx.request().headers())
+        .sendBufferAwait(ctx.body)
 
-    requireNotNull(receiptDeliveryOption) { "receiptDeliveryOption cannot be null" }
+      // mark the request as delivered
+      requestRepository.setAsDeliveredTo(context.requestRecord.id, url, Instant.now())
 
-    webClient
-      .postAbs(receiptDeliveryOption)
-      .putHeaders(ctx.request().headers())
-      .sendBufferAwait(ctx.body)
+      // close the connection
+      ctx.response()
+        .setStatusCode(200)
+        .end()
+    }
 
-    // todo
-    ctx.response()
-      .setStatusCode(200)
-      .end()
-
-
-  }
 }

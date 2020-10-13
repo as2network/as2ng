@@ -1,19 +1,30 @@
 package com.freighttrust.as2.domain
 
+import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.*
 import com.freighttrust.as2.util.AS2Header
-import com.freighttrust.as2.util.CompressionUtil
-import com.freighttrust.as2.util.CryptoUtil
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.jooq.tables.records.MessageRecord
 import com.freighttrust.jooq.tables.records.RequestRecord
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.disposition.DispositionOptions
 import io.vertx.core.MultiMap
+import org.bouncycastle.cms.CMSException
+import org.bouncycastle.cms.RecipientId
+import org.bouncycastle.cms.RecipientInformation
+import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId
+import org.bouncycastle.cms.jcajce.ZlibExpanderProvider
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.mail.smime.SMIMECompressedParser
+import org.bouncycastle.mail.smime.SMIMEEnvelopedParser
+import org.bouncycastle.mail.smime.SMIMEException
+import org.bouncycastle.mail.smime.SMIMEUtil
 import org.slf4j.LoggerFactory
+import java.security.GeneralSecurityException
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
+import javax.mail.MessagingException
 import javax.mail.internet.MimeBodyPart
 
 data class MessageContext(
@@ -37,7 +48,7 @@ data class MessageContext(
 }
 
 enum class MessageType {
-  Message, MessageDispositionNotification
+  Message, DispositionNotification
 }
 
 data class Message(
@@ -46,6 +57,10 @@ data class Message(
   val body: MimeBodyPart,
   val context: MessageContext
 ) {
+
+  companion object {
+    val logger = LoggerFactory.getLogger(Message::class.java)
+  }
 
   val messageId = headers.get(AS2Header.MessageId)!!
   val senderId = headers.get(AS2Header.As2From)!!
@@ -71,19 +86,103 @@ data class Message(
     privateKey: PrivateKey,
     tempFileHelper: TempFileHelper
   ): Message =
-    require(isEncrypted) { "message is not encrypted" }
-      .let {
-        CryptoUtil.decrypt(this, certificate, privateKey, tempFileHelper)
+    when (isEncrypted) {
+      false ->
+        throw GeneralSecurityException("Content-Type '${body.contentType}' indicates the message is not encrypted")
+      true -> {
+
+        // Get the recipient object for decryption
+        val recipientId: RecipientId = JceKeyTransRecipientId(certificate)
+
+        // Parse the MIME body into a SMIME envelope object
+        var recipient: RecipientInformation? = null
+        try {
+          val aEnvelope = SMIMEEnvelopedParser(body)
+          recipient = aEnvelope.recipientInfos[recipientId]
+        } catch (ex: java.lang.Exception) {
+          logger.error("Error retrieving RecipientInformation", ex)
+        }
+
+        if (recipient == null) throw GeneralSecurityException("Certificate does not match part signature")
+
+        // try to decrypt the data
+        // Custom file: see #103
+
+        val body = SMIMEUtil
+          .toMimeBodyPart(
+            recipient.getContentStream(
+              JceKeyTransEnvelopedRecipient(privateKey)
+                .setProvider(BouncyCastleProvider())
+            ),
+            tempFileHelper.newFile()
+          )
+
+        copy(
+          body = body,
+          context = context.copy(decryptedBody = body)
+        )
       }
+    }
+
 
   fun decompress(
     tempFileHelper: TempFileHelper
   ): Message =
-    require(isCompressed) { "message is not compressed" }
-      .let {
-        CompressionUtil.decompress(this, tempFileHelper)
-      }
+    when (isCompressed) {
+      false -> this
+      true -> {
+        try {
 
+          logger.debug("Decompressing a compressed AS2 message")
+
+          // Compress using stream
+          if (logger.isDebugEnabled) {
+
+            val str = StringBuilder()
+              .apply {
+                append("Headers before uncompress\n")
+                body
+                  .allHeaderLines
+                  .toList()
+                  .forEach { str -> append("$str\n") }
+                append("done")
+              }.toString()
+
+            logger.debug(str)
+          }
+
+          // TODO: get buffer from configuration
+          val decompressed =
+            SMIMECompressedParser(body, 8 * 1024)
+              .getContent(ZlibExpanderProvider())
+              .let { typedStream -> SMIMEUtil.toMimeBodyPart(typedStream, tempFileHelper.newFile()) }
+              .also {
+                logger.info("Successfully decompressed incoming AS2 message")
+              }
+
+          copy(
+            body = decompressed,
+            context = context.copy(decompressedBody = Pair(decompressed, "zlib"))
+          )
+
+        } catch (ex: Exception) {
+
+          when (ex) {
+            is SMIMEException,
+            is CMSException,
+            is MessagingException -> {
+              logger.error("Error decompressing received message", ex)
+              throw DispositionException(
+                Disposition.automaticError("decompression-failed"),
+                ex
+              )
+            }
+            else -> throw ex
+          }
+
+        }
+      }
+    }
 
   fun verify(
     certificate: X509Certificate,

@@ -74,21 +74,3 @@ services:
       MINIO_HTTP_TRACE: "/var/log/minio/minio.log"
       MINIO_ACCESS_KEY:
       MINIO_SECRET_KEY:
-
-  OpenAS2A:
-    image: gradle:jdk14
-    working_dir: /opt/as2
-    user: "${USER_ID}:${GROUP_ID}"
-    volumes:
-      - ./:/opt/as2
-    network_mode: host
-    command: "gradle --no-daemon :as2-lib:openas2a:run"
-
-  OpenAS2B:
-    image: gradle:jdk14
-    working_dir: /opt/as2
-    user: "${USER_ID}:${GROUP_ID}"
-    volumes:
-      - ./:/opt/as2
-    network_mode: host
-    command: "gradle --no-daemon :as2-lib:openas2b:run"

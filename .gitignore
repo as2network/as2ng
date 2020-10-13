@@ -98,4 +98,4 @@ node_modules/
 **/*.p12
 
 
-as2-lib/*/data
+as2-lib/data
