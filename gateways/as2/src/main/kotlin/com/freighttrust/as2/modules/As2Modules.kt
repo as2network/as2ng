@@ -5,6 +5,7 @@ import com.freighttrust.as2.cert.VaultCertificateProvider
 import com.freighttrust.as2.cert.VaultConfigOptions
 import com.freighttrust.as2.handlers.*
 import com.freighttrust.as2.handlers.As2FailureHandler
+import com.freighttrust.as2.handlers.edi.EDIValidationHandler
 import com.freighttrust.as2.handlers.mdn.As2ForwardMdnHandler
 import com.freighttrust.as2.handlers.mdn.As2MdnReceivedHandler
 import com.freighttrust.as2.handlers.mdn.As2MicVerificationHandler
@@ -13,6 +14,7 @@ import com.freighttrust.as2.handlers.message.As2MessageReceivedHandler
 import com.freighttrust.as2.handlers.message.As2MicGenerationHandler
 import com.typesafe.config.Config
 import io.vertx.ext.web.client.WebClient
+import io.xlate.edi.stream.EDIInputFactory
 import okhttp3.OkHttpClient
 import org.koin.core.qualifier._q
 import org.koin.dsl.module
@@ -27,6 +29,8 @@ val As2ExchangeServerModule = module {
 
   factory { Generators.timeBasedGenerator() }
 
+  single { EDIInputFactory.newFactory() }
+
   single { As2BodyHandler() }
   single { As2TempFileHandler() }
   single { As2RequestHandler(get(), get(), get(), get(), get()) }
@@ -40,6 +44,8 @@ val As2ExchangeServerModule = module {
   single { As2MicGenerationHandler() }
   single { As2ForwardMessageHandler(get(), get()) }
   single { As2ForwardMdnHandler(get(), get()) }
+
+  single { EDIValidationHandler(get()) }
 
   single { WebClient.create(get()) }
 

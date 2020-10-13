@@ -26,35 +26,49 @@
             format="sender.as2_id, receiver.as2_id, attributes.fileid"
             mimetype="text/plain"/>
 
-    <!--  Special directory for sending messages to "OpenAS2B" -->
     <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
-            outboxdir="%home%/../../data/OpenAS2A/toOpenAS2B"
-            errordir="%home%/../../data/OpenAS2A/toOpenAS2B/error"
+            outboxdir="%home%/../../data/text/OpenAS2A/toOpenAS2B"
+            errordir="%home%/../../data/text/OpenAS2A/toOpenAS2B/error"
             interval="5"
             defaults="sender.as2_id=OpenAS2A, receiver.as2_id=OpenAS2B"
             sendFilename="true"
             mimetype="text/plain"/>
+
+    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
+            outboxdir="%home%/../../data/edi-x12/OpenAS2A/toOpenAS2B"
+            errordir="%home%/../../data/edi-x12/OpenAS2A/toOpenAS2B/error"
+            interval="5"
+            defaults="sender.as2_id=OpenAS2A, receiver.as2_id=OpenAS2B"
+            sendFilename="true"
+            mimetype="application/edi-x12"/>
+
     <module classname="com.helger.as2lib.processor.storage.MDNFileModule"
             filename="%home%/../../data/OpenAS2A/mdn/$date.uuuu$/$date.MM$/$mdn.msg.sender.as2_id$-$mdn.msg.receiver.as2_id$-$mdn.msg.headers.message-id$"
             protocol="as2"
             tempdir="%home%/../../data/OpenAS2A/temp"
             charset="utf-8"/>
+
     <module classname="com.helger.as2lib.processor.storage.MessageFileModule"
             filename="%home%/../../data/OpenAS2A/inbox/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
             header="%home%/../../data/OpenAS2A/inbox/msgheaders/$date.uuuu$/$date.MM$/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
             protocol="as2"
             tempdir="%home%/../../data/OpenAS2A/temp"
             charset="utf-8"/>
+
     <module classname="com.helger.as2lib.processor.receiver.AS2ReceiverModule"
             port="10080"
             errordir="%home%/../../data/OpenAS2A/inbox/error"
             errorformat="$msg.sender.as2_id$, $msg.receiver.as2_id$, $msg.headers.message-id$"/>
+
     <module classname="com.freighttrust.as2.receiver.net.AS2MDNReceiverModule"
             port="10081"/>
+
     <module classname="com.helger.as2lib.processor.resender.DirectoryResenderModule"
             resenddir="%home%/../../data/OpenAS2A/resend"
             errordir="%home%/../../data/OpenAS2A/resend/error"
             resenddelay="60"/>
+
     <module classname="com.helger.as2lib.processor.sender.AsynchMDNSenderModule"/>
+
   </processor>
 </openas2>
