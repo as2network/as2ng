@@ -2,12 +2,11 @@ package com.freighttrust.as2.cli.config.keypair
 
 import com.freighttrust.common.util.Either
 import com.freighttrust.crypto.CertificateFactory
-import com.freighttrust.jooq.tables.records.KeyPairRecord
+import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.persistence.KeyPairRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import picocli.CommandLine
 import picocli.CommandLine.Command
 import java.time.ZoneOffset
 
@@ -35,7 +34,7 @@ class KeyPairIssue : KoinComponent, Runnable {
 
           val inserted = runBlocking {
             repository.insert(
-              KeyPairRecord()
+              KeyPair()
                 .apply {
                   setCaChain(*value.caChain.toTypedArray())
                   issuingCa = value.issuingCA

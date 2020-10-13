@@ -1,6 +1,7 @@
 package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.KEY_PAIR
+import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.records.KeyPairRecord
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.Repository
@@ -11,15 +12,12 @@ import java.security.cert.X509Certificate
 
 
 class PostgresKeyPairRepository(
-  private val dbCtx: DSLContext
-) : KeyPairRepository, AbstractJooqRepository<KeyPairRecord>(
-  dbCtx, KEY_PAIR, listOf(KEY_PAIR.ID)
+  dbCtx: DSLContext
+) : KeyPairRepository, AbstractJooqRepository<KeyPairRecord, KeyPair>(
+  dbCtx, KEY_PAIR, KeyPair::class.java
 ) {
 
-  override fun idQuery(record: KeyPairRecord): Condition =
-    KEY_PAIR.ID.let { field ->
-      field.eq(record.get(field))
-    }
+  override fun idQuery(value: KeyPair): Condition = KEY_PAIR.ID.eq(value.id)
 
   override suspend fun findIdByCertificate(certificate: X509Certificate, ctx: Repository.Context?): Long? =
     coroutineScope {

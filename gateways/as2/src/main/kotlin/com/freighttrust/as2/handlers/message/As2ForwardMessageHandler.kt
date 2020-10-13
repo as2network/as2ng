@@ -1,7 +1,7 @@
 package com.freighttrust.as2.handlers.message
 
 import com.freighttrust.as2.domain.Disposition
-import com.freighttrust.as2.domain.DispositionNotification
+import com.freighttrust.as2.domain.fromMimeBodyPart
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.dataSource
 import com.freighttrust.as2.ext.isSigned
@@ -10,9 +10,9 @@ import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.message
 import com.freighttrust.as2.handlers.tempFileHelper
 import com.freighttrust.as2.util.AS2Header
-import com.freighttrust.jooq.tables.records.DispositionNotificationRecord
-import com.freighttrust.jooq.tables.records.KeyPairRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.jooq.tables.pojos.DispositionNotification
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.DispositionNotificationRepository
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.RequestRepository
@@ -90,11 +90,11 @@ class As2ForwardMessageHandler(
         if (bodyPart.isSigned()) {
 
           val partner = partnerRepository.findById(
-            TradingPartnerRecord().apply { id = ctx.message.tradingChannel.recipientId }
+            TradingPartner().apply { id = ctx.message.tradingChannel.recipientId }
           ) ?: throw Error("Could not find recipient trading partner in database")
 
           val keyPair = keyPairRepository.findById(
-            KeyPairRecord().apply { id = partner.keyPairId }
+            KeyPair().apply { id = partner.keyPairId }
           ) ?: throw Error("Could not find key pair for partner in database")
 
           bodyPart = bodyPart.verifiedContent(keyPair.certificate.toX509(), ctx.tempFileHelper)
@@ -102,18 +102,19 @@ class As2ForwardMessageHandler(
 
         // store the notification
 
-        DispositionNotification.from(bodyPart)
+        DispositionNotification()
+          .fromMimeBodyPart(bodyPart)
           .also { notification ->
 
             dispositionNotificationRepository
               .insert(
-                DispositionNotificationRecord()
+                DispositionNotification()
                   .apply {
-                    this.requestId = ctx.message.context.requestRecord.id
+                    this.requestId = ctx.message.context.request.id
                     this.originalMessageId = notification.originalMessageId
                     this.originalRecipient = notification.originalRecipient
                     this.finalRecipient = notification.finalRecipient
-                    this.reportingUa = notification.reportingUA
+                    this.reportingUa = notification.reportingUa
                     this.disposition = notification.disposition.toString()
                     notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
                   }
@@ -131,7 +132,7 @@ class As2ForwardMessageHandler(
       }
 
       // mark the request as delivered
-      requestRepository.setAsDeliveredTo(context.requestRecord.id, url, Instant.now())
+      requestRepository.setAsDeliveredTo(context.request.id, url, Instant.now())
 
       // close the connection
       ctx.response().end()

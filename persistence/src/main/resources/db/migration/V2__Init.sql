@@ -148,5 +148,6 @@ create table disposition_notification
     final_recipient      varchar(64),
     reporting_ua         varchar(64),
     disposition          varchar(128),
-    received_content_mic varchar(64) null
+    received_content_mic varchar(64) null,
+    digest_algorithm    varchar(16) null
 );

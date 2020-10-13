@@ -1,9 +1,7 @@
 package com.freighttrust.as2.cli.config.channel
 
-import com.freighttrust.jooq.tables.records.KeyPairRecord
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
-import com.freighttrust.persistence.KeyPairRepository
+import com.freighttrust.jooq.tables.pojos.TradingChannel
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
@@ -76,7 +74,7 @@ class TradingChannelUpdate : KoinComponent, Runnable {
         senderPartnerId
           ?.also {
             val senderExists = partnerRepository
-              .exists(TradingPartnerRecord().apply { id = it }, tx)
+              .exists(TradingPartner().apply { id = it }, tx)
             if (!senderExists) throw Error("Sender trading partner with id = $senderPartnerId not found")
           }
 
@@ -85,18 +83,18 @@ class TradingChannelUpdate : KoinComponent, Runnable {
         recipientPartnerId
           ?.also {
             val recipientExists = partnerRepository
-              .exists(TradingPartnerRecord().apply { id = recipientPartnerId }, tx)
+              .exists(TradingPartner().apply { id = recipientPartnerId }, tx)
 
             if (!recipientExists) throw Error("Sender trading partner with id = $recipientPartnerId not found")
           }
 
         // add the trading channel
 
-        val record = channelRepository.findById(TradingChannelRecord().apply { id = this@TradingChannelUpdate.id })
+        val record = channelRepository.findById(TradingChannel().apply { id = this@TradingChannelUpdate.id })
           ?: throw Error("Trading channel not found with id = $id")
 
         channelRepository.update(
-          TradingChannelRecord()
+          TradingChannel()
             .apply {
               id = this@TradingChannelUpdate.id
               name = this@TradingChannelUpdate.name ?: record.name

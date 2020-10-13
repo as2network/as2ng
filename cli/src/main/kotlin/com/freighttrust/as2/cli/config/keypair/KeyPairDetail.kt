@@ -1,6 +1,6 @@
 package com.freighttrust.as2.cli.config.keypair
 
-import com.freighttrust.jooq.tables.records.KeyPairRecord
+import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.persistence.KeyPairRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
@@ -30,7 +30,7 @@ class KeyPairDetail : KoinComponent, Runnable {
       requireNotNull(
         runBlocking {
           repository.findById(
-            KeyPairRecord().apply { id = this@KeyPairDetail.id }
+            KeyPair().apply { id = this@KeyPairDetail.id }
           )
         }
       ) { "Key pair not found with id = $id" }

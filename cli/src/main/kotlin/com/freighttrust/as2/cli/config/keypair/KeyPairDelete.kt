@@ -1,6 +1,6 @@
 package com.freighttrust.as2.cli.config.keypair
 
-import com.freighttrust.jooq.tables.records.KeyPairRecord
+import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.persistence.KeyPairRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
@@ -32,7 +32,7 @@ class KeyPairDelete : KoinComponent, Runnable {
         requireNotNull(
 
           repository.findById(
-            KeyPairRecord().apply { id = this@KeyPairDelete.id }
+            KeyPair().apply { id = this@KeyPairDelete.id }
           )
 
         ) { "Key pair not found with id = $id" }

@@ -16,7 +16,7 @@ class As2ForwardMdnHandler(
   override suspend fun coroutineHandle(ctx: RoutingContext): Unit =
     with(ctx.message) {
 
-      val originalMessage = context.originalMessageRecord ?: throw Error("Original message record cannot be null")
+      val originalMessage = context.originalMessage ?: throw Error("Original message record cannot be null")
       val url: String = originalMessage.receiptDeliveryOption ?: throw Error("Receipt delivery option cannot be null")
 
       // forward the mdn
@@ -26,7 +26,7 @@ class As2ForwardMdnHandler(
         .sendBufferAwait(ctx.body)
 
       // mark the request as delivered
-      requestRepository.setAsDeliveredTo(context.requestRecord.id, url, Instant.now())
+      requestRepository.setAsDeliveredTo(context.request.id, url, Instant.now())
 
       // close the connection
       ctx.response()

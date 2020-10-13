@@ -6,6 +6,8 @@ package com.freighttrust.jooq.tables;
 
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.TradingPartnerHistoryRecord;
+import com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding;
+import com.freighttrust.persistence.postgres.bindings.TsTzRange;
 
 import javax.annotation.processing.Generated;
 
@@ -35,7 +37,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartnerHistory extends TableImpl<TradingPartnerHistoryRecord> {
 
-    private static final long serialVersionUID = -942677935;
+    private static final long serialVersionUID = -1632939288;
 
     /**
      * The reference instance of <code>public.trading_partner_history</code>
@@ -71,10 +73,9 @@ public class TradingPartnerHistory extends TableImpl<TradingPartnerHistoryRecord
     public final TableField<TradingPartnerHistoryRecord, Long> KEY_PAIR_ID = createField(DSL.name("key_pair_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * The column <code>public.trading_partner_history.validity</code>.
      */
-    @java.lang.Deprecated
-    public final TableField<TradingPartnerHistoryRecord, Object> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\""), this, "");
+    public final TableField<TradingPartnerHistoryRecord, TsTzRange> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\""), this, "", new TimestampTimezoneRangeBinding());
 
     /**
      * Create a <code>public.trading_partner_history</code> table reference
@@ -145,7 +146,7 @@ public class TradingPartnerHistory extends TableImpl<TradingPartnerHistoryRecord
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<Long, String, String, Long, Object> fieldsRow() {
+    public Row5<Long, String, String, Long, TsTzRange> fieldsRow() {
         return (Row5) super.fieldsRow();
     }
 }

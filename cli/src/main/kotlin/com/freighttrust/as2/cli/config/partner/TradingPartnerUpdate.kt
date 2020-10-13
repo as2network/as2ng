@@ -1,7 +1,7 @@
 package com.freighttrust.as2.cli.config.partner
 
-import com.freighttrust.jooq.tables.records.KeyPairRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
@@ -50,12 +50,12 @@ class TradingPartnerUpdate : KoinComponent, Runnable {
     val record =
       requireNotNull(
         runBlocking {
-          partnerRepository.findById(TradingPartnerRecord().apply { this.id = this@TradingPartnerUpdate.id })
+          partnerRepository.findById(TradingPartner().apply { this.id = this@TradingPartnerUpdate.id })
         }
       ) { "Trading partner not found" }
 
     // merge values
-    val update = TradingPartnerRecord().apply {
+    val update = TradingPartner().apply {
       id = record.id
       name = this@TradingPartnerUpdate.name ?: record.name
       email = this@TradingPartnerUpdate.email ?: record.email
@@ -66,7 +66,7 @@ class TradingPartnerUpdate : KoinComponent, Runnable {
 
       keyPairId
         ?.also {
-          val exists = keyPairRepository.exists(KeyPairRecord().apply { id = it })
+          val exists = keyPairRepository.exists(KeyPair().apply { id = it })
           if (!exists) throw Error("Encryption key pair not found with id = $it")
         }
 

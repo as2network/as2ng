@@ -2,8 +2,8 @@ package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.jooq.tables.records.KeyPairRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import com.freighttrust.persistence.extensions.toPrivateKey
@@ -28,11 +28,11 @@ class As2DecryptionHandler(
           // todo replace with a join
 
           val partner = partnerRepository.findById(
-            TradingPartnerRecord().apply { id = recipientId }
+            TradingPartner().apply { id = recipientId }
           ) ?: throw Error("Partner not found with id = $recipientId")
 
           val keyPair = keyPairRepository.findById(
-            KeyPairRecord().apply {
+            KeyPair().apply {
               id = partner.keyPairId
             }
           ) ?: throw Error("Key pair not found for id = ${partner.keyPairId}")

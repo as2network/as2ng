@@ -1,7 +1,7 @@
 package com.freighttrust.as2.cli.config.partner
 
-import com.freighttrust.jooq.tables.records.KeyPairRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
@@ -45,10 +45,10 @@ class TradingPartnerAdd : KoinComponent, Runnable {
     val inserted = runBlocking {
 
 
-      val exists = keyPairRepository.exists(KeyPairRecord().apply { id = keyPairId })
+      val exists = keyPairRepository.exists(KeyPair().apply { id = keyPairId })
       if (!exists) throw Error("Encryption key pair not found with id = $keyPairId")
 
-      val record = TradingPartnerRecord()
+      val record = TradingPartner()
         .apply {
           name = this@TradingPartnerAdd.name
           email = this@TradingPartnerAdd.email

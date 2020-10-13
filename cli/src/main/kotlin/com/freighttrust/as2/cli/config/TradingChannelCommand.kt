@@ -17,5 +17,5 @@ import picocli.CommandLine.Command
     TradingChannelDetail::class
   ]
 )
-class TradingChannel {
+class TradingChannelCommand {
 }

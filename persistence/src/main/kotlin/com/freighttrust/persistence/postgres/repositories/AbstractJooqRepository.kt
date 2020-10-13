@@ -5,23 +5,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import org.jooq.*
+import org.jooq.Condition
+import org.jooq.DSLContext
+import org.jooq.Record
+import org.jooq.Table
 import org.jooq.impl.DSL
 import kotlin.coroutines.CoroutineContext
 
-abstract class AbstractJooqRepository<R : Record>(
+abstract class AbstractJooqRepository<R : Record, Pojo>(
   private val dbCtx: DSLContext,
   protected val table: Table<R>,
-  protected val idFields: List<Field<*>>,
+  private val pojoClass: Class<Pojo>,
   override val coroutineContext: CoroutineContext = Dispatchers.IO
-) : Repository<R>, CoroutineScope {
+) : Repository<Pojo>, CoroutineScope {
 
   class JooqContext(val dbCtx: DSLContext) : Repository.Context
 
-  private val defaultContext = JooqContext(dbCtx)
-
   // TODO there has to be a generic way of doing this
-  protected abstract fun idQuery(record: R): Condition
+  protected abstract fun idQuery(record: Pojo): Condition
 
   protected fun jooqContext(ctx: Repository.Context?): DSLContext =
     if (ctx == null)
@@ -41,52 +42,57 @@ abstract class AbstractJooqRepository<R : Record>(
     return result
   }
 
-  override suspend fun exists(record: R, ctx: Repository.Context?): Boolean =
+  override suspend fun exists(value: Pojo, ctx: Repository.Context?): Boolean =
     coroutineScope {
       jooqContext(ctx)
-        .fetchCount(table, idQuery(record)) == 1
+        .fetchCount(table, idQuery(value)) == 1
     }
 
-  override suspend fun findAll(ctx: Repository.Context?): List<R> =
+  override suspend fun findAll(ctx: Repository.Context?): List<Pojo> =
     coroutineScope {
       jooqContext(ctx)
         .selectFrom(table)
-        .fetch()
+        .fetchInto<Pojo>(pojoClass)
         .toList()
     }
 
-  override suspend fun findById(record: R, ctx: Repository.Context?): R? =
+  override suspend fun findById(value: Pojo, ctx: Repository.Context?): Pojo? =
     coroutineScope {
       jooqContext(ctx)
         .selectFrom(table)
-        .where(idQuery(record))
+        .where(idQuery(value))
         .fetchOne()
+        .into(pojoClass)
     }
 
-  override suspend fun insert(record: R, ctx: Repository.Context?): R =
+  override suspend fun insert(value: Pojo, ctx: Repository.Context?): Pojo =
     coroutineScope {
-      jooqContext(ctx)
-        .insertInto(table)
-        .set(record)
-        .returning()
-        .fetchOne()
+      with(jooqContext(ctx)) {
+        insertInto(table)
+          .set(newRecord(table, value))
+          .returning()
+          .fetchOne()
+          .into(pojoClass)
+      }
     }
 
-  override suspend fun update(record: R, ctx: Repository.Context?): R =
+  override suspend fun update(value: Pojo, ctx: Repository.Context?): Pojo =
     coroutineScope {
-      jooqContext(ctx)
-        .update(table)
-        .set(record)
-        .where(idQuery(record))
-        .returning()
-        .fetchOne()
+      with(jooqContext(ctx)) {
+        update(table)
+          .set(newRecord(table, value))
+          .where(idQuery(value))
+          .returning()
+          .fetchOne()
+          .into(pojoClass)
+      }
     }
 
-  override suspend fun deleteById(record: R, ctx: Repository.Context?): Int =
+  override suspend fun deleteById(value: Pojo, ctx: Repository.Context?): Int =
     coroutineScope {
       jooqContext(ctx)
         .deleteFrom(table)
-        .where(idQuery(record))
+        .where(idQuery(value))
         .execute()
     }
 

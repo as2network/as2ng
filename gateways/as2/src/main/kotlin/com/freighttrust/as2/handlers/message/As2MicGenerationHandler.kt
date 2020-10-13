@@ -1,6 +1,6 @@
 package com.freighttrust.as2.handlers.message
 
-import com.freighttrust.as2.domain.MessageType
+import com.freighttrust.as2.domain.As2MessageType
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.message
 import io.vertx.ext.web.RoutingContext
@@ -11,7 +11,7 @@ class As2MicGenerationHandler : CoroutineRouteHandler() {
 
     with(ctx.message) {
 
-      if (type == MessageType.Message) {
+      if (type == As2MessageType.Message) {
         ctx.message = withMics()
       }
 

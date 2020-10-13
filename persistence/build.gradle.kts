@@ -1,5 +1,6 @@
 import com.rohanprabhu.gradle.plugins.kdjooq.JooqEdition
 import org.jooq.meta.jaxb.Configuration
+import org.jooq.meta.jaxb.ForcedType
 
 plugins {
   kotlin("jvm")
@@ -65,13 +66,19 @@ jooqGenerator {
             org.jooq.meta.jaxb.Database()
               .withName("org.jooq.meta.postgres.PostgresDatabase")
               .withInputSchema("public")
+              .withForcedTypes(
+                ForcedType()
+                  .withIncludeTypes("tstzrange")
+                  .withUserType("com.freighttrust.persistence.postgres.bindings.TsTzRange")
+                  .withBinding("com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding")
+              )
           )
           .withGenerate(
             org.jooq.meta.jaxb.Generate()
               .withRelations(true)
               .withDeprecated(false)
               .withRecords(true)
-              .withImmutablePojos(false)
+              .withPojos(true)
               .withFluentSetters(true)
           )
           .withTarget(

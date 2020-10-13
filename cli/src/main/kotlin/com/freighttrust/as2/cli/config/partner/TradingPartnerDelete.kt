@@ -1,6 +1,6 @@
 package com.freighttrust.as2.cli.config.partner
 
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
@@ -45,7 +45,7 @@ class TradingPartnerDelete : KoinComponent, Runnable {
           require((id != null).xor(name != null)) { "Either a name or an id must be provided" }
 
           when {
-            id != null -> repository.findById(TradingPartnerRecord().apply { this.id = id })
+            id != null -> repository.findById(TradingPartner().apply { this.id = id })
             name != null -> repository.findByName(name)
             else -> throw IllegalStateException("This code should not be able to execute")
           }

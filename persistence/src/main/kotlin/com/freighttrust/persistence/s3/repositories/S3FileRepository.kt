@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.services.s3.model.PutObjectRequest
 import com.amazonaws.services.s3.transfer.TransferManager
 import com.freighttrust.jooq.Tables.FILE
+import com.freighttrust.jooq.tables.pojos.File
 import com.freighttrust.jooq.tables.records.FileRecord
 import com.freighttrust.persistence.postgres.repositories.AbstractJooqRepository
 import com.freighttrust.persistence.FileRepository
@@ -18,17 +19,14 @@ class S3FileRepository(
   dbCtx: DSLContext,
   private val transferManager: TransferManager,
   private val bucket: String
-) : AbstractJooqRepository<FileRecord>(
-  dbCtx, FILE, listOf(FILE.ID)
+) : AbstractJooqRepository<FileRecord, File>(
+  dbCtx, FILE, File::class.java
 ), FileRepository {
 
-  override fun idQuery(record: FileRecord): Condition =
-    FILE.ID.let { field ->
-      field.eq(record.get(field))
-    }
+  override fun idQuery(record: File): Condition = FILE.ID.eq(record.id)
 
   // TODO large file support
-  override suspend fun insert(key: String, dataHandler: DataHandler, ctx: Repository.Context?): FileRecord =
+  override suspend fun insert(key: String, dataHandler: DataHandler, ctx: Repository.Context?): File =
     coroutineScope {
       ObjectMetadata()
         .apply { this.contentType = dataHandler.contentType }
@@ -41,7 +39,7 @@ class S3FileRepository(
             .values(bucket, key)
             .returningResult(FILE.ID, FILE.BUCKET, FILE.KEY)
             .fetch()
-            .into(FILE)
+            .into(File::class.java)
             .first()
         }
     }

@@ -2,8 +2,9 @@ package com.freighttrust.as2.ext
 
 import com.freighttrust.as2.BuildConfig
 import com.freighttrust.as2.domain.Disposition
-import com.freighttrust.as2.domain.DispositionNotification
+import com.freighttrust.as2.domain.toMimeBodyPart
 import com.freighttrust.as2.handlers.message
+import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
@@ -70,28 +71,28 @@ val RoutingContext.reportingUserAgent: String
 
 fun RoutingContext.dispositionNotification(disposition: Disposition): DispositionNotification =
   with(message) {
+    DispositionNotification()
+      .apply {
+        this.originalMessageId = messageId
+        // todo review original and final recipient logic
+        originalRecipient = recipientId
+        finalRecipient = recipientId
+        reportingUa = reportingUserAgent
+        this.disposition = disposition.toString()
+        receivedContentMic = dispositionNotificationOptions
+          ?.firstMICAlg
+          ?.let { signingAlgorithm ->
 
-    DispositionNotification(
-      messageId,
-      // todo review original and final recipient logic
-      recipientId,
-      recipientId,
-      reportingUserAgent,
-      disposition,
-      dispositionNotificationOptions
-        ?.firstMICAlg
-        ?.let { signingAlgorithm ->
+            val includeHeaders =
+              context
+                .let { context ->
+                  context.wasEncrypted || context.wasSigned || context.wasCompressed
+                }
 
-          val includeHeaders =
-            context
-              .let { context ->
-                context.wasEncrypted || context.wasSigned || context.wasCompressed
-              }
-
-          body.calculateMic(includeHeaders, signingAlgorithm)
-        },
-      dispositionNotificationOptions
-        ?.firstMICAlg?.id
-    )
+            body.calculateMic(includeHeaders, signingAlgorithm)
+          }
+        digestAlgorithm = dispositionNotificationOptions
+          ?.firstMICAlg?.id
+      }
   }
 
