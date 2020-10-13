@@ -33,5 +33,4 @@ class As2ForwardMdnHandler(
         .setStatusCode(200)
         .end()
     }
-
 }

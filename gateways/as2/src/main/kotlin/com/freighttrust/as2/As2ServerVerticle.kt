@@ -9,13 +9,13 @@ import com.freighttrust.as2.handlers.mdn.As2MicVerificationHandler
 import com.freighttrust.as2.handlers.message.As2ForwardMessageHandler
 import com.freighttrust.as2.handlers.message.As2MessageReceivedHandler
 import com.freighttrust.as2.handlers.message.As2MicGenerationHandler
+import com.typesafe.config.Config
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.coroutines.CoroutineVerticle
 import org.jooq.DSLContext
 import org.koin.core.Koin
+import org.koin.core.qualifier._q
 import org.slf4j.LoggerFactory
-
 
 class As2ServerVerticle(
   private val koin: Koin
@@ -23,9 +23,9 @@ class As2ServerVerticle(
 
   private val logger = LoggerFactory.getLogger(As2ServerVerticle::class.java)
 
-  private val webClient: WebClient = koin.get()
-
   override suspend fun start() {
+
+    val config = koin.get<Config>(_q("as2"))
 
     val router = Router.router(vertx)
 
@@ -53,15 +53,16 @@ class As2ServerVerticle(
 
     logger.info("Mounting router")
 
+    val port = config.getInt("port")
+
     vertx
       .createHttpServer()
       .requestHandler(router)
-      .listen(8080)
+      .listen(port)
   }
 
   override suspend fun stop() {
     val dbCtx = koin.get<DSLContext>()
     dbCtx.close()
   }
-
 }

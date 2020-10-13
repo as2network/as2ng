@@ -124,7 +124,6 @@ data class Message(
       }
     }
 
-
   fun decompress(
     tempFileHelper: TempFileHelper
   ): Message =
@@ -151,7 +150,6 @@ data class Message(
             logger.debug(str)
           }
 
-          // TODO: get buffer from configuration
           val decompressed =
             SMIMECompressedParser(body, 8 * 1024)
               .getContent(ZlibExpanderProvider())
@@ -164,7 +162,6 @@ data class Message(
             body = decompressed,
             context = context.copy(decompressedBody = Pair(decompressed, "zlib"))
           )
-
         } catch (ex: Exception) {
 
           when (ex) {
@@ -179,7 +176,6 @@ data class Message(
             }
             else -> throw ex
           }
-
         }
       }
     }
@@ -197,7 +193,6 @@ data class Message(
               context = context.copy(verifiedBody = verifiedBody, signatureCertificate = certificate)
             )
           }
-
       }
 
   fun withMics(): Message {
@@ -211,6 +206,4 @@ data class Message(
 
     return copy(context = context.copy(mics = mics))
   }
-
-
 }

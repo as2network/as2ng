@@ -19,7 +19,6 @@ class As2BodyHandler : Handler<RoutingContext> {
         Pair(file, FileOutputStream(file))
       }
 
-
   override fun handle(ctx: RoutingContext) {
 
     val request = ctx.request()
@@ -64,7 +63,5 @@ class As2BodyHandler : Handler<RoutingContext> {
 
       ctx.next()
     }
-
   }
-
 }

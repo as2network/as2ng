@@ -29,6 +29,7 @@ import javax.activation.DataHandler
 import javax.mail.internet.MimeBodyPart
 
 class As2ForwardMessageHandler(
+  private val baseUrl: String,
   private val requestRepository: RequestRepository,
   private val partnerRepository: TradingPartnerRepository,
   private val keyPairRepository: KeyPairRepository,
@@ -49,10 +50,9 @@ class As2ForwardMessageHandler(
         .timeout(10000)
 
       if (isMdnRequested && isMdnAsynchronous) {
-        // TODO make configurable
         // replace the response url with the exchange url instead of the original sender
         request.headers().remove(AS2Header.ReceiptDeliveryOption.key)
-        request.putHeader(AS2Header.ReceiptDeliveryOption.key, "http://localhost:8080/mdn")
+        request.putHeader(AS2Header.ReceiptDeliveryOption.key, "$baseUrl/mdn")
       }
 
       // forward the message
@@ -90,7 +90,7 @@ class As2ForwardMessageHandler(
         if (bodyPart.isSigned()) {
 
           val partner = partnerRepository.findById(
-            TradingPartnerRecord().apply{ id = ctx.message.tradingChannel.recipientId }
+            TradingPartnerRecord().apply { id = ctx.message.tradingChannel.recipientId }
           ) ?: throw Error("Could not find recipient trading partner in database")
 
           val keyPair = keyPairRepository.findById(
@@ -118,7 +118,6 @@ class As2ForwardMessageHandler(
                     notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
                   }
               )
-
           }
 
         // return the mdn
@@ -137,5 +136,4 @@ class As2ForwardMessageHandler(
       // close the connection
       ctx.response().end()
     }
-
 }

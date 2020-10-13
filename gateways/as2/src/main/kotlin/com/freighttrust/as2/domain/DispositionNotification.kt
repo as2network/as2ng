@@ -56,7 +56,6 @@ enum class DispositionSendingMode(val key: String) {
   companion object {
     fun parse(str: String) = values().firstOrNull { it.key == str }
   }
-
 }
 
 /**
@@ -74,7 +73,6 @@ enum class DispositionType(val key: String) {
   companion object {
     fun parse(str: String) = values().firstOrNull { it.key == str }
   }
-
 }
 
 enum class DispositionModifier(val key: String) {
@@ -86,7 +84,6 @@ enum class DispositionModifier(val key: String) {
   companion object {
     fun parse(str: String) = values().firstOrNull { it.key == str }
   }
-
 }
 
 data class Disposition(
@@ -180,7 +177,6 @@ data class Disposition(
       DispositionModifier.Error,
       reason
     )
-
   }
 
   override fun toString(): String = StringBuilder()
@@ -190,7 +186,6 @@ data class Disposition(
       // TODO enforce only one error type is set
       if (modifier != null) append("/${modifier.key}")
       if (modifierText != null) append(": $modifierText")
-
     }.toString()
 }
 
@@ -247,12 +242,9 @@ data class DispositionNotification(
                   headers.getAs2Header(AS2Header.ReceivedContentMIC),
                   headers.getAs2Header(AS2Header.DigestAlgorithmId)
                 )
-
               }
           }
       }
-
-
   }
 
   fun toMimeBodyPart(ctx: RoutingContext): MimeBodyPart =
@@ -281,7 +273,6 @@ data class DispositionNotification(
             val mic = message.body.calculateMic(includeHeaders, signingAlgorithm)
             setAs2Header(AS2Header.ReceivedContentMIC, mic)
           }
-
         }
         .let { headers ->
           val builder = StringBuilder()
@@ -298,7 +289,5 @@ data class DispositionNotification(
               setHeader(HttpHeaders.CONTENT_TYPE.toString(), "message/disposition-notification")
             }
         }
-
     }
-
 }

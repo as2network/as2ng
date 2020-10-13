@@ -19,5 +19,4 @@ abstract class CoroutineRouteHandler : Handler<RoutingContext> {
   }
 
   abstract suspend fun coroutineHandle(ctx: RoutingContext)
-
 }

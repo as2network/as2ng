@@ -3,9 +3,6 @@ package com.freighttrust.as2.handlers
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.signatureCertificateFromBody
-import com.helger.as2lib.disposition.AS2DispositionException
-import com.helger.as2lib.disposition.DispositionType
-import com.helger.as2lib.processor.receiver.AbstractActiveNetModule
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.LoggerFactory
 
@@ -23,8 +20,8 @@ class As2SignatureVerificationHandler : CoroutineRouteHandler() {
 
       try {
 
-        val certificate = body.signatureCertificateFromBody(ctx.tempFileHelper) ?:
-        throw Error("Body certificate not found")
+        val certificate = body.signatureCertificateFromBody(ctx.tempFileHelper)
+        ?: throw Error("Body certificate not found")
 
         certificate.checkValidity()
 
@@ -33,7 +30,6 @@ class As2SignatureVerificationHandler : CoroutineRouteHandler() {
         logger.info("Successfully verified signature of incoming AS2 message")
 
         ctx.next()
-
       } catch (ex: Exception) {
         logger.error("Error verifying signature: ${ex.message}")
         throw DispositionException(
@@ -41,10 +37,6 @@ class As2SignatureVerificationHandler : CoroutineRouteHandler() {
           ex
         )
       }
-
-
-
     }
-
   }
 }
