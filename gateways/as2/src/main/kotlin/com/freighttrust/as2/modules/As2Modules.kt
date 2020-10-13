@@ -1,10 +1,12 @@
 package com.freighttrust.as2.modules
-
 import com.fasterxml.uuid.Generators
-import com.freighttrust.as2.cert.VaultCertificateProvider
-import com.freighttrust.as2.cert.VaultConfigOptions
-import com.freighttrust.as2.handlers.*
+import com.freighttrust.as2.handlers.As2BodyHandler
+import com.freighttrust.as2.handlers.As2DecompressionHandler
+import com.freighttrust.as2.handlers.As2DecryptionHandler
 import com.freighttrust.as2.handlers.As2FailureHandler
+import com.freighttrust.as2.handlers.As2RequestHandler
+import com.freighttrust.as2.handlers.As2SignatureVerificationHandler
+import com.freighttrust.as2.handlers.As2TempFileHandler
 import com.freighttrust.as2.handlers.edi.EDIValidationHandler
 import com.freighttrust.as2.handlers.mdn.As2ForwardMdnHandler
 import com.freighttrust.as2.handlers.mdn.As2MdnReceivedHandler
@@ -18,7 +20,6 @@ import io.xlate.edi.stream.EDIInputFactory
 import okhttp3.OkHttpClient
 import org.koin.core.qualifier._q
 import org.koin.dsl.module
-import java.net.URL
 
 val As2ExchangeServerModule = module {
 
@@ -59,27 +60,3 @@ val HttpModule = module {
 
 }
 
-val CertsModule = module {
-
-  factory(_q("certs")) {
-    val config = get<Config>(_q("app"))
-    config.getConfig("certs")
-  }
-
-  factory {
-    val c = get<Config>(_q("certs.VaultCertificateFactory"))
-
-    VaultConfigOptions(
-      x509CertificateRequestUrl = URL(c.getString("X509CertificateUrl")),
-      authToken = c.getString("AuthToken"),
-      commonName = c.getString("CommonName"),
-      format = c.getString("Format"),
-      privateKeyFormat = c.getString("PrivateKeyFormat"),
-      ttl = c.getString("TTL")
-    )
-  }
-
-  factory {
-    VaultCertificateProvider(get(), get())
-  }
-}
