@@ -28,7 +28,7 @@ fun RoutingContext.bodyAsMimeBodyPart() =
     .let { bodyPart ->
 
       val receivedContentType = AS2HttpHelper
-        // TODO looking into exactly how content type might be encoded
+        // TODO look into exactly how content type might be encoded
         .getCleanContentType(request().getHeader(HttpHeaders.CONTENT_TYPE))
 
       bodyPart.dataHandler = DataHandler(bodyDataSource())

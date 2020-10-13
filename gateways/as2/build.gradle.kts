@@ -14,7 +14,7 @@ build.dependsOn(tasks.shadowJar)
 val appJvmArgs = listOf("-Xms512m", "-Xmx512m")
 
 val vertxLauncher = "io.vertx.core.Launcher"
-val vertxDebug = getenv("VERTX_DEBUG")?.toBoolean() ?: false
+val vertxDebug = getenv("VERTX_DEBUG")?.toBoolean() ?: true
 
 fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   group = "application"
@@ -33,7 +33,7 @@ fun JavaExec.verticleTask(verticle: String, debugPort: String) {
 
   if (vertxDebug) {
     val javaOpts = listOf(
-      "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=0.0.0.0:$debugPort",
+      "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:$debugPort",
       "-Dvertx.options.maxEventLoopExecuteTime=${Long.MAX_VALUE}",
       "-Dvertx.options.maxWorkerExecuteTime=${Long.MAX_VALUE}",
       "-Dvertx.debug=true",

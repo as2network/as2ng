@@ -42,7 +42,7 @@ val As2ExchangeServerModule = module {
   single { As2SignatureVerificationHandler() }
   single { As2MicVerificationHandler() }
   single { As2MicGenerationHandler() }
-  single { As2ForwardMessageHandler(get(), get()) }
+  single { As2ForwardMessageHandler(get(), get(), get(), get(), get()) }
   single { As2ForwardMdnHandler(get(), get()) }
 
   single { EDIValidationHandler(get()) }

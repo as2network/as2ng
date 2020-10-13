@@ -1,14 +1,11 @@
 package com.freighttrust.as2.ext
 
-import com.freighttrust.as2.domain.Disposition
-import com.freighttrust.as2.domain.DispositionNotification
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.as2.util.TempFileHelper
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.as2lib.util.AS2IOHelper
 import com.helger.commons.http.CHttp
-import com.helger.commons.http.CHttpHeader
 import com.helger.commons.io.stream.NullOutputStream
 import com.helger.mail.cte.EContentTransferEncoding
 import org.apache.http.HttpHeaders
@@ -33,7 +30,6 @@ import java.security.Provider
 import java.security.SignatureException
 import java.security.cert.X509Certificate
 import java.util.*
-import javax.mail.internet.InternetHeaders
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMultipart
 
@@ -167,7 +163,7 @@ fun MimeBodyPart.signatureCertificateFromBody(
 
 fun MimeBodyPart.verifiedContent(
   certificate: X509Certificate,
-  tempFileHelper: TempFileHelper,
+  tempFileFactory: TempFileHelper,
   securityProvider: Provider = BouncyCastleProvider()
 ): MimeBodyPart =
   require(isSigned()) { "Body must be signed" }
@@ -183,7 +179,7 @@ fun MimeBodyPart.verifiedContent(
           .build(),
         content as MimeMultipart,
         "binary",
-        tempFileHelper.newFile()
+        tempFileFactory.newFile()
       ).let { parser ->
 
         parser.signerInfos.signers
