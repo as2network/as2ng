@@ -1,6 +1,5 @@
 package com.freighttrust.as2.handlers
 
-import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.domain.DispositionNotification
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.createMDN
@@ -16,8 +15,8 @@ import com.freighttrust.as2.util.AS2Header.Version
 import com.freighttrust.jooq.tables.records.DispositionNotificationRecord
 import com.freighttrust.jooq.tables.records.KeyPairRecord
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
-import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.DispositionNotificationRepository
+import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import com.freighttrust.persistence.extensions.toPrivateKey

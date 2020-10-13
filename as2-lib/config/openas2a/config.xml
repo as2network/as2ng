@@ -14,6 +14,7 @@
   <processor classname="com.helger.as2lib.processor.DefaultMessageProcessor"
              pendingMDN="%home%/../../data/OpenAS2A/pendingMDN3"
              pendingMDNinfo="%home%/../../data/OpenAS2A/pendinginfoMDN3">
+
     <module classname="com.helger.as2lib.processor.sender.AS2SenderModule"/>
 
     <!-- This will parse the filename to get a sender and receiver. For instance a file
