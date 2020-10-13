@@ -65,14 +65,18 @@ fun RoutingContext.createMDN(text: String, notification: DispositionNotification
         }
     }
 
+val RoutingContext.reportingUserAgent: String
+  get() = "FreightTrust AS2 ${BuildConfig.version}@${request().host()}"
+
 fun RoutingContext.dispositionNotification(disposition: Disposition): DispositionNotification =
   with(message) {
+
     DispositionNotification(
       messageId,
       // todo review original and final recipient logic
       recipientId,
       recipientId,
-      "FreightTrustAS2/${BuildConfig.version}",
+      reportingUserAgent,
       disposition,
       dispositionNotificationOptions
         ?.firstMICAlg
@@ -90,3 +94,4 @@ fun RoutingContext.dispositionNotification(disposition: Disposition): Dispositio
         ?.firstMICAlg?.id
     )
   }
+
