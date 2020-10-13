@@ -10,8 +10,6 @@ import io.vertx.core.Vertx
 import io.vertx.core.spi.VerticleFactory
 import org.koin.core.Koin
 import org.koin.core.KoinApplication
-import org.koin.core.context.GlobalContext
-import org.koin.core.context.KoinContext
 import org.koin.core.context.KoinContextHandler
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -48,7 +46,6 @@ class As2VerticleFactory : VerticleFactory {
         koin = it.koin
       }
     }
-
   }
 
   override fun close() {
@@ -60,5 +57,4 @@ class As2VerticleFactory : VerticleFactory {
       .let { className -> Class.forName(className, true, classLoader) }
       .constructors.first()
       .let { constructor -> constructor.newInstance(koin) as Verticle }
-
 }

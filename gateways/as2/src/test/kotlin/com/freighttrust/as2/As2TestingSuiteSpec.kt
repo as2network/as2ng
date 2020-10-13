@@ -39,11 +39,9 @@ import com.freighttrust.as2.domain.DispositionActionMode
 import com.freighttrust.as2.domain.DispositionSendingMode
 import com.freighttrust.as2.domain.DispositionType
 import com.freighttrust.as2.ext.disposition
-import com.freighttrust.as2.ext.isSigned
 import com.freighttrust.as2.modules.As2ExchangeServerModule
 import com.freighttrust.as2.utils.asOkHttpRequest
 import com.freighttrust.as2.utils.asPathResourceFile
-import com.freighttrust.as2.utils.ignoreExceptions
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.persistence.s3.S3Module
@@ -51,7 +49,6 @@ import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientSettings
-import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.message.AS2Message
 import com.helger.as2lib.session.AS2Session
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
@@ -62,7 +59,6 @@ import io.vertx.core.Vertx
 import io.vertx.kotlin.core.deployVerticleAwait
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
-import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.jooq.DSLContext
 import org.koin.core.context.startKoin
@@ -146,14 +142,10 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
           hasException() shouldBe false
           hasMDN() shouldBe false
         }
-
       }
 
       test("2. Sender sends un-encrypted data and requests an unsigned receipt. Receiver sends back the unsigned receipt.")
         .config(enabled = false) {}
-
-
-
 
       test("3. Sender sends un-encrypted data and requests a signed receipt. Receiver sends back the signed receipt.") {
 
@@ -175,7 +167,6 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
             DispositionType.Processed
           )
         }
-
       }
 
       test("4. Sender sends encrypted data and does not request a receipt.")
@@ -232,7 +223,7 @@ class As2TestingSuiteSpec : FunSpec(), KoinTest {
 //          }
 //
 //          // Assert OpenAS2C received a correct MDN response
-////          mockServerC.requestCount shouldBe 1
+// //          mockServerC.requestCount shouldBe 1
 //        }
 
       test("9. Sender sends signed data and requests a signed receipt. Receiver sends back the signed receipt.")

@@ -11,12 +11,11 @@ class As2MicGenerationHandler : CoroutineRouteHandler() {
 
     with(ctx.message) {
 
-      if(type == MessageType.Message) {
+      if (type == MessageType.Message) {
         ctx.message = withMics()
       }
 
       ctx.next()
     }
-
   }
 }

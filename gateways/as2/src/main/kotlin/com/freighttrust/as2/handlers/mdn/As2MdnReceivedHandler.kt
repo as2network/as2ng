@@ -56,7 +56,6 @@ class As2MdnReceivedHandler(
 
       messageRepository
         .findById(MessageRecord().apply { requestId = originalRequestId })
-
     }
 
     ctx.message = message.copy(
@@ -67,6 +66,5 @@ class As2MdnReceivedHandler(
     )
 
     ctx.next()
-
   }
 }

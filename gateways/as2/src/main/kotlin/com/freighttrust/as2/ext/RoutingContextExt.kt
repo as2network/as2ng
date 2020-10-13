@@ -1,5 +1,6 @@
 package com.freighttrust.as2.ext
 
+import com.freighttrust.as2.BuildConfig
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.domain.DispositionNotification
 import com.freighttrust.as2.handlers.message
@@ -62,10 +63,7 @@ fun RoutingContext.createMDN(text: String, notification: DispositionNotification
           setContent(multipart)
           setHeader(HttpHeaders.CONTENT_TYPE.toString(), multipart.contentType)
         }
-
     }
-
-
 
 fun RoutingContext.dispositionNotification(disposition: Disposition): DispositionNotification =
   with(message) {
@@ -74,8 +72,7 @@ fun RoutingContext.dispositionNotification(disposition: Disposition): Dispositio
       // todo review original and final recipient logic
       recipientId,
       recipientId,
-      // TODO determine correct reporting ua
-      "FreightTrustAS2/1.0",
+      "FreightTrustAS2/${BuildConfig.version}",
       disposition,
       dispositionNotificationOptions
         ?.firstMICAlg

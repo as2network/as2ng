@@ -29,6 +29,5 @@ class As2MicVerificationHandler : CoroutineRouteHandler() {
 
       ctx.next()
     }
-
   }
 }

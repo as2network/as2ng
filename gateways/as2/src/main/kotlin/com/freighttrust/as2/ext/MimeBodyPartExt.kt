@@ -60,10 +60,8 @@ fun MimeBodyPart.isCompressed(): Boolean {
   return sMimeType != null && sMimeType.equals("compressed-data", ignoreCase = true)
 }
 
-
 fun MimeBodyPart.setHeader(header: AS2Header, value: String) =
   setHeader(header.key, value)
-
 
 fun MimeBodyPart.isSigned(): Boolean {
   val contentType = AS2HttpHelper.parseContentType(this.contentType) ?: return false
@@ -102,7 +100,7 @@ fun MimeBodyPart.sign(
       addSignerInfoGenerator(
         JcaSimpleSignerInfoGeneratorBuilder()
           .setProvider(BouncyCastleProvider())
-          .setSignedAttributeGenerator (AttributeTable (signedAttributes))
+          .setSignedAttributeGenerator(AttributeTable(signedAttributes))
           .build(algorithm.signAlgorithmName, privateKey, certificate)
       )
       addCertificates(certificateStore)
@@ -115,7 +113,6 @@ fun MimeBodyPart.sign(
         setHeader(HttpHeaders.CONTENT_TYPE, signed.contentType)
       }
     }
-
 }
 
 fun MimeBodyPart.signatureCertificateFromBody(
@@ -157,7 +154,6 @@ fun MimeBodyPart.signatureCertificateFromBody(
                   .getCertificate(certificateHolder)
               }
           }
-
       }
     }
 
@@ -192,7 +188,6 @@ fun MimeBodyPart.verifiedContent(
         parser.content
       }
     }
-
 
 fun MimeBodyPart.calculateMic(
   includeHeaders: Boolean,

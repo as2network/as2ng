@@ -4,6 +4,7 @@ import java.lang.System.getenv
 plugins {
   kotlin("jvm")
   id("com.github.johnrengelman.shadow")
+  id("com.github.kukuhyoniatmoko.buildconfigkotlin")
 }
 
 val packageGroup = "$group.${rootProject.name}"
@@ -43,7 +44,6 @@ fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   }
 }
 
-
 tasks {
 
   withType<ShadowJar> {
@@ -52,7 +52,15 @@ tasks {
   }
 
   create<JavaExec>("runAS2Server") { verticleTask(verticle = "as2:com.freighttrust.as2.As2ServerVerticle", debugPort = "10000") }
+}
 
+buildConfigKotlin {
+  sourceSet("main") {
+    packageName = "com.freighttrust.as2"
+    buildConfig(name = "group", value = project.group.toString())
+    buildConfig(name = "name", value = project.name)
+    buildConfig(name = "version", value = project.version.toString())
+  }
 }
 
 dependencies {

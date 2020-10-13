@@ -19,7 +19,5 @@ class As2DecompressionHandler : Handler<RoutingContext> {
         message
 
     ctx.next()
-
   }
-
 }

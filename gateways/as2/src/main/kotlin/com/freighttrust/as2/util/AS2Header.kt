@@ -25,7 +25,6 @@ enum class AS2Header(val key: String) {
    */
   DispositionNotificationOptions("Disposition-Notification-Options"),
 
-
   RecipientAddress("Recipient-Address"),
   Server("Server"),
   Subject("Subject"),
@@ -41,5 +40,4 @@ enum class AS2Header(val key: String) {
   OriginalRecipient("Original-Recipient"),
   FinalRecipient("Final-Recipient"),
   ReportingUA("Reporting-UA");
-
 }

@@ -58,10 +58,8 @@ class As2FailureHandler(
 
         // unhandled so just close the connection and mark response as internal server error
         ctx.response().setStatusCode(500).close()
-
       }
     }
-
   }
 
   private suspend fun handleDispositionException(ctx: RoutingContext, failure: DispositionException) {
@@ -99,7 +97,6 @@ class As2FailureHandler(
             algorithm,
             EContentTransferEncoding.BINARY
           )
-
         } ?: mdn
 
       val buffer = withContext(Dispatchers.IO) {
@@ -140,7 +137,7 @@ class As2FailureHandler(
             .putHeader(Version, "1.1")
             .putHeader(MimeVersion, "1.0")
             .putHeader(Subject, "Your Requested MDN Response")
-            .putHeader(HttpHeaders.USER_AGENT, "FreightTrustAS2/1.0")
+            .putHeader(HttpHeaders.USER_AGENT, notification.reportingUA)
             .putHeader(HttpHeaders.CONTENT_TYPE, responseBody.contentType)
             .putHeader(HttpHeaders.CONTENT_ENCODING, responseBody.encoding)
             .sendBufferAwait(buffer)
@@ -148,13 +145,9 @@ class As2FailureHandler(
           with(response) {
             require(statusCode() == 200) { "Unexpected status code in MDN response: ${statusCode()}" }
           }
-
         }
       }
-
     }
-
-
   }
 
   private suspend fun storeNotification(ctx: RoutingContext, notification: DispositionNotification) {
@@ -174,7 +167,5 @@ class As2FailureHandler(
             notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
           }
       )
-
   }
-
 }

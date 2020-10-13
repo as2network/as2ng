@@ -15,6 +15,7 @@ plugins {
   id("io.spring.dependency-management") version "1.0.9.RELEASE"
   id("com.github.ben-manes.versions") version "0.28.0"
   id("me.qoomon.git-versioning") version "3.0.0"
+  id("com.github.kukuhyoniatmoko.buildconfigkotlin") version "1.0.5"
 }
 
 if (!JavaVersion.current().isJava11Compatible) {
@@ -60,7 +61,7 @@ allprojects {
   apply(from = "$rootDir/gradle/versions.gradle")
   apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
-  group = "com.freighttrust.customs"
+  group = "com.freighttrust"
 
   repositories {
     jcenter()

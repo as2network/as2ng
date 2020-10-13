@@ -11,7 +11,6 @@ import com.freighttrust.persistence.extensions.toX509
 import io.vertx.ext.web.RoutingContext
 import java.security.GeneralSecurityException
 
-
 class As2DecryptionHandler(
   private val partnerRepository: TradingPartnerRepository,
   private val keyPairRepository: KeyPairRepository
@@ -36,7 +35,7 @@ class As2DecryptionHandler(
             KeyPairRecord().apply {
               id = partner.keyPairId
             }
-          ) ?: throw  Error("Key pair not found for id = ${partner.keyPairId}")
+          ) ?: throw Error("Key pair not found for id = ${partner.keyPairId}")
 
           val certificate = keyPair.certificate.toX509()
           val privateKey = keyPair.privateKey.toPrivateKey()
@@ -46,19 +45,14 @@ class As2DecryptionHandler(
             privateKey,
             ctx.tempFileHelper
           )
-
         }
-
       }
 
       ctx.next()
-
     } catch (ex: GeneralSecurityException) {
       throw DispositionException(
         Disposition.automaticError("decryption-failed")
       )
     }
-
   }
-
 }

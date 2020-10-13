@@ -2,7 +2,6 @@ package com.freighttrust.as2.handlers.edi
 
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.bodyDataSource
 import com.freighttrust.as2.ext.contentType
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.message
@@ -38,7 +37,6 @@ class EDIValidationHandler(
                 }
               }
           }
-
       }
 
       else -> {

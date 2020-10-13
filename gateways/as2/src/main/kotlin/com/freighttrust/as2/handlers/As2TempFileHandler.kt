@@ -4,7 +4,6 @@ import com.freighttrust.as2.handlers.As2TempFileHandler.Companion.CTX_TEMP_FILE_
 import com.freighttrust.as2.util.TempFileHelper
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
-import java.io.File
 
 val RoutingContext.tempFileHelper
   get(): TempFileHelper = get(CTX_TEMP_FILE_HELPER)

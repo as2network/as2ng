@@ -21,17 +21,15 @@ class As2MessageReceivedHandler(
         this.requestId = messageContext.requestRecord.id
         this.compressionAlgorithm = messageContext.compressionAlgorithm
 
-        if(messageContext.mics != null) {
+        if (messageContext.mics != null) {
           setMics(*messageContext.mics.toTypedArray())
         }
 
         this.isMdnRequested = message.isMdnRequested
         this.isMdnAsync = message.isMdnAsynchronous
         this.receiptDeliveryOption = message.receiptDeliveryOption
-
       }.also { record -> messageRepository.insert(record) }
 
     ctx.next()
-
   }
 }

@@ -34,8 +34,7 @@ class As2RequestHandler(
   private val uuidGenerator: TimeBasedGenerator,
   private val tradingChannelRepository: TradingChannelRepository,
   private val requestRepository: RequestRepository,
-  private val fileRepository: FileRepository,
-  private val messageRepository: MessageRepository
+  private val fileRepository: FileRepository
 ) : CoroutineRouteHandler() {
 
   companion object {
@@ -74,14 +73,12 @@ class As2RequestHandler(
                   headers.get(AS2Header.As2To)!!,
                   headers.get(AS2Header.As2From)!!
                 )
-
               }
 
               tradingChannelRepository
                 .findByAs2Identifiers(senderId, recipientId) ?: throw DispositionException(
                 Disposition.automaticFailure("Trading channel not found for provided AS2-From and AS2-To")
               )
-
             }
 
         // store body
@@ -96,7 +93,7 @@ class As2RequestHandler(
           RequestRecord()
             .apply {
               this.id = uuidGenerator.generate()
-              this.type = when(messageType) {
+              this.type = when (messageType) {
                 MessageType.Message -> message
                 MessageType.DispositionNotification -> mdn
               }
@@ -121,5 +118,4 @@ class As2RequestHandler(
         ctx.next()
       }
   }
-
 }

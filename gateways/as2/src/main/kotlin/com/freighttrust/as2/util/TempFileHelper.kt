@@ -15,5 +15,4 @@ class TempFileHelper {
   fun deleteAll() {
     tempFiles.forEach { it.delete() }
   }
-
 }

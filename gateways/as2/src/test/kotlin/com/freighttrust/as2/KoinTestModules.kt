@@ -3,7 +3,6 @@ package com.freighttrust.as2
 import com.helger.as2.app.MainOpenAS2Server
 import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
-import com.helger.as2lib.session.AS2Session
 import com.helger.commons.io.resource.ClassPathResource
 import com.helger.security.keystore.EKeyStoreType
 import com.opentable.db.postgres.embedded.EmbeddedPostgres
@@ -24,7 +23,6 @@ import javax.sql.DataSource
 val AS2ClientModule = module {
 
   single { AS2Client() }
-
 }
 
 val HttpMockModule = module {
@@ -84,7 +82,6 @@ val As2LibModule = module {
         setPartnershipName("OpenAS2A-OpenAS2B")
       }
   }
-
 }
 
 val EmbeddedPostgresModule = module(override = true) {
@@ -99,7 +96,6 @@ val EmbeddedPostgresModule = module(override = true) {
           .dataSource(db.postgresDatabase)
           .locations("classpath:/db/migration")
           .apply { Flyway(this).migrate() }
-
       }
   }
 
@@ -121,5 +117,4 @@ val EmbeddedPostgresModule = module(override = true) {
 
     HikariDataSource(dataSourceConfig)
   }
-
 }

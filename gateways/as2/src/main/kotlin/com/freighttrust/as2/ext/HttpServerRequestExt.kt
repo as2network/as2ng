@@ -1,6 +1,5 @@
 package com.freighttrust.as2.ext
 
-
 import com.freighttrust.as2.util.AS2Header
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpHeaders
