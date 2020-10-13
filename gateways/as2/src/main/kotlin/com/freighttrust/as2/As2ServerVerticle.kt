@@ -2,6 +2,7 @@ package com.freighttrust.as2
 
 import com.freighttrust.as2.handlers.*
 import com.freighttrust.as2.handlers.As2FailureHandler
+import com.freighttrust.as2.handlers.edi.EDIValidationHandler
 import com.freighttrust.as2.handlers.mdn.As2ForwardMdnHandler
 import com.freighttrust.as2.handlers.mdn.As2MdnReceivedHandler
 import com.freighttrust.as2.handlers.mdn.As2MicVerificationHandler
@@ -28,10 +29,6 @@ class As2ServerVerticle(
 
     val router = Router.router(vertx)
 
-    router.errorHandler(500, { event ->
-      event.failure().printStackTrace()
-    })
-
     router
       .route()
       .failureHandler(koin.get<As2FailureHandler>())
@@ -44,6 +41,7 @@ class As2ServerVerticle(
       .handler(koin.get<As2SignatureVerificationHandler>())
 
     router.post("/message")
+      .handler(koin.get<EDIValidationHandler>())
       .handler(koin.get<As2MicGenerationHandler>())
       .handler(koin.get<As2MessageReceivedHandler>())
       .handler(koin.get<As2ForwardMessageHandler>())

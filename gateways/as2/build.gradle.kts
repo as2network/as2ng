@@ -83,6 +83,8 @@ dependencies {
   implementation("io.vertx:vertx-web-api-contract")
   implementation("io.vertx:vertx-reactive-streams")
 
+  implementation("io.xlate:staedi")
+
   implementation("com.squareup.okhttp3:okhttp")
 
   implementation("org.apache.logging.log4j:log4j")
