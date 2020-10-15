@@ -1,5 +1,6 @@
 package com.freighttrust.as2.cli.config.keypair
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.common.util.Either
 import com.freighttrust.crypto.CertificateFactory
 import com.freighttrust.jooq.tables.pojos.KeyPair
@@ -8,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import picocli.CommandLine.Command
+import java.io.PrintWriter
 import java.time.ZoneOffset
 
 
@@ -19,6 +21,7 @@ class KeyPairIssue : KoinComponent, Runnable {
 
   private val repository: KeyPairRepository by inject()
   private val certificateFactory: CertificateFactory by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   override fun run() {
 
@@ -47,8 +50,7 @@ class KeyPairIssue : KoinComponent, Runnable {
             )
           }
 
-          println(inserted)
-
+          objectMapper.writeValue(PrintWriter(System.out), inserted)
         }
       }
     }

@@ -35,9 +35,10 @@ private fun koinExecutionStrategy(parseResult: CommandLine.ParseResult): Int {
         factory {
           ObjectMapper()
             .apply {
-              registerModule(KotlinModule() )
+              registerModule(KotlinModule())
             }
             .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .enable(SerializationFeature.INDENT_OUTPUT)
         }
       }
     )

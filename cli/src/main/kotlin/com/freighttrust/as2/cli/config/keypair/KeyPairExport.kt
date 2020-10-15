@@ -1,5 +1,6 @@
 package com.freighttrust.as2.cli.config.keypair
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.persistence.KeyPairRepository
 import kotlinx.coroutines.runBlocking
@@ -16,6 +17,7 @@ import picocli.CommandLine.Command
 class KeyPairExport : KoinComponent, Runnable {
 
   private val repository: KeyPairRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   @CommandLine.Option(
     names = ["-i", "--id"],

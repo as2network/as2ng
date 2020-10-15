@@ -1,5 +1,6 @@
 package com.freighttrust.as2.cli.config.partner
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.persistence.TradingPartnerRepository
 import com.google.common.flogger.FluentLogger
 import kotlinx.coroutines.runBlocking
@@ -14,6 +15,7 @@ import picocli.CommandLine.Command
 class TradingPartnerList : KoinComponent, Runnable {
 
   private val repository: TradingPartnerRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   override fun run() {
     val tradingPartners = runBlocking { repository.findAll() }

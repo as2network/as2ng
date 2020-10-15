@@ -1,5 +1,6 @@
 package com.freighttrust.as2.cli.config.channel
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.TradingChannelRepository
@@ -62,6 +63,7 @@ class TradingChannelUpdate : KoinComponent, Runnable {
 
   private val partnerRepository: TradingPartnerRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   override fun run() {
 

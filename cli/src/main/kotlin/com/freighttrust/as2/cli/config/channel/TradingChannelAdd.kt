@@ -1,5 +1,6 @@
 package com.freighttrust.as2.cli.config.channel
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
@@ -11,6 +12,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
+import java.io.PrintWriter
 
 @Command(
   name = "add",
@@ -62,6 +64,7 @@ class TradingChannelAdd : KoinComponent, Runnable {
 
   private val partnerRepository: TradingPartnerRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   override fun run() {
 
@@ -98,12 +101,11 @@ class TradingChannelAdd : KoinComponent, Runnable {
           tx
         )
 
-
       }
 
     }
 
-    println(inserted)
+    objectMapper.writeValue(PrintWriter(System.out), inserted)
   }
 
 }

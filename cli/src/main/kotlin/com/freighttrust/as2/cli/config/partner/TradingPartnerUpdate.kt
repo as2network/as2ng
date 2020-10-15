@@ -1,5 +1,6 @@
 package com.freighttrust.as2.cli.config.partner
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.KeyPairRepository
@@ -19,6 +20,7 @@ class TradingPartnerUpdate : KoinComponent, Runnable {
 
   private val keyPairRepository: KeyPairRepository by inject()
   private val partnerRepository: TradingPartnerRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   @CommandLine.Option(
     names = ["-i", "--id"],
