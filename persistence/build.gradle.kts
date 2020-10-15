@@ -68,9 +68,10 @@ jooqGenerator {
               .withInputSchema("public")
               .withForcedTypes(
                 ForcedType()
-                  .withIncludeTypes("tstzrange")
                   .withUserType("com.freighttrust.persistence.postgres.bindings.TsTzRange")
                   .withBinding("com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding")
+                  .withIncludeTypes("tstzrange")
+                  .withIncludeExpression(".*")
               )
           )
           .withGenerate(
