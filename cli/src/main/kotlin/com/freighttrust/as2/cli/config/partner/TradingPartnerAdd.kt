@@ -1,7 +1,8 @@
 package com.freighttrust.as2.cli.config.partner
 
-import com.freighttrust.jooq.tables.records.KeyPairRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
@@ -9,6 +10,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
+import java.io.PrintWriter
 
 @Command(
   name = "add",
@@ -39,16 +41,16 @@ class TradingPartnerAdd : KoinComponent, Runnable {
 
   private val keyPairRepository: KeyPairRepository by inject()
   private val partnerRepository: TradingPartnerRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   override fun run() {
 
     val inserted = runBlocking {
 
-
-      val exists = keyPairRepository.exists(KeyPairRecord().apply { id = keyPairId })
+      val exists = keyPairRepository.exists(KeyPair().apply { id = keyPairId })
       if (!exists) throw Error("Encryption key pair not found with id = $keyPairId")
 
-      val record = TradingPartnerRecord()
+      val record = TradingPartner()
         .apply {
           name = this@TradingPartnerAdd.name
           email = this@TradingPartnerAdd.email
@@ -58,7 +60,7 @@ class TradingPartnerAdd : KoinComponent, Runnable {
       partnerRepository.insert(record)
 
     }
-    println(inserted)
+    objectMapper.writeValue(PrintWriter(System.out), inserted)
   }
 
 }

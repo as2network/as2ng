@@ -63,6 +63,11 @@ dependencyManagement {
     dependency 'com.google.flatbuffers:flatbuffers-java:1.11.0'
     dependency 'javax.xml.bind:jaxb-api:2.3.1'
 
+    dependency 'com.fasterxml.jackson.core:jackson-core:2.11.3'
+    dependency 'com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3'
+    dependency 'com.fasterxml.jackson.module:jackson-modules-java8:2.11.3'
+    dependency 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3'
+
     // ------------------------------------------------------------------
     // Cryptography
     // ------------------------------------------------------------------

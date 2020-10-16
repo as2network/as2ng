@@ -1,6 +1,5 @@
 package com.freighttrust.as2.handlers
 
-import com.freighttrust.as2.domain.DispositionNotification
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.createMDN
 import com.freighttrust.as2.ext.dispositionNotification
@@ -12,9 +11,9 @@ import com.freighttrust.as2.util.AS2Header.MessageId
 import com.freighttrust.as2.util.AS2Header.MimeVersion
 import com.freighttrust.as2.util.AS2Header.Subject
 import com.freighttrust.as2.util.AS2Header.Version
-import com.freighttrust.jooq.tables.records.DispositionNotificationRecord
-import com.freighttrust.jooq.tables.records.KeyPairRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.freighttrust.jooq.tables.pojos.DispositionNotification
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.DispositionNotificationRepository
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.RequestRepository
@@ -44,7 +43,7 @@ class As2FailureHandler(
     // record the failure
     with(ctx.failure()) {
       requestRepository.setAsFailed(
-        ctx.message.context.requestRecord.id,
+        ctx.message.context.request.id,
         message,
         ExceptionUtils.getStackTrace(this)
       )
@@ -81,13 +80,13 @@ class As2FailureHandler(
 
           val partner = with(context.tradingChannel) {
             partnerRepository.findById(
-              TradingPartnerRecord().apply { id = recipientId }
+              TradingPartner().apply { id = recipientId }
             ) ?: throw Error("Partner not found with id = $recipientId")
           }
 
           val keyPair = with(partner) {
             keyPairRepository.findById(
-              KeyPairRecord().apply { id = keyPairId }
+              KeyPair().apply { id = keyPairId }
             ) ?: throw Error("KeyPair not found with id = $keyPairId")
           }
 
@@ -137,7 +136,7 @@ class As2FailureHandler(
             .putHeader(Version, "1.1")
             .putHeader(MimeVersion, "1.0")
             .putHeader(Subject, "Your Requested MDN Response")
-            .putHeader(HttpHeaders.USER_AGENT, notification.reportingUA)
+            .putHeader(HttpHeaders.USER_AGENT, notification.reportingUa)
             .putHeader(HttpHeaders.CONTENT_TYPE, responseBody.contentType)
             .putHeader(HttpHeaders.CONTENT_ENCODING, responseBody.encoding)
             .sendBufferAwait(buffer)
@@ -152,17 +151,17 @@ class As2FailureHandler(
 
   private suspend fun storeNotification(ctx: RoutingContext, notification: DispositionNotification) {
 
-    val originalRequestId = ctx.message.context.requestRecord.id
+    val originalRequestId = ctx.message.context.request.id
 
     dispositionNotificationRepository
       .insert(
-        DispositionNotificationRecord()
+        DispositionNotification()
           .apply {
             this.requestId = originalRequestId
             this.originalMessageId = notification.originalMessageId
             this.originalRecipient = notification.originalRecipient
             this.finalRecipient = notification.finalRecipient
-            this.reportingUa = notification.reportingUA
+            this.reportingUa = notification.reportingUa
             this.disposition = notification.disposition.toString()
             notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
           }

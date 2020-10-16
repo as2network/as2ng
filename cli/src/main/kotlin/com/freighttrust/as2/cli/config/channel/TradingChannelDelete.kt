@@ -1,14 +1,14 @@
 package com.freighttrust.as2.cli.config.channel
 
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.persistence.TradingChannelRepository
-import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import java.io.PrintWriter
 
 
 @Command(
@@ -18,6 +18,7 @@ import picocli.CommandLine.Command
 class TradingChannelDelete : KoinComponent, Runnable {
 
   private val repository: TradingChannelRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   @CommandLine.Option(
     names = ["-i", "--id"],
@@ -47,7 +48,7 @@ class TradingChannelDelete : KoinComponent, Runnable {
           require((id != null).xor(name != null)) { "Either a name or an id must be provided" }
 
           when {
-            id != null -> repository.findById(TradingChannelRecord().apply { this.id = id })
+            id != null -> repository.findById(TradingChannel().apply { this.id = id })
             name != null -> repository.findByName(name)
             else -> throw IllegalStateException("This code should not be able to execute")
           }
@@ -56,6 +57,6 @@ class TradingChannelDelete : KoinComponent, Runnable {
 
     runBlocking { repository.deleteById(record) }
 
-    println("Trading channel with $identifier successfully deleted")
+    objectMapper.writeValue(PrintWriter(System.out), record)
   }
 }

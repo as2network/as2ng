@@ -1,5 +1,8 @@
 package com.freighttrust.as2.cli.config.channel
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.freighttrust.jooq.tables.pojos.TradingChannel
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.TradingChannelRepository
@@ -9,6 +12,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
+import java.io.PrintWriter
 
 @Command(
   name = "add",
@@ -60,6 +64,7 @@ class TradingChannelAdd : KoinComponent, Runnable {
 
   private val partnerRepository: TradingPartnerRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   override fun run() {
 
@@ -70,21 +75,21 @@ class TradingChannelAdd : KoinComponent, Runnable {
         // check that sender exists
 
         val senderExists = partnerRepository
-          .exists(TradingPartnerRecord().apply { id = senderPartnerId }, tx)
+          .exists(TradingPartner().apply { id = senderPartnerId }, tx)
 
         if (!senderExists) throw Error("Sender trading partner with id = $senderPartnerId not found")
 
         // check that recipient exists
 
         val recipientExists = partnerRepository
-          .exists(TradingPartnerRecord().apply { id = recipientPartnerId }, tx)
+          .exists(TradingPartner().apply { id = recipientPartnerId }, tx)
 
         if (!recipientExists) throw Error("Sender trading partner with id = $recipientPartnerId not found")
 
         // add the trading channel
 
         channelRepository.insert(
-          TradingChannelRecord()
+          TradingChannel()
             .apply {
               name = this@TradingChannelAdd.name
               senderId = this@TradingChannelAdd.senderPartnerId
@@ -96,12 +101,11 @@ class TradingChannelAdd : KoinComponent, Runnable {
           tx
         )
 
-
       }
 
     }
 
-    println(inserted)
+    objectMapper.writeValue(PrintWriter(System.out), inserted)
   }
 
 }

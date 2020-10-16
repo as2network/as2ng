@@ -18,7 +18,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row7;
+import org.jooq.Row8;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DispositionNotification extends TableImpl<DispositionNotificationRecord> {
 
-    private static final long serialVersionUID = 1613656143;
+    private static final long serialVersionUID = 580705145;
 
     /**
      * The reference instance of <code>public.disposition_notification</code>
@@ -90,6 +90,11 @@ public class DispositionNotification extends TableImpl<DispositionNotificationRe
      * The column <code>public.disposition_notification.received_content_mic</code>.
      */
     public final TableField<DispositionNotificationRecord, String> RECEIVED_CONTENT_MIC = createField(DSL.name("received_content_mic"), org.jooq.impl.SQLDataType.VARCHAR(64), this, "");
+
+    /**
+     * The column <code>public.disposition_notification.digest_algorithm</code>.
+     */
+    public final TableField<DispositionNotificationRecord, String> DIGEST_ALGORITHM = createField(DSL.name("digest_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
 
     /**
      * Create a <code>public.disposition_notification</code> table reference
@@ -175,11 +180,11 @@ public class DispositionNotification extends TableImpl<DispositionNotificationRe
     }
 
     // -------------------------------------------------------------------------
-    // Row7 type methods
+    // Row8 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row7<UUID, String, String, String, String, String, String> fieldsRow() {
-        return (Row7) super.fieldsRow();
+    public Row8<UUID, String, String, String, String, String, String, String> fieldsRow() {
+        return (Row8) super.fieldsRow();
     }
 }

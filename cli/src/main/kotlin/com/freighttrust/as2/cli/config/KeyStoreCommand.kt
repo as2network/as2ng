@@ -1,5 +1,7 @@
 package com.freighttrust.as2.cli.config
 
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.jooq.tables.records.KeyPairRecord
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.KeyPairRepository
@@ -19,7 +21,7 @@ import java.security.KeyStore
 @Command(
   name = "key-store"
 )
-class KeyStore : KoinComponent {
+class KeyStoreCommand : KoinComponent {
 
   private val partnerRepository: TradingPartnerRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
@@ -42,11 +44,11 @@ class KeyStore : KoinComponent {
         partnerRepository.transaction { tx ->
 
           val partner = partnerRepository.findById(
-            TradingPartnerRecord().apply { id = partnerId }, tx
+            TradingPartner().apply { id = partnerId }, tx
           ) ?: throw Error("Could not find sending partner with id = $partnerId")
 
           val partnerKeyPair = keyPairRepository.findById(
-            KeyPairRecord().apply { id = partner.keyPairId }, tx
+            KeyPair().apply { id = partner.keyPairId }, tx
           ) ?: throw Error("Could not find sending partner key pair with id = ${partner.keyPairId}")
 
           val partnerIdentifiers = mutableListOf<String>()
@@ -69,11 +71,11 @@ class KeyStore : KoinComponent {
             .map { recipientId ->
 
               val recipient = partnerRepository.findById(
-                TradingPartnerRecord().apply { id = recipientId }, tx
+                TradingPartner().apply { id = recipientId }, tx
               ) ?: throw Error("Could not find recipient partner with id = $recipientId")
 
               val keyPair = keyPairRepository.findById(
-                KeyPairRecord().apply { id = recipient.keyPairId }, tx
+                KeyPair().apply { id = recipient.keyPairId }, tx
               ) ?: throw Error("Could not find recipient partner key pair with id = ${recipient.keyPairId}")
 
               Pair(recipientId, keyPair)

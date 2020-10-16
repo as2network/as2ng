@@ -6,6 +6,8 @@ package com.freighttrust.jooq.tables;
 
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.TradingChannelHistoryRecord;
+import com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding;
+import com.freighttrust.persistence.postgres.bindings.TsTzRange;
 
 import javax.annotation.processing.Generated;
 
@@ -35,7 +37,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord> {
 
-    private static final long serialVersionUID = -1879603594;
+    private static final long serialVersionUID = 1114727290;
 
     /**
      * The reference instance of <code>public.trading_channel_history</code>
@@ -86,10 +88,9 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * The column <code>public.trading_channel_history.validity</code>.
      */
-    @java.lang.Deprecated
-    public final TableField<TradingChannelHistoryRecord, Object> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\""), this, "");
+    public final TableField<TradingChannelHistoryRecord, TsTzRange> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\""), this, "", new TimestampTimezoneRangeBinding());
 
     /**
      * Create a <code>public.trading_channel_history</code> table reference
@@ -160,7 +161,7 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<Long, String, Long, String, Long, String, String, Object> fieldsRow() {
+    public Row8<Long, String, Long, String, Long, String, String, TsTzRange> fieldsRow() {
         return (Row8) super.fieldsRow();
     }
 }

@@ -17,5 +17,5 @@ import picocli.CommandLine.Command
     KeyPairExport::class
   ]
 )
-class KeyPair {
+class KeyPairCommand {
 }

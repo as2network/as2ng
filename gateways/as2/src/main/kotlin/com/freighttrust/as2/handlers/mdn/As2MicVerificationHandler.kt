@@ -15,7 +15,7 @@ class As2MicVerificationHandler : CoroutineRouteHandler() {
 
     with(ctx.message) {
 
-      val originalMessage = requireNotNull(context.originalMessageRecord) { "original message record cannot be null" }
+      val originalMessage = requireNotNull(context.originalMessage) { "original message record cannot be null" }
       val mdn = requireNotNull(context.dispositionNotification) { "disposition notification cannot be null" }
 
       if (mdn.receivedContentMic != null) {

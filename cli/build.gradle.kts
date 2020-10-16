@@ -17,6 +17,11 @@ dependencies {
   implementation(project(":persistence"))
   implementation(project(":crypto"))
 
+  implementation("com.fasterxml.jackson.core:jackson-core")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+  implementation("com.fasterxml.jackson.module:jackson-modules-java8")
+  implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
   implementation("org.bouncycastle:bcpkix-jdk15on")
   implementation("info.picocli:picocli")
 

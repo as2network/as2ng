@@ -7,6 +7,8 @@ package com.freighttrust.jooq.tables;
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord;
+import com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding;
+import com.freighttrust.persistence.postgres.bindings.TsTzRange;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +43,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartner extends TableImpl<TradingPartnerRecord> {
 
-    private static final long serialVersionUID = 1041835184;
+    private static final long serialVersionUID = -1038124932;
 
     /**
      * The reference instance of <code>public.trading_partner</code>
@@ -77,10 +79,9 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
     public final TableField<TradingPartnerRecord, Long> KEY_PAIR_ID = createField(DSL.name("key_pair_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * The column <code>public.trading_partner.validity</code>.
      */
-    @java.lang.Deprecated
-    public final TableField<TradingPartnerRecord, Object> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\"").defaultValue(org.jooq.impl.DSL.field("tstzrange(CURRENT_TIMESTAMP, NULL::timestamp with time zone)", org.jooq.impl.SQLDataType.OTHER)), this, "");
+    public final TableField<TradingPartnerRecord, TsTzRange> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\"").defaultValue(org.jooq.impl.DSL.field("tstzrange(CURRENT_TIMESTAMP, NULL::timestamp with time zone)", org.jooq.impl.SQLDataType.OTHER)), this, "", new TimestampTimezoneRangeBinding());
 
     /**
      * Create a <code>public.trading_partner</code> table reference
@@ -175,7 +176,7 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row5<Long, String, String, Long, Object> fieldsRow() {
+    public Row5<Long, String, String, Long, TsTzRange> fieldsRow() {
         return (Row5) super.fieldsRow();
     }
 }

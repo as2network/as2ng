@@ -1,11 +1,11 @@
 package com.freighttrust.as2.handlers.mdn
 
-import com.freighttrust.as2.domain.DispositionNotification
+import com.freighttrust.as2.domain.fromMimeBodyPart
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.message
-import com.freighttrust.jooq.tables.records.DispositionNotificationRecord
-import com.freighttrust.jooq.tables.records.MessageRecord
-import com.freighttrust.jooq.tables.records.RequestRecord
+import com.freighttrust.jooq.tables.pojos.DispositionNotification
+import com.freighttrust.jooq.tables.pojos.Message
+import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.persistence.DispositionNotificationRepository
 import com.freighttrust.persistence.MessageRepository
 import com.freighttrust.persistence.RequestRepository
@@ -21,7 +21,8 @@ class As2MdnReceivedHandler(
 
     val message = ctx.message
 
-    val notification = DispositionNotification.from(message.body)
+    val notification = DispositionNotification()
+      .fromMimeBodyPart(message.body)
 
     // TODO handle error better
 
@@ -31,9 +32,9 @@ class As2MdnReceivedHandler(
     val originalMessageRecord = requestRepository.transaction { tx ->
 
       requestRepository.update(
-        RequestRecord()
+        Request()
           .apply {
-            this.id = message.context.requestRecord.id
+            this.id = message.context.request.id
             this.originalRequestId = originalRequestId
           },
         tx
@@ -41,13 +42,13 @@ class As2MdnReceivedHandler(
 
       dispositionNotificationRepository
         .insert(
-          DispositionNotificationRecord()
+          DispositionNotification()
             .apply {
-              this.requestId = message.context.requestRecord.id
+              this.requestId = message.context.request.id
               this.originalMessageId = notification.originalMessageId
               this.originalRecipient = notification.originalRecipient
               this.finalRecipient = notification.finalRecipient
-              this.reportingUa = notification.reportingUA
+              this.reportingUa = notification.reportingUa
               this.disposition = notification.disposition.toString()
               notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
             },
@@ -55,12 +56,12 @@ class As2MdnReceivedHandler(
         )
 
       messageRepository
-        .findById(MessageRecord().apply { requestId = originalRequestId })
+        .findById(Message().apply { requestId = originalRequestId })
     }
 
     ctx.message = message.copy(
       context = message.context.copy(
-        originalMessageRecord = originalMessageRecord,
+        originalMessage = originalMessageRecord,
         dispositionNotification = notification
       )
     )

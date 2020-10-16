@@ -2,7 +2,7 @@ package com.freighttrust.as2.handlers.message
 
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.message
-import com.freighttrust.jooq.tables.records.MessageRecord
+import com.freighttrust.jooq.tables.pojos.Message
 import com.freighttrust.persistence.MessageRepository
 import io.vertx.ext.web.RoutingContext
 
@@ -15,10 +15,10 @@ class As2MessageReceivedHandler(
     val message = ctx.message
     val messageContext = message.context
 
-    MessageRecord()
+    Message()
       .apply {
 
-        this.requestId = messageContext.requestRecord.id
+        this.requestId = messageContext.request.id
         this.compressionAlgorithm = messageContext.compressionAlgorithm
 
         if (messageContext.mics != null) {

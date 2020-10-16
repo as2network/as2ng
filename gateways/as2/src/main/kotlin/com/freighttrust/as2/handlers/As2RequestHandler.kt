@@ -2,9 +2,9 @@ package com.freighttrust.as2.handlers
 
 import com.fasterxml.uuid.impl.TimeBasedGenerator
 import com.freighttrust.as2.domain.Disposition
-import com.freighttrust.as2.domain.Message
-import com.freighttrust.as2.domain.MessageContext
-import com.freighttrust.as2.domain.MessageType
+import com.freighttrust.as2.domain.As2Message
+import com.freighttrust.as2.domain.As2MessageContext
+import com.freighttrust.as2.domain.As2MessageType
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.bodyAsMimeBodyPart
 import com.freighttrust.as2.ext.get
@@ -14,9 +14,8 @@ import com.freighttrust.as2.handlers.As2RequestHandler.Companion.CTX_AS2_MESSAGE
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.jooq.enums.RequestType.mdn
 import com.freighttrust.jooq.enums.RequestType.message
-import com.freighttrust.jooq.tables.records.RequestRecord
+import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.persistence.FileRepository
-import com.freighttrust.persistence.MessageRepository
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.extensions.toJSONB
@@ -24,8 +23,8 @@ import io.vertx.ext.web.RoutingContext
 import org.jooq.tools.json.JSONObject
 import java.time.OffsetDateTime
 
-var RoutingContext.message: Message
-  get() = get<Message>(CTX_AS2_MESSAGE)
+var RoutingContext.message: As2Message
+  get() = get<As2Message>(CTX_AS2_MESSAGE)
   set(message) {
     put(CTX_AS2_MESSAGE, message)
   }
@@ -48,8 +47,8 @@ class As2RequestHandler(
         val path = request.path()
 
         val messageType = when {
-          path.endsWith("message") -> MessageType.Message
-          path.endsWith("mdn") -> MessageType.DispositionNotification
+          path.endsWith("message") -> As2MessageType.Message
+          path.endsWith("mdn") -> As2MessageType.DispositionNotification
           else -> throw IllegalStateException()
         }
 
@@ -62,14 +61,14 @@ class As2RequestHandler(
 
               val (senderId, recipientId) = when (messageType) {
 
-                MessageType.Message ->
+                As2MessageType.Message ->
                   Pair(
                     headers.get(AS2Header.As2From)!!,
                     headers.get(AS2Header.As2To)!!
                   )
 
                 // invert when processing mdn
-                MessageType.DispositionNotification -> Pair(
+                As2MessageType.DispositionNotification -> Pair(
                   headers.get(AS2Header.As2To)!!,
                   headers.get(AS2Header.As2From)!!
                 )
@@ -90,12 +89,12 @@ class As2RequestHandler(
         val fileRecord = fileRepository.insert(messageId, dataHandler)
 
         val requestRecord = requestRepository.insert(
-          RequestRecord()
+          Request()
             .apply {
               this.id = uuidGenerator.generate()
               this.type = when (messageType) {
-                MessageType.Message -> message
-                MessageType.DispositionNotification -> mdn
+                As2MessageType.Message -> message
+                As2MessageType.DispositionNotification -> mdn
               }
               this.tradingChannelId = tradingChannel.id
               this.messageId = messageId
@@ -108,11 +107,11 @@ class As2RequestHandler(
 
         // set message on the routing context
 
-        Message(
+        As2Message(
           messageType,
           request.headers(),
           body,
-          MessageContext(tradingChannel, requestRecord)
+          As2MessageContext(tradingChannel, requestRecord)
         ).also { message -> ctx.put(CTX_AS2_MESSAGE, message) }
 
         ctx.next()

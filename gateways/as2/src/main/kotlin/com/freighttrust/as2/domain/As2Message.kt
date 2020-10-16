@@ -1,12 +1,17 @@
 package com.freighttrust.as2.domain
 
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.*
+import com.freighttrust.as2.ext.calculateMic
+import com.freighttrust.as2.ext.get
+import com.freighttrust.as2.ext.isCompressed
+import com.freighttrust.as2.ext.isEncrypted
+import com.freighttrust.as2.ext.isSigned
+import com.freighttrust.as2.ext.verifiedContent
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.as2.util.TempFileHelper
-import com.freighttrust.jooq.tables.records.MessageRecord
-import com.freighttrust.jooq.tables.records.RequestRecord
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
+import com.freighttrust.jooq.tables.pojos.DispositionNotification
+import com.freighttrust.jooq.tables.pojos.Request
+import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.helger.as2lib.disposition.DispositionOptions
 import io.vertx.core.MultiMap
 import org.bouncycastle.cms.CMSException
@@ -26,11 +31,12 @@ import java.security.PrivateKey
 import java.security.cert.X509Certificate
 import javax.mail.MessagingException
 import javax.mail.internet.MimeBodyPart
+import com.freighttrust.jooq.tables.pojos.Message as MessageRecord
 
-data class MessageContext(
-  val tradingChannel: TradingChannelRecord,
-  val requestRecord: RequestRecord,
-  val originalMessageRecord: MessageRecord? = null,
+data class As2MessageContext(
+  val tradingChannel: TradingChannel,
+  val request: Request,
+  val originalMessage: MessageRecord? = null,
   val dispositionNotification: DispositionNotification? = null,
   val decryptedBody: MimeBodyPart? = null,
   val decompressedBody: Pair<MimeBodyPart, String>? = null,
@@ -47,19 +53,19 @@ data class MessageContext(
   val compressionAlgorithm: String? = decompressedBody?.second
 }
 
-enum class MessageType {
+enum class As2MessageType {
   Message, DispositionNotification
 }
 
-data class Message(
-  val type: MessageType,
+data class As2Message(
+  val type: As2MessageType,
   val headers: MultiMap,
   val body: MimeBodyPart,
-  val context: MessageContext
+  val context: As2MessageContext
 ) {
 
   companion object {
-    val logger = LoggerFactory.getLogger(Message::class.java)
+    val logger = LoggerFactory.getLogger(As2Message::class.java)
   }
 
   val messageId = headers.get(AS2Header.MessageId)!!
@@ -85,7 +91,7 @@ data class Message(
     certificate: X509Certificate,
     privateKey: PrivateKey,
     tempFileHelper: TempFileHelper
-  ): Message =
+  ): As2Message =
     when (isEncrypted) {
       false ->
         throw GeneralSecurityException("Content-Type '${body.contentType}' indicates the message is not encrypted")
@@ -126,7 +132,7 @@ data class Message(
 
   fun decompress(
     tempFileHelper: TempFileHelper
-  ): Message =
+  ): As2Message =
     when (isCompressed) {
       false -> this
       true -> {
@@ -183,7 +189,7 @@ data class Message(
   fun verify(
     certificate: X509Certificate,
     tempFileHelper: TempFileHelper
-  ): Message =
+  ): As2Message =
     require(isSigned) { "message is not signed" }
       .let {
         body.verifiedContent(certificate, tempFileHelper)
@@ -195,7 +201,7 @@ data class Message(
           }
       }
 
-  fun withMics(): Message {
+  fun withMics(): As2Message {
 
     val includeHeaders =
       context.wasEncrypted || context.wasSigned || context.wasCompressed

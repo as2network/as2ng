@@ -1,12 +1,14 @@
 package com.freighttrust.as2.cli.config.partner
 
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import java.io.PrintWriter
 
 
 @Command(
@@ -16,6 +18,7 @@ import picocli.CommandLine.Command
 class TradingPartnerDelete : KoinComponent, Runnable {
 
   private val repository: TradingPartnerRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   @CommandLine.Option(
     names = ["-i", "--id"],
@@ -45,7 +48,7 @@ class TradingPartnerDelete : KoinComponent, Runnable {
           require((id != null).xor(name != null)) { "Either a name or an id must be provided" }
 
           when {
-            id != null -> repository.findById(TradingPartnerRecord().apply { this.id = id })
+            id != null -> repository.findById(TradingPartner().apply { this.id = id })
             name != null -> repository.findByName(name)
             else -> throw IllegalStateException("This code should not be able to execute")
           }
@@ -54,6 +57,6 @@ class TradingPartnerDelete : KoinComponent, Runnable {
 
     runBlocking { repository.deleteById(record) }
 
-    println("Trading partner with $identifier successfully deleted")
+    objectMapper.writeValue(PrintWriter(System.out), record)
   }
 }

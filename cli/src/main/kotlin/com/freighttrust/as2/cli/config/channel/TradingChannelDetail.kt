@@ -1,5 +1,7 @@
 package com.freighttrust.as2.cli.config.channel
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.records.TradingChannelRecord
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.TradingChannelRepository
@@ -9,6 +11,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import picocli.CommandLine
 import picocli.CommandLine.Command
+import java.io.PrintWriter
 
 
 @Command(
@@ -18,6 +21,7 @@ import picocli.CommandLine.Command
 class TradingChannelDetail : KoinComponent, Runnable {
 
   private val repository: TradingChannelRepository by inject()
+  private val objectMapper: ObjectMapper by inject()
 
   @CommandLine.Option(
     names = ["-i", "--id"],
@@ -45,25 +49,14 @@ class TradingChannelDetail : KoinComponent, Runnable {
           require((id != null).xor(name != null)) { "Either a name or an id must be provided" }
 
           when {
-            id != null -> repository.findById(TradingChannelRecord().apply { this.id = id })
+            id != null -> repository.findById(TradingChannel().apply { this.id = id })
             name != null -> repository.findByName(name)
             else -> throw IllegalStateException("This code should not be able to execute")
           }
         }
       ) { "Trading channel not found" }
 
-    // todo convert to using json or something for formatting the objects
-
-    println("Trading Channel")
-    println("--------\n")
-    println("id:\t\t\t\t\t\t${record.id}")
-    println("name:\t\t\t\t\t${record.name}")
-    println("senderId:\t\t\t\t${record.senderId}")
-    println("senderAsIdentifier:\t\t${record.senderAs2Identifier}")
-    println("recipientId:\t\t\t${record.recipientId}")
-    println("recipientAsIdentifier:\t${record.recipientAs2Identifier}")
-    println("recipientMessageUrl:\t${record.recipientMessageUrl}")
-    println("validity:\t\t\t\t${record.validity}")
+    objectMapper.writeValue(PrintWriter(System.out), record)
 
   }
 }

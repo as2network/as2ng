@@ -17,5 +17,5 @@ import picocli.CommandLine.Command
     TradingPartnerList::class
   ]
 )
-class TradingPartner {
+class TradingPartnerCommand {
 }

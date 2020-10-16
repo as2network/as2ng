@@ -1,6 +1,7 @@
 package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.jooq.Tables.REQUEST
+import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.records.RequestRecord
 import com.freighttrust.persistence.Repository
 import com.freighttrust.persistence.RequestRepository
@@ -13,14 +14,11 @@ import java.util.*
 
 class PostgresRequestRepository(
   dbCtx: DSLContext
-) : RequestRepository, AbstractJooqRepository<RequestRecord>(
-  dbCtx, REQUEST, listOf(REQUEST.ID)
+) : RequestRepository, AbstractJooqRepository<RequestRecord, Request>(
+  dbCtx, REQUEST, Request::class.java
 ) {
 
-  override fun idQuery(record: RequestRecord): Condition =
-    REQUEST.ID.let { field ->
-      field.eq(record.get(field))
-    }
+  override fun idQuery(record: Request): Condition = REQUEST.ID.eq(record.id)
 
   override suspend fun findRequestIdByMessageId(messageId: String, ctx: Repository.Context?): UUID? =
     coroutineScope {

@@ -7,6 +7,8 @@ package com.freighttrust.jooq.tables;
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.TradingChannelRecord;
+import com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding;
+import com.freighttrust.persistence.postgres.bindings.TsTzRange;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +43,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannel extends TableImpl<TradingChannelRecord> {
 
-    private static final long serialVersionUID = 1327274290;
+    private static final long serialVersionUID = 754792495;
 
     /**
      * The reference instance of <code>public.trading_channel</code>
@@ -92,10 +94,9 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     public final TableField<TradingChannelRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
 
     /**
-     * @deprecated Unknown data type. Please define an explicit {@link org.jooq.Binding} to specify how this type should be handled. Deprecation can be turned off using {@literal <deprecationOnUnknownTypes/>} in your code generator configuration.
+     * The column <code>public.trading_channel.validity</code>.
      */
-    @java.lang.Deprecated
-    public final TableField<TradingChannelRecord, Object> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\"").defaultValue(org.jooq.impl.DSL.field("tstzrange(CURRENT_TIMESTAMP, NULL::timestamp with time zone)", org.jooq.impl.SQLDataType.OTHER)), this, "");
+    public final TableField<TradingChannelRecord, TsTzRange> VALIDITY = createField(DSL.name("validity"), org.jooq.impl.DefaultDataType.getDefaultDataType("\"pg_catalog\".\"tstzrange\"").defaultValue(org.jooq.impl.DSL.field("tstzrange(CURRENT_TIMESTAMP, NULL::timestamp with time zone)", org.jooq.impl.SQLDataType.OTHER)), this, "", new TimestampTimezoneRangeBinding());
 
     /**
      * Create a <code>public.trading_channel</code> table reference
@@ -194,7 +195,7 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<Long, String, Long, String, Long, String, String, Object> fieldsRow() {
+    public Row8<Long, String, Long, String, Long, String, String, TsTzRange> fieldsRow() {
         return (Row8) super.fieldsRow();
     }
 }
