@@ -8,7 +8,7 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 plugins {
   `maven-publish`
   distribution
-  id("org.jetbrains.kotlin.jvm") version "1.3.72"
+  id("org.jetbrains.kotlin.jvm") version "1.4.10"
   id("org.jlleitschuh.gradle.ktlint") version "9.2.1" apply false
   id("org.jlleitschuh.gradle.ktlint-idea") version "9.2.1" apply true
   id("com.github.johnrengelman.shadow") version "5.2.0" apply true

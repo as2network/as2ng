@@ -35,7 +35,7 @@ val PostgresModule = module {
 
     val dataSourceConfig = HikariConfig()
       .apply {
-        driverClassName = Driver::class.java.name
+        driverClassName = config.getString("driverClassName")
         jdbcUrl = config.getString("jdbcUrl")
         isAutoCommit = config.getBoolean("isAutoCommit")
         maximumPoolSize = config.getInt("maximumPoolSize")

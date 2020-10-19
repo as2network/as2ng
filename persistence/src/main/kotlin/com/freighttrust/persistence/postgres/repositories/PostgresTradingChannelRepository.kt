@@ -16,8 +16,8 @@ class PostgresTradingChannelRepository(
   dbCtx, TRADING_CHANNEL, TradingChannel::class.java
 ) {
 
-  override fun idQuery(record: TradingChannel): Condition =
-    TRADING_CHANNEL.ID.eq(record.id)
+  override fun idQuery(value: TradingChannel): Condition =
+    TRADING_CHANNEL.ID.eq(value.id)
 
   override suspend fun findByName(name: String, ctx: Repository.Context?): TradingChannel? =
     coroutineScope {
@@ -25,7 +25,7 @@ class PostgresTradingChannelRepository(
         .selectFrom(table)
         .where(TRADING_CHANNEL.NAME.eq(name))
         .fetchOne()
-        .into(TradingChannel::class.java)
+        ?.into(TradingChannel::class.java)
     }
 
 
@@ -39,7 +39,7 @@ class PostgresTradingChannelRepository(
           )
         )
         .fetchOne()
-        .into(TradingChannel::class.java)
+        ?.into(TradingChannel::class.java)
     }
 
   override suspend fun findBySenderId(senderId: Long, ctx: Repository.Context?): List<TradingChannel> =
@@ -59,4 +59,6 @@ class PostgresTradingChannelRepository(
         .fetch()
         .into(TradingChannel::class.java)
     }
+
+
 }

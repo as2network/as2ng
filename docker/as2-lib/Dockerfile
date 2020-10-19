@@ -5,7 +5,7 @@ WORKDIR /opt
 
 COPY . .
 
-RUN gradle as2-lib:server:shadowJar
+RUN gradle :as2-lib:shadowJar
 
 FROM openjdk:11
 
@@ -17,9 +17,10 @@ RUN mkdir libs \
   && mkdir config \
   && mkdir data
 
-COPY --from=build  /opt/as2-lib/server/build/libs/*.jar libs/
+COPY --from=build  /opt/as2-lib/build/libs/*.jar libs/
 
 ENTRYPOINT ["java", "-classpath", "libs/*", "-Xms512m", "-Xmx512m", "com.helger.as2.app.MainOpenAS2Server"]
+CMD ["/opt/as2/config/config.xml"]
 
 VOLUME /opt/as2/config
 VOLUME /opt/as2/data

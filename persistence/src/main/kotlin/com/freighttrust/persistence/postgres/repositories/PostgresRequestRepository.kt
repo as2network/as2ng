@@ -18,7 +18,7 @@ class PostgresRequestRepository(
   dbCtx, REQUEST, Request::class.java
 ) {
 
-  override fun idQuery(record: Request): Condition = REQUEST.ID.eq(record.id)
+  override fun idQuery(value: Request): Condition = REQUEST.ID.eq(value.id)
 
   override suspend fun findRequestIdByMessageId(messageId: String, ctx: Repository.Context?): UUID? =
     coroutineScope {

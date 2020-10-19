@@ -31,7 +31,8 @@
  */
 
 plugins {
-  `java-library`
+  kotlin("jvm")
+  id("com.github.johnrengelman.shadow")
 }
 
 val appJvmArgs = listOf("-Xms512m", "-Xmx512m")
@@ -49,8 +50,25 @@ fun JavaExec.serverTask(configPath: String) {
 }
 
 tasks {
+
   create<JavaExec>("runOpenAS2A") { serverTask("config/openas2a/config.xml") }
   create<JavaExec>("runOpenAS2B") { serverTask("config/openas2b/config.xml") }
+
+  withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+
+    archiveBaseName.set(project.name)
+    archiveClassifier.set("")
+
+    mergeServiceFiles()
+
+    manifest {
+      attributes(
+        mapOf(
+          "Main-Class" to "com.helger.as2.app.MainOpenAS2Server"
+        )
+      )
+    }
+  }
 }
 
 dependencies {

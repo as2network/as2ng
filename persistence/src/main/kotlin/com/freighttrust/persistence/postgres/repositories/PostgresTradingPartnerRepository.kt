@@ -16,7 +16,7 @@ class PostgresTradingPartnerRepository(
   dbCtx, TRADING_PARTNER, TradingPartner::class.java
 ) {
 
-  override fun idQuery(record: TradingPartner): Condition = TRADING_PARTNER.ID.eq(record.id)
+  override fun idQuery(value: TradingPartner): Condition = TRADING_PARTNER.ID.eq(value.id)
 
   override suspend fun findByName(name: String, ctx: Repository.Context?): TradingPartner? =
     coroutineScope {

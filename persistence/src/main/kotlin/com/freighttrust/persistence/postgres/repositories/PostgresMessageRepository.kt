@@ -14,7 +14,7 @@ class PostgresMessageRepository(
   dbCtx, MESSAGE, Message::class.java
 ) {
 
-  override fun idQuery(record: Message): Condition =
-    MESSAGE.REQUEST_ID.eq(record.requestId)
+  override fun idQuery(value: Message): Condition =
+    MESSAGE.REQUEST_ID.eq(value.requestId)
 
 }

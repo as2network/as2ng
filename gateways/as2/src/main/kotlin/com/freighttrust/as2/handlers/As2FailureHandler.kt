@@ -22,6 +22,7 @@ import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
 import com.helger.mail.cte.EContentTransferEncoding
 import io.vertx.core.buffer.Buffer
+import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
@@ -38,27 +39,37 @@ class As2FailureHandler(
   private val dispositionNotificationRepository: DispositionNotificationRepository
 ) : CoroutineRouteHandler() {
 
+  companion object {
+    val logger = LoggerFactory.getLogger(As2FailureHandler::class.java)
+  }
+
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
-    // record the failure
-    with(ctx.failure()) {
-      requestRepository.setAsFailed(
-        ctx.message.context.request.id,
-        message,
-        ExceptionUtils.getStackTrace(this)
-      )
-    }
+    try {
 
-    // attempt to handle it
+      if (!ctx.hasAs2Message) throw ctx.failure()
 
-    when (val failure = ctx.failure()) {
-      is DispositionException -> handleDispositionException(ctx, failure)
-      else -> {
-
-        // unhandled so just close the connection and mark response as internal server error
-        ctx.response().setStatusCode(500).close()
+      // record the failure
+      with(ctx.failure()) {
+        requestRepository.setAsFailed(
+          ctx.message.context.request.id,
+          message,
+          ExceptionUtils.getStackTrace(this)
+        )
       }
+
+      // attempt to handle it
+
+      when (val failure = ctx.failure()) {
+        is DispositionException -> handleDispositionException(ctx, failure)
+        else -> throw failure
+      }
+
+    } catch (t: Throwable) {
+      logger.error("Request failed", t)
+      ctx.response().setStatusCode(500).end()
     }
+
   }
 
   private suspend fun handleDispositionException(ctx: RoutingContext, failure: DispositionException) {

@@ -25,6 +25,11 @@ class KeyPairIssue : KoinComponent, Runnable {
 
   override fun run() {
 
+    objectMapper.writeValue(
+      PrintWriter(System.out),
+      runBlocking { repository.issue(certificateFactory) }
+    )
+
     // todo replace with a uuid?
     val commonName = "${System.currentTimeMillis()}.freighttrust.com"
     when (val response = certificateFactory.issueX509(commonName)) {

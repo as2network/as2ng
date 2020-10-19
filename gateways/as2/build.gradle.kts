@@ -75,6 +75,7 @@ dependencies {
   implementation(project(":domain"))
   implementation(project(":messaging"))
   implementation(project(":persistence"))
+  implementation(project(":crypto"))
 
   implementation("com.fasterxml.uuid:java-uuid-generator")
   implementation("com.helger.as2:as2-server")
@@ -98,12 +99,29 @@ dependencies {
   implementation("org.apache.logging.log4j:log4j")
   implementation("org.apache.logging.log4j:log4j-slf4j-impl")
 
-  testImplementation("io.kotlintest:kotlintest-runner-junit5")
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.koin:koin-test")
   testImplementation("io.mockk:mockk")
   testImplementation("com.opentable.components:otj-pg-embedded")
   testImplementation("com.squareup.okhttp3:mockwebserver")
+
+  testImplementation("io.kotest:kotest-runner-junit5")
+  testImplementation("io.kotest:kotest-assertions-core")
+  testImplementation("io.kotest:kotest-property")
+  testImplementation("io.kotest:kotest-extensions-koin")
+  testImplementation("io.kotest:kotest-extensions-testcontainers")
+
+  testImplementation("org.testcontainers:testcontainers")
+  testImplementation("org.testcontainers:postgresql")
+  testImplementation("org.testcontainers:vault")
+  testImplementation("org.testcontainers:localstack")
+
+  testImplementation("com.fasterxml.jackson.core:jackson-core")
+  testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+  testImplementation("com.fasterxml.jackson.module:jackson-modules-java8")
+  testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
+
 }
 
 tasks {

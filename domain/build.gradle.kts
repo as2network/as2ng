@@ -16,8 +16,6 @@ dependencies {
 
   implementation("com.google.guava:guava")
   implementation("javax.xml.bind:jaxb-api")
-
-  testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
 // xjc {

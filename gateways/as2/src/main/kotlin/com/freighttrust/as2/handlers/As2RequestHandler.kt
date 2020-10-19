@@ -19,12 +19,16 @@ import com.freighttrust.persistence.FileRepository
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.extensions.toJSONB
+import com.helger.as2lib.message.AS2Message
 import io.vertx.ext.web.RoutingContext
 import org.jooq.tools.json.JSONObject
 import java.time.OffsetDateTime
 
+val RoutingContext.hasAs2Message
+get() = get<AS2Message?>(CTX_AS2_MESSAGE) != null
+
 var RoutingContext.message: As2Message
-  get() = get<As2Message>(CTX_AS2_MESSAGE)
+  get() = get(CTX_AS2_MESSAGE)
   set(message) {
     put(CTX_AS2_MESSAGE, message)
   }

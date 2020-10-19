@@ -2,7 +2,9 @@ package com.freighttrust.persistence.postgres.repositories
 
 import com.freighttrust.persistence.Repository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jooq.Condition
@@ -22,7 +24,7 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
   class JooqContext(val dbCtx: DSLContext) : Repository.Context
 
   // TODO there has to be a generic way of doing this
-  protected abstract fun idQuery(record: Pojo): Condition
+  protected abstract fun idQuery(value: Pojo): Condition
 
   protected fun jooqContext(ctx: Repository.Context?): DSLContext =
     if (ctx == null)
@@ -32,14 +34,14 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
       ctx.dbCtx
     }
 
-  override suspend fun <U> transaction(run: suspend (Repository.Context) -> U?): U? {
-    var result: U? = null
+  override suspend fun <U> transaction(run: suspend (Repository.Context) -> U): U {
+    var result: Deferred<U>? = null
     coroutineScope {
       dbCtx.transaction { txConfig ->
-        launch { result = run(JooqContext(DSL.using(txConfig))) }
+        result = async { run(JooqContext(DSL.using(txConfig))) }
       }
     }
-    return result
+    return result!!.await()
   }
 
   override suspend fun exists(value: Pojo, ctx: Repository.Context?): Boolean =
@@ -52,7 +54,7 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
     coroutineScope {
       jooqContext(ctx)
         .selectFrom(table)
-        .fetchInto<Pojo>(pojoClass)
+        .fetchInto(pojoClass)
         .toList()
     }
 
@@ -62,7 +64,7 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
         .selectFrom(table)
         .where(idQuery(value))
         .fetchOne()
-        .into(pojoClass)
+        ?.into(pojoClass)
     }
 
   override suspend fun insert(value: Pojo, ctx: Repository.Context?): Pojo =

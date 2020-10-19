@@ -23,7 +23,7 @@ class S3FileRepository(
   dbCtx, FILE, File::class.java
 ), FileRepository {
 
-  override fun idQuery(record: File): Condition = FILE.ID.eq(record.id)
+  override fun idQuery(value: File): Condition = FILE.ID.eq(value.id)
 
   // TODO large file support
   override suspend fun insert(key: String, dataHandler: DataHandler, ctx: Repository.Context?): File =

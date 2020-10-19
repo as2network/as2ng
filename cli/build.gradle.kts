@@ -24,8 +24,6 @@ dependencies {
 
   implementation("org.bouncycastle:bcpkix-jdk15on")
   implementation("info.picocli:picocli")
-
-  testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
 fun JavaExec.runTask() {

@@ -1,5 +1,6 @@
 package com.freighttrust.persistence
 
+import com.freighttrust.crypto.CertificateFactory
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.freighttrust.jooq.tables.pojos.File
 import com.freighttrust.jooq.tables.pojos.KeyPair
@@ -18,7 +19,7 @@ interface Repository<T> {
 
   interface Context
 
-  suspend fun <U> transaction(run: suspend (Context) -> U?): U?
+  suspend fun <U> transaction(run: suspend (Context) -> U): U
 
   suspend fun exists(value: T, ctx: Context? = null): Boolean
 
@@ -35,6 +36,8 @@ interface Repository<T> {
 }
 
 interface KeyPairRepository : Repository<KeyPair> {
+
+  suspend fun issue(certificateFactory: CertificateFactory, ctx: Repository.Context? = null): KeyPair
 
   suspend fun findIdByCertificate(certificate: X509Certificate, ctx: Repository.Context? = null): Long?
 

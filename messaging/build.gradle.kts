@@ -12,7 +12,6 @@ dependencies {
   api("org.apache.activemq:activemq-client")
   api("com.typesafe:config")
 
-  testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
 tasks {

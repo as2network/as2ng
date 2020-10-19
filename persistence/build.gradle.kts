@@ -14,6 +14,7 @@ dependencies {
 
   implementation(project(":common"))
   implementation(project(":domain"))
+  implementation(project(":crypto"))
 
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
@@ -25,8 +26,6 @@ dependencies {
   api("org.jooq:jooq")
   api("com.zaxxer:HikariCP")
   api("org.flywaydb:flyway-core")
-
-  testImplementation("io.kotlintest:kotlintest-runner-junit5")
 }
 
 tasks {

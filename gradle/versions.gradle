@@ -6,7 +6,7 @@ dependencyManagement {
     // Kotlin
     // ------------------------------------------------------------------
 
-    dependencySet(group: 'org.jetbrains.kotlinx', version: '1.3.7') {
+    dependencySet(group: 'org.jetbrains.kotlinx', version: '1.3.9') {
       entry 'kotlinx-coroutines-core'
       entry 'kotlinx-coroutines-jdk8'
       entry 'kotlinx-coroutines-test'
@@ -73,6 +73,7 @@ dependencyManagement {
     // ------------------------------------------------------------------
 
     dependency 'org.bouncycastle:bcpkix-jdk15on:1.58'
+    dependency 'com.bettercloud:vault-java-driver:5.1.0'
 
     // ------------------------------------------------------------------
     // Transports
@@ -117,7 +118,18 @@ dependencyManagement {
     // Testing
     // ------------------------------------------------------------------
 
-    dependency 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
+    dependency 'org.testcontainers:testcontainers:1.14.3'
+
+    dependency 'org.testcontainers:localstack:1.14.3'
+    dependency 'org.testcontainers:vault:1.14.3'
+    dependency 'org.testcontainers:postgresql:1.14.3'
+
+    dependency 'io.kotest:kotest-runner-junit5:4.3.0'
+    dependency 'io.kotest:kotest-assertions-core:4.3.0'
+    dependency 'io.kotest:kotest-property:4.3.0'
+    dependency 'io.kotest:kotest-extensions-koin:4.3.0'
+    dependency 'io.kotest:kotest-extensions-testcontainers:4.3.0'
+
     dependency 'io.mockk:mockk:1.10.0'
     dependency 'com.opentable.components:otj-pg-embedded:0.13.3'
     dependency 'com.squareup.okhttp3:mockwebserver:4.8.0'
