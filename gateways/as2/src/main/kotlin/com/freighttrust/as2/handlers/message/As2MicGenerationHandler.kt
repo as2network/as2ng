@@ -3,6 +3,7 @@ package com.freighttrust.as2.handlers.message
 import com.freighttrust.as2.domain.As2MessageType
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.message
+import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.RoutingContext
 
 class As2MicGenerationHandler : CoroutineRouteHandler() {

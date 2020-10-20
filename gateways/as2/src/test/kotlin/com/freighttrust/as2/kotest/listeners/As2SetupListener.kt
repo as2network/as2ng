@@ -14,6 +14,8 @@ import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientResponse
 import com.helger.as2lib.client.AS2ClientSettings
+import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
+import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.commons.mime.CMimeType
 import com.helger.mail.cte.EContentTransferEncoding
@@ -242,8 +244,22 @@ class As2SetupListener(
       return this
     }
 
-    fun withDispositionOptions(options: DispositionOptions): As2RequestBuilder {
-      settings.setMDNOptions(options)
+    fun withEncryptAndSign(
+      cryptoAlgorithm: ECryptoAlgorithmCrypt?,
+      signingAlgorithm: ECryptoAlgorithmSign?
+    ): As2RequestBuilder {
+      settings.setEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+      return this
+    }
+
+    fun withMdn(requestMdn: Boolean): As2RequestBuilder {
+      settings.isMDNRequested = requestMdn
+      return this
+    }
+
+    fun withDispositionOptions(options: DispositionOptions?): As2RequestBuilder {
+      options?.also { settings.setMDNOptions(it) } ?: settings.setMDNOptions("")
+
       return this
     }
 
