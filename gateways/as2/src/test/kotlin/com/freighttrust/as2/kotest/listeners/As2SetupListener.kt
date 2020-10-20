@@ -1,40 +1,65 @@
 package com.freighttrust.as2.kotest.listeners
 
+import com.freighttrust.as2.ext.toAs2Identifier
+import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
+import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
 import com.freighttrust.crypto.CertificateFactory
-import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.KeyStoreUtil
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.TradingPartnerRepository
-import com.helger.as2.app.MainOpenAS2Server
+import com.helger.as2lib.client.AS2Client
+import com.helger.as2lib.client.AS2ClientRequest
+import com.helger.as2lib.client.AS2ClientResponse
 import com.helger.as2lib.client.AS2ClientSettings
+import com.helger.as2lib.disposition.DispositionOptions
+import com.helger.commons.mime.CMimeType
+import com.helger.mail.cte.EContentTransferEncoding
 import com.helger.security.keystore.EKeyStoreType
 import io.kotest.core.listeners.TestListener
 import io.kotest.core.spec.Spec
-import io.kotest.core.test.TestCase
-import io.kotest.core.test.TestResult
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
-import org.koin.core.module.Module
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.inject
+import org.koin.core.module.Module
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.BindMode
-import org.testcontainers.containers.Container
 import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.output.Slf4jLogConsumer
+import org.testcontainers.containers.wait.strategy.Wait
+import org.testcontainers.utility.MountableFile
 import java.io.File
 import java.io.FileOutputStream
-import java.security.KeyStore
+import java.nio.charset.Charset
+
+enum class TestPartner(val resourcePath: String) {
+
+  Walmart("openas2/Walmart"),
+  CocaCola("openas2/CocaCola");
+
+  val as2Identifier = name.toAs2Identifier()
+
+  companion object {
+
+    fun findByAs2Identifier(identifier: String): TestPartner = values()
+      .first { it.as2Identifier == identifier }
+
+  }
+
+}
 
 class As2SetupListener(
   private val modules: List<Module>
 ) : TestListener, KoinComponent {
+
+  companion object {
+    val logger = LoggerFactory.getLogger(As2SetupListener::class.java)
+  }
 
   private val keyPairRepository: KeyPairRepository by inject()
   private val certificateFactory: CertificateFactory by inject()
@@ -43,19 +68,12 @@ class As2SetupListener(
 
   private val keyStoreUtil = KeyStoreUtil()
 
-  public lateinit var walmartKeyPair: KeyPair
-  public lateinit var cocaColaKeyPair: KeyPair
+  public lateinit var partnerMap: Map<TestPartner, TradingPartner>
+  public lateinit var keyStoreMap: Map<TestPartner, File>
 
-  public lateinit var walmart: TradingPartner
-  public lateinit var cocaCola: TradingPartner
+  public lateinit var clientSettingsMap: Map<TestPartner, AS2ClientSettings>
 
-  public lateinit var walmartToCocaCola: TradingChannel
-
-  // some base settings for as2 client calls
-  public lateinit var walmartClientSettings: AS2ClientSettings
-  public lateinit var cocaColaClientSettings: AS2ClientSettings
-
-  private var containers = emptyList<GenericContainer<Nothing>>()
+  private lateinit var containerMap: Map<TestPartner, GenericContainer<Nothing>>
 
   override suspend fun beforeSpec(spec: Spec) {
 
@@ -64,91 +82,117 @@ class As2SetupListener(
       modules(modules)
     }
 
-    walmartKeyPair = keyPairRepository.issue(certificateFactory)
-    cocaColaKeyPair = keyPairRepository.issue(certificateFactory)
+    // create trading partners
 
-    walmart = partnerRepository
-      .insert(
-        TradingPartner()
-          .apply {
-            name = "Walmart"
-            email = "walmart@partners.com"
-            keyPairId = walmartKeyPair.id
-          }
-      )
+    partnerMap = TestPartner.values()
+      .map { tp ->
+        Pair(
+          tp,
+          partnerRepository
+            .insert(
+              TradingPartner()
+                .apply {
+                  name = tp.name
+                  email = "${tp.name.toLowerCase()}@partners.com"
+                  keyPairId = keyPairRepository.issue(certificateFactory).id
+                }
+            )
+        )
+      }.toMap()
 
-    cocaCola = partnerRepository
-      .insert(
-        TradingPartner()
-          .apply {
-            name = "Coca Cola"
-            email = "a@partners.com"
-            keyPairId = cocaColaKeyPair.id
-          }
-      )
+    // add Walmart -> CocaCola trading channel
 
-    walmartToCocaCola = channelRepository
-      .insert(
-        TradingChannel()
-          .apply {
-            name = "Walmart To Coca Cola"
-            senderId = walmart.id
-            senderAs2Identifier = walmart.name
-            recipientId = cocaCola.id
-            recipientAs2Identifier = cocaCola.name
-            recipientMessageUrl = "http://localhost:10100"
-          }
-      )
-
-    walmartClientSettings = createClientSettings(walmart)
-      .apply {
-        setReceiverData("coca-cola", "Coca Cola", "http://localhost:8080/message")
-        setPartnershipName(senderAS2ID + "_" + receiverAS2ID);
-      }
-
-    cocaColaClientSettings = createClientSettings(cocaCola)
-
-    containers = containers + GenericContainer<Nothing>("as2-server")
-      .apply {
-        withClasspathResourceMapping("openas2/walmart", "/opt/as2/config", BindMode.READ_ONLY)
-        withExposedPorts(10101)
-        start()
-      }
-
-    containers = containers + GenericContainer<Nothing>("as2-server")
-      .apply {
-        withClasspathResourceMapping("openas2/cocacola", "/opt/as2/config", BindMode.READ_ONLY)
-        withExposedPorts(10101)
-        start()
-      }
-
-    // wait 5 seconds for startup
-    delay(5000L)
-
-    //
-
-    channelRepository.update(
-      walmartToCocaCola.apply {
-        recipientMessageUrl = "http://localhost:${containers[1].firstMappedPort}"
-      }
+    val tradingChannels = listOf(
+      channelRepository
+        .insert(
+          TradingChannel()
+            .apply {
+              name = "${Walmart.name} To ${CocaCola.name}"
+              senderId = partnerMap.getValue(Walmart).id
+              senderAs2Identifier = Walmart.as2Identifier
+              recipientId = partnerMap.getValue(CocaCola).id
+              recipientAs2Identifier = CocaCola.as2Identifier
+              recipientMessageUrl = "http://localhost"
+            }
+        )
     )
+
+    // create keystores
+
+    keyStoreMap = partnerMap.mapValues { (key, value) ->
+      val path = "src/test/resources/openas2/${key.as2Identifier}/keystore.p12"
+      createKeyStore(value, "password", path)
+    }
+
+    // generate as2 client settings
+
+    clientSettingsMap = partnerMap
+      .mapValues { (_, partner) -> createClientSettings(partner) }
+
+    // create as2 server containers
+
+    containerMap = TestPartner.values()
+      .map { tp ->
+
+        val keyStorePath = keyStoreMap[tp]
+          ?.toPath()
+          ?.let { MountableFile.forHostPath(it) }
+          ?: throw Error("Keystore not found")
+
+        Pair(tp,
+          GenericContainer<Nothing>("as2-server")
+            .apply {
+              withTmpFs(mapOf("/opt/as2/data" to ""))
+              withClasspathResourceMapping(tp.resourcePath, "/opt/as2/config", BindMode.READ_ONLY)
+              // we have to copy the keystore as it's not available in the classpath at compile time
+              withCopyFileToContainer(keyStorePath, "/opt/as2/config/keystore.p12")
+              withExposedPorts(10101)
+              waitingFor(Wait.forLogMessage(".*Server Started.*", 1))
+              start()
+            }.also { container ->
+              container.followOutput(
+                Slf4jLogConsumer(
+                  LoggerFactory.getLogger("As2Server [${tp.name}]")
+                ).withSeparateOutputStreams()
+              )
+            }
+        )
+      }.toMap()
+
+    // update the recipient message urls now that the containers have started and we can get their mapped ports
+
+    tradingChannels
+      .forEach { channel ->
+
+        val container = containerMap[TestPartner.findByAs2Identifier(channel.recipientAs2Identifier)]
+          ?: throw Error("Container not found")
+
+        channel.recipientMessageUrl = "http://localhost:${container.firstMappedPort}"
+
+        channelRepository
+          .update(channel)
+      }
+
   }
 
-  private suspend fun createClientSettings(partner: TradingPartner): AS2ClientSettings =
+  fun sendingFrom(sender: TestPartner): As2RequestBuilder =
+    As2RequestBuilder(
+      sender,
+      clientSettingsMap[sender]
+        ?: error("No client settings found for test partner = $sender")
+    )
+
+  private fun createClientSettings(partner: TradingPartner): AS2ClientSettings =
     AS2ClientSettings()
       .apply {
 
-        val path = "src/test/resources/openas2/${partner.name.toLowerCase().replace(" ", "")}/keystore.p12"
+        val keyStoreFile = keyStoreMap[TestPartner.valueOf(partner.name)] ?: throw Error("Key store not found")
 
-        setKeyStore(
-          EKeyStoreType.PKCS12,
-          createKeyStore(partner, "password", path),
-          "password"
-        )
+        setKeyStore(EKeyStoreType.PKCS12, keyStoreFile, "password")
 
         // for the purposes of testing we follow the convention where the partner name is the as2 identifier and key alias
         setSenderData(
-          partner.name.toLowerCase().replace(" ", "-"),
+          partner.name.toAs2Identifier(),
           partner.email,
           partner.name
         )
@@ -161,7 +205,7 @@ class As2SetupListener(
         withContext(Dispatchers.IO) {
 
           val file = File(path)
-//            .also { it.deleteOnExit() }
+            .also { it.deleteOnExit() }
 
           FileOutputStream(file)
             .apply {
@@ -177,9 +221,46 @@ class As2SetupListener(
   override suspend fun afterSpec(spec: Spec) {
 
     withContext(Dispatchers.IO) {
-      containers.forEach { it.stop() }
+      containerMap.values.forEach { it.stop() }
     }
 
     stopKoin()
+  }
+
+  inner class As2RequestBuilder(
+    private val sender: TestPartner,
+    private val settings: AS2ClientSettings
+  ) {
+
+    private val client = AS2Client()
+
+    private var request: AS2ClientRequest? = null
+
+    fun to(recipient: TestPartner): As2RequestBuilder {
+      settings.setPartnershipName("${sender.name} to ${recipient.name}")
+      settings.setReceiverData(recipient.as2Identifier, recipient.name, "http://localhost:8080/message")
+      return this
+    }
+
+    fun withDispositionOptions(options: DispositionOptions): As2RequestBuilder {
+      settings.setMDNOptions(options)
+      return this
+    }
+
+    fun withSubject(subject: String): As2RequestBuilder {
+      request = AS2ClientRequest(subject)
+      return this
+    }
+
+    fun withTextData(text: String): As2RequestBuilder {
+      with(requireNotNull(request)) {
+        setData("This is a test", Charset.defaultCharset())
+        contentType = CMimeType.TEXT_PLAIN.asString
+        contentTransferEncoding = EContentTransferEncoding.BINARY
+      }
+      return this;
+    }
+
+    fun send(): AS2ClientResponse = client.sendSynchronous(settings, requireNotNull(request))
   }
 }

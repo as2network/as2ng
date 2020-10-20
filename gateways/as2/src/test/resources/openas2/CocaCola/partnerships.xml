@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <partnerships>
   <partner name="Walmart" as2_id="Walmart" x509_alias="Walmart" email="walmart@partners.com"/>
-  <partner name="Coca Cola" as2_id="Coca-Cola" x509_alias="Coca Cola" email="cocacola@partners.com"/>
+  <partner name="CocaCola" as2_id="CocaCola" x509_alias="CocaCola" email="cocacola@partners.com"/>
 
   <partnership name="Walmart-CocaCola">
     <sender name="Walmart"/>
-    <receiver name="Coca Cola"/>
+    <receiver name="CocaCola"/>
     <attribute name="protocol" value="as2"/>
   </partnership>
 

@@ -20,6 +20,7 @@ import com.freighttrust.persistence.TradingPartnerRepository
 import com.freighttrust.persistence.extensions.toX509
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.commons.http.CHttpHeader
+import io.vertx.core.VertxException
 import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
@@ -38,103 +39,112 @@ class As2ForwardMessageHandler(
 ) : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext): Unit =
-    with(ctx.message) {
+    try {
+      with(ctx.message) {
 
-      val url = tradingChannel.recipientMessageUrl
+        val url = tradingChannel.recipientMessageUrl
 
-      // prepare the http call for the recipient
+        // prepare the http call for the recipient
 
-      val request = webClient
-        .postAbs(tradingChannel.recipientMessageUrl)
-        .putHeaders(ctx.request().headers())
-        .timeout(10000)
+        val request = webClient
+          .postAbs(tradingChannel.recipientMessageUrl)
+          .putHeaders(ctx.request().headers())
+          .timeout(10000)
 
-      if (isMdnRequested && isMdnAsynchronous) {
-        // replace the response url with the exchange url instead of the original sender
-        request.headers().remove(AS2Header.ReceiptDeliveryOption.key)
-        request.putHeader(AS2Header.ReceiptDeliveryOption.key, "$baseUrl/mdn")
-      }
-
-      // forward the message
-      val response = request.sendBufferAwait(ctx.body)
-
-      if (response.statusCode() != 200) {
-        throw DispositionException(
-          Disposition.automaticFailure("non-200-response")
-        )
-      }
-
-      if (isMdnRequested && !isMdnAsynchronous) {
-
-        //
-
-        var bodyPart = MimeBodyPart()
-          .apply {
-
-            val receivedContentType = AS2HttpHelper
-              .getCleanContentType(response.getHeader(HttpHeaders.CONTENT_TYPE.toString()))
-
-            dataHandler = DataHandler(
-              response.body()
-                .dataSource(
-                  response.getHeader(HttpHeaders.CONTENT_TYPE.toString()),
-                  response.getHeader(HttpHeaders.CONTENT_TRANSFER_ENCODING.toString())
-                )
-            )
-            // Header must be set AFTER the DataHandler!
-            setHeader(CHttpHeader.CONTENT_TYPE, receivedContentType)
-          }
-
-        // response may be signed
-
-        if (bodyPart.isSigned()) {
-
-          val partner = partnerRepository.findById(
-            TradingPartner().apply { id = ctx.message.tradingChannel.recipientId }
-          ) ?: throw Error("Could not find recipient trading partner in database")
-
-          val keyPair = keyPairRepository.findById(
-            KeyPair().apply { id = partner.keyPairId }
-          ) ?: throw Error("Could not find key pair for partner in database")
-
-          bodyPart = bodyPart.verifiedContent(keyPair.certificate.toX509(), ctx.tempFileHelper)
+        if (isMdnRequested && isMdnAsynchronous) {
+          // replace the response url with the exchange url instead of the original sender
+          request.headers().remove(AS2Header.ReceiptDeliveryOption.key)
+          request.putHeader(AS2Header.ReceiptDeliveryOption.key, "$baseUrl/mdn")
         }
 
-        // store the notification
+        // forward the message
+        val response = request.sendBufferAwait(ctx.body)
 
-        DispositionNotification()
-          .fromMimeBodyPart(bodyPart)
-          .also { notification ->
+        if (response.statusCode() != 200) {
+          throw DispositionException(
+            Disposition.automaticFailure("non-200-response")
+          )
+        }
 
-            dispositionNotificationRepository
-              .insert(
-                DispositionNotification()
-                  .apply {
-                    this.requestId = ctx.message.context.request.id
-                    this.originalMessageId = notification.originalMessageId
-                    this.originalRecipient = notification.originalRecipient
-                    this.finalRecipient = notification.finalRecipient
-                    this.reportingUa = notification.reportingUa
-                    this.disposition = notification.disposition.toString()
-                    notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
-                  }
+        if (isMdnRequested && !isMdnAsynchronous) {
+
+          //
+
+          var bodyPart = MimeBodyPart()
+            .apply {
+
+              val receivedContentType = AS2HttpHelper
+                .getCleanContentType(response.getHeader(HttpHeaders.CONTENT_TYPE.toString()))
+
+              dataHandler = DataHandler(
+                response.body()
+                  .dataSource(
+                    response.getHeader(HttpHeaders.CONTENT_TYPE.toString()),
+                    response.getHeader(HttpHeaders.CONTENT_TRANSFER_ENCODING.toString())
+                  )
               )
+              // Header must be set AFTER the DataHandler!
+              setHeader(CHttpHeader.CONTENT_TYPE, receivedContentType)
+            }
+
+          // response may be signed
+
+          if (bodyPart.isSigned()) {
+
+            val partner = partnerRepository.findById(
+              TradingPartner().apply { id = ctx.message.tradingChannel.recipientId }
+            ) ?: throw Error("Could not find recipient trading partner in database")
+
+            val keyPair = keyPairRepository.findById(
+              KeyPair().apply { id = partner.keyPairId }
+            ) ?: throw Error("Could not find key pair for partner in database")
+
+            bodyPart = bodyPart.verifiedContent(keyPair.certificate.toX509(), ctx.tempFileHelper)
           }
 
-        // return the mdn
+          // store the notification
 
-        response
-          .headers()
-          .forEach { (key, value) -> ctx.response().putHeader(key, value) }
+          DispositionNotification()
+            .fromMimeBodyPart(bodyPart)
+            .also { notification ->
 
-        // send with received body
-        ctx.response().write(response.body())
+              dispositionNotificationRepository
+                .insert(
+                  DispositionNotification()
+                    .apply {
+                      this.requestId = ctx.message.context.request.id
+                      this.originalMessageId = notification.originalMessageId
+                      this.originalRecipient = notification.originalRecipient
+                      this.finalRecipient = notification.finalRecipient
+                      this.reportingUa = notification.reportingUa
+                      this.disposition = notification.disposition.toString()
+                      notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
+                    }
+                )
+            }
+
+          // return the mdn
+
+          response
+            .headers()
+            .forEach { (key, value) -> ctx.response().putHeader(key, value) }
+
+          // send with received body
+          ctx.response().write(response.body())
+        }
+
+        // mark the request as delivered
+        requestRepository.setAsDeliveredTo(context.request.id, url, Instant.now())
+
+        // close the connection
+        ctx.response().end()
+      }
+    } catch (t: Throwable) {
+
+      when {
+        else -> throw t
       }
 
-      // mark the request as delivered
-      requestRepository.setAsDeliveredTo(context.request.id, url, Instant.now())
 
-      // close the connection
-      ctx.response().end()
     }
 }

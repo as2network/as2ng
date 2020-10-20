@@ -125,14 +125,14 @@ create table message
 (
     request_id              uuid primary key references request (id),
 
-    encryption_algorithm    varchar(16)   null,
-    compression_algorithm   varchar(16)   null,
+    encryption_algorithm    varchar(16)    null,
+    compression_algorithm   varchar(16)    null,
 
-    mics                    varchar(64)[] null,
+    mics                    varchar(512)[] null,
 
     is_mdn_requested        bool,
     is_mdn_async            bool,
-    receipt_delivery_option varchar(128)  null
+    receipt_delivery_option varchar(128)   null
 );
 
 /*****************************************************************************/
@@ -148,6 +148,6 @@ create table disposition_notification
     final_recipient      varchar(64),
     reporting_ua         varchar(64),
     disposition          varchar(128),
-    received_content_mic varchar(64) null,
-    digest_algorithm    varchar(16) null
+    received_content_mic varchar(512) null,
+    digest_algorithm     varchar(16) null
 );

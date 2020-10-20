@@ -53,7 +53,7 @@ class As2FailureHandler(
       with(ctx.failure()) {
         requestRepository.setAsFailed(
           ctx.message.context.request.id,
-          message,
+          message?.take(128),
           ExceptionUtils.getStackTrace(this)
         )
       }

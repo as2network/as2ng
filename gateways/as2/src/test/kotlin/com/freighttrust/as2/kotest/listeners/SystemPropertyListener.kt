@@ -23,6 +23,8 @@ class SystemPropertyListener(
       System.setProperty("s3.endpoint.signingRegion", signingRegion)
     }
 
+    System.setProperty("s3.bucket", "integration-test")
+
     System.setProperty("vault.issueUrl", "http://${vault.host}:${vault.firstMappedPort}/v1/pki_int/issue/freighttrust-dot-com")
 
   }

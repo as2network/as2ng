@@ -116,10 +116,7 @@ dependencies {
   testImplementation("org.testcontainers:vault")
   testImplementation("org.testcontainers:localstack")
 
-  testImplementation("com.fasterxml.jackson.core:jackson-core")
-  testImplementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-  testImplementation("com.fasterxml.jackson.module:jackson-modules-java8")
-  testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+  testImplementation("com.amazonaws:aws-java-sdk-s3")
 
 
 }
