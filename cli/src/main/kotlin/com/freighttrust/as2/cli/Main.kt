@@ -59,9 +59,6 @@ private fun koinExecutionStrategy(parseResult: CommandLine.ParseResult): Int {
 
 fun main(args: Array<String>) {
 
-  // configure log4j2 backend for flogger framework
-  System.setProperty("flogger.backend_factory", "com.google.common.flogger.backend.log4j2.Log4j2BackendFactory#getInstance")
-
   val exitCode = CommandLine(CliCommand())
     .setCaseInsensitiveEnumValuesAllowed(true)
     .setExecutionStrategy { parseResult -> koinExecutionStrategy(parseResult) }

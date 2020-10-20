@@ -4,15 +4,18 @@ import com.freighttrust.as2.modules.As2ExchangeServerModule
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.persistence.s3.S3Module
-import com.google.common.flogger.MetadataKey.single
 import io.vertx.core.Verticle
 import io.vertx.core.Vertx
+import io.vertx.core.logging.LoggerFactory
+import io.vertx.core.logging.SLF4JLogDelegateFactory
 import io.vertx.core.spi.VerticleFactory
 import org.koin.core.Koin
 import org.koin.core.KoinApplication
 import org.koin.core.context.KoinContextHandler
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
 import org.koin.dsl.module
+import org.koin.logger.SLF4JLogger
 
 class As2VerticleFactory : VerticleFactory {
 
@@ -37,7 +40,7 @@ class As2VerticleFactory : VerticleFactory {
 
     if (koin == null) {
       koinApp = startKoin {
-        printLogger()
+        logger(SLF4JLogger(Level.ERROR))
         modules(
           modules +
             module { single { vertx } }

@@ -15,7 +15,7 @@ build.dependsOn(tasks.shadowJar)
 val appJvmArgs = listOf("-Xms512m", "-Xmx512m")
 
 val vertxLauncher = "io.vertx.core.Launcher"
-val vertxDebug = getenv("VERTX_DEBUG")?.toBoolean() ?: true
+val vertxDebug = getenv("VERTX_DEBUG")?.toBoolean() ?: false
 
 fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   group = "application"
@@ -38,7 +38,8 @@ fun JavaExec.verticleTask(verticle: String, debugPort: String) {
       "-Dvertx.options.maxEventLoopExecuteTime=${Long.MAX_VALUE}",
       "-Dvertx.options.maxWorkerExecuteTime=${Long.MAX_VALUE}",
       "-Dvertx.debug=true",
-      "-Dvertx.debug.suspend=true"
+      "-Dvertx.debug.suspend=true",
+      "-Dvertx.logger-delegate-factory-class-name=io.vertx.core.logging.SLF4JLogDelegateFactory"
     )
     args("--java-opts", javaOpts.joinToString(" "))
   }
@@ -95,9 +96,6 @@ dependencies {
   implementation("io.xlate:staedi")
 
   implementation("com.squareup.okhttp3:okhttp")
-
-  implementation("org.apache.logging.log4j:log4j")
-  implementation("org.apache.logging.log4j:log4j-slf4j-impl")
 
   testImplementation("io.vertx:vertx-junit5")
   testImplementation("org.koin:koin-test")

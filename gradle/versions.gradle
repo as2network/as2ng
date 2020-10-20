@@ -21,6 +21,7 @@ dependencyManagement {
     dependencySet(group: 'org.koin', version: '2.1.6') {
       entry 'koin-core'
       entry 'koin-test'
+      entry 'koin-logger-slf4j'
     }
 
     dependency 'com.typesafe:config:1.4.0'
@@ -98,10 +99,6 @@ dependencyManagement {
     // ------------------------------------------------------------------
 
     dependency 'org.slf4j:slf4j-api:1.7.30'
-
-    dependency 'com.google.flogger:flogger:0.5.1'
-    dependency 'com.google.flogger:flogger-slf4j-backend:0.5.1'
-    dependency 'com.google.flogger:flogger-log4j2-backend:0.5.1'
 
     dependency 'org.apache.logging.log4j:log4j:2.13.3'
     dependency 'org.apache.logging.log4j:log4j-slf4j-impl:2.13.3'

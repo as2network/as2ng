@@ -2,7 +2,6 @@ package com.freighttrust.as2.cli.config.partner
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.persistence.TradingPartnerRepository
-import com.google.common.flogger.FluentLogger
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
 import org.koin.core.inject
