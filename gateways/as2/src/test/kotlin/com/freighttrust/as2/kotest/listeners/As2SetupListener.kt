@@ -24,6 +24,7 @@ import io.kotest.core.listeners.TestListener
 import io.kotest.core.spec.Spec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.mockwebserver.MockWebServer
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -254,6 +255,11 @@ class As2SetupListener(
 
     fun withMdn(requestMdn: Boolean): As2RequestBuilder {
       settings.isMDNRequested = requestMdn
+      return this
+    }
+
+    fun withAsyncMdn(url: String?): As2RequestBuilder {
+      settings.asyncMDNUrl = url
       return this
     }
 

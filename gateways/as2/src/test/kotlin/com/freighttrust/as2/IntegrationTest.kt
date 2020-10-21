@@ -1,5 +1,7 @@
 package com.freighttrust.as2
 
+import com.freighttrust.as2.RequestStyle.Async
+import com.freighttrust.as2.RequestStyle.Sync
 import com.freighttrust.as2.ext.isSigned
 import com.freighttrust.as2.kotest.listeners.As2SetupListener
 import com.freighttrust.as2.kotest.listeners.LocalStackListener
@@ -13,32 +15,37 @@ import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
 import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.persistence.s3.S3Module
-import com.helger.as2lib.client.AS2Client
-import com.helger.as2lib.client.AS2ClientRequest
-import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
+import com.helger.as2lib.client.AS2ClientResponse
 import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt.CRYPT_AES128_CBC
-import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign.DIGEST_SHA_512
 import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.disposition.DispositionOptions.IMPORTANCE_REQUIRED
-import com.helger.commons.mime.CMimeType
-import com.helger.mail.cte.EContentTransferEncoding
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.data.forAll
+import io.kotest.data.row
 import io.kotest.extensions.testcontainers.perSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.deployVerticleAwait
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 import org.koin.dsl.module
 import org.koin.test.KoinTest
+import org.testcontainers.Testcontainers
 import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.containers.localstack.LocalStackContainer.Service.S3
 import org.testcontainers.vault.VaultContainer
-import java.nio.charset.Charset
+import java.util.concurrent.TimeUnit
+
+enum class RequestStyle {
+  Sync, Async
+}
 
 class IntegrationTest : FunSpec(), KoinTest {
 
@@ -62,9 +69,19 @@ class IntegrationTest : FunSpec(), KoinTest {
       withDatabaseName("test")
     }
 
+  val mdnServer = MockWebServer()
+    .apply {
+      start(10100)
+    }
+
+  val asyncMdnUrl = "http://${mdnServer.hostName}:${mdnServer.port}/mdn"
+
   private val k by lazy { getKoin() }
 
   init {
+
+    // this allows the as2 servers to reach the exchange server
+    Testcontainers.exposeHostPorts(8080)
 
     listener(localStack.perSpec())
     listener(vault.perSpec())
@@ -97,10 +114,12 @@ class IntegrationTest : FunSpec(), KoinTest {
 
     with(setupListener) {
 
+      test("1. Send un-encrypted data and do not request a receipt") {
 
-      context("Synchronous Flow") {
-
-        test("1. Send un-encrypted data and do not request a receipt") {
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
@@ -111,15 +130,31 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe false
+
+          verifySync(style) {
+            response.hasMDN() shouldBe false
+          }
+
+          verifyAsync(style) { request ->
+            request shouldBe null
+          }
+
         }
 
-        test("2. Send un-encrypted data and request an unsigned receipt") {
+      }
+
+      test("2. Send un-encrypted data and request an unsigned receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
               .withMdn(true)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(null, DIGEST_SHA_512)
               .withDispositionOptions(
                 DispositionOptions()
@@ -131,16 +166,31 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe true
+
+          verifySync(style) {
+            response.hasMDN() shouldBe true
+          }
+
+          verifyAsync(style) { request ->
+            request shouldNotBe null
+          }
 
         }
 
-        test("3. Send un-encrypted data and request a signed receipt") {
+      }
+
+      test("3. Send un-encrypted data and request a signed receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
               .withMdn(true)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(null, DIGEST_SHA_512)
               .withDispositionOptions(
                 DispositionOptions()
@@ -154,12 +204,25 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe true
 
-          response.mdn!!.data!!.isSigned() shouldBe true
+          verifySync(style) {
+            response.hasMDN() shouldBe true
+            response.mdn!!.data!!.isSigned() shouldBe true
+          }
+
+          verifyAsync(style) { request ->
+            request shouldNotBe null
+          }
+
         }
+      }
 
-        test("4. Send encrypted data and do not request a receipt") {
+      test("4. Send encrypted data and do not request a receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
@@ -171,16 +234,30 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe false
+
+          verifySync(style) {
+            response.hasMDN() shouldBe false
+          }
+
+          verifyAsync(style) { request ->
+            request shouldBe null
+          }
 
         }
+      }
 
-        test("5. Send encrypted data and request an un-signed receipt") {
+      test("5. Send encrypted data and request an un-signed receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
               .withMdn(true)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
               .withDispositionOptions(
                 DispositionOptions()
@@ -192,15 +269,31 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe true
-          response.mdn!!.data!!.isSigned() shouldBe false
-        }
 
-        test("6. Send encrypted data and request a signed receipt") {
+          verifySync(style) {
+            response.hasMDN() shouldBe true
+            response.mdn!!.data!!.isSigned() shouldBe false
+          }
+
+          verifyAsync(style) { request ->
+            request shouldNotBe null
+          }
+
+        }
+      }
+
+      test("6. Send encrypted data and request a signed receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
+
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
               .withMdn(true)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
               .withDispositionOptions(
                 DispositionOptions()
@@ -214,11 +307,25 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe true
-          response.mdn!!.data!!.isSigned() shouldBe true
-        }
 
-        test("7. Send signed data and do not request a receipt") {
+          verifySync(style) {
+            response.hasMDN() shouldBe true
+            response.mdn!!.data!!.isSigned() shouldBe true
+          }
+
+          verifyAsync(style) { request ->
+            request shouldNotBe null
+          }
+
+        }
+      }
+
+      test("7. Send signed data and do not request a receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
@@ -230,16 +337,31 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe false
+
+          verifySync(style) {
+            response.hasMDN() shouldBe false
+          }
+
+          verifyAsync(style) { request ->
+            request shouldBe null
+          }
 
         }
 
-        test("8. Send signed data and request an un-signed receipt") {
+      }
+
+      test("8. Send signed data and request an un-signed receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
               .withMdn(true)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(null, DIGEST_SHA_512)
               .withDispositionOptions(
                 DispositionOptions()
@@ -251,17 +373,31 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe true
-          response.mdn!!.data!!.isSigned() shouldBe false
+
+          verifySync(style) {
+            response.hasMDN() shouldBe true
+            response.mdn!!.data!!.isSigned() shouldBe false
+          }
+
+          verifyAsync(style) { request ->
+            request shouldNotBe null
+          }
 
         }
+      }
 
-        test("9. Send signed data and request a signed receipt") {
+      test("9. Send signed data and request a signed receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
               .withMdn(true)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(null, DIGEST_SHA_512)
               .withDispositionOptions(
                 DispositionOptions()
@@ -275,13 +411,25 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe true
-          response.mdn!!.data!!.isSigned() shouldBe true
+
+          verifySync(style) {
+            response.hasMDN() shouldBe true
+            response.mdn!!.data!!.isSigned() shouldBe true
+          }
+
+          verifyAsync(style) { request ->
+            request shouldNotBe null
+          }
 
         }
+      }
 
-        test("10. Send encrypted and signed data and do not request a receipt") {
+      test("10. Send encrypted and signed data and do not request a receipt") {
 
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
@@ -292,16 +440,30 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe false
+
+          verifySync(style) {
+            response.hasMDN() shouldBe false
+          }
+
+          verifyAsync(style) { request ->
+            request shouldBe null
+          }
 
         }
+      }
 
-        test("11. Send encrypted and signed data and request an un-signed receipt") {
+      test("11. Send encrypted and signed data and request an un-signed receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
               .withMdn(true)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
               .withDispositionOptions(
                 DispositionOptions()
@@ -313,17 +475,32 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe false
-          response.mdn!!.data!!.isSigned() shouldBe false
+
+          verifySync(style) {
+            response.hasMDN() shouldBe true
+            response.mdn!!.data!!.isSigned() shouldBe false
+          }
+
+          verifyAsync(style) { request ->
+            request shouldNotBe null
+          }
 
         }
 
-        test("12. Send encrypted and signed data and request a signed receipt") {
+      }
+
+      test("12. Send encrypted and signed data and request a signed receipt") {
+
+        forAll(
+          row(Sync),
+          row(Async)
+        ) { style ->
 
           val response =
             sendingFrom(Walmart)
               .to(CocaCola)
               .withMdn(true)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
               .withDispositionOptions(
                 DispositionOptions()
@@ -337,9 +514,15 @@ class IntegrationTest : FunSpec(), KoinTest {
               .send()
 
           response.hasException() shouldBe false
-          response.hasMDN() shouldBe true
-          response.mdn!!.data!!.isSigned() shouldBe true
 
+          verifySync(style) {
+            response.hasMDN() shouldBe true
+            response.mdn!!.data!!.isSigned() shouldBe true
+          }
+
+          verifyAsync(style) { request ->
+            request shouldNotBe null
+          }
 
         }
 
@@ -348,4 +531,18 @@ class IntegrationTest : FunSpec(), KoinTest {
     }
   }
 
+  fun verifySync(style: RequestStyle, verify: () -> Unit) {
+    if (style == Sync) verify()
+  }
+
+  @Suppress("BlockingMethodInNonBlockingContext")
+  suspend fun verifyAsync(style: RequestStyle, verify: (RecordedRequest?) -> Unit) {
+    if (style == Async)
+      withContext(Dispatchers.IO) {
+        verify(mdnServer.takeRequest(1, TimeUnit.SECONDS))
+      }
+  }
+
 }
+
+

@@ -51,9 +51,9 @@ class As2ServerVerticle(
       .handler(koin.get<As2MicVerificationHandler>())
       .handler(koin.get<As2ForwardMdnHandler>())
 
-    logger.info("Mounting router")
-
     val port = config.getInt("port")
+
+    logger.info("Mounting router, port = {}", port)
 
     vertx
       .createHttpServer()

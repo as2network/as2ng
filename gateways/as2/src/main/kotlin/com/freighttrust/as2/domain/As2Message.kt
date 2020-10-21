@@ -25,7 +25,9 @@ import org.bouncycastle.mail.smime.SMIMECompressedParser
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser
 import org.bouncycastle.mail.smime.SMIMEException
 import org.bouncycastle.mail.smime.SMIMEUtil
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import java.security.GeneralSecurityException
 import java.security.PrivateKey
 import java.security.cert.X509Certificate
@@ -45,6 +47,10 @@ data class As2MessageContext(
   val verifiedBody: MimeBodyPart? = null,
   val mics: List<String>? = null
 ) {
+
+  companion object {
+    val logger = LoggerFactory.getLogger(As2MessageContext::class.java)
+  }
 
   val wasEncrypted: Boolean = decryptedBody != null
   val wasCompressed: Boolean = decompressedBody != null
@@ -212,4 +218,18 @@ data class As2Message(
 
     return copy(context = context.copy(mics = mics))
   }
+
+  private val contextMap = mapOf(
+    "MessageId" to messageId,
+    "RequestId" to context.request.id.toString(),
+    "AS2-From" to senderId,
+    "AS2-To" to recipientId
+  )
+
+  fun withLogger(log: (Logger) -> Unit) {
+    MDC.setContextMap(contextMap)
+    log(logger)
+    MDC.clear()
+  }
+
 }

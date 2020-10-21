@@ -15,6 +15,8 @@ class SystemPropertyListener(
 
   override suspend fun beforeSpec(spec: Spec) {
 
+    System.setProperty("as2.host", "host.testcontainers.internal")
+
     val jdbcUrl = "jdbc:postgresql://${postgres.host}:${postgres.firstMappedPort}/test?user=test&password=test"
     System.setProperty("postgres.jdbcUrl", jdbcUrl)
 

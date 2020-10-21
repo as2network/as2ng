@@ -20,5 +20,7 @@
             errordir="%home%/data/inbox/error"
             errorformat="$msg.sender.as2_id$, $msg.receiver.as2_id$, $msg.headers.message-id$"/>
 
+    <module classname="com.helger.as2lib.processor.sender.AsynchMDNSenderModule"/>
+
   </processor>
 </openas2>

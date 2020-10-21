@@ -7,11 +7,11 @@
   </Appenders>
   <Loggers>
 
-    <Logger name="com.helger.as2lib.crypto" level="debug" additivity="false">
+    <Logger name="com.freighttrust.as2" level="DEBUG" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
 
-    <Root level="INFO">
+    <Root level="${env:LOG_LEVEL:-INFO}">
       <AppenderRef ref="Console"/>
     </Root>
 
