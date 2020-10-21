@@ -178,9 +178,10 @@ class As2SetupListener(
 
   }
 
-  fun sendingFrom(sender: TestPartner): As2RequestBuilder =
+  fun sendingFrom(sender: TestPartner, subject: String): As2RequestBuilder =
     As2RequestBuilder(
       sender,
+      subject,
       clientSettingsMap[sender]
         ?: error("No client settings found for test partner = $sender")
     )
@@ -231,15 +232,19 @@ class As2SetupListener(
   }
 
   inner class As2RequestBuilder(
-    private val sender: TestPartner,
-    private val settings: AS2ClientSettings
+    val sender: TestPartner,
+    val subject: String,
+    val settings: AS2ClientSettings
   ) {
 
     private val client = AS2Client()
 
-    private var request: AS2ClientRequest? = null
+    var recipient: TestPartner? = null
+
+    var request: AS2ClientRequest = AS2ClientRequest(subject)
 
     fun to(recipient: TestPartner): As2RequestBuilder {
+      this.recipient = recipient
       settings.setPartnershipName("${sender.name} to ${recipient.name}")
       settings.setReceiverData(recipient.as2Identifier, recipient.name, "http://localhost:8080/message")
       return this
@@ -265,18 +270,12 @@ class As2SetupListener(
 
     fun withDispositionOptions(options: DispositionOptions?): As2RequestBuilder {
       options?.also { settings.setMDNOptions(it) } ?: settings.setMDNOptions("")
-
-      return this
-    }
-
-    fun withSubject(subject: String): As2RequestBuilder {
-      request = AS2ClientRequest(subject)
       return this
     }
 
     fun withTextData(text: String): As2RequestBuilder {
-      with(requireNotNull(request)) {
-        setData("This is a test", Charset.defaultCharset())
+      with(request) {
+        setData(text, Charset.defaultCharset())
         contentType = CMimeType.TEXT_PLAIN.asString
         contentTransferEncoding = EContentTransferEncoding.BINARY
       }

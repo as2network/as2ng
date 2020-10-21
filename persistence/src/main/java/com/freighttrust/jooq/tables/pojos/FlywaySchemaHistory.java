@@ -23,7 +23,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class FlywaySchemaHistory implements Serializable {
 
-    private static final long serialVersionUID = 406310614;
+    private static final long serialVersionUID = -1835162220;
 
     private Integer   installedRank;
     private String    version;
@@ -163,6 +163,95 @@ public class FlywaySchemaHistory implements Serializable {
     public FlywaySchemaHistory setSuccess(Boolean success) {
         this.success = success;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final FlywaySchemaHistory other = (FlywaySchemaHistory) obj;
+        if (installedRank == null) {
+            if (other.installedRank != null)
+                return false;
+        }
+        else if (!installedRank.equals(other.installedRank))
+            return false;
+        if (version == null) {
+            if (other.version != null)
+                return false;
+        }
+        else if (!version.equals(other.version))
+            return false;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        }
+        else if (!description.equals(other.description))
+            return false;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        }
+        else if (!type.equals(other.type))
+            return false;
+        if (script == null) {
+            if (other.script != null)
+                return false;
+        }
+        else if (!script.equals(other.script))
+            return false;
+        if (checksum == null) {
+            if (other.checksum != null)
+                return false;
+        }
+        else if (!checksum.equals(other.checksum))
+            return false;
+        if (installedBy == null) {
+            if (other.installedBy != null)
+                return false;
+        }
+        else if (!installedBy.equals(other.installedBy))
+            return false;
+        if (installedOn == null) {
+            if (other.installedOn != null)
+                return false;
+        }
+        else if (!installedOn.equals(other.installedOn))
+            return false;
+        if (executionTime == null) {
+            if (other.executionTime != null)
+                return false;
+        }
+        else if (!executionTime.equals(other.executionTime))
+            return false;
+        if (success == null) {
+            if (other.success != null)
+                return false;
+        }
+        else if (!success.equals(other.success))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.installedRank == null) ? 0 : this.installedRank.hashCode());
+        result = prime * result + ((this.version == null) ? 0 : this.version.hashCode());
+        result = prime * result + ((this.description == null) ? 0 : this.description.hashCode());
+        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+        result = prime * result + ((this.script == null) ? 0 : this.script.hashCode());
+        result = prime * result + ((this.checksum == null) ? 0 : this.checksum.hashCode());
+        result = prime * result + ((this.installedBy == null) ? 0 : this.installedBy.hashCode());
+        result = prime * result + ((this.installedOn == null) ? 0 : this.installedOn.hashCode());
+        result = prime * result + ((this.executionTime == null) ? 0 : this.executionTime.hashCode());
+        result = prime * result + ((this.success == null) ? 0 : this.success.hashCode());
+        return result;
     }
 
     @Override

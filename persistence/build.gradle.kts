@@ -79,6 +79,7 @@ jooqGenerator {
               .withDeprecated(false)
               .withRecords(true)
               .withPojos(true)
+              .withPojosEqualsAndHashCode(true)
               .withFluentSetters(true)
           )
           .withTarget(

@@ -24,3 +24,23 @@ fun Buffer.dataSource(contentType: String, contentTransferEncoding: String): Dat
         )
     }
   }
+
+fun okio.Buffer.dataSource(contentType: String, contentTransferEncoding: String): DataSource =
+  this.let { buffer ->
+
+    object : DataSource {
+
+      override fun getName(): String = "OKIO Buffer data source"
+
+      override fun getContentType(): String = contentType
+
+      override fun getOutputStream(): OutputStream = throw UnsupportedOperationException()
+
+      override fun getInputStream(): InputStream =
+        AS2IOHelper.getContentTransferEncodingAwareInputStream(
+          buffer.inputStream(),
+          contentTransferEncoding
+        )
+    }
+
+  }

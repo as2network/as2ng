@@ -23,7 +23,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DispositionNotification implements Serializable {
 
-    private static final long serialVersionUID = 1255012838;
+    private static final long serialVersionUID = 891402058;
 
     private UUID   requestId;
     private String originalMessageId;
@@ -137,6 +137,81 @@ public class DispositionNotification implements Serializable {
     public DispositionNotification setDigestAlgorithm(String digestAlgorithm) {
         this.digestAlgorithm = digestAlgorithm;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final DispositionNotification other = (DispositionNotification) obj;
+        if (requestId == null) {
+            if (other.requestId != null)
+                return false;
+        }
+        else if (!requestId.equals(other.requestId))
+            return false;
+        if (originalMessageId == null) {
+            if (other.originalMessageId != null)
+                return false;
+        }
+        else if (!originalMessageId.equals(other.originalMessageId))
+            return false;
+        if (originalRecipient == null) {
+            if (other.originalRecipient != null)
+                return false;
+        }
+        else if (!originalRecipient.equals(other.originalRecipient))
+            return false;
+        if (finalRecipient == null) {
+            if (other.finalRecipient != null)
+                return false;
+        }
+        else if (!finalRecipient.equals(other.finalRecipient))
+            return false;
+        if (reportingUa == null) {
+            if (other.reportingUa != null)
+                return false;
+        }
+        else if (!reportingUa.equals(other.reportingUa))
+            return false;
+        if (disposition == null) {
+            if (other.disposition != null)
+                return false;
+        }
+        else if (!disposition.equals(other.disposition))
+            return false;
+        if (receivedContentMic == null) {
+            if (other.receivedContentMic != null)
+                return false;
+        }
+        else if (!receivedContentMic.equals(other.receivedContentMic))
+            return false;
+        if (digestAlgorithm == null) {
+            if (other.digestAlgorithm != null)
+                return false;
+        }
+        else if (!digestAlgorithm.equals(other.digestAlgorithm))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.requestId == null) ? 0 : this.requestId.hashCode());
+        result = prime * result + ((this.originalMessageId == null) ? 0 : this.originalMessageId.hashCode());
+        result = prime * result + ((this.originalRecipient == null) ? 0 : this.originalRecipient.hashCode());
+        result = prime * result + ((this.finalRecipient == null) ? 0 : this.finalRecipient.hashCode());
+        result = prime * result + ((this.reportingUa == null) ? 0 : this.reportingUa.hashCode());
+        result = prime * result + ((this.disposition == null) ? 0 : this.disposition.hashCode());
+        result = prime * result + ((this.receivedContentMic == null) ? 0 : this.receivedContentMic.hashCode());
+        result = prime * result + ((this.digestAlgorithm == null) ? 0 : this.digestAlgorithm.hashCode());
+        return result;
     }
 
     @Override

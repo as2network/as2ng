@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Message extends TableImpl<MessageRecord> {
 
-    private static final long serialVersionUID = 750923922;
+    private static final long serialVersionUID = 1821680026;
 
     /**
      * The reference instance of <code>public.message</code>
@@ -74,7 +74,7 @@ public class Message extends TableImpl<MessageRecord> {
     /**
      * The column <code>public.message.mics</code>.
      */
-    public final TableField<MessageRecord, String[]> MICS = createField(DSL.name("mics"), org.jooq.impl.SQLDataType.VARCHAR(64).getArrayDataType(), this, "");
+    public final TableField<MessageRecord, String[]> MICS = createField(DSL.name("mics"), org.jooq.impl.SQLDataType.VARCHAR(512).getArrayDataType(), this, "");
 
     /**
      * The column <code>public.message.is_mdn_requested</code>.

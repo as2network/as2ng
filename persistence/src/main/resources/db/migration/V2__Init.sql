@@ -125,7 +125,7 @@ create table message
 (
     request_id              uuid primary key references request (id),
 
-    encryption_algorithm    varchar(16)    null,
+    encryption_algorithm    varchar(32)    null,
     compression_algorithm   varchar(16)    null,
 
     mics                    varchar(512)[] null,
@@ -143,7 +143,7 @@ create table disposition_notification
 (
     request_id           uuid primary key references request (id),
 
-    original_message_id  varchar(64),
+    original_message_id  varchar(64) references request(message_id),
     original_recipient   varchar(64),
     final_recipient      varchar(64),
     reporting_ua         varchar(64),

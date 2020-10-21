@@ -24,7 +24,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannelHistory implements Serializable {
 
-    private static final long serialVersionUID = -1746259785;
+    private static final long serialVersionUID = -1722413569;
 
     private Long      id;
     private String    name;
@@ -138,6 +138,81 @@ public class TradingChannelHistory implements Serializable {
     public TradingChannelHistory setValidity(TsTzRange validity) {
         this.validity = validity;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final TradingChannelHistory other = (TradingChannelHistory) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        }
+        else if (!id.equals(other.id))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        }
+        else if (!name.equals(other.name))
+            return false;
+        if (senderId == null) {
+            if (other.senderId != null)
+                return false;
+        }
+        else if (!senderId.equals(other.senderId))
+            return false;
+        if (senderAs2Identifier == null) {
+            if (other.senderAs2Identifier != null)
+                return false;
+        }
+        else if (!senderAs2Identifier.equals(other.senderAs2Identifier))
+            return false;
+        if (recipientId == null) {
+            if (other.recipientId != null)
+                return false;
+        }
+        else if (!recipientId.equals(other.recipientId))
+            return false;
+        if (recipientAs2Identifier == null) {
+            if (other.recipientAs2Identifier != null)
+                return false;
+        }
+        else if (!recipientAs2Identifier.equals(other.recipientAs2Identifier))
+            return false;
+        if (recipientMessageUrl == null) {
+            if (other.recipientMessageUrl != null)
+                return false;
+        }
+        else if (!recipientMessageUrl.equals(other.recipientMessageUrl))
+            return false;
+        if (validity == null) {
+            if (other.validity != null)
+                return false;
+        }
+        else if (!validity.equals(other.validity))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
+        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+        result = prime * result + ((this.senderId == null) ? 0 : this.senderId.hashCode());
+        result = prime * result + ((this.senderAs2Identifier == null) ? 0 : this.senderAs2Identifier.hashCode());
+        result = prime * result + ((this.recipientId == null) ? 0 : this.recipientId.hashCode());
+        result = prime * result + ((this.recipientAs2Identifier == null) ? 0 : this.recipientAs2Identifier.hashCode());
+        result = prime * result + ((this.recipientMessageUrl == null) ? 0 : this.recipientMessageUrl.hashCode());
+        result = prime * result + ((this.validity == null) ? 0 : this.validity.hashCode());
+        return result;
     }
 
     @Override

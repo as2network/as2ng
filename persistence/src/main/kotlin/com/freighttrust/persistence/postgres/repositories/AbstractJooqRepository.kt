@@ -17,7 +17,7 @@ import kotlin.coroutines.CoroutineContext
 abstract class AbstractJooqRepository<R : Record, Pojo>(
   private val dbCtx: DSLContext,
   protected val table: Table<R>,
-  private val pojoClass: Class<Pojo>,
+  protected val pojoClass: Class<Pojo>,
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : Repository<Pojo>, CoroutineScope {
 

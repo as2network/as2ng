@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DispositionNotification extends TableImpl<DispositionNotificationRecord> {
 
-    private static final long serialVersionUID = 580705145;
+    private static final long serialVersionUID = -546859147;
 
     /**
      * The reference instance of <code>public.disposition_notification</code>
@@ -89,7 +89,7 @@ public class DispositionNotification extends TableImpl<DispositionNotificationRe
     /**
      * The column <code>public.disposition_notification.received_content_mic</code>.
      */
-    public final TableField<DispositionNotificationRecord, String> RECEIVED_CONTENT_MIC = createField(DSL.name("received_content_mic"), org.jooq.impl.SQLDataType.VARCHAR(64), this, "");
+    public final TableField<DispositionNotificationRecord, String> RECEIVED_CONTENT_MIC = createField(DSL.name("received_content_mic"), org.jooq.impl.SQLDataType.VARCHAR(512), this, "");
 
     /**
      * The column <code>public.disposition_notification.digest_algorithm</code>.
@@ -146,11 +146,15 @@ public class DispositionNotification extends TableImpl<DispositionNotificationRe
 
     @Override
     public List<ForeignKey<DispositionNotificationRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<DispositionNotificationRecord, ?>>asList(Keys.DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY);
+        return Arrays.<ForeignKey<DispositionNotificationRecord, ?>>asList(Keys.DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY, Keys.DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_ORIGINAL_MESSAGE_ID_FKEY);
     }
 
-    public Request request() {
+    public Request dispositionNotificationRequestIdFkey() {
         return new Request(this, Keys.DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY);
+    }
+
+    public Request dispositionNotificationOriginalMessageIdFkey() {
+        return new Request(this, Keys.DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_ORIGINAL_MESSAGE_ID_FKEY);
     }
 
     @Override

@@ -20,11 +20,14 @@ class As2MicVerificationHandler : CoroutineRouteHandler() {
 
       if (mdn.receivedContentMic != null) {
 
-        originalMessage.mics
+        val match = originalMessage.mics
           ?.find { calculatedMic -> calculatedMic == mdn.receivedContentMic }
-          ?: throw Error("Failed to match received content mic. Expected one of ${originalMessage.mics.joinToString(";")}, received ${mdn.receivedContentMic}")
 
-        logger.info("Successfully verified received content mic: ${mdn.receivedContentMic}")
+        if(match != null) {
+          logger.info("Successfully verified received content mic: ${mdn.receivedContentMic}")
+        } else {
+          logger.warn("Failed to match received content mic. Expected one of ${originalMessage.mics.joinToString(";")}, received ${mdn.receivedContentMic}")
+        }
       }
 
       ctx.next()

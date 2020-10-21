@@ -1,9 +1,14 @@
 package com.freighttrust.as2
 
+import arrow.core.Tuple4
 import com.freighttrust.as2.RequestStyle.Async
 import com.freighttrust.as2.RequestStyle.Sync
+import com.freighttrust.as2.domain.fromMimeBodyPart
 import com.freighttrust.as2.ext.isSigned
+import com.freighttrust.as2.ext.verifiedContent
+import com.freighttrust.as2.extensions.bodyAsMimeBodyPart
 import com.freighttrust.as2.kotest.listeners.As2SetupListener
+import com.freighttrust.as2.kotest.listeners.As2SetupListener.As2RequestBuilder
 import com.freighttrust.as2.kotest.listeners.LocalStackListener
 import com.freighttrust.as2.kotest.listeners.MigrationsListener
 import com.freighttrust.as2.kotest.listeners.SystemPropertyListener
@@ -11,15 +16,25 @@ import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
 import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
 import com.freighttrust.as2.kotest.listeners.VaultListener
 import com.freighttrust.as2.modules.As2ExchangeServerModule
+import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
+import com.freighttrust.jooq.enums.RequestType
+import com.freighttrust.jooq.tables.pojos.DispositionNotification
+import com.freighttrust.jooq.tables.pojos.Message
+import com.freighttrust.jooq.tables.pojos.Request
+import com.freighttrust.jooq.tables.pojos.TradingChannel
+import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.persistence.s3.S3Module
 import com.helger.as2lib.client.AS2ClientResponse
+import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
 import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt.CRYPT_AES128_CBC
+import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign.DIGEST_SHA_512
 import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.disposition.DispositionOptions.IMPORTANCE_REQUIRED
+import io.kotest.core.spec.Spec
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.data.forAll
 import io.kotest.data.row
@@ -76,6 +91,8 @@ class IntegrationTest : FunSpec(), KoinTest {
 
   val asyncMdnUrl = "http://${mdnServer.hostName}:${mdnServer.port}/mdn"
 
+  val tempFileHelper = TempFileHelper()
+
   private val k by lazy { getKoin() }
 
   init {
@@ -112,6 +129,9 @@ class IntegrationTest : FunSpec(), KoinTest {
       )
     )
 
+    val cryptoRows = ECryptoAlgorithmCrypt.values().map { row(it) }.toTypedArray()
+    val signingRows = ECryptoAlgorithmSign.values().map { row(it) }.toTypedArray()
+
     with(setupListener) {
 
       test("1. Send un-encrypted data and do not request a receipt") {
@@ -121,37 +141,29 @@ class IntegrationTest : FunSpec(), KoinTest {
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(false)
-              .withSubject("Un-encrypted data with no receipt")
-              .withTextData("This is a test")
-              .send()
+          val requestBuilder = sendingFrom(Walmart, testCase.displayName)
+            .to(CocaCola)
+            .withMdn(false)
+            .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+            .withTextData(testCase.displayName)
 
-          response.hasException() shouldBe false
+          val response = requestBuilder.send()
 
-          verifySync(style) {
-            response.hasMDN() shouldBe false
-          }
-
-          verifyAsync(style) { request ->
-            request shouldBe null
-          }
+          verify(requestBuilder, response)
 
         }
 
       }
 
-      test("2. Send un-encrypted data and request an unsigned receipt") {
+      xtest("2. Send un-encrypted data and request an unsigned receipt") {
 
         forAll(
           row(Sync),
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
+          val requestBuilder =
+            sendingFrom(Walmart, testCase.displayName)
               .to(CocaCola)
               .withMdn(true)
               .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
@@ -161,19 +173,11 @@ class IntegrationTest : FunSpec(), KoinTest {
                   .setMICAlg(DIGEST_SHA_512)
                   .setMICAlgImportance(IMPORTANCE_REQUIRED)
               )
-              .withSubject("Un-encrypted data with an unsigned receipt")
-              .withTextData("This is a test")
-              .send()
+              .withTextData(testCase.displayName)
 
-          response.hasException() shouldBe false
+          val response = requestBuilder.send()
 
-          verifySync(style) {
-            response.hasMDN() shouldBe true
-          }
-
-          verifyAsync(style) { request ->
-            request shouldNotBe null
-          }
+          verify(requestBuilder, response)
 
         }
 
@@ -186,34 +190,28 @@ class IntegrationTest : FunSpec(), KoinTest {
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(true)
-              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-              .withEncryptAndSign(null, DIGEST_SHA_512)
-              .withDispositionOptions(
-                DispositionOptions()
-                  .setMICAlg(DIGEST_SHA_512)
-                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                  .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                  .setProtocolImportance(IMPORTANCE_REQUIRED)
-              )
-              .withSubject("Un-encrypted data with a signed receipt")
-              .withTextData("This is a test")
-              .send()
+          forAll(*signingRows) { signingAlgorithm ->
 
-          response.hasException() shouldBe false
+            val requestBuilder =
+              sendingFrom(Walmart, testCase.displayName)
+                .to(CocaCola)
+                .withMdn(true)
+                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withEncryptAndSign(null, signingAlgorithm)
+                .withDispositionOptions(
+                  DispositionOptions()
+                    .setMICAlg(DIGEST_SHA_512)
+                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                    .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                    .setProtocolImportance(IMPORTANCE_REQUIRED)
+                )
+                .withTextData(testCase.displayName)
 
-          verifySync(style) {
-            response.hasMDN() shouldBe true
-            response.mdn!!.data!!.isSigned() shouldBe true
+            val response = requestBuilder.send()
+
+            verify(requestBuilder, response)
+
           }
-
-          verifyAsync(style) { request ->
-            request shouldNotBe null
-          }
-
         }
       }
 
@@ -224,59 +222,51 @@ class IntegrationTest : FunSpec(), KoinTest {
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(false)
-              .withEncryptAndSign(CRYPT_AES128_CBC, null)
-              .withSubject("Encrypted data with no receipt")
-              .withTextData("This is a test")
-              .send()
+          forAll(*cryptoRows) { cryptoAlgorithm ->
 
-          response.hasException() shouldBe false
+            val requestBuilder =
+              sendingFrom(Walmart, testCase.displayName)
+                .to(CocaCola)
+                .withMdn(false)
+                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withEncryptAndSign(cryptoAlgorithm, null)
+                .withTextData(testCase.displayName)
 
-          verifySync(style) {
-            response.hasMDN() shouldBe false
+            val response = requestBuilder.send()
+
+            verify(requestBuilder, response)
+
           }
-
-          verifyAsync(style) { request ->
-            request shouldBe null
-          }
-
         }
+
       }
 
-      test("5. Send encrypted data and request an un-signed receipt") {
+      xtest("5. Send encrypted data and request an un-signed receipt") {
 
         forAll(
           row(Sync),
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(true)
-              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-              .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
-              .withDispositionOptions(
-                DispositionOptions()
-                  .setMICAlg(DIGEST_SHA_512)
-                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
-              )
-              .withSubject("Encrypted data with an un-signed receipt")
-              .withTextData("This is a test")
-              .send()
+          forAll(*cryptoRows) { cryptoAlgorithm ->
 
-          response.hasException() shouldBe false
+            val requestBuilder =
+              sendingFrom(Walmart, testCase.displayName)
+                .to(CocaCola)
+                .withMdn(true)
+                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withEncryptAndSign(cryptoAlgorithm, DIGEST_SHA_512)
+                .withDispositionOptions(
+                  DispositionOptions()
+                    .setMICAlg(DIGEST_SHA_512)
+                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                )
+                .withTextData(testCase.displayName)
 
-          verifySync(style) {
-            response.hasMDN() shouldBe true
-            response.mdn!!.data!!.isSigned() shouldBe false
-          }
+            val response = requestBuilder.send()
 
-          verifyAsync(style) { request ->
-            request shouldNotBe null
+            verify(requestBuilder, response)
+
           }
 
         }
@@ -289,34 +279,32 @@ class IntegrationTest : FunSpec(), KoinTest {
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(true)
-              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-              .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
-              .withDispositionOptions(
-                DispositionOptions()
-                  .setMICAlg(DIGEST_SHA_512)
-                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                  .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                  .setProtocolImportance(IMPORTANCE_REQUIRED)
-              )
-              .withSubject("Encrypted data with a signed receipt")
-              .withTextData("This is a test")
-              .send()
+          forAll(*cryptoRows) { cryptoAlgorithm ->
 
-          response.hasException() shouldBe false
+            forAll(*signingRows) { signingAlgorithm ->
 
-          verifySync(style) {
-            response.hasMDN() shouldBe true
-            response.mdn!!.data!!.isSigned() shouldBe true
+              val requestBuilder =
+                sendingFrom(Walmart, testCase.displayName)
+                  .to(CocaCola)
+                  .withMdn(true)
+                  .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                  .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+                  .withDispositionOptions(
+                    DispositionOptions()
+                      .setMICAlg(DIGEST_SHA_512)
+                      .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                      .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                      .setProtocolImportance(IMPORTANCE_REQUIRED)
+                  )
+                  .withTextData(testCase.displayName)
+
+              val response = requestBuilder.send()
+
+              verify(requestBuilder, response)
+
+            }
+
           }
-
-          verifyAsync(style) { request ->
-            request shouldNotBe null
-          }
-
         }
       }
 
@@ -327,38 +315,31 @@ class IntegrationTest : FunSpec(), KoinTest {
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
+          val requestBuilder =
+            sendingFrom(Walmart, testCase.displayName)
               .to(CocaCola)
               .withMdn(false)
+              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
               .withEncryptAndSign(null, DIGEST_SHA_512)
-              .withSubject("Signed data with no receipt")
-              .withTextData("This is a test")
-              .send()
+              .withTextData(testCase.displayName)
 
-          response.hasException() shouldBe false
+          val response = requestBuilder.send()
 
-          verifySync(style) {
-            response.hasMDN() shouldBe false
-          }
-
-          verifyAsync(style) { request ->
-            request shouldBe null
-          }
+          verify(requestBuilder, response)
 
         }
 
       }
 
-      test("8. Send signed data and request an un-signed receipt") {
+      xtest("8. Send signed data and request an un-signed receipt") {
 
         forAll(
           row(Sync),
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
+          val requestBuilder =
+            sendingFrom(Walmart, testCase.displayName)
               .to(CocaCola)
               .withMdn(true)
               .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
@@ -368,20 +349,11 @@ class IntegrationTest : FunSpec(), KoinTest {
                   .setMICAlg(DIGEST_SHA_512)
                   .setMICAlgImportance(IMPORTANCE_REQUIRED)
               )
-              .withSubject("Signed data with an un-signed receipt")
-              .withTextData("This is a test")
-              .send()
+              .withTextData(testCase.displayName)
 
-          response.hasException() shouldBe false
+          val response = requestBuilder.send()
 
-          verifySync(style) {
-            response.hasMDN() shouldBe true
-            response.mdn!!.data!!.isSigned() shouldBe false
-          }
-
-          verifyAsync(style) { request ->
-            request shouldNotBe null
-          }
+          verify(requestBuilder, response)
 
         }
       }
@@ -393,32 +365,27 @@ class IntegrationTest : FunSpec(), KoinTest {
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(true)
-              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-              .withEncryptAndSign(null, DIGEST_SHA_512)
-              .withDispositionOptions(
-                DispositionOptions()
-                  .setMICAlg(DIGEST_SHA_512)
-                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                  .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                  .setProtocolImportance(IMPORTANCE_REQUIRED)
-              )
-              .withSubject("Signed data with a signed receipt")
-              .withTextData("This is a test")
-              .send()
+          forAll(*signingRows) { signingAlgorithm ->
 
-          response.hasException() shouldBe false
+            val requestBuilder =
+              sendingFrom(Walmart, testCase.displayName)
+                .to(CocaCola)
+                .withMdn(true)
+                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withEncryptAndSign(null, signingAlgorithm)
+                .withDispositionOptions(
+                  DispositionOptions()
+                    .setMICAlg(DIGEST_SHA_512)
+                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                    .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                    .setProtocolImportance(IMPORTANCE_REQUIRED)
+                )
+                .withTextData(testCase.displayName)
 
-          verifySync(style) {
-            response.hasMDN() shouldBe true
-            response.mdn!!.data!!.isSigned() shouldBe true
-          }
+            val response = requestBuilder.send()
 
-          verifyAsync(style) { request ->
-            request shouldNotBe null
+            verify(requestBuilder, response)
+
           }
 
         }
@@ -430,59 +397,51 @@ class IntegrationTest : FunSpec(), KoinTest {
           row(Sync),
           row(Async)
         ) { style ->
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(false)
-              .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
-              .withSubject("Encrypted and signed data with no receipt")
-              .withTextData("This is a test")
-              .send()
 
-          response.hasException() shouldBe false
+          forAll(*cryptoRows) { cryptoAlgorithm ->
 
-          verifySync(style) {
-            response.hasMDN() shouldBe false
+            val requestBuilder =
+              sendingFrom(Walmart, testCase.displayName)
+                .to(CocaCola)
+                .withMdn(false)
+                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withEncryptAndSign(cryptoAlgorithm, DIGEST_SHA_512)
+                .withTextData(testCase.displayName)
+
+            val response = requestBuilder.send()
+
+            verify(requestBuilder, response)
+
           }
-
-          verifyAsync(style) { request ->
-            request shouldBe null
-          }
-
         }
       }
 
-      test("11. Send encrypted and signed data and request an un-signed receipt") {
+      xtest("11. Send encrypted and signed data and request an un-signed receipt") {
 
         forAll(
           row(Sync),
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(true)
-              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-              .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
-              .withDispositionOptions(
-                DispositionOptions()
-                  .setMICAlg(DIGEST_SHA_512)
-                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
-              )
-              .withSubject("Signed and encrypted data with an un-signed receipt")
-              .withTextData("This is a test")
-              .send()
+          forAll(*cryptoRows) { cryptoAlgorithm ->
 
-          response.hasException() shouldBe false
+            val requestBuilder =
+              sendingFrom(Walmart, testCase.displayName)
+                .to(CocaCola)
+                .withMdn(true)
+                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withEncryptAndSign(cryptoAlgorithm, DIGEST_SHA_512)
+                .withDispositionOptions(
+                  DispositionOptions()
+                    .setMICAlg(DIGEST_SHA_512)
+                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                )
+                .withTextData(testCase.displayName)
 
-          verifySync(style) {
-            response.hasMDN() shouldBe true
-            response.mdn!!.data!!.isSigned() shouldBe false
-          }
+            val response = requestBuilder.send()
 
-          verifyAsync(style) { request ->
-            request shouldNotBe null
+            verify(requestBuilder, response)
+
           }
 
         }
@@ -496,34 +455,31 @@ class IntegrationTest : FunSpec(), KoinTest {
           row(Async)
         ) { style ->
 
-          val response =
-            sendingFrom(Walmart)
-              .to(CocaCola)
-              .withMdn(true)
-              .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-              .withEncryptAndSign(CRYPT_AES128_CBC, DIGEST_SHA_512)
-              .withDispositionOptions(
-                DispositionOptions()
-                  .setMICAlg(DIGEST_SHA_512)
-                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                  .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                  .setProtocolImportance(IMPORTANCE_REQUIRED)
-              )
-              .withSubject("Signed and encrypted data with an un-signed receipt")
-              .withTextData("This is a test")
-              .send()
+          forAll(*cryptoRows) { cryptoAlgorithm ->
 
-          response.hasException() shouldBe false
+            forAll(*signingRows) { signingAlgorithm ->
 
-          verifySync(style) {
-            response.hasMDN() shouldBe true
-            response.mdn!!.data!!.isSigned() shouldBe true
+              val requestBuilder =
+                sendingFrom(Walmart, testCase.displayName)
+                  .to(CocaCola)
+                  .withMdn(true)
+                  .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                  .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+                  .withDispositionOptions(
+                    DispositionOptions()
+                      .setMICAlg(DIGEST_SHA_512)
+                      .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                      .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                      .setProtocolImportance(IMPORTANCE_REQUIRED)
+                  )
+                  .withTextData(testCase.displayName)
+
+              val response = requestBuilder.send()
+
+              verify(requestBuilder, response)
+
+            }
           }
-
-          verifyAsync(style) { request ->
-            request shouldNotBe null
-          }
-
         }
 
       }
@@ -531,18 +487,135 @@ class IntegrationTest : FunSpec(), KoinTest {
     }
   }
 
-  fun verifySync(style: RequestStyle, verify: () -> Unit) {
-    if (style == Sync) verify()
-  }
+  private suspend fun verify(
+    requestBuilder: As2RequestBuilder,
+    response: AS2ClientResponse
+  ): Tuple4<Request, TradingChannel?, Message?, DispositionNotification?> {
 
-  @Suppress("BlockingMethodInNonBlockingContext")
-  suspend fun verifyAsync(style: RequestStyle, verify: (RecordedRequest?) -> Unit) {
-    if (style == Async)
-      withContext(Dispatchers.IO) {
-        verify(mdnServer.takeRequest(1, TimeUnit.SECONDS))
+    // should be no exceptions in the response from the client call
+    response.hasException() shouldBe false
+
+    // lookup the exchange in the database
+    val persisted = k.get<RequestRepository>()
+      .findByMessageId(
+        requireNotNull(response.originalMessageID),
+        withTradingChannel = true,
+        withMessage = true,
+        withDisposition = true
+      )
+
+    persisted shouldNotBe null
+
+    val (request, tradingChannel, message, dispositionNotification) = requireNotNull(persisted)
+
+    // verify request
+
+    with(request) {
+      type shouldBe RequestType.message
+
+      messageId shouldBe response.originalMessageID
+      subject shouldBe requestBuilder.subject
+
+      request.deliveredAt shouldNotBe null
+    }
+
+    with(requireNotNull(tradingChannel)) {
+
+      // sender/recipient as2 identifiers should match the request
+      requestBuilder.sender.as2Identifier shouldBe senderAs2Identifier
+      requestBuilder.recipient!!.as2Identifier shouldBe recipientAs2Identifier
+
+      // delivery url should match the configured url for the trading channel
+      request.deliveredTo shouldBe recipientMessageUrl
+    }
+
+    val (mdnRequested, asyncMdnRequested) =
+      with(requestBuilder.settings) {
+        Pair(isMDNRequested, isAsyncMDNRequested)
       }
+
+    // verify message
+
+    with(requireNotNull(message)) {
+
+      // we remove the - and / in the algo name to account for differences in representation between
+      // as2-lib and bouncycastle
+
+      // TODO encryption algo
+//      encryptionAlgorithm
+//        ?.replace("-", "")
+//        ?.replace("/", "") shouldBe
+//        requestBuilder.settings.cryptAlgoID
+//          ?.replace("-", "")
+
+      compressionAlgorithm shouldBe requestBuilder.settings.compressionType?.name
+
+      // TODO mics
+
+      isMdnRequested shouldBe mdnRequested
+      isMdnAsync shouldBe (isMdnRequested && asyncMdnRequested)
+
+      // TODO receipt delivery option
+
+    }
+
+    // verify MDN if one was requested
+
+    when {
+      mdnRequested && !asyncMdnRequested -> {
+
+        response.hasMDN() shouldBe true
+
+        with(requireNotNull(response.mdn)) {
+
+          val bodyPart = data
+            ?.takeIf { it.isSigned() }
+            ?.verifiedContent(
+              requireNotNull(response.mdnVerificationCertificate),
+              tempFileHelper
+            ) ?: data
+
+          val receivedDispositionNotification = DispositionNotification()
+            .fromMimeBodyPart(requireNotNull(bodyPart))
+            .apply {
+              // request id should be the only field that is different so we set it to match the db to make comparison easier
+              requestId = dispositionNotification?.requestId
+            }
+
+          // TODO
+//          receivedDispositionNotification shouldBe dispositionNotification
+        }
+
+      }
+
+      mdnRequested && asyncMdnRequested -> {
+
+        // capture async mdn
+        val mdn = mdnServer.takeRequest(1, TimeUnit.SECONDS)
+        mdn shouldNotBe null
+
+//        with(requireNotNull(mdn)) {
+//
+//          val receivedDispositionNotification = DispositionNotification()
+//            .fromMimeBodyPart(mdn.bodyAsMimeBodyPart())
+//
+//          // received disposition notification should match the db
+//          receivedDispositionNotification shouldBe dispositionNotification
+//        }
+
+      }
+      else -> {
+        // do nothing
+      }
+    }
+
+
+    return persisted
   }
 
+  override fun afterSpec(spec: Spec) {
+    tempFileHelper.deleteAll()
+  }
 }
 
 

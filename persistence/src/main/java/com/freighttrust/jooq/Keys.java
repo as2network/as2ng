@@ -77,6 +77,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final ForeignKey<DispositionNotificationRecord, RequestRecord> DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY = ForeignKeys0.DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY;
+    public static final ForeignKey<DispositionNotificationRecord, RequestRecord> DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_ORIGINAL_MESSAGE_ID_FKEY = ForeignKeys0.DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_ORIGINAL_MESSAGE_ID_FKEY;
     public static final ForeignKey<MessageRecord, RequestRecord> MESSAGE__MESSAGE_REQUEST_ID_FKEY = ForeignKeys0.MESSAGE__MESSAGE_REQUEST_ID_FKEY;
     public static final ForeignKey<RequestRecord, TradingChannelRecord> REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY;
     public static final ForeignKey<RequestRecord, RequestRecord> REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY;
@@ -114,6 +115,7 @@ public class Keys {
 
     private static class ForeignKeys0 {
         public static final ForeignKey<DispositionNotificationRecord, RequestRecord> DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_REQUEST_ID_FKEY = Internal.createForeignKey(Keys.REQUEST_PKEY, DispositionNotification.DISPOSITION_NOTIFICATION, "disposition_notification_request_id_fkey", new TableField[] { DispositionNotification.DISPOSITION_NOTIFICATION.REQUEST_ID }, true);
+        public static final ForeignKey<DispositionNotificationRecord, RequestRecord> DISPOSITION_NOTIFICATION__DISPOSITION_NOTIFICATION_ORIGINAL_MESSAGE_ID_FKEY = Internal.createForeignKey(Keys.REQUEST_MESSAGE_ID_KEY, DispositionNotification.DISPOSITION_NOTIFICATION, "disposition_notification_original_message_id_fkey", new TableField[] { DispositionNotification.DISPOSITION_NOTIFICATION.ORIGINAL_MESSAGE_ID }, true);
         public static final ForeignKey<MessageRecord, RequestRecord> MESSAGE__MESSAGE_REQUEST_ID_FKEY = Internal.createForeignKey(Keys.REQUEST_PKEY, Message.MESSAGE, "message_request_id_fkey", new TableField[] { Message.MESSAGE.REQUEST_ID }, true);
         public static final ForeignKey<RequestRecord, TradingChannelRecord> REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY = Internal.createForeignKey(Keys.TRADING_CHANNEL_PKEY, Request.REQUEST, "request_trading_channel_id_fkey", new TableField[] { Request.REQUEST.TRADING_CHANNEL_ID }, true);
         public static final ForeignKey<RequestRecord, RequestRecord> REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY = Internal.createForeignKey(Keys.REQUEST_PKEY, Request.REQUEST, "request_original_request_id_fkey", new TableField[] { Request.REQUEST.ORIGINAL_REQUEST_ID }, true);

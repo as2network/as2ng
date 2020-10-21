@@ -22,7 +22,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class File implements Serializable {
 
-    private static final long serialVersionUID = -1486024069;
+    private static final long serialVersionUID = -2109849637;
 
     private Long   id;
     private String bucket;
@@ -71,6 +71,46 @@ public class File implements Serializable {
     public File setKey(String key) {
         this.key = key;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final File other = (File) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        }
+        else if (!id.equals(other.id))
+            return false;
+        if (bucket == null) {
+            if (other.bucket != null)
+                return false;
+        }
+        else if (!bucket.equals(other.bucket))
+            return false;
+        if (key == null) {
+            if (other.key != null)
+                return false;
+        }
+        else if (!key.equals(other.key))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
+        result = prime * result + ((this.bucket == null) ? 0 : this.bucket.hashCode());
+        result = prime * result + ((this.key == null) ? 0 : this.key.hashCode());
+        return result;
     }
 
     @Override

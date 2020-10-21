@@ -25,6 +25,7 @@ import org.bouncycastle.mail.smime.SMIMECompressedParser
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser
 import org.bouncycastle.mail.smime.SMIMEException
 import org.bouncycastle.mail.smime.SMIMEUtil
+import org.bouncycastle.operator.DefaultAlgorithmNameFinder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -35,12 +36,14 @@ import javax.mail.MessagingException
 import javax.mail.internet.MimeBodyPart
 import com.freighttrust.jooq.tables.pojos.Message as MessageRecord
 
+val encryptionAlgorithmNameFinder = DefaultAlgorithmNameFinder()
+
 data class As2MessageContext(
   val tradingChannel: TradingChannel,
   val request: Request,
   val originalMessage: MessageRecord? = null,
   val dispositionNotification: DispositionNotification? = null,
-  val decryptedBody: MimeBodyPart? = null,
+  val decryptedBody: Pair<MimeBodyPart, String>? = null,
   val decompressedBody: Pair<MimeBodyPart, String>? = null,
   val signatureKeyId: Long? = null,
   val signatureCertificate: X509Certificate? = null,
@@ -56,6 +59,7 @@ data class As2MessageContext(
   val wasCompressed: Boolean = decompressedBody != null
   val wasSigned: Boolean = verifiedBody != null
 
+  val encryptionAlgorithm: String? = decryptedBody?.second
   val compressionAlgorithm: String? = decompressedBody?.second
 }
 
@@ -108,9 +112,10 @@ data class As2Message(
 
         // Parse the MIME body into a SMIME envelope object
         var recipient: RecipientInformation? = null
+        var envelope: SMIMEEnvelopedParser? = null
         try {
-          val aEnvelope = SMIMEEnvelopedParser(body)
-          recipient = aEnvelope.recipientInfos[recipientId]
+          envelope = SMIMEEnvelopedParser(body)
+          recipient = envelope.recipientInfos[recipientId]
         } catch (ex: java.lang.Exception) {
           logger.error("Error retrieving RecipientInformation", ex)
         }
@@ -131,7 +136,12 @@ data class As2Message(
 
         copy(
           body = body,
-          context = context.copy(decryptedBody = body)
+          context = context.copy(
+            decryptedBody = Pair(
+              body,
+              encryptionAlgorithmNameFinder.getAlgorithmName(envelope!!.contentEncryptionAlgorithm).toLowerCase()
+            )
+          )
         )
       }
     }

@@ -24,7 +24,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class KeyPair implements Serializable {
 
-    private static final long serialVersionUID = 1774497073;
+    private static final long serialVersionUID = 1472914955;
 
     private Long           id;
     private String         serialNumber;
@@ -138,6 +138,81 @@ public class KeyPair implements Serializable {
     public KeyPair setExpiresAt(OffsetDateTime expiresAt) {
         this.expiresAt = expiresAt;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final KeyPair other = (KeyPair) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        }
+        else if (!id.equals(other.id))
+            return false;
+        if (serialNumber == null) {
+            if (other.serialNumber != null)
+                return false;
+        }
+        else if (!serialNumber.equals(other.serialNumber))
+            return false;
+        if (certificate == null) {
+            if (other.certificate != null)
+                return false;
+        }
+        else if (!certificate.equals(other.certificate))
+            return false;
+        if (privateKey == null) {
+            if (other.privateKey != null)
+                return false;
+        }
+        else if (!privateKey.equals(other.privateKey))
+            return false;
+        if (privateKeyType == null) {
+            if (other.privateKeyType != null)
+                return false;
+        }
+        else if (!privateKeyType.equals(other.privateKeyType))
+            return false;
+        if (issuingCa == null) {
+            if (other.issuingCa != null)
+                return false;
+        }
+        else if (!issuingCa.equals(other.issuingCa))
+            return false;
+        if (caChain == null) {
+            if (other.caChain != null)
+                return false;
+        }
+        else if (!Arrays.equals(caChain, other.caChain))
+            return false;
+        if (expiresAt == null) {
+            if (other.expiresAt != null)
+                return false;
+        }
+        else if (!expiresAt.equals(other.expiresAt))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
+        result = prime * result + ((this.serialNumber == null) ? 0 : this.serialNumber.hashCode());
+        result = prime * result + ((this.certificate == null) ? 0 : this.certificate.hashCode());
+        result = prime * result + ((this.privateKey == null) ? 0 : this.privateKey.hashCode());
+        result = prime * result + ((this.privateKeyType == null) ? 0 : this.privateKeyType.hashCode());
+        result = prime * result + ((this.issuingCa == null) ? 0 : this.issuingCa.hashCode());
+        result = prime * result + ((this.caChain == null) ? 0 : Arrays.hashCode(this.caChain));
+        result = prime * result + ((this.expiresAt == null) ? 0 : this.expiresAt.hashCode());
+        return result;
     }
 
     @Override

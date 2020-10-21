@@ -24,7 +24,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Message implements Serializable {
 
-    private static final long serialVersionUID = 1836118350;
+    private static final long serialVersionUID = 2113953880;
 
     private UUID     requestId;
     private String   encryptionAlgorithm;
@@ -125,6 +125,74 @@ public class Message implements Serializable {
     public Message setReceiptDeliveryOption(String receiptDeliveryOption) {
         this.receiptDeliveryOption = receiptDeliveryOption;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final Message other = (Message) obj;
+        if (requestId == null) {
+            if (other.requestId != null)
+                return false;
+        }
+        else if (!requestId.equals(other.requestId))
+            return false;
+        if (encryptionAlgorithm == null) {
+            if (other.encryptionAlgorithm != null)
+                return false;
+        }
+        else if (!encryptionAlgorithm.equals(other.encryptionAlgorithm))
+            return false;
+        if (compressionAlgorithm == null) {
+            if (other.compressionAlgorithm != null)
+                return false;
+        }
+        else if (!compressionAlgorithm.equals(other.compressionAlgorithm))
+            return false;
+        if (mics == null) {
+            if (other.mics != null)
+                return false;
+        }
+        else if (!Arrays.equals(mics, other.mics))
+            return false;
+        if (isMdnRequested == null) {
+            if (other.isMdnRequested != null)
+                return false;
+        }
+        else if (!isMdnRequested.equals(other.isMdnRequested))
+            return false;
+        if (isMdnAsync == null) {
+            if (other.isMdnAsync != null)
+                return false;
+        }
+        else if (!isMdnAsync.equals(other.isMdnAsync))
+            return false;
+        if (receiptDeliveryOption == null) {
+            if (other.receiptDeliveryOption != null)
+                return false;
+        }
+        else if (!receiptDeliveryOption.equals(other.receiptDeliveryOption))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.requestId == null) ? 0 : this.requestId.hashCode());
+        result = prime * result + ((this.encryptionAlgorithm == null) ? 0 : this.encryptionAlgorithm.hashCode());
+        result = prime * result + ((this.compressionAlgorithm == null) ? 0 : this.compressionAlgorithm.hashCode());
+        result = prime * result + ((this.mics == null) ? 0 : Arrays.hashCode(this.mics));
+        result = prime * result + ((this.isMdnRequested == null) ? 0 : this.isMdnRequested.hashCode());
+        result = prime * result + ((this.isMdnAsync == null) ? 0 : this.isMdnAsync.hashCode());
+        result = prime * result + ((this.receiptDeliveryOption == null) ? 0 : this.receiptDeliveryOption.hashCode());
+        return result;
     }
 
     @Override

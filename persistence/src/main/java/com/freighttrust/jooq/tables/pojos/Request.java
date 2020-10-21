@@ -28,7 +28,7 @@ import org.jooq.JSONB;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Request implements Serializable {
 
-    private static final long serialVersionUID = 502223965;
+    private static final long serialVersionUID = -1992493349;
 
     private UUID           id;
     private RequestType    type;
@@ -207,6 +207,116 @@ public class Request implements Serializable {
     public Request setErrorStackTrace(String errorStackTrace) {
         this.errorStackTrace = errorStackTrace;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final Request other = (Request) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        }
+        else if (!id.equals(other.id))
+            return false;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        }
+        else if (!type.equals(other.type))
+            return false;
+        if (headers == null) {
+            if (other.headers != null)
+                return false;
+        }
+        else if (!headers.equals(other.headers))
+            return false;
+        if (bodyFileId == null) {
+            if (other.bodyFileId != null)
+                return false;
+        }
+        else if (!bodyFileId.equals(other.bodyFileId))
+            return false;
+        if (messageId == null) {
+            if (other.messageId != null)
+                return false;
+        }
+        else if (!messageId.equals(other.messageId))
+            return false;
+        if (subject == null) {
+            if (other.subject != null)
+                return false;
+        }
+        else if (!subject.equals(other.subject))
+            return false;
+        if (tradingChannelId == null) {
+            if (other.tradingChannelId != null)
+                return false;
+        }
+        else if (!tradingChannelId.equals(other.tradingChannelId))
+            return false;
+        if (originalRequestId == null) {
+            if (other.originalRequestId != null)
+                return false;
+        }
+        else if (!originalRequestId.equals(other.originalRequestId))
+            return false;
+        if (receivedAt == null) {
+            if (other.receivedAt != null)
+                return false;
+        }
+        else if (!receivedAt.equals(other.receivedAt))
+            return false;
+        if (deliveredAt == null) {
+            if (other.deliveredAt != null)
+                return false;
+        }
+        else if (!deliveredAt.equals(other.deliveredAt))
+            return false;
+        if (deliveredTo == null) {
+            if (other.deliveredTo != null)
+                return false;
+        }
+        else if (!deliveredTo.equals(other.deliveredTo))
+            return false;
+        if (errorMessage == null) {
+            if (other.errorMessage != null)
+                return false;
+        }
+        else if (!errorMessage.equals(other.errorMessage))
+            return false;
+        if (errorStackTrace == null) {
+            if (other.errorStackTrace != null)
+                return false;
+        }
+        else if (!errorStackTrace.equals(other.errorStackTrace))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
+        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+        result = prime * result + ((this.headers == null) ? 0 : this.headers.hashCode());
+        result = prime * result + ((this.bodyFileId == null) ? 0 : this.bodyFileId.hashCode());
+        result = prime * result + ((this.messageId == null) ? 0 : this.messageId.hashCode());
+        result = prime * result + ((this.subject == null) ? 0 : this.subject.hashCode());
+        result = prime * result + ((this.tradingChannelId == null) ? 0 : this.tradingChannelId.hashCode());
+        result = prime * result + ((this.originalRequestId == null) ? 0 : this.originalRequestId.hashCode());
+        result = prime * result + ((this.receivedAt == null) ? 0 : this.receivedAt.hashCode());
+        result = prime * result + ((this.deliveredAt == null) ? 0 : this.deliveredAt.hashCode());
+        result = prime * result + ((this.deliveredTo == null) ? 0 : this.deliveredTo.hashCode());
+        result = prime * result + ((this.errorMessage == null) ? 0 : this.errorMessage.hashCode());
+        result = prime * result + ((this.errorStackTrace == null) ? 0 : this.errorStackTrace.hashCode());
+        return result;
     }
 
     @Override

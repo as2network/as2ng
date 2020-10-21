@@ -24,7 +24,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartner implements Serializable {
 
-    private static final long serialVersionUID = -200774104;
+    private static final long serialVersionUID = -773369600;
 
     private Long      id;
     private String    name;
@@ -99,6 +99,60 @@ public class TradingPartner implements Serializable {
     public TradingPartner setValidity(TsTzRange validity) {
         this.validity = validity;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final TradingPartner other = (TradingPartner) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        }
+        else if (!id.equals(other.id))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        }
+        else if (!name.equals(other.name))
+            return false;
+        if (email == null) {
+            if (other.email != null)
+                return false;
+        }
+        else if (!email.equals(other.email))
+            return false;
+        if (keyPairId == null) {
+            if (other.keyPairId != null)
+                return false;
+        }
+        else if (!keyPairId.equals(other.keyPairId))
+            return false;
+        if (validity == null) {
+            if (other.validity != null)
+                return false;
+        }
+        else if (!validity.equals(other.validity))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
+        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+        result = prime * result + ((this.email == null) ? 0 : this.email.hashCode());
+        result = prime * result + ((this.keyPairId == null) ? 0 : this.keyPairId.hashCode());
+        result = prime * result + ((this.validity == null) ? 0 : this.validity.hashCode());
+        return result;
     }
 
     @Override

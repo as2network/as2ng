@@ -6,6 +6,9 @@ dependencies {
 
   api(kotlin("stdlib"))
 
+  api("io.arrow-kt:arrow-core")
+  api("io.arrow-kt:arrow-generic")
+
   api("org.koin:koin-core")
   api("org.koin:koin-logger-slf4j")
 
