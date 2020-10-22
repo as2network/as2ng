@@ -11,7 +11,7 @@ ROOT_DIR="$( cd ${BIN_DIR}/.. && pwd)"
 TASK=${1}
 shift
 
-COMMAND="exec ${ROOT_DIR}/gradlew :persistence:flyway${TASK^}"
+COMMAND="exec ${ROOT_DIR}/gradlew :modules:persistence:flyway${TASK^}"
 
 eval "${COMMAND}"
 

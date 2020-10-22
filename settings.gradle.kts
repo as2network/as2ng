@@ -7,13 +7,11 @@ pluginManagement {
   }
 }
 
-rootProject.name = "customs-gateway"
+rootProject.name = "as2ng"
 
-include(":common")
-include(":domain")
-include(":crypto")
-include(":persistence")
-include(":gateways:as2")
-include(":cli")
-
-include(":as2-lib")
+include(":modules:common")
+include(":modules:crypto")
+include(":modules:persistence")
+include(":modules:http")
+include(":modules:cli")
+include(":modules:as2-lib")

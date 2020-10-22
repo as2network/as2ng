@@ -1,0 +1,22 @@
+MDN Headers:
+AS2-To: OpenAS2A
+AS2-From: OpenAS2B
+AS2-Version: 1.1
+Date: "Thu, 22 Oct 2020 16:33:04 +0100"
+Server: "as2-lib 4.6.3"
+Mime-Version: 1.0
+From: "openas2b@email.com"
+Subject: "Your Requested MDN Response"
+Content-Transfer-Encoding: binary
+Content-Type: "multipart/signed; protocol=\"application/pkcs7-signature\"; micalg=md5;    boundary=\"----=_Part_1_1839933788.1603380784587\""
+Message-ID: "<as2-lib-22102020163304+0100-5558@OpenAS2B_OpenAS2A>"
+
+MDN Attributes:
+REPORTING_UA: as2-lib 4.6.3@127.0.0.1:10082
+ORIGINAL_RECIPIENT: rfc822; OpenAS2B
+FINAL_RECIPIENT: rfc822; OpenAS2B
+ORIGINAL_MESSAGE_ID: <as2-lib-22102020163303+0100-2573@OpenAS2A_OpenAS2B>
+DISPOSITION: automatic-action/MDN-sent-automatically; processed
+MIC: /fUJ2LM5d20SwX/covky5g==, md5
+Text:
+The message sent to Recipient OpenAS2B on Thu, 22 Oct 2020 16:33:03 +0100 with Subject From OpenAS2A to OpenAS2B has been received, the EDI Interchange was successfully decrypted and it's integrity was verified. In addition, the sender of the message, Sender OpenAS2A at Location 127.0.0.1 was authenticated as the originator of the message. There is no guarantee however that the EDI Interchange was syntactically correct, or was received by the EDI application/translator.

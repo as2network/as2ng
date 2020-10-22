@@ -8,7 +8,7 @@ set -o errexit
 BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$( cd ${BIN_DIR}/.. && pwd)"
 
-COMMAND="exec ${ROOT_DIR}/gradlew :cli:run --args='${@}'"
+COMMAND="exec ${ROOT_DIR}/gradlew :modules:cli:run --args='${@}'"
 
 eval "${COMMAND}"
 
