@@ -2,7 +2,7 @@ package com.freighttrust.as2.handlers.mdn
 
 import com.freighttrust.as2.domain.fromMimeBodyPart
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
-import com.freighttrust.as2.handlers.message
+import com.freighttrust.as2.handlers.as2Context
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.freighttrust.jooq.tables.pojos.Message
 import com.freighttrust.jooq.tables.pojos.Request
@@ -11,7 +11,7 @@ import com.freighttrust.persistence.MessageRepository
 import com.freighttrust.persistence.RequestRepository
 import io.vertx.ext.web.RoutingContext
 
-class As2MdnReceivedHandler(
+class MdnReceivedHandler(
   private val requestRepository: RequestRepository,
   private val messageRepository: MessageRepository,
   private val dispositionNotificationRepository: DispositionNotificationRepository
@@ -19,7 +19,7 @@ class As2MdnReceivedHandler(
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
-    val message = ctx.message
+    val message = ctx.as2Context
 
     val notification = DispositionNotification()
       .fromMimeBodyPart(message.body)
@@ -34,7 +34,7 @@ class As2MdnReceivedHandler(
       requestRepository.update(
         Request()
           .apply {
-            this.id = message.context.request.id
+            this.id = message.records.request.id
             this.originalRequestId = originalRequestId
           },
         tx
@@ -44,7 +44,7 @@ class As2MdnReceivedHandler(
         .insert(
           DispositionNotification()
             .apply {
-              this.requestId = message.context.request.id
+              this.requestId = message.records.request.id
               this.originalMessageId = notification.originalMessageId
               this.originalRecipient = notification.originalRecipient
               this.finalRecipient = notification.finalRecipient
@@ -59,8 +59,8 @@ class As2MdnReceivedHandler(
         .findById(Message().apply { requestId = originalRequestId })
     }
 
-    ctx.message = message.copy(
-      context = message.context.copy(
+    ctx.as2Context = message.copy(
+      records = message.records.copy(
         originalMessage = originalMessageRecord,
         dispositionNotification = notification
       )

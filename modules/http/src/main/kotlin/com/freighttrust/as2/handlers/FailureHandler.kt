@@ -32,7 +32,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HttpHeaders
 import java.security.Provider
 
-class As2FailureHandler(
+class FailureHandler(
   private val webClient: WebClient,
   private val partnerRepository: TradingPartnerRepository,
   private val keyPairRepository: KeyPairRepository,
@@ -42,7 +42,7 @@ class As2FailureHandler(
 ) : CoroutineRouteHandler() {
 
   companion object {
-    val logger = LoggerFactory.getLogger(As2FailureHandler::class.java)
+    val logger = LoggerFactory.getLogger(FailureHandler::class.java)
   }
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -54,7 +54,7 @@ class As2FailureHandler(
       // record the failure
       with(ctx.failure()) {
         requestRepository.setAsFailed(
-          ctx.message.context.request.id,
+          ctx.as2Context.records.request.id,
           message?.take(128),
           ExceptionUtils.getStackTrace(this)
         )
@@ -76,7 +76,7 @@ class As2FailureHandler(
 
   private suspend fun handleDispositionException(ctx: RoutingContext, failure: DispositionException) {
 
-    with(ctx.message) {
+    with(ctx.as2Context) {
 
       if (!isMdnRequested) return
 
@@ -91,7 +91,7 @@ class As2FailureHandler(
         ?.firstMICAlg
         ?.let { algorithm ->
 
-          val partner = with(context.tradingChannel) {
+          val partner = with(records.tradingChannel) {
             partnerRepository.findById(
               TradingPartner().apply { id = recipientId }
             ) ?: throw Error("Partner not found with id = $recipientId")
@@ -165,7 +165,7 @@ class As2FailureHandler(
 
   private suspend fun storeNotification(ctx: RoutingContext, notification: DispositionNotification) {
 
-    val originalRequestId = ctx.message.context.request.id
+    val originalRequestId = ctx.as2Context.records.request.id
 
     dispositionNotificationRepository
       .insert(

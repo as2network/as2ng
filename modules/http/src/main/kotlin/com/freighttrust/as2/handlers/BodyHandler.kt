@@ -11,7 +11,7 @@ import java.io.FileOutputStream
 import java.io.RandomAccessFile
 import java.nio.channels.FileChannel
 
-class As2BodyHandler : Handler<RoutingContext> {
+class BodyHandler : Handler<RoutingContext> {
 
   private fun newFileOutputStream(ctx: RoutingContext): Pair<File, FileOutputStream> =
     ctx.tempFileHelper.newFile()

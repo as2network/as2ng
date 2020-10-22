@@ -30,7 +30,7 @@ fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   args("--cluster")
   args("--launcher-class", vertxLauncher)
   args("--redeploy", "src/**/*")
-  args("--on-redeploy", "../../gradlew :gateways:as2:classes")
+  args("--on-redeploy", "../../gradlew :modules:http:classes")
 
   if (vertxDebug) {
     val javaOpts = listOf(
@@ -52,7 +52,7 @@ tasks {
     archiveClassifier.set("")
   }
 
-  create<JavaExec>("runAS2Server") { verticleTask(verticle = "as2:com.freighttrust.as2.As2ServerVerticle", debugPort = "10000") }
+  create<JavaExec>("runAS2Server") { verticleTask(verticle = "as2:com.freighttrust.as2.ServerVerticle", debugPort = "10000") }
 }
 
 buildConfigKotlin {

@@ -1,26 +1,22 @@
 package com.freighttrust.as2.domain
 
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.calculateMic
-import com.freighttrust.as2.ext.get
-import com.freighttrust.as2.ext.isCompressed
-import com.freighttrust.as2.ext.isEncrypted
-import com.freighttrust.as2.ext.isSigned
-import com.freighttrust.as2.ext.verifiedContent
+import com.freighttrust.as2.ext.*
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.helger.as2lib.disposition.DispositionOptions
+import io.vertx.core.Handler
 import io.vertx.core.MultiMap
+import io.vertx.ext.web.RoutingContext
 import org.bouncycastle.cms.CMSException
 import org.bouncycastle.cms.RecipientId
 import org.bouncycastle.cms.RecipientInformation
 import org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
 import org.bouncycastle.cms.jcajce.JceKeyTransRecipientId
 import org.bouncycastle.cms.jcajce.ZlibExpanderProvider
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.mail.smime.SMIMECompressedParser
 import org.bouncycastle.mail.smime.SMIMEEnvelopedParser
 import org.bouncycastle.mail.smime.SMIMEException
@@ -35,78 +31,81 @@ import java.security.Provider
 import java.security.cert.X509Certificate
 import javax.mail.MessagingException
 import javax.mail.internet.MimeBodyPart
+import kotlin.reflect.KClass
 import com.freighttrust.jooq.tables.pojos.Message as MessageRecord
 
 val encryptionAlgorithmNameFinder = DefaultAlgorithmNameFinder()
 
-data class As2MessageContext(
-  val tradingChannel: TradingChannel,
-  val request: Request,
-  val originalMessage: MessageRecord? = null,
-  val dispositionNotification: DispositionNotification? = null,
-  val decryptedBody: Pair<MimeBodyPart, String>? = null,
-  val decompressedBody: Pair<MimeBodyPart, String>? = null,
-  val signatureKeyId: Long? = null,
-  val signatureCertificate: X509Certificate? = null,
-  val verifiedBody: MimeBodyPart? = null,
-  val mics: List<String>? = null
-) {
-
-  companion object {
-    val logger = LoggerFactory.getLogger(As2MessageContext::class.java)
-  }
-
-  val wasEncrypted: Boolean = decryptedBody != null
-  val wasCompressed: Boolean = decompressedBody != null
-  val wasSigned: Boolean = verifiedBody != null
-
-  val encryptionAlgorithm: String? = decryptedBody?.second
-  val compressionAlgorithm: String? = decompressedBody?.second
-}
-
-enum class As2MessageType {
+enum class As2RequestType {
   Message, DispositionNotification
 }
 
-data class As2Message(
-  val type: As2MessageType,
+data class Records(
+  val request: Request,
+  val tradingChannel: TradingChannel,
+  val originalMessage: MessageRecord? = null,
+  val dispositionNotification: DispositionNotification? = null
+)
+
+data class BodyContext(
+  val currentBody: MimeBodyPart,
+  val decryptedBody: Pair<MimeBodyPart, String>? = null,
+  val decompressedBody: Pair<MimeBodyPart, String>? = null,
+  val verifiedBody: Pair<MimeBodyPart, X509Certificate>? = null,
+  val mics: List<String>? = null
+) {
+
+  val contentType: String get() = currentBody.contentType
+
+  val wasEncrypted: Boolean get() = decryptedBody != null
+  val wasCompressed: Boolean get() = decompressedBody != null
+  val wasSigned: Boolean get() = verifiedBody != null
+
+  val encryptionAlgorithm: String? get() = decryptedBody?.second
+  val compressionAlgorithm: String? get() = decompressedBody?.second
+}
+
+data class As2RequestContext(
+  val requestType: As2RequestType,
   val headers: MultiMap,
-  val body: MimeBodyPart,
-  val context: As2MessageContext
+  val securityProvider: Provider,
+  val tempFileHelper: TempFileHelper,
+  val records: Records,
+  val bodyContext: BodyContext
 ) {
 
   companion object {
-    val logger = LoggerFactory.getLogger(As2Message::class.java)
+    val logger: Logger = LoggerFactory.getLogger(As2RequestContext::class.java)
   }
 
-  val messageId = headers.get(AS2Header.MessageId)!!
-  val senderId = headers.get(AS2Header.As2From)!!
-  val recipientId = headers.get(AS2Header.As2To)!!
+  val body: MimeBodyPart get() = bodyContext.currentBody
+  val contentType: String get() = bodyContext.contentType
 
-  val tradingChannel = context.tradingChannel
+  val messageId: String get() = headers.get(AS2Header.MessageId) ?: throw Error("Message-Id header not found")
+  val senderId: String get() = headers.get(AS2Header.As2From) ?: throw Error("AS2-From header not found")
+  val recipientId: String get() = headers.get(AS2Header.As2To) ?: throw Error("AS2-To header not found")
 
-  val isEncrypted = body.isEncrypted()
-  val isCompressed = body.isCompressed()
-  val isSigned = body.isSigned()
+  val isBodyEncrypted: Boolean get() = bodyContext.currentBody.isEncrypted()
+  val isBodyCompressed: Boolean get() = bodyContext.currentBody.isCompressed()
+  val isBodySigned: Boolean get() = bodyContext.currentBody.isSigned()
 
-  val receiptDeliveryOption = headers.get(AS2Header.ReceiptDeliveryOption)
-  val dispositionNotificationTo = headers.get(AS2Header.DispositionNotificationTo)
+  val receiptDeliveryOption: String? get() = headers.get(AS2Header.ReceiptDeliveryOption)
+  val dispositionNotificationTo: String? get() = headers.get(AS2Header.DispositionNotificationTo)
 
-  val dispositionNotificationOptions = headers.get(AS2Header.DispositionNotificationOptions)
-    ?.let { DispositionOptions.createFromString(it) }
+  val dispositionNotificationOptions: DispositionOptions?
+    get() = headers.get(AS2Header.DispositionNotificationOptions)
+      ?.let { DispositionOptions.createFromString(it) }
 
   val isMdnRequested = dispositionNotificationTo != null
   val isMdnAsynchronous = receiptDeliveryOption != null
 
   fun decrypt(
     certificate: X509Certificate,
-    privateKey: PrivateKey,
-    tempFileHelper: TempFileHelper,
-    securityProvider: Provider
-  ): As2Message =
-    when (isEncrypted) {
+    privateKey: PrivateKey
+  ): As2RequestContext =
+    when (isBodyEncrypted) {
       false ->
-        throw GeneralSecurityException("Content-Type '${body.contentType}' indicates the message is not encrypted")
+        throw GeneralSecurityException("Content-Type '${bodyContext.contentType}' indicates the message is not encrypted")
       true -> {
 
         // Get the recipient object for decryption
@@ -127,7 +126,7 @@ data class As2Message(
         // try to decrypt the data
         // Custom file: see #103
 
-        val body = SMIMEUtil
+        val decryptedBody = SMIMEUtil
           .toMimeBodyPart(
             recipient.getContentStream(
               JceKeyTransEnvelopedRecipient(privateKey)
@@ -137,10 +136,10 @@ data class As2Message(
           )
 
         copy(
-          body = body,
-          context = context.copy(
+          bodyContext = bodyContext.copy(
+            currentBody = decryptedBody,
             decryptedBody = Pair(
-              body,
+              decryptedBody,
               encryptionAlgorithmNameFinder.getAlgorithmName(envelope!!.contentEncryptionAlgorithm).toLowerCase()
             )
           )
@@ -148,10 +147,8 @@ data class As2Message(
       }
     }
 
-  fun decompress(
-    tempFileHelper: TempFileHelper
-  ): As2Message =
-    when (isCompressed) {
+  fun decompress(): As2RequestContext =
+    when (isBodyCompressed) {
       false -> this
       true -> {
         try {
@@ -174,7 +171,7 @@ data class As2Message(
             logger.debug(str)
           }
 
-          val decompressed =
+          val decompressedBody =
             SMIMECompressedParser(body, 8 * 1024)
               .getContent(ZlibExpanderProvider())
               .let { typedStream -> SMIMEUtil.toMimeBodyPart(typedStream, tempFileHelper.newFile()) }
@@ -183,8 +180,10 @@ data class As2Message(
               }
 
           copy(
-            body = decompressed,
-            context = context.copy(decompressedBody = Pair(decompressed, "zlib"))
+            bodyContext = bodyContext.copy(
+              currentBody = decompressedBody,
+              decompressedBody = Pair(decompressedBody, "zlib")
+            )
           )
         } catch (ex: Exception) {
 
@@ -204,43 +203,42 @@ data class As2Message(
       }
     }
 
-  fun verify(
-    certificate: X509Certificate,
-    tempFileHelper: TempFileHelper,
-    securityProvider: Provider
-  ): As2Message =
-    require(isSigned) { "message is not signed" }
+  fun verify(certificate: X509Certificate): As2RequestContext =
+    require(isBodySigned) { "message is not signed" }
       .let {
         body.verifiedContent(certificate, tempFileHelper, securityProvider)
           .let { verifiedBody ->
             copy(
-              body = verifiedBody,
-              context = context.copy(verifiedBody = verifiedBody, signatureCertificate = certificate)
+              bodyContext = bodyContext.copy(
+                currentBody = verifiedBody,
+                verifiedBody = Pair(verifiedBody, certificate)
+              )
             )
           }
       }
 
-  fun withMics(): As2Message {
+  fun withMics(): As2RequestContext =
+    with(bodyContext) {
+      val includeHeaders = wasEncrypted || wasSigned || wasCompressed
 
-    val includeHeaders =
-      context.wasEncrypted || context.wasSigned || context.wasCompressed
+      val mics = dispositionNotificationOptions
+        ?.allMICAlgs?.map { algorithm -> body.calculateMic(includeHeaders, algorithm) }
+        ?: emptyList()
 
-    val mics = dispositionNotificationOptions
-      ?.allMICAlgs?.map { algorithm -> body.calculateMic(includeHeaders, algorithm) }
-      ?: emptyList()
-
-    return copy(context = context.copy(mics = mics))
-  }
+      this@As2RequestContext.copy(bodyContext = copy(mics = mics))
+    }
 
   private val contextMap = mapOf(
     "MessageId" to messageId,
-    "RequestId" to context.request.id.toString(),
+    "RequestId" to records.request.id.toString(),
+    "TradingChannel" to records.tradingChannel.name,
+    "TradingChannelId" to records.tradingChannel.id.toString(),
     "AS2-From" to senderId,
     "AS2-To" to recipientId
   )
 
-  fun withLogger(log: (Logger) -> Unit) {
-    MDC.setContextMap(contextMap)
+  fun withLogger(clazz: KClass<out Handler<RoutingContext>>, log: Logger.() -> Unit) {
+    MDC.setContextMap(contextMap + ("Handler" to clazz.simpleName))
     log(logger)
     MDC.clear()
   }

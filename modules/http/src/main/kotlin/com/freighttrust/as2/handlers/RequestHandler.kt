@@ -2,16 +2,18 @@ package com.freighttrust.as2.handlers
 
 import com.fasterxml.uuid.impl.TimeBasedGenerator
 import com.freighttrust.as2.domain.Disposition
-import com.freighttrust.as2.domain.As2Message
-import com.freighttrust.as2.domain.As2MessageContext
-import com.freighttrust.as2.domain.As2MessageType
+import com.freighttrust.as2.domain.As2RequestContext
+import com.freighttrust.as2.domain.Records
+import com.freighttrust.as2.domain.As2RequestType
+import com.freighttrust.as2.domain.BodyContext
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.bodyAsMimeBodyPart
 import com.freighttrust.as2.ext.get
 import com.freighttrust.as2.ext.getAS2Header
 import com.freighttrust.as2.ext.toMap
-import com.freighttrust.as2.handlers.As2RequestHandler.Companion.CTX_AS2_MESSAGE
+import com.freighttrust.as2.handlers.As2RequestHandler.Companion.CTX_AS2
 import com.freighttrust.as2.util.AS2Header
+import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.jooq.enums.RequestType.mdn
 import com.freighttrust.jooq.enums.RequestType.message
 import com.freighttrust.jooq.tables.pojos.Request
@@ -22,26 +24,28 @@ import com.freighttrust.persistence.extensions.toJSONB
 import com.helger.as2lib.message.AS2Message
 import io.vertx.ext.web.RoutingContext
 import org.jooq.tools.json.JSONObject
+import java.security.Provider
 import java.time.OffsetDateTime
 
 val RoutingContext.hasAs2Message
-get() = get<AS2Message?>(CTX_AS2_MESSAGE) != null
+get() = get<AS2Message?>(CTX_AS2) != null
 
-var RoutingContext.message: As2Message
-  get() = get(CTX_AS2_MESSAGE)
+var RoutingContext.as2Context: As2RequestContext
+  get() = get(CTX_AS2)
   set(message) {
-    put(CTX_AS2_MESSAGE, message)
+    put(CTX_AS2, message)
   }
 
 class As2RequestHandler(
   private val uuidGenerator: TimeBasedGenerator,
   private val tradingChannelRepository: TradingChannelRepository,
   private val requestRepository: RequestRepository,
-  private val fileRepository: FileRepository
+  private val fileRepository: FileRepository,
+  private val securityProvider: Provider
 ) : CoroutineRouteHandler() {
 
   companion object {
-    const val CTX_AS2_MESSAGE = "as2_message"
+    const val CTX_AS2 = "As2Context"
   }
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -51,28 +55,28 @@ class As2RequestHandler(
         val path = request.path()
 
         val messageType = when {
-          path.endsWith("message") -> As2MessageType.Message
-          path.endsWith("mdn") -> As2MessageType.DispositionNotification
+          path.endsWith("message") -> As2RequestType.Message
+          path.endsWith("mdn") -> As2RequestType.DispositionNotification
           else -> throw IllegalStateException()
         }
 
         // TODO validate as2 headers before continuing
 
         // lookup trading channel
-        val tradingChannel =
+        val tradingChannelRecord =
           request.headers()
             .let { headers ->
 
               val (senderId, recipientId) = when (messageType) {
 
-                As2MessageType.Message ->
+                As2RequestType.Message ->
                   Pair(
                     headers.get(AS2Header.As2From)!!,
                     headers.get(AS2Header.As2To)!!
                   )
 
                 // invert when processing mdn
-                As2MessageType.DispositionNotification -> Pair(
+                As2RequestType.DispositionNotification -> Pair(
                   headers.get(AS2Header.As2To)!!,
                   headers.get(AS2Header.As2From)!!
                 )
@@ -99,10 +103,10 @@ class As2RequestHandler(
             .apply {
               this.id = uuidGenerator.generate()
               this.type = when (messageType) {
-                As2MessageType.Message -> message
-                As2MessageType.DispositionNotification -> mdn
+                As2RequestType.Message -> message
+                As2RequestType.DispositionNotification -> mdn
               }
-              this.tradingChannelId = tradingChannel.id
+              this.tradingChannelId = tradingChannelRecord.id
               this.messageId = messageId
               this.subject = request.getAS2Header(AS2Header.Subject)
               this.receivedAt = OffsetDateTime.now()
@@ -113,12 +117,14 @@ class As2RequestHandler(
 
         // set message on the routing context
 
-        As2Message(
+        As2RequestContext(
           messageType,
           request.headers(),
-          body,
-          As2MessageContext(tradingChannel, requestRecord)
-        ).also { message -> ctx.put(CTX_AS2_MESSAGE, message) }
+          securityProvider,
+          TempFileHelper(),
+          Records(requestRecord, tradingChannelRecord),
+          BodyContext(body)
+        ).also { message -> ctx.put(CTX_AS2, message) }
 
         ctx.next()
       }

@@ -12,7 +12,7 @@ import io.vertx.ext.web.RoutingContext
 import java.security.GeneralSecurityException
 import java.security.Provider
 
-class As2DecryptionHandler(
+class DecryptionHandler(
   private val partnerRepository: TradingPartnerRepository,
   private val keyPairRepository: KeyPairRepository,
   private val securityProvider: Provider
@@ -21,11 +21,11 @@ class As2DecryptionHandler(
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
     try {
-      with(ctx.message) {
+      with(ctx.as2Context) {
 
-        if (!isEncrypted) return ctx.next()
+        if (!isBodyEncrypted) return ctx.next()
 
-        with(tradingChannel) {
+        with(records.tradingChannel) {
 
           // todo replace with a join
 
@@ -42,12 +42,7 @@ class As2DecryptionHandler(
           val certificate = keyPair.certificate.toX509()
           val privateKey = keyPair.privateKey.toPrivateKey()
 
-          ctx.message = decrypt(
-            certificate,
-            privateKey,
-            ctx.tempFileHelper,
-            securityProvider
-          )
+          ctx.as2Context = decrypt(certificate, privateKey)
         }
       }
 

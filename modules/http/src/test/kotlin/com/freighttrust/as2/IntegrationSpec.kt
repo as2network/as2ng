@@ -13,7 +13,6 @@ import com.freighttrust.as2.kotest.listeners.SystemPropertyListener
 import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
 import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
 import com.freighttrust.as2.kotest.listeners.VaultListener
-import com.freighttrust.as2.modules.As2ExchangeServerModule
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.common.modules.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
@@ -61,12 +60,12 @@ enum class RequestStyle {
   Sync, Async
 }
 
-class IntegrationTest : FunSpec(), KoinTest {
+class IntegrationSpec : FunSpec(), KoinTest {
 
   val localStack = LocalStackContainer()
     .withServices(S3)
 
-  val vault = VaultContainer<Nothing>("vault:latest")
+  val vault = VaultContainer<Nothing>("vault:1.4.3")
     .apply {
       withVaultToken("root")
       withClasspathResourceMapping(
@@ -130,7 +129,7 @@ class IntegrationTest : FunSpec(), KoinTest {
             single(createdAtStart = true) {
               runBlocking {
                 get<Vertx>()
-                  .deployVerticleAwait(As2ServerVerticle(_koin))
+                  .deployVerticleAwait(ServerVerticle(_koin))
               }
             }
           }

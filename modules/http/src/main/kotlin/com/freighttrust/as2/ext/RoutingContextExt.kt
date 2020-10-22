@@ -3,7 +3,7 @@ package com.freighttrust.as2.ext
 import com.freighttrust.as2.BuildConfig
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.domain.toMimeBodyPart
-import com.freighttrust.as2.handlers.message
+import com.freighttrust.as2.handlers.as2Context
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.commons.http.CHttp
@@ -70,7 +70,7 @@ val RoutingContext.reportingUserAgent: String
   get() = "FreightTrust AS2 ${BuildConfig.version}@${request().host()}"
 
 fun RoutingContext.dispositionNotification(disposition: Disposition): DispositionNotification =
-  with(message) {
+  with(as2Context) {
     DispositionNotification()
       .apply {
         this.originalMessageId = messageId
@@ -79,18 +79,18 @@ fun RoutingContext.dispositionNotification(disposition: Disposition): Dispositio
         finalRecipient = recipientId
         reportingUa = reportingUserAgent
         this.disposition = disposition.toString()
+
         receivedContentMic = dispositionNotificationOptions
           ?.firstMICAlg
           ?.let { signingAlgorithm ->
 
-            val includeHeaders =
-              context
-                .let { context ->
-                  context.wasEncrypted || context.wasSigned || context.wasCompressed
-                }
+            val includeHeaders = with(bodyContext) {
+              wasEncrypted || wasSigned || wasCompressed
+            }
 
             body.calculateMic(includeHeaders, signingAlgorithm)
           }
+
         digestAlgorithm = dispositionNotificationOptions
           ?.firstMICAlg?.id
       }

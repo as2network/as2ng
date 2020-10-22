@@ -18,7 +18,7 @@ dependencies {
   api("org.apache.logging.log4j:log4j")
   api("org.apache.logging.log4j:log4j-slf4j-impl")
 
-  testApi("org.koin:koin-testj")
+  testApi("org.koin:koin-test")
 
 }
 

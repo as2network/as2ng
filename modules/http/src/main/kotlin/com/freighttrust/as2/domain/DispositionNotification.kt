@@ -1,13 +1,11 @@
 package com.freighttrust.as2.domain
 
 import com.freighttrust.as2.ext.calculateMic
-import com.freighttrust.as2.ext.getAS2Header
 import com.freighttrust.as2.ext.getAs2Header
 import com.freighttrust.as2.ext.setAs2Header
-import com.freighttrust.as2.handlers.message
+import com.freighttrust.as2.handlers.as2Context
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
-import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.util.AS2IOHelper
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
@@ -97,7 +95,8 @@ data class Disposition(
 
   companion object {
 
-    val regex = Regex("(manual-action|automatic-action)/(MDN-sent-manually|MDN-sent-automatically); (processed|failed)(/(error|warning|failure): (.*))?")
+    val regex =
+      Regex("(manual-action|automatic-action)/(MDN-sent-manually|MDN-sent-automatically); (processed|failed)(/(error|warning|failure): (.*))?")
 
     fun parse(str: String): Disposition {
       val matches = regex.findAll(str).toList()
@@ -200,9 +199,9 @@ fun DispositionNotification.fromMimeBodyPart(bodyPart: MimeBodyPart): Dispositio
     var dispositionBodyPart: MimeBodyPart? = null
 
     for (idx in 0..multipartBody.count) {
-      val bodyPart = multipartBody.getBodyPart(idx) as MimeBodyPart
-      if (bodyPart.isMimeType("message/disposition-notification")) {
-        dispositionBodyPart = bodyPart
+      val part = multipartBody.getBodyPart(idx) as MimeBodyPart
+      if (part.isMimeType("message/disposition-notification")) {
+        dispositionBodyPart = part
         break
       }
     }
@@ -236,7 +235,7 @@ fun DispositionNotification.fromMimeBodyPart(bodyPart: MimeBodyPart): Dispositio
 
 
 fun DispositionNotification.toMimeBodyPart(ctx: RoutingContext): MimeBodyPart =
-  with(ctx) {
+  with(ctx.as2Context) {
     InternetHeaders()
       .apply {
         setAs2Header(AS2Header.ReportingUA, reportingUa)
@@ -245,20 +244,13 @@ fun DispositionNotification.toMimeBodyPart(ctx: RoutingContext): MimeBodyPart =
         setAs2Header(AS2Header.OriginalMessageID, originalMessageId)
         setAs2Header(AS2Header.Disposition, disposition.toString())
 
-        val dispositionOptions = request()
-          .getAS2Header(AS2Header.DispositionNotificationOptions)
-          .let { DispositionOptions.createFromString(it) }
+        val signingAlgorithm =
+          dispositionNotificationOptions?.firstMICAlg ?: throw Error("Disposition notification options not set")
 
-        val signingAlgorithm = dispositionOptions.firstMICAlg
-
-        val includeHeaders =
-          message.context
-            .let { context ->
-              context.wasEncrypted || context.wasSigned || context.wasCompressed
-            }
+        val includeHeaders = with(bodyContext) { wasEncrypted || wasSigned || wasCompressed }
 
         signingAlgorithm?.apply {
-          val mic = message.body.calculateMic(includeHeaders, signingAlgorithm)
+          val mic = body.calculateMic(includeHeaders, signingAlgorithm)
           setAs2Header(AS2Header.ReceivedContentMIC, mic)
         }
       }
