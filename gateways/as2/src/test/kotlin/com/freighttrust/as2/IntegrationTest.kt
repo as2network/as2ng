@@ -5,9 +5,8 @@ import com.freighttrust.as2.RequestStyle.Async
 import com.freighttrust.as2.domain.fromMimeBodyPart
 import com.freighttrust.as2.ext.isSigned
 import com.freighttrust.as2.ext.verifiedContent
-import com.freighttrust.as2.extensions.bodyAsMimeBodyPart
-import com.freighttrust.as2.kotest.listeners.As2SetupListener
-import com.freighttrust.as2.kotest.listeners.As2SetupListener.As2RequestBuilder
+import com.freighttrust.as2.kotest.listeners.IntegrationTestListener
+import com.freighttrust.as2.kotest.listeners.IntegrationTestListener.As2RequestBuilder
 import com.freighttrust.as2.kotest.listeners.LocalStackListener
 import com.freighttrust.as2.kotest.listeners.MigrationsListener
 import com.freighttrust.as2.kotest.listeners.SystemPropertyListener
@@ -119,7 +118,7 @@ class IntegrationTest : FunSpec(), KoinTest {
     listener(LocalStackListener(localStack))
 
     val setupListener = listener(
-      As2SetupListener(
+      IntegrationTestListener(
         listOf(
           AppConfigModule,
           PostgresModule,

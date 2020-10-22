@@ -24,7 +24,6 @@ import io.kotest.core.listeners.TestListener
 import io.kotest.core.spec.Spec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.mockwebserver.MockWebServer
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -56,12 +55,12 @@ enum class TestPartner(val resourcePath: String) {
 
 }
 
-class As2SetupListener(
+class IntegrationTestListener(
   private val modules: List<Module>
 ) : TestListener, KoinComponent {
 
   companion object {
-    val logger = LoggerFactory.getLogger(As2SetupListener::class.java)
+    val logger = LoggerFactory.getLogger(IntegrationTestListener::class.java)
   }
 
   private val keyPairRepository: KeyPairRepository by inject()
@@ -247,6 +246,7 @@ class As2SetupListener(
       this.recipient = recipient
       settings.setPartnershipName("${sender.name} to ${recipient.name}")
       settings.setReceiverData(recipient.as2Identifier, recipient.name, "http://localhost:8080/message")
+      settings.messageIDFormat = "as2-lib-\$date.uuuuMMdd-HHmmssZ\$-\$rand.1234\$@\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
       return this
     }
 
