@@ -1,5 +1,6 @@
 package com.freighttrust.persistence
 
+import arrow.core.Tuple3
 import arrow.core.Tuple4
 import com.freighttrust.crypto.CertificateFactory
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
@@ -68,6 +69,13 @@ interface RequestRepository : Repository<Request> {
     withDisposition: Boolean = false,
     ctx: Repository.Context? = null
   ): Tuple4<Request, TradingChannel?, Message?, DispositionNotification?>?
+
+  suspend fun findByOriginalRequestId(
+    originalRequestId: UUID,
+    withTradingChannel: Boolean = false,
+    withDisposition: Boolean = false,
+    ctx: Repository.Context? = null
+  ): Tuple3<Request, TradingChannel?, DispositionNotification?>?
 
   suspend fun findRequestIdByMessageId(messageId: String, ctx: Repository.Context? = null): UUID?
 

@@ -7,7 +7,7 @@ COPY . .
 
 RUN gradle :as2-lib:shadowJar
 
-FROM openjdk:11
+FROM oracle/graalvm-ce:20.2.0-java11
 
 RUN mkdir -p /opt/as2
 

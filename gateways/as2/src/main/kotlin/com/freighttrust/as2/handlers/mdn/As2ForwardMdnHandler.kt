@@ -6,12 +6,19 @@ import com.freighttrust.persistence.RequestRepository
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 class As2ForwardMdnHandler(
   private val webClient: WebClient,
   private val requestRepository: RequestRepository
 ) : CoroutineRouteHandler() {
+
+  companion object {
+    val logger = LoggerFactory.getLogger(As2ForwardMdnHandler::class.java)
+  }
 
   override suspend fun coroutineHandle(ctx: RoutingContext): Unit =
     with(ctx.message) {
@@ -20,10 +27,15 @@ class As2ForwardMdnHandler(
       val url: String = originalMessage.receiptDeliveryOption ?: throw Error("Receipt delivery option cannot be null")
 
       // forward the mdn
-      webClient
-        .postAbs(url)
-        .putHeaders(ctx.request().headers())
-        .sendBufferAwait(ctx.body)
+      withContext(Dispatchers.IO) {
+
+        logger.info("Forwarding MDN to {}", url)
+
+        webClient
+          .postAbs(url)
+          .putHeaders(ctx.request().headers())
+          .sendBufferAwait(ctx.body)
+      }
 
       // mark the request as delivered
       requestRepository.setAsDeliveredTo(context.request.id, url, Instant.now())
@@ -32,5 +44,7 @@ class As2ForwardMdnHandler(
       ctx.response()
         .setStatusCode(200)
         .end()
+
+      logger.info("Forwarded MDN")
     }
 }

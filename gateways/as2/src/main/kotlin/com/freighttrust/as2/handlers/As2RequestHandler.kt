@@ -90,7 +90,9 @@ class As2RequestHandler(
 
         val dataHandler = body.dataHandler
         val messageId = request.getAS2Header(AS2Header.MessageId)
-        val fileRecord = fileRepository.insert(messageId, dataHandler)
+
+        val key = uuidGenerator.generate().toString()
+        val fileRecord = fileRepository.insert(key, dataHandler)
 
         val requestRecord = requestRepository.insert(
           Request()
