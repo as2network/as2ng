@@ -5,8 +5,11 @@ import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.signatureCertificateFromBody
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.LoggerFactory
+import java.security.Provider
 
-class As2SignatureVerificationHandler : CoroutineRouteHandler() {
+class As2SignatureVerificationHandler(
+  private val securityProvider: Provider
+) : CoroutineRouteHandler() {
 
   companion object {
     private val logger = LoggerFactory.getLogger(As2SignatureVerificationHandler::class.java)
@@ -20,12 +23,12 @@ class As2SignatureVerificationHandler : CoroutineRouteHandler() {
 
       try {
 
-        val certificate = body.signatureCertificateFromBody(ctx.tempFileHelper)
+        val certificate = body.signatureCertificateFromBody(ctx.tempFileHelper, securityProvider)
         ?: throw Error("Body certificate not found")
 
         certificate.checkValidity()
 
-        ctx.message = verify(certificate, ctx.tempFileHelper)
+        ctx.message = verify(certificate, ctx.tempFileHelper, securityProvider)
 
         logger.info("Successfully verified signature of incoming AS2 message")
 

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.security.GeneralSecurityException
 import java.security.PrivateKey
+import java.security.Provider
 import java.security.cert.X509Certificate
 import javax.mail.MessagingException
 import javax.mail.internet.MimeBodyPart
@@ -100,7 +101,8 @@ data class As2Message(
   fun decrypt(
     certificate: X509Certificate,
     privateKey: PrivateKey,
-    tempFileHelper: TempFileHelper
+    tempFileHelper: TempFileHelper,
+    securityProvider: Provider
   ): As2Message =
     when (isEncrypted) {
       false ->
@@ -129,7 +131,7 @@ data class As2Message(
           .toMimeBodyPart(
             recipient.getContentStream(
               JceKeyTransEnvelopedRecipient(privateKey)
-                .setProvider(BouncyCastleProvider())
+                .setProvider(securityProvider)
             ),
             tempFileHelper.newFile()
           )
@@ -204,11 +206,12 @@ data class As2Message(
 
   fun verify(
     certificate: X509Certificate,
-    tempFileHelper: TempFileHelper
+    tempFileHelper: TempFileHelper,
+    securityProvider: Provider
   ): As2Message =
     require(isSigned) { "message is not signed" }
       .let {
-        body.verifiedContent(certificate, tempFileHelper)
+        body.verifiedContent(certificate, tempFileHelper, securityProvider)
           .let { verifiedBody ->
             copy(
               body = verifiedBody,

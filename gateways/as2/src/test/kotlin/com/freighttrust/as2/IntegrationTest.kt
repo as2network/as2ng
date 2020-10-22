@@ -581,7 +581,8 @@ class IntegrationTest : FunSpec(), KoinTest {
             ?.takeIf { it.isSigned() }
             ?.verifiedContent(
               requireNotNull(response.mdnVerificationCertificate),
-              tempFileHelper
+              tempFileHelper,
+              k.get()
             ) ?: data
 
           val receivedDispositionNotification = DispositionNotification()

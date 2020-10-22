@@ -72,7 +72,8 @@ fun MimeBodyPart.sign(
   privateKey: PrivateKey,
   certificate: X509Certificate,
   algorithm: ECryptoAlgorithmSign,
-  encoding: EContentTransferEncoding
+  encoding: EContentTransferEncoding,
+  securityProvider: Provider
 ): MimeBodyPart {
 
   // check the certificate is valid
@@ -99,7 +100,7 @@ fun MimeBodyPart.sign(
       setContentTransferEncoding(encoding.id)
       addSignerInfoGenerator(
         JcaSimpleSignerInfoGeneratorBuilder()
-          .setProvider(BouncyCastleProvider())
+          .setProvider(securityProvider)
           .setSignedAttributeGenerator(AttributeTable(signedAttributes))
           .build(algorithm.signAlgorithmName, privateKey, certificate)
       )
@@ -117,7 +118,7 @@ fun MimeBodyPart.sign(
 
 fun MimeBodyPart.signatureCertificateFromBody(
   tempFileHelper: TempFileHelper,
-  securityProvider: Provider = BouncyCastleProvider()
+  securityProvider: Provider
 ): X509Certificate? =
   require(isSigned()) { "Body must be signed" }
     .let {
@@ -160,13 +161,13 @@ fun MimeBodyPart.signatureCertificateFromBody(
 fun MimeBodyPart.verifiedContent(
   certificate: X509Certificate,
   tempFileFactory: TempFileHelper,
-  securityProvider: Provider = BouncyCastleProvider()
+  securityProvider: Provider
 ): MimeBodyPart =
   require(isSigned()) { "Body must be signed" }
     .let {
 
       val verifier = JcaSimpleSignerInfoVerifierBuilder()
-        .setProvider(BouncyCastleProvider())
+        .setProvider(securityProvider)
         .build(certificate.publicKey)
 
       SMIMESignedParser(

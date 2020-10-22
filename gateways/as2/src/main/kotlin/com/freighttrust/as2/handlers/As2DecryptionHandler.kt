@@ -10,10 +10,12 @@ import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
 import io.vertx.ext.web.RoutingContext
 import java.security.GeneralSecurityException
+import java.security.Provider
 
 class As2DecryptionHandler(
   private val partnerRepository: TradingPartnerRepository,
-  private val keyPairRepository: KeyPairRepository
+  private val keyPairRepository: KeyPairRepository,
+  private val securityProvider: Provider
 ) : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -43,7 +45,8 @@ class As2DecryptionHandler(
           ctx.message = decrypt(
             certificate,
             privateKey,
-            ctx.tempFileHelper
+            ctx.tempFileHelper,
+            securityProvider
           )
         }
       }

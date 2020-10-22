@@ -19,8 +19,11 @@ import com.typesafe.config.Config
 import io.vertx.ext.web.client.WebClient
 import io.xlate.edi.stream.EDIInputFactory
 import okhttp3.OkHttpClient
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.koin.core.qualifier._q
+import org.koin.dsl.bind
 import org.koin.dsl.module
+import java.security.Provider
 
 val As2ExchangeServerModule = module {
 
@@ -41,23 +44,25 @@ val As2ExchangeServerModule = module {
 
   factory { Generators.timeBasedGenerator() }
 
+  single { BouncyCastleProvider() }.bind(Provider::class)
+
   single { EDIInputFactory.newFactory() }
 
   single { As2BodyHandler() }
   single { As2TempFileHandler() }
   single { As2RequestHandler(get(), get(), get(), get()) }
   single { As2DecompressionHandler() }
-  single { As2DecryptionHandler(get(), get()) }
+  single { As2DecryptionHandler(get(), get(), get()) }
   single { As2MdnReceivedHandler(get(), get(), get()) }
   single { As2MessageReceivedHandler(get()) }
-  single { As2FailureHandler(get(), get(), get(), get(), get()) }
-  single { As2SignatureVerificationHandler() }
+  single { As2FailureHandler(get(), get(), get(), get(), get(), get()) }
+  single { As2SignatureVerificationHandler(get()) }
   single { As2MicVerificationHandler() }
   single { As2MicGenerationHandler() }
 
   single { As2ForwardMdnHandler(get(), get()) }
 
-  single { As2ForwardMessageHandler(get(_q("baseUrl")), get(), get(), get(), get(), get()) }
+  single { As2ForwardMessageHandler(get(_q("baseUrl")), get(), get(), get(), get(), get(), get()) }
 
   single { EDIValidationHandler(get()) }
 

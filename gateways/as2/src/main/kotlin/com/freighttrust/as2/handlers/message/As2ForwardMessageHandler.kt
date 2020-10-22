@@ -29,6 +29,7 @@ import io.vertx.kotlin.ext.web.client.sendBufferAwait
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
+import java.security.Provider
 import java.time.Instant
 import javax.activation.DataHandler
 import javax.mail.internet.MimeBodyPart
@@ -39,7 +40,8 @@ class As2ForwardMessageHandler(
   private val partnerRepository: TradingPartnerRepository,
   private val keyPairRepository: KeyPairRepository,
   private val dispositionNotificationRepository: DispositionNotificationRepository,
-  private val webClient: WebClient
+  private val webClient: WebClient,
+  private val securityProvider: Provider
 ) : CoroutineRouteHandler() {
 
   companion object {
@@ -111,7 +113,7 @@ class As2ForwardMessageHandler(
             KeyPair().apply { id = partner.keyPairId }
           ) ?: throw Error("Could not find key pair for partner in database")
 
-          bodyPart = bodyPart.verifiedContent(keyPair.certificate.toX509(), ctx.tempFileHelper)
+          bodyPart = bodyPart.verifiedContent(keyPair.certificate.toX509(), ctx.tempFileHelper, securityProvider)
         }
 
         // store the notification

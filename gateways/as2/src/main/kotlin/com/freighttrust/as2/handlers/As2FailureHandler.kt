@@ -30,13 +30,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HttpHeaders
+import java.security.Provider
 
 class As2FailureHandler(
   private val webClient: WebClient,
   private val partnerRepository: TradingPartnerRepository,
   private val keyPairRepository: KeyPairRepository,
   private val requestRepository: RequestRepository,
-  private val dispositionNotificationRepository: DispositionNotificationRepository
+  private val dispositionNotificationRepository: DispositionNotificationRepository,
+  private val securityProvider: Provider
 ) : CoroutineRouteHandler() {
 
   companion object {
@@ -105,7 +107,8 @@ class As2FailureHandler(
             keyPair.privateKey.toPrivateKey(),
             keyPair.certificate.toX509(),
             algorithm,
-            EContentTransferEncoding.BINARY
+            EContentTransferEncoding.BINARY,
+            securityProvider
           )
         } ?: mdn
 
