@@ -99,3 +99,5 @@ node_modules/
 
 
 as2-lib/data
+
+**/null
