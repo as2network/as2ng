@@ -62,7 +62,7 @@ tasks {
     }
   }
 
-  create<JavaExec>("runAS2Server") { verticleTask(verticle = "as2:com.freighttrust.as2.ServerVerticle", debugPort = "10000") }
+  create<JavaExec>("runAS2Server") { verticleTask(verticle = "as2ng:com.freighttrust.as2.ServerVerticle", debugPort = "10000") }
 }
 
 buildConfigKotlin {

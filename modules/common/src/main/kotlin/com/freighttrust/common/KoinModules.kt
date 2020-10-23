@@ -1,4 +1,4 @@
-package com.freighttrust.common.modules
+package com.freighttrust.common
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory

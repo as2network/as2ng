@@ -35,7 +35,7 @@ tasks {
 
 val postgresUrl =
   System.getenv("POSTGRES_URL")
-    ?: "jdbc:postgresql://localhost:5432/customs_gateway?user=customs_gateway&password=customs_gateway"
+    ?: "jdbc:postgresql://localhost:5432/as2ng?user=as2ng&password=as2ng"
 
 flyway {
   url = postgresUrl

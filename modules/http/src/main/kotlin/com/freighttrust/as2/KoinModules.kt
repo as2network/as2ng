@@ -27,13 +27,13 @@ import java.security.Provider
 
 val As2ExchangeServerModule = module {
 
-  single(_q("as2")) {
+  single(_q("http")) {
     val config = get<Config>(_q("app"))
-    config.getConfig("as2")
+    config.getConfig("http")
   }
 
   single(_q("baseUrl")) {
-    val config = get<Config>(_q("as2"))
+    val config = get<Config>(_q("http"))
 
     val protocol = if (config.getBoolean("https")) "https" else "http"
     val host = config.getString("host")

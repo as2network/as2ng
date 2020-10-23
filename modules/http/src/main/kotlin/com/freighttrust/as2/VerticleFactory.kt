@@ -1,6 +1,6 @@
 package com.freighttrust.as2
 
-import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.common.AppConfigModule
 import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.persistence.s3.S3Module
 import io.vertx.core.Verticle
@@ -26,7 +26,7 @@ class VerticleFactory : VerticleFactory {
   private var koinApp: KoinApplication? = null
   private var koin: Koin? = null
 
-  override fun prefix(): String = "as2"
+  override fun prefix(): String = "as2ng"
 
   override fun init(vertx: Vertx) {
 

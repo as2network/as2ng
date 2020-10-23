@@ -25,7 +25,7 @@ class ServerVerticle(
 
   override suspend fun start() {
 
-    val config = koin.get<Config>(_q("as2"))
+    val config = koin.get<Config>(_q("http"))
 
     val router = Router.router(vertx)
 

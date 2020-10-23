@@ -27,7 +27,7 @@ cd $ROOT_DIR && docker-compose exec vault sh /init.sh
 flyway migrate
 
 # create the bucket in minio
-mc mb --ignore-existing local/${AS2_EXCHANGE_S3_BUCKET}
+mc mb --ignore-existing local/${AS2NG_S3_BUCKET}
 
 # create some key pairs
 cli config key-pair issue

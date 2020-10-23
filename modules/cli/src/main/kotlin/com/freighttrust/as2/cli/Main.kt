@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.util.StdDateFormat
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.freighttrust.as2.cli.json.TsTzRangeSerializer
-import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.common.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
 import com.freighttrust.persistence.postgres.PostgresModule
 import com.freighttrust.persistence.postgres.bindings.TsTzRange

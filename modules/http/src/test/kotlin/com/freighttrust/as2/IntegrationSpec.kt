@@ -14,7 +14,7 @@ import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
 import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
 import com.freighttrust.as2.kotest.listeners.VaultListener
 import com.freighttrust.as2.util.TempFileHelper
-import com.freighttrust.common.modules.AppConfigModule
+import com.freighttrust.common.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
 import com.freighttrust.jooq.enums.RequestType
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
