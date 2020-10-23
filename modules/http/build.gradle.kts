@@ -50,6 +50,16 @@ tasks {
   withType<ShadowJar> {
     archiveBaseName.set(project.name)
     archiveClassifier.set("")
+
+    mergeServiceFiles()
+
+    manifest {
+      attributes(
+        mapOf(
+          "Multi-Release" to true
+        )
+      )
+    }
   }
 
   create<JavaExec>("runAS2Server") { verticleTask(verticle = "as2:com.freighttrust.as2.ServerVerticle", debugPort = "10000") }

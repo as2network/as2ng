@@ -1,20 +1,20 @@
-FROM gradle:jdk14 AS build
+FROM gradle:jdk11 AS build
 
 RUN mkdir -p /opt/build
 WORKDIR /opt/build
 
 COPY . .
 
-RUN gradle :cli:shadowJar
+RUN gradle :modules:cli:shadowJar
 
-FROM openjdk:14
+FROM oracle/graalvm-ce:20.2.0-java11
 
 RUN mkdir -p /opt/cli/libs \
   && mkdir -p /opt/cli/data
 
 WORKDIR /opt/cli
 
-COPY --from=build  /opt/build/cli/build/libs/*.jar libs/
+COPY --from=build  /opt/build/modules/cli/build/libs/*.jar libs/
 
 ENTRYPOINT ["java", "-classpath", "libs/*", "-Xms512m", "-Xmx512m", "com.freighttrust.as2.cli.MainKt"]
 

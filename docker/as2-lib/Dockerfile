@@ -19,8 +19,10 @@ RUN mkdir libs \
 
 COPY --from=build  /opt/modules/as2-lib/build/libs/*.jar libs/
 
-ENTRYPOINT ["java", "-classpath", "libs/*", "-Xms512m", "-Xmx512m", "com.helger.as2.app.MainOpenAS2Server"]
-CMD ["/opt/as2/config/config.xml"]
+COPY docker/as2-lib/entrypoint.sh entrypoint.sh
+
+ENTRYPOINT ["/opt/as2/entrypoint.sh"]
+CMD ["config/config.xml"]
 
 VOLUME /opt/as2/config
 VOLUME /opt/as2/data

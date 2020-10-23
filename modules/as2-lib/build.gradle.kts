@@ -64,7 +64,8 @@ tasks {
     manifest {
       attributes(
         mapOf(
-          "Main-Class" to "com.helger.as2.app.MainOpenAS2Server"
+          "Main-Class" to "com.helger.as2.app.MainOpenAS2Server",
+          "Multi-Release" to true
         )
       )
     }

@@ -142,13 +142,14 @@ class IntegrationTestListener(
           ?: throw Error("Keystore not found")
 
         Pair(tp,
-          GenericContainer<Nothing>("as2-server")
+          GenericContainer<Nothing>("as2ng/as2lib-server:4.6.3")
             .apply {
               withTmpFs(mapOf("/opt/as2/data" to ""))
               withClasspathResourceMapping(tp.resourcePath, "/opt/as2/config", BindMode.READ_ONLY)
               // we have to copy the keystore as it's not available in the classpath at compile time
               withCopyFileToContainer(keyStorePath, "/opt/as2/config/keystore.p12")
               withExposedPorts(10101)
+              withCommand("/opt/as2/config/config.xml")
               waitingFor(Wait.forLogMessage(".*Server Started.*", 1))
               start()
             }.also { container ->
@@ -246,7 +247,8 @@ class IntegrationTestListener(
       this.recipient = recipient
       settings.setPartnershipName("${sender.name} to ${recipient.name}")
       settings.setReceiverData(recipient.as2Identifier, recipient.name, "http://localhost:8080/message")
-      settings.messageIDFormat = "as2-lib-\$date.uuuuMMdd-HHmmssZ\$-\$rand.1234\$@\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
+      settings.messageIDFormat =
+        "as2-lib-\$date.uuuuMMdd-HHmmssZ\$-\$rand.1234\$@\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
       return this
     }
 

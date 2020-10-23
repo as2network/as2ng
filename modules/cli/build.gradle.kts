@@ -44,6 +44,8 @@ tasks {
     archiveBaseName.set(project.name)
     archiveClassifier.set("")
 
+    mergeServiceFiles()
+
     manifest {
       attributes(
         mapOf(
