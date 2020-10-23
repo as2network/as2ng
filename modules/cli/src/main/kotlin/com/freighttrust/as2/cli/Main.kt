@@ -19,13 +19,13 @@ import picocli.CommandLine.Command
 import kotlin.system.exitProcess
 
 @Command(
-  name = "as2",
+  name = "as2ng",
   subcommands = [
     CommandLine.HelpCommand::class,
     ConfigCommand::class
   ],
   mixinStandardHelpOptions = true,
-  version = ["as2-cli 0.1.0"]
+  version = ["as2-cli develop"]
 )
 class CliCommand {
 

@@ -3,13 +3,16 @@ package com.freighttrust.as2.cli.config
 import com.freighttrust.persistence.KeyStoreUtil
 import kotlinx.coroutines.runBlocking
 import org.koin.core.KoinComponent
+import picocli.CommandLine
 import picocli.CommandLine.Command
+import picocli.CommandLine.HelpCommand
 import picocli.CommandLine.Option
 import java.io.File
 import java.io.FileOutputStream
 
 @Command(
-  name = "key-store"
+  name = "key-store",
+  subcommands = [HelpCommand::class]
 )
 class KeyStoreCommand : KoinComponent {
 
