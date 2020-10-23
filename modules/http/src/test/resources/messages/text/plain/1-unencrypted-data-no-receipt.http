@@ -1,0 +1,20 @@
+POST / HTTP/1.1
+Content-Type: text/plain
+Subject: Message
+Message-ID: <OpenAS2C_OpenAS2A>
+Content-Disposition: attachment; filename=attachment.txt
+Content-Transfer-Encoding: binary
+Connection: close, TE
+User-Agent: as2-lib/AS2Sender-4.5.5
+Mime-Version: 1.0
+AS2-Version: 1.1
+Date: Thu, 23 Jul 2020 16:01:07 +0200
+Recipient-Address: http://localhost:10085
+AS2-From: OpenAS2C
+AS2-To: OpenAS2A
+From: openas2c@email.com
+Content-Length: 64
+
+This is a test file for sending.
+The whole content is sent.
+EOF

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openas2 _CryptoVerifyUseCertificateInBodyPart="false"
+         _CryptoSignIncludeCertificateInBodyPart="false">
+
+  <certificates classname="com.helger.as2.app.cert.ServerCertificateFactory"
+                type="pkcs12"
+                filename="%home%/keystore.p12"
+                password="password"
+                interval="300"/>
+
+  <partnerships classname="com.helger.as2.app.partner.ServerXMLPartnershipFactory"
+                filename="%home%/partnerships.xml"/>
+
+  <processor classname="com.helger.as2lib.processor.DefaultMessageProcessor"
+             pendingMDN="%home%/../../data/OpenAS2B/pendingMDN3"
+             pendingMDNinfo="%home%/../../data/OpenAS2B/pendinginfoMDN3">
+    <module classname="com.helger.as2lib.processor.sender.AS2SenderModule"/>
+
+    <!-- This will parse the filename to get a sender and receiver. For instance a file
+      named openas2b-OpenAS2B.1234 would be sent from openas2b to OpenAS2B. -->
+    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
+            outboxdir="%home%/../../data/OpenAS2B/toAny"
+            errordir="%home%/../../data/OpenAS2B/toAny/error"
+            interval="5"
+            delimiters="-."
+            format="sender.as2_id, receiver.as2_id, attributes.fileid"
+            mimetype="text/plain"/>
+    <!--  Special directory for sending messages to "OpenAS2A" -->
+    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
+            outboxdir="%home%/../../data/OpenAS2B/toOpenAS2A/"
+            errordir="%home%/../../data/OpenAS2B/toOpenAS2A/error"
+            interval="5"
+            defaults="sender.as2_id=OpenAS2B, receiver.as2_id=OpenAS2A"
+            mimetype="text/plain"/>
+    <!--  Special directory for sending messages to "OpenAS2B" -->
+    <!--    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"-->
+    <!--            outboxdir="%home%/../../data/OpenAS2B/toOpenAS2B"-->
+    <!--            errordir="%home%/../../data/OpenAS2B/toOpenAS2B/error"-->
+    <!--            interval="5"-->
+    <!--            defaults="sender.as2_id=OpenAS2A, receiver.as2_id=OpenAS2B"-->
+    <!--            sendFilename="true"-->
+    <!--            mimetype="text/plain"/>-->
+    <module classname="com.helger.as2lib.processor.storage.MDNFileModule"
+            filename="%home%/../../data/OpenAS2B/mdn/$date.uuuu$/$date.MM$/$mdn.msg.sender.as2_id$-$mdn.msg.receiver.as2_id$-$mdn.msg.headers.message-id$"
+            protocol="as2"
+            tempdir="%home%/../../data/OpenAS2B/temp"
+            charset="utf-8"/>
+    <module classname="com.helger.as2lib.processor.storage.MessageFileModule"
+            filename="%home%/../../data/OpenAS2B/inbox/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
+            header="%home%/../../data/OpenAS2B/inbox/msgheaders/$date.uuuu$/$date.MM$/$msg.sender.as2_id$-$msg.receiver.as2_id$-$msg.headers.message-id$"
+            protocol="as2"
+            tempdir="%home%/../../data/OpenAS2B/temp"
+            charset="utf-8"/>
+    <module classname="com.helger.as2lib.processor.receiver.AS2ReceiverModule"
+            port="10082"
+            errordir="%home%/../../data/OpenAS2B/inbox/error"
+            errorformat="$msg.sender.as2_id$, $msg.receiver.as2_id$, $msg.headers.message-id$"/>
+    <module classname="com.freighttrust.as2.receiver.net.AS2MDNReceiverModule"
+            port="10083"/>
+    <module classname="com.helger.as2lib.processor.resender.DirectoryResenderModule"
+            resenddir="%home%/../../data/OpenAS2B/resend"
+            errordir="%home%/../../data/OpenAS2B/resend/error"
+            resenddelay="60"/>
+    <module classname="com.helger.as2lib.processor.sender.AsynchMDNSenderModule"/>
+  </processor>
+</openas2>
