@@ -12,6 +12,6 @@ rootProject.name = "as2ng"
 include(":modules:common")
 include(":modules:crypto")
 include(":modules:persistence")
-include(":modules:http")
+include(":modules:server")
 include(":modules:cli")
 include(":modules:as2-lib")
