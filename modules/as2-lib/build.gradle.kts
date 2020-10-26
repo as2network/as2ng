@@ -70,6 +70,12 @@ tasks {
       )
     }
   }
+
+
+  register<Copy>("assembleRuntimeDependencies") {
+    from(configurations.runtimeClasspath)
+    into("$buildDir/libs")
+  }
 }
 
 dependencies {

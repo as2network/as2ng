@@ -161,7 +161,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       }
 
-      xtest("2. Send un-encrypted data and request an unsigned receipt") {
+      test("2. Send un-encrypted data and request an unsigned receipt") {
 
         checkAll(requestStyles) { style ->
 
@@ -242,7 +242,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       }
 
-      xtest("5. Send encrypted data and request an un-signed receipt") {
+      test("5. Send encrypted data and request an un-signed receipt") {
 
         checkAll(requestStyles) { style ->
 
@@ -331,7 +331,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       }
 
-      xtest("8. Send signed data and request an un-signed receipt") {
+      test("8. Send signed data and request an un-signed receipt") {
 
         checkAll(requestStyles) { style ->
 
@@ -414,7 +414,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
         }
       }
 
-      xtest("11. Send encrypted and signed data and request an un-signed receipt") {
+      test("11. Send encrypted and signed data and request an un-signed receipt") {
 
         checkAll(requestStyles) { style ->
 
