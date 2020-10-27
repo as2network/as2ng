@@ -11,7 +11,7 @@ plugins {
   id("org.jetbrains.kotlin.jvm") version "1.4.10"
   id("org.jlleitschuh.gradle.ktlint") version "9.2.1" apply false
   id("org.jlleitschuh.gradle.ktlint-idea") version "9.2.1" apply true
-  id("com.github.johnrengelman.shadow") version "5.2.0" apply true
+  id("com.github.johnrengelman.shadow") version "6.1.0" apply true
   id("io.spring.dependency-management") version "1.0.9.RELEASE"
   id("com.github.ben-manes.versions") version "0.28.0"
   id("me.qoomon.git-versioning") version "3.0.0"

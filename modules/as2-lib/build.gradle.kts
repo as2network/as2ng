@@ -59,18 +59,26 @@ tasks {
     archiveBaseName.set(project.name)
     archiveClassifier.set("")
 
+    // default service files merge
     mergeServiceFiles()
+
+    // some specific service file merging for smime data handling
+    mergeServiceFiles("META-INF/javamail.*")
+    mergeServiceFiles("META-INF/mailcap*")
+    mergeServiceFiles("META-INF/mime.types")
+    mergeServiceFiles("META-INF/mimetypes.default")
 
     manifest {
       attributes(
         mapOf(
           "Main-Class" to "com.helger.as2.app.MainOpenAS2Server",
-          "Multi-Release" to true
+          "Multi-Release" to true,
+          "Title" to project.name,
+          "Version" to project.version
         )
       )
     }
   }
-
 
   register<Copy>("assembleRuntimeDependencies") {
     from(configurations.runtimeClasspath)

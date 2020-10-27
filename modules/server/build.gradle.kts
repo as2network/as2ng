@@ -53,10 +53,21 @@ tasks {
 
     mergeServiceFiles()
 
+    // default service files merge
+    mergeServiceFiles()
+
+    // some specific service file merging for smime data handling
+    mergeServiceFiles("META-INF/javamail.*")
+    mergeServiceFiles("META-INF/mailcap*")
+    mergeServiceFiles("META-INF/mime.types")
+    mergeServiceFiles("META-INF/mimetypes.default")
+
     manifest {
       attributes(
         mapOf(
-          "Multi-Release" to true
+          "Multi-Release" to true,
+          "Title" to project.name,
+          "Version" to project.version
         )
       )
     }

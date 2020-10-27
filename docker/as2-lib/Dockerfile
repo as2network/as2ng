@@ -5,8 +5,7 @@ WORKDIR /opt
 
 COPY . .
 
-RUN gradle :modules:as2-lib:assemble \
-  && gradle :modules:as2-lib:assembleRuntimeDependencies
+RUN gradle :modules:as2-lib:shadowJar
 
 FROM oracle/graalvm-ce:20.2.0-java11
 
