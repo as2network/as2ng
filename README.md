@@ -1,7 +1,5 @@
 # AS2NG
 
-TBD
-
 For getting started as a developer please consult the [Development Guide](/.github/development.md).
 
 For information on how to run AS2NG please consult our [Usage Guide](/.github/usage.md)
