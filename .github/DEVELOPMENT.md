@@ -16,6 +16,7 @@
 2. [Docker](https://docs.docker.com/install/)
 3. [Docker Compose](https://docs.docker.com/compose/install/)
 4. [direnv](https://github.com/direnv/direnv/blob/master/docs/installation.md)
+5. Authenticated against the `docker.pkg.github.com/freight-trust/as2ng` [container registry](https://docs.github.com/en/free-pro-team@latest/packages/using-github-packages-with-your-projects-ecosystem/configuring-docker-for-use-with-github-packages)
 
 ## Code Organization
 
