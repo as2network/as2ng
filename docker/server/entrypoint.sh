@@ -7,7 +7,7 @@ MAIN_CLASS=${MAIN_CLASS:-"io.vertx.core.Launcher"}
 JAVA_OPTS=${JAVA_OPTS:-""}
 VERTX_OPTS=${VERTX_OPTS:-""}
 
-CMD="java -cp libs/* ${DEFAULT_JAVA_OPTS} ${JAVA_OPTS} ${DEFAULT_VERTX_OPTS} ${VERTX_OPTS} ${MAIN_CLASS}"
+CMD="java -cp \"libs/*\" ${DEFAULT_JAVA_OPTS} ${JAVA_OPTS} ${DEFAULT_VERTX_OPTS} ${VERTX_OPTS} ${MAIN_CLASS}"
 
 eval "${CMD} $*"
 
