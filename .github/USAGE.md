@@ -2,11 +2,19 @@
 
 ## Configuration
 
+### Server
+
+| System Property                                   | Environment Variable                                 | Description                                                                                           | Default                                                                 |
+| :------------------------------------------------ | :--------------------------------------------------- | :---------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
+| `-Dhttp.host`                                      | `AS2NG_HTTP_HOST`                                    | Hostname that the server is reachable from                                                             | localhost                                                              |
+| `-Dhttp.port`                                      | `AS2NG_HTTP_PORT`                                    | Port that the server is reachable from                                                                 | 8080                                                                   |
+| `-Dhttp.https`                                     | `AS2NG_HTTPS_ENABLED`                                | Whether or not https is enabled                                                                        | false                                                                  |
+
 ### Postgres
 
 | System Property                                   | Environment Variable                                 | Description                                                                                           | Default                                                                 |
 | :------------------------------------------------ | :--------------------------------------------------- | :---------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
-| `-Dpostgres.jdbcUrl`                              | `AS2NG_JDBC_URL`                                     | JDBC style connection url                                                                             | No default                                                               |
+| `-Dpostgres.jdbcUrl`                              | `AS2NG_JDBC_URL`                                     | JDBC style connection url                                                                             | jdbc:postgresql://localhost/as2ng?user=as2ng&password=as2ng                                                               |
 | `-Dpostgres.maximumPoolSize`                      | `AS2NG_JDBC_CONNECTION_LIMIT`                        | Maxmimum number of database connections to maintain in the connection pool                            | `30`                                                                       |
 
 ### S3 Compliant Storage
