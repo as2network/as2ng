@@ -35,7 +35,9 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.extensions.testcontainers.perSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.property.Exhaustive
 import io.kotest.property.checkAll
+import io.kotest.property.exhaustive.boolean
 import io.kotest.property.exhaustive.exhaustive
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.deployVerticleAwait
@@ -313,17 +315,22 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
           checkAll(signingAlgorithms) { signingAlgorithm ->
 
-            val requestBuilder =
-              sendingFrom(Walmart, testCase.displayName)
-                .to(CocaCola)
-                .withMdn(false)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(null, signingAlgorithm)
-                .withTextData(testCase.displayName)
+            checkAll(Exhaustive.boolean()) { includeSigningCertificateInBody ->
 
-            val response = requestBuilder.send()
+              val requestBuilder =
+                sendingFrom(Walmart, testCase.displayName)
+                  .to(CocaCola)
+                  .withMdn(false)
+                  .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                  .withEncryptAndSign(null, signingAlgorithm)
+                  .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+                  .withTextData(testCase.displayName)
 
-            verify(requestBuilder, response)
+              val response = requestBuilder.send()
+
+              verify(requestBuilder, response)
+
+            }
 
           }
 
@@ -337,22 +344,27 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
           checkAll(signingAlgorithms) { signingAlgorithm ->
 
-            val requestBuilder =
-              sendingFrom(Walmart, testCase.displayName)
-                .to(CocaCola)
-                .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(null, signingAlgorithm)
-                .withDispositionOptions(
-                  DispositionOptions()
-                    .setMICAlg(DIGEST_SHA_512)
-                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                )
-                .withTextData(testCase.displayName)
+            checkAll(Exhaustive.boolean()) { includeSigningCertificateInBody ->
 
-            val response = requestBuilder.send()
+              val requestBuilder =
+                sendingFrom(Walmart, testCase.displayName)
+                  .to(CocaCola)
+                  .withMdn(true)
+                  .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                  .withEncryptAndSign(null, signingAlgorithm)
+                  .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+                  .withDispositionOptions(
+                    DispositionOptions()
+                      .setMICAlg(DIGEST_SHA_512)
+                      .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                  )
+                  .withTextData(testCase.displayName)
 
-            verify(requestBuilder, response)
+              val response = requestBuilder.send()
+
+              verify(requestBuilder, response)
+
+            }
 
           }
 
@@ -365,24 +377,29 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
           checkAll(signingAlgorithms) { signingAlgorithm ->
 
-            val requestBuilder =
-              sendingFrom(Walmart, testCase.displayName)
-                .to(CocaCola)
-                .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(null, signingAlgorithm)
-                .withDispositionOptions(
-                  DispositionOptions()
-                    .setMICAlg(DIGEST_SHA_512)
-                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                    .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                    .setProtocolImportance(IMPORTANCE_REQUIRED)
-                )
-                .withTextData(testCase.displayName)
+            checkAll(Exhaustive.boolean()) { includeSigningCertificateInBody ->
 
-            val response = requestBuilder.send()
+              val requestBuilder =
+                sendingFrom(Walmart, testCase.displayName)
+                  .to(CocaCola)
+                  .withMdn(true)
+                  .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                  .withEncryptAndSign(null, signingAlgorithm)
+                  .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+                  .withDispositionOptions(
+                    DispositionOptions()
+                      .setMICAlg(DIGEST_SHA_512)
+                      .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                      .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                      .setProtocolImportance(IMPORTANCE_REQUIRED)
+                  )
+                  .withTextData(testCase.displayName)
 
-            verify(requestBuilder, response)
+              val response = requestBuilder.send()
+
+              verify(requestBuilder, response)
+
+            }
 
           }
 
@@ -397,18 +414,22 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
             checkAll(signingAlgorithms) { signingAlgorithm ->
 
-              val requestBuilder =
-                sendingFrom(Walmart, testCase.displayName)
-                  .to(CocaCola)
-                  .withMdn(false)
-                  .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                  .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
-                  .withTextData(testCase.displayName)
+              checkAll(Exhaustive.boolean()) { includeSigningCertificateInBody ->
 
-              val response = requestBuilder.send()
+                val requestBuilder =
+                  sendingFrom(Walmart, testCase.displayName)
+                    .to(CocaCola)
+                    .withMdn(false)
+                    .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                    .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+                    .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+                    .withTextData(testCase.displayName)
 
-              verify(requestBuilder, response)
+                val response = requestBuilder.send()
 
+                verify(requestBuilder, response)
+
+              }
             }
           }
         }
@@ -422,23 +443,27 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
             checkAll(signingAlgorithms) { signingAlgorithm ->
 
-              val requestBuilder =
-                sendingFrom(Walmart, testCase.displayName)
-                  .to(CocaCola)
-                  .withMdn(true)
-                  .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                  .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
-                  .withDispositionOptions(
-                    DispositionOptions()
-                      .setMICAlg(DIGEST_SHA_512)
-                      .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                  )
-                  .withTextData(testCase.displayName)
+              checkAll(Exhaustive.boolean()) { includeSigningCertificateInBody ->
 
-              val response = requestBuilder.send()
+                val requestBuilder =
+                  sendingFrom(Walmart, testCase.displayName)
+                    .to(CocaCola)
+                    .withMdn(true)
+                    .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                    .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+                    .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+                    .withDispositionOptions(
+                      DispositionOptions()
+                        .setMICAlg(DIGEST_SHA_512)
+                        .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                    )
+                    .withTextData(testCase.displayName)
 
-              verify(requestBuilder, response)
+                val response = requestBuilder.send()
 
+                verify(requestBuilder, response)
+
+              }
             }
 
           }
@@ -455,24 +480,29 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
             checkAll(signingAlgorithms) { signingAlgorithm ->
 
-              val requestBuilder =
-                sendingFrom(Walmart, testCase.displayName)
-                  .to(CocaCola)
-                  .withMdn(true)
-                  .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                  .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
-                  .withDispositionOptions(
-                    DispositionOptions()
-                      .setMICAlg(DIGEST_SHA_512)
-                      .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                      .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                      .setProtocolImportance(IMPORTANCE_REQUIRED)
-                  )
-                  .withTextData(testCase.displayName)
+              checkAll(Exhaustive.boolean()) { includeSigningCertificateInBody ->
 
-              val response = requestBuilder.send()
+                val requestBuilder =
+                  sendingFrom(Walmart, testCase.displayName)
+                    .to(CocaCola)
+                    .withMdn(true)
+                    .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                    .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+                    .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+                    .withDispositionOptions(
+                      DispositionOptions()
+                        .setMICAlg(DIGEST_SHA_512)
+                        .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                        .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                        .setProtocolImportance(IMPORTANCE_REQUIRED)
+                    )
+                    .withTextData(testCase.displayName)
 
-              verify(requestBuilder, response)
+                val response = requestBuilder.send()
+
+                verify(requestBuilder, response)
+
+              }
 
             }
           }

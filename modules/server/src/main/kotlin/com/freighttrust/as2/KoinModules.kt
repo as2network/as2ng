@@ -56,7 +56,7 @@ val As2ExchangeServerModule = module {
   single { MdnReceivedHandler(get(), get(), get()) }
   single { MessageReceivedHandler(get()) }
   single { FailureHandler(get(), get(), get(), get(), get(), get()) }
-  single { SignatureVerificationHandler() }
+  single { SignatureVerificationHandler(get()) }
   single { MicVerificationHandler() }
   single { MicGenerationHandler() }
 

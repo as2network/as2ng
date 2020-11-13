@@ -3,6 +3,7 @@ package com.freighttrust.as2.kotest.listeners
 import com.freighttrust.as2.ext.toAs2Identifier
 import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
 import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
+import com.freighttrust.as2.util.As2TestClient
 import com.freighttrust.crypto.CertificateFactory
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
@@ -237,7 +238,7 @@ class IntegrationTestListener(
     val settings: AS2ClientSettings
   ) {
 
-    private val client = AS2Client()
+    private val client = As2TestClient()
 
     var recipient: TestPartner? = null
 
@@ -282,6 +283,11 @@ class IntegrationTestListener(
         contentTransferEncoding = EContentTransferEncoding.BINARY
       }
       return this;
+    }
+
+    fun withIncludeSigningCertificateInBody(include: Boolean): As2RequestBuilder {
+      client.includeSigningCertificateInBody = include
+      return this
     }
 
     fun send(): AS2ClientResponse = client.sendSynchronous(settings, requireNotNull(request))
