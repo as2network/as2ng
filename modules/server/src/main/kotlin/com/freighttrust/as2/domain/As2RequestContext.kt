@@ -5,8 +5,11 @@ import com.freighttrust.as2.ext.*
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
+import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.pojos.TradingChannel
+import com.freighttrust.persistence.extensions.toPrivateKey
+import com.freighttrust.persistence.extensions.toX509
 import com.helger.as2lib.disposition.DispositionOptions
 import io.vertx.core.Handler
 import io.vertx.core.MultiMap
@@ -49,7 +52,7 @@ data class Records(
 
 data class BodyContext(
   val currentBody: MimeBodyPart,
-  val decryptedBody: Pair<MimeBodyPart, String>? = null,
+  val decryptedBody: Triple<MimeBodyPart, String, KeyPair>? = null,
   val decompressedBody: Pair<MimeBodyPart, String>? = null,
   val verifiedBody: Pair<MimeBodyPart, X509Certificate>? = null,
   val mics: List<String>? = null
@@ -62,6 +65,8 @@ data class BodyContext(
   val wasSigned: Boolean get() = verifiedBody != null
 
   val encryptionAlgorithm: String? get() = decryptedBody?.second
+  val encryptionKeyPairId: Long? get() = decryptedBody?.third?.id
+
   val compressionAlgorithm: String? get() = decompressedBody?.second
 }
 
@@ -100,13 +105,15 @@ data class As2RequestContext(
   val isMdnAsynchronous = receiptDeliveryOption != null
 
   fun decrypt(
-    certificate: X509Certificate,
-    privateKey: PrivateKey
+    keyPair: KeyPair
   ): As2RequestContext =
     when (isBodyEncrypted) {
       false ->
         throw GeneralSecurityException("Content-Type '${bodyContext.contentType}' indicates the message is not encrypted")
       true -> {
+
+        val certificate = keyPair.certificate.toX509()
+        val privateKey = keyPair.privateKey.toPrivateKey()
 
         // Get the recipient object for decryption
         val recipientId: RecipientId = JceKeyTransRecipientId(certificate)
@@ -138,9 +145,10 @@ data class As2RequestContext(
         copy(
           bodyContext = bodyContext.copy(
             currentBody = decryptedBody,
-            decryptedBody = Pair(
+            decryptedBody = Triple(
               decryptedBody,
-              encryptionAlgorithmNameFinder.getAlgorithmName(envelope!!.contentEncryptionAlgorithm).toLowerCase()
+              encryptionAlgorithmNameFinder.getAlgorithmName(envelope!!.contentEncryptionAlgorithm).toLowerCase(),
+              keyPair
             )
           )
         )

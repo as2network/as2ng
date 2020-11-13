@@ -24,10 +24,11 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Message implements Serializable {
 
-    private static final long serialVersionUID = 2113953880;
+    private static final long serialVersionUID = 1213792445;
 
     private UUID     requestId;
     private String   encryptionAlgorithm;
+    private Long     encryptionKeyPairId;
     private String   compressionAlgorithm;
     private String[] mics;
     private Boolean  isMdnRequested;
@@ -39,6 +40,7 @@ public class Message implements Serializable {
     public Message(Message value) {
         this.requestId = value.requestId;
         this.encryptionAlgorithm = value.encryptionAlgorithm;
+        this.encryptionKeyPairId = value.encryptionKeyPairId;
         this.compressionAlgorithm = value.compressionAlgorithm;
         this.mics = value.mics;
         this.isMdnRequested = value.isMdnRequested;
@@ -49,6 +51,7 @@ public class Message implements Serializable {
     public Message(
         UUID     requestId,
         String   encryptionAlgorithm,
+        Long     encryptionKeyPairId,
         String   compressionAlgorithm,
         String[] mics,
         Boolean  isMdnRequested,
@@ -57,6 +60,7 @@ public class Message implements Serializable {
     ) {
         this.requestId = requestId;
         this.encryptionAlgorithm = encryptionAlgorithm;
+        this.encryptionKeyPairId = encryptionKeyPairId;
         this.compressionAlgorithm = compressionAlgorithm;
         this.mics = mics;
         this.isMdnRequested = isMdnRequested;
@@ -79,6 +83,15 @@ public class Message implements Serializable {
 
     public Message setEncryptionAlgorithm(String encryptionAlgorithm) {
         this.encryptionAlgorithm = encryptionAlgorithm;
+        return this;
+    }
+
+    public Long getEncryptionKeyPairId() {
+        return this.encryptionKeyPairId;
+    }
+
+    public Message setEncryptionKeyPairId(Long encryptionKeyPairId) {
+        this.encryptionKeyPairId = encryptionKeyPairId;
         return this;
     }
 
@@ -148,6 +161,12 @@ public class Message implements Serializable {
         }
         else if (!encryptionAlgorithm.equals(other.encryptionAlgorithm))
             return false;
+        if (encryptionKeyPairId == null) {
+            if (other.encryptionKeyPairId != null)
+                return false;
+        }
+        else if (!encryptionKeyPairId.equals(other.encryptionKeyPairId))
+            return false;
         if (compressionAlgorithm == null) {
             if (other.compressionAlgorithm != null)
                 return false;
@@ -187,6 +206,7 @@ public class Message implements Serializable {
         int result = 1;
         result = prime * result + ((this.requestId == null) ? 0 : this.requestId.hashCode());
         result = prime * result + ((this.encryptionAlgorithm == null) ? 0 : this.encryptionAlgorithm.hashCode());
+        result = prime * result + ((this.encryptionKeyPairId == null) ? 0 : this.encryptionKeyPairId.hashCode());
         result = prime * result + ((this.compressionAlgorithm == null) ? 0 : this.compressionAlgorithm.hashCode());
         result = prime * result + ((this.mics == null) ? 0 : Arrays.hashCode(this.mics));
         result = prime * result + ((this.isMdnRequested == null) ? 0 : this.isMdnRequested.hashCode());
@@ -201,6 +221,7 @@ public class Message implements Serializable {
 
         sb.append(requestId);
         sb.append(", ").append(encryptionAlgorithm);
+        sb.append(", ").append(encryptionKeyPairId);
         sb.append(", ").append(compressionAlgorithm);
         sb.append(", ").append(Arrays.toString(mics));
         sb.append(", ").append(isMdnRequested);
