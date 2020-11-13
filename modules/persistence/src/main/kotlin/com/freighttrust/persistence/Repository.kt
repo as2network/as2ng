@@ -77,7 +77,7 @@ interface RequestRepository : Repository<Request> {
     ctx: Repository.Context? = null
   ): Tuple3<Request, TradingChannel?, DispositionNotification?>?
 
-  suspend fun findRequestIdByMessageId(messageId: String, ctx: Repository.Context? = null): UUID?
+  suspend fun findRequestId(messageId: String, ctx: Repository.Context? = null): UUID?
 
   suspend fun setAsDeliveredTo(id: UUID, url: String, timestamp: Instant, ctx: Repository.Context? = null)
   suspend fun setAsFailed(id: UUID, message: String?, stackTrace: String, ctx: Repository.Context? = null)

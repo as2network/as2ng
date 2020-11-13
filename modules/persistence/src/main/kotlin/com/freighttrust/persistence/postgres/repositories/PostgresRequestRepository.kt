@@ -66,7 +66,7 @@ class PostgresRequestRepository(
     }
 
 
-  override suspend fun findRequestIdByMessageId(messageId: String, ctx: Repository.Context?): UUID? =
+  override suspend fun findRequestId(messageId: String, ctx: Repository.Context?): UUID? =
     coroutineScope {
       jooqContext(ctx)
         .select(REQUEST.ID)
