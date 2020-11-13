@@ -14,8 +14,7 @@ import java.security.Provider
 
 class DecryptionHandler(
   private val partnerRepository: TradingPartnerRepository,
-  private val keyPairRepository: KeyPairRepository,
-  private val securityProvider: Provider
+  private val keyPairRepository: KeyPairRepository
 ) : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -39,10 +38,7 @@ class DecryptionHandler(
             }
           ) ?: throw Error("Key pair not found for id = ${partner.keyPairId}")
 
-          val certificate = keyPair.certificate.toX509()
-          val privateKey = keyPair.privateKey.toPrivateKey()
-
-          ctx.as2Context = decrypt(certificate, privateKey)
+          ctx.as2Context = decrypt(keyPair)
         }
       }
 

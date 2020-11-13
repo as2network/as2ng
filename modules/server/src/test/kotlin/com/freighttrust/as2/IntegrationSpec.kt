@@ -545,6 +545,13 @@ class IntegrationSpec : FunSpec(), KoinTest {
       // we remove the - and / in the algo name to account for differences in representation between
       // as2-lib and bouncycastle
 
+      if(requestBuilder.settings.cryptAlgoID != null) {
+        // should be the receivers keypair id which in this case should be 2
+        encryptionKeyPairId shouldBe 2L
+      } else {
+        encryptionKeyPairId shouldBe null
+      }
+
       // TODO encryption algo
 //      encryptionAlgorithm
 //        ?.replace("-", "")

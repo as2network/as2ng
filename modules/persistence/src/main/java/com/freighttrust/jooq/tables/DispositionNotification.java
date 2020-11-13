@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class DispositionNotification extends TableImpl<DispositionNotificationRecord> {
 
-    private static final long serialVersionUID = -546859147;
+    private static final long serialVersionUID = -869350968;
 
     /**
      * The reference instance of <code>public.disposition_notification</code>
@@ -64,7 +64,7 @@ public class DispositionNotification extends TableImpl<DispositionNotificationRe
     /**
      * The column <code>public.disposition_notification.original_message_id</code>.
      */
-    public final TableField<DispositionNotificationRecord, String> ORIGINAL_MESSAGE_ID = createField(DSL.name("original_message_id"), org.jooq.impl.SQLDataType.VARCHAR(64), this, "");
+    public final TableField<DispositionNotificationRecord, String> ORIGINAL_MESSAGE_ID = createField(DSL.name("original_message_id"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
 
     /**
      * The column <code>public.disposition_notification.original_recipient</code>.

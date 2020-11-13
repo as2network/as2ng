@@ -44,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Request extends TableImpl<RequestRecord> {
 
-    private static final long serialVersionUID = 1627749746;
+    private static final long serialVersionUID = -300781222;
 
     /**
      * The reference instance of <code>public.request</code>
@@ -82,7 +82,7 @@ public class Request extends TableImpl<RequestRecord> {
     /**
      * The column <code>public.request.message_id</code>.
      */
-    public final TableField<RequestRecord, String> MESSAGE_ID = createField(DSL.name("message_id"), org.jooq.impl.SQLDataType.VARCHAR(64), this, "");
+    public final TableField<RequestRecord, String> MESSAGE_ID = createField(DSL.name("message_id"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
 
     /**
      * The column <code>public.request.subject</code>.
@@ -117,7 +117,7 @@ public class Request extends TableImpl<RequestRecord> {
     /**
      * The column <code>public.request.error_message</code>.
      */
-    public final TableField<RequestRecord, String> ERROR_MESSAGE = createField(DSL.name("error_message"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+    public final TableField<RequestRecord, String> ERROR_MESSAGE = createField(DSL.name("error_message"), org.jooq.impl.SQLDataType.VARCHAR(512), this, "");
 
     /**
      * The column <code>public.request.error_stack_trace</code>.

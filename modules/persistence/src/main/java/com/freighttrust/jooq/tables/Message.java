@@ -18,7 +18,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row7;
+import org.jooq.Row8;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Message extends TableImpl<MessageRecord> {
 
-    private static final long serialVersionUID = 1821680026;
+    private static final long serialVersionUID = -1719785207;
 
     /**
      * The reference instance of <code>public.message</code>
@@ -64,7 +64,12 @@ public class Message extends TableImpl<MessageRecord> {
     /**
      * The column <code>public.message.encryption_algorithm</code>.
      */
-    public final TableField<MessageRecord, String> ENCRYPTION_ALGORITHM = createField(DSL.name("encryption_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(16), this, "");
+    public final TableField<MessageRecord, String> ENCRYPTION_ALGORITHM = createField(DSL.name("encryption_algorithm"), org.jooq.impl.SQLDataType.VARCHAR(32), this, "");
+
+    /**
+     * The column <code>public.message.encryption_key_pair_id</code>.
+     */
+    public final TableField<MessageRecord, Long> ENCRYPTION_KEY_PAIR_ID = createField(DSL.name("encryption_key_pair_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.message.compression_algorithm</code>.
@@ -175,11 +180,11 @@ public class Message extends TableImpl<MessageRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row7 type methods
+    // Row8 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row7<UUID, String, String, String[], Boolean, Boolean, String> fieldsRow() {
-        return (Row7) super.fieldsRow();
+    public Row8<UUID, String, Long, String, String[], Boolean, Boolean, String> fieldsRow() {
+        return (Row8) super.fieldsRow();
     }
 }
