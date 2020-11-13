@@ -102,7 +102,7 @@ create table request
     headers             jsonb,
     body_file_id        bigint                       not null,
 
-    message_id          varchar(64) unique,
+    message_id          varchar(128) unique,
     subject             varchar(128),
 
     trading_channel_id  bigint references trading_channel (id),
@@ -113,7 +113,7 @@ create table request
     delivered_at        timestamptz                  null,
     delivered_to        varchar(128)                 null,
 
-    error_message       varchar(128)                 null,
+    error_message       varchar(512)                 null,
     error_stack_trace   text                         null
 );
 
@@ -143,7 +143,7 @@ create table disposition_notification
 (
     request_id           uuid primary key references request (id),
 
-    original_message_id  varchar(64) references request(message_id),
+    original_message_id  varchar(128) references request(message_id),
     original_recipient   varchar(64),
     final_recipient      varchar(64),
     reporting_ua         varchar(64),

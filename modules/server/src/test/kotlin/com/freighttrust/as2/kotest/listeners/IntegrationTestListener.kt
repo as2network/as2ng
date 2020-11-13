@@ -248,7 +248,7 @@ class IntegrationTestListener(
       settings.setPartnershipName("${sender.name} to ${recipient.name}")
       settings.setReceiverData(recipient.as2Identifier, recipient.name, "http://localhost:8080/message")
       settings.messageIDFormat =
-        "as2-lib-\$date.uuuuMMdd-HHmmssZ\$-\$rand.1234\$@\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
+        "as2-lib-\$date.uuuuMMdd-HHmmssZ\$-\$rand.123456789\$@\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
       return this
     }
 

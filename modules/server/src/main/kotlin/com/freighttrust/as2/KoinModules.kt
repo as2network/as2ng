@@ -54,7 +54,7 @@ val As2ExchangeServerModule = module {
   single { DecompressionHandler() }
   single { DecryptionHandler(get(), get(), get()) }
   single { MdnReceivedHandler(get(), get(), get()) }
-  single { MessageReceivedHandler(get()) }
+  single { MessageReceivedHandler(get(), get()) }
   single { FailureHandler(get(), get(), get(), get(), get(), get()) }
   single { SignatureVerificationHandler() }
   single { MicVerificationHandler() }
