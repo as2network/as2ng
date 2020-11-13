@@ -26,7 +26,7 @@ class MdnReceivedHandler(
 
     // TODO handle error better
 
-    val originalRequestId = requestRepository.findRequestIdByMessageId(notification.originalMessageId)
+    val originalRequestId = requestRepository.findRequestId(notification.originalMessageId)
       ?: throw Error("Could not find original request id")
 
     val originalMessageRecord = requestRepository.transaction { tx ->

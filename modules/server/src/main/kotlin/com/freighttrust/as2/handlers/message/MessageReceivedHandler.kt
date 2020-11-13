@@ -1,12 +1,16 @@
 package com.freighttrust.as2.handlers.message
 
+import com.freighttrust.as2.domain.Disposition
+import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.as2Context
 import com.freighttrust.jooq.tables.pojos.Message
 import com.freighttrust.persistence.MessageRepository
+import com.freighttrust.persistence.RequestRepository
 import io.vertx.ext.web.RoutingContext
 
 class MessageReceivedHandler(
+  private val requestRepository: RequestRepository,
   private val messageRepository: MessageRepository
 ) : CoroutineRouteHandler() {
 

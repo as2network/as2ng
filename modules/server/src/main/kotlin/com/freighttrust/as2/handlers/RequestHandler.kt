@@ -28,7 +28,7 @@ import java.security.Provider
 import java.time.OffsetDateTime
 
 val RoutingContext.hasAs2Message
-get() = get<AS2Message?>(CTX_AS2) != null
+  get() = get<AS2Message?>(CTX_AS2) != null
 
 var RoutingContext.as2Context: As2RequestContext
   get() = get(CTX_AS2)
@@ -98,22 +98,36 @@ class As2RequestHandler(
         val key = uuidGenerator.generate().toString()
         val fileRecord = fileRepository.insert(key, dataHandler)
 
-        val requestRecord = requestRepository.insert(
-          Request()
-            .apply {
-              this.id = uuidGenerator.generate()
-              this.type = when (messageType) {
-                As2RequestType.Message -> message
-                As2RequestType.DispositionNotification -> mdn
-              }
-              this.tradingChannelId = tradingChannelRecord.id
-              this.messageId = messageId
-              this.subject = request.getAS2Header(AS2Header.Subject)
-              this.receivedAt = OffsetDateTime.now()
-              this.headers = JSONObject(request.headers().toMap()).toJSONB()
-              this.bodyFileId = fileRecord.id
-            }
-        )
+        val requestRecord = requestRepository.transaction { tx ->
+
+          // check there is not a request already in the database with the same message id
+          // message id is supposed to be globally unique
+
+          val existingRequestId = requestRepository.findRequestId(messageId, tx)
+          if (existingRequestId != null) throw DispositionException(
+            Disposition.automaticError("Message id is not unique and has already been received")
+          )
+
+          requestRepository.insert(
+            Request()
+              .apply {
+                this.id = uuidGenerator.generate()
+                this.type = when (messageType) {
+                  As2RequestType.Message -> message
+                  As2RequestType.DispositionNotification -> mdn
+                }
+                this.tradingChannelId = tradingChannelRecord.id
+                this.messageId = messageId
+                this.subject = request.getAS2Header(AS2Header.Subject)
+                this.receivedAt = OffsetDateTime.now()
+                this.headers = JSONObject(request.headers().toMap()).toJSONB()
+                this.bodyFileId = fileRecord.id
+              },
+            tx
+          )
+
+        }
+
 
         // set message on the routing context
 
