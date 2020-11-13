@@ -57,6 +57,7 @@ interface TradingChannelRepository : Repository<TradingChannel> {
 }
 
 interface TradingPartnerRepository : Repository<TradingPartner> {
+  suspend fun findById(id: Long, withKeyPair: Boolean = false, ctx: Repository.Context? = null): Pair<TradingPartner, KeyPair?>?
   suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingPartner?
 }
 
