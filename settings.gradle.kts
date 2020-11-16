@@ -10,6 +10,7 @@ pluginManagement {
 rootProject.name = "as2ng"
 
 include(":modules:common")
+include(":modules:testing")
 include(":modules:crypto")
 include(":modules:persistence")
 include(":modules:server")

@@ -7,12 +7,8 @@ import com.freighttrust.as2.ext.isSigned
 import com.freighttrust.as2.ext.verifiedContent
 import com.freighttrust.as2.kotest.listeners.IntegrationTestListener
 import com.freighttrust.as2.kotest.listeners.IntegrationTestListener.As2RequestBuilder
-import com.freighttrust.as2.kotest.listeners.LocalStackListener
-import com.freighttrust.as2.kotest.listeners.MigrationsListener
-import com.freighttrust.as2.kotest.listeners.SystemPropertyListener
 import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
 import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
-import com.freighttrust.as2.kotest.listeners.VaultListener
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.common.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
@@ -25,6 +21,10 @@ import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.local.LocalPersistenceModule
 import com.freighttrust.persistence.postgres.PostgresPersistenceModule
 import com.freighttrust.persistence.s3.S3PersistenceModule
+import com.freighttrust.testing.kotest.FlywayTestListener
+import com.freighttrust.testing.kotest.PostgresTestListener
+import com.freighttrust.testing.kotest.S3TestListener
+import com.freighttrust.testing.kotest.VaultTestListener
 import com.helger.as2lib.client.AS2ClientResponse
 import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
@@ -33,7 +33,6 @@ import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.disposition.DispositionOptions.IMPORTANCE_REQUIRED
 import io.kotest.core.spec.Spec
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.extensions.testcontainers.perSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.property.Exhaustive
@@ -52,11 +51,6 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.testcontainers.Testcontainers
-import org.testcontainers.containers.BindMode
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.containers.localstack.LocalStackContainer
-import org.testcontainers.containers.localstack.LocalStackContainer.Service.S3
-import org.testcontainers.vault.VaultContainer
 import java.util.concurrent.TimeUnit
 
 enum class RequestStyle {
@@ -64,26 +58,6 @@ enum class RequestStyle {
 }
 
 class IntegrationSpec : FunSpec(), KoinTest {
-
-  val localStack = LocalStackContainer()
-    .withServices(S3)
-
-  val vault = VaultContainer<Nothing>("vault:1.4.3")
-    .apply {
-      withVaultToken("root")
-      withClasspathResourceMapping(
-        "/vault/init.sh",
-        "/opt/init.sh",
-        BindMode.READ_ONLY
-      )
-    }
-
-  val postgres = PostgreSQLContainer<Nothing>("postgres:12")
-    .apply {
-      withUsername("test")
-      withPassword("test")
-      withDatabaseName("test")
-    }
 
   val mdnServer = MockWebServer()
     .apply {
@@ -111,15 +85,21 @@ class IntegrationSpec : FunSpec(), KoinTest {
     // this allows the as2 servers to reach the exchange server
     Testcontainers.exposeHostPorts(8080)
 
-    listener(localStack.perSpec())
-    listener(vault.perSpec())
-    listener(postgres.perSpec())
-    listener(MigrationsListener(postgres))
-    listener(VaultListener(vault))
-    listener(SystemPropertyListener(postgres, localStack, vault))
-    listener(LocalStackListener(localStack))
+    // override the host that the as2 server is configured with
+    System.setProperty("http.host", "host.testcontainers.internal")
 
-    val setupListener = listener(
+    // kotest listeners for managing dependent services and config overrides
+
+    listener(S3TestListener("integration-spec"))
+    listener(VaultTestListener())
+
+    PostgresTestListener()
+      .apply {
+        listener(this)
+        listener(FlywayTestListener(this.container))
+      }
+
+    val testListener = listener(
       IntegrationTestListener(
         listOf(
           AppConfigModule,
@@ -145,7 +125,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
     val cryptoAlgorithms = ECryptoAlgorithmCrypt.values().toList().exhaustive()
     val signingAlgorithms = ECryptoAlgorithmSign.values().toList().exhaustive()
 
-    with(setupListener) {
+    with(testListener) {
 
       test("1. Send un-encrypted data and do not request a receipt") {
 
