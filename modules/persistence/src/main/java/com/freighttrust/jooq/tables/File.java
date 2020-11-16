@@ -6,6 +6,7 @@ package com.freighttrust.jooq.tables;
 
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
+import com.freighttrust.jooq.enums.FileProvider;
 import com.freighttrust.jooq.tables.records.FileRecord;
 
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import javax.annotation.processing.Generated;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Identity;
+import org.jooq.JSONB;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Row3;
@@ -41,7 +43,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class File extends TableImpl<FileRecord> {
 
-    private static final long serialVersionUID = 44945742;
+    private static final long serialVersionUID = -1006293322;
 
     /**
      * The reference instance of <code>public.file</code>
@@ -62,14 +64,14 @@ public class File extends TableImpl<FileRecord> {
     public final TableField<FileRecord, Long> ID = createField(DSL.name("id"), org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaultValue(org.jooq.impl.DSL.field("nextval('file_id_seq'::regclass)", org.jooq.impl.SQLDataType.BIGINT)), this, "");
 
     /**
-     * The column <code>public.file.bucket</code>.
+     * The column <code>public.file.provider</code>.
      */
-    public final TableField<FileRecord, String> BUCKET = createField(DSL.name("bucket"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+    public final TableField<FileRecord, FileProvider> PROVIDER = createField(DSL.name("provider"), org.jooq.impl.SQLDataType.VARCHAR.asEnumDataType(com.freighttrust.jooq.enums.FileProvider.class), this, "");
 
     /**
-     * The column <code>public.file.key</code>.
+     * The column <code>public.file.metadata</code>.
      */
-    public final TableField<FileRecord, String> KEY = createField(DSL.name("key"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+    public final TableField<FileRecord, JSONB> METADATA = createField(DSL.name("metadata"), org.jooq.impl.SQLDataType.JSONB, this, "");
 
     /**
      * Create a <code>public.file</code> table reference
@@ -121,7 +123,7 @@ public class File extends TableImpl<FileRecord> {
 
     @Override
     public List<UniqueKey<FileRecord>> getKeys() {
-        return Arrays.<UniqueKey<FileRecord>>asList(Keys.FILE_PKEY, Keys.FILE_BUCKET_KEY_KEY);
+        return Arrays.<UniqueKey<FileRecord>>asList(Keys.FILE_PKEY, Keys.FILE_PROVIDER_METADATA_KEY);
     }
 
     @Override
@@ -155,7 +157,7 @@ public class File extends TableImpl<FileRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Row3<Long, String, String> fieldsRow() {
+    public Row3<Long, FileProvider, JSONB> fieldsRow() {
         return (Row3) super.fieldsRow();
     }
 }

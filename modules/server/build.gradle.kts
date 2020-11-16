@@ -100,6 +100,8 @@ dependencies {
   implementation("com.fasterxml.uuid:java-uuid-generator")
   implementation("com.helger.as2:as2-server")
 
+  implementation("org.apache.tika:tika-core")
+
   implementation("com.google.guava:guava")
 
   implementation("io.vertx:vertx-core")

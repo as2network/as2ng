@@ -18,14 +18,14 @@ class SystemPropertyListener(
     System.setProperty("http.host", "host.testcontainers.internal")
 
     val jdbcUrl = "jdbc:postgresql://${postgres.host}:${postgres.firstMappedPort}/test?user=test&password=test"
-    System.setProperty("postgres.jdbcUrl", jdbcUrl)
+    System.setProperty("persistence.postgres.jdbcUrl", jdbcUrl)
 
     with(localStack.getEndpointConfiguration(LocalStackContainer.Service.S3)) {
-      System.setProperty("s3.endpoint.serviceEndpoint", serviceEndpoint)
-      System.setProperty("s3.endpoint.signingRegion", signingRegion)
+      System.setProperty("persistence.s3.endpoint.serviceEndpoint", serviceEndpoint)
+      System.setProperty("persistence.s3.endpoint.signingRegion", signingRegion)
     }
 
-    System.setProperty("s3.bucket", "integration-test")
+    System.setProperty("persistence.s3.bucket", "integration-test")
 
     System.setProperty("vault.issueUrl", "http://${vault.host}:${vault.firstMappedPort}/v1/pki_int/issue/freighttrust-dot-com")
 

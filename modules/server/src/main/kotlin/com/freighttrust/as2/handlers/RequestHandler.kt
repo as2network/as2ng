@@ -17,12 +17,13 @@ import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.jooq.enums.RequestType.mdn
 import com.freighttrust.jooq.enums.RequestType.message
 import com.freighttrust.jooq.tables.pojos.Request
-import com.freighttrust.persistence.FileRepository
+import com.freighttrust.persistence.FileService
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.extensions.toJSONB
 import com.helger.as2lib.message.AS2Message
 import io.vertx.ext.web.RoutingContext
+import org.apache.tika.mime.MimeTypes
 import org.jooq.tools.json.JSONObject
 import java.security.Provider
 import java.time.OffsetDateTime
@@ -40,12 +41,14 @@ class As2RequestHandler(
   private val uuidGenerator: TimeBasedGenerator,
   private val tradingChannelRepository: TradingChannelRepository,
   private val requestRepository: RequestRepository,
-  private val fileRepository: FileRepository,
+  private val fileService: FileService,
   private val securityProvider: Provider
 ) : CoroutineRouteHandler() {
 
   companion object {
     const val CTX_AS2 = "As2Context"
+
+    val mimeTypes = MimeTypes.getDefaultMimeTypes()
   }
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -95,8 +98,8 @@ class As2RequestHandler(
         val dataHandler = body.dataHandler
         val messageId = request.getAS2Header(AS2Header.MessageId)
 
-        val key = uuidGenerator.generate().toString()
-        val fileRecord = fileRepository.insert(key, dataHandler)
+        val bodyPath = "request_body/${uuidGenerator.generate()}"
+        val fileRecord = fileService.writeToFile(bodyPath, dataHandler)
 
         val requestRecord = requestRepository.transaction { tx ->
 

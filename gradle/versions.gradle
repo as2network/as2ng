@@ -110,11 +110,12 @@ dependencyManagement {
 
 
     // ------------------------------------------------------------------
-    // Tooling
+    // Tooling & Utility
     // ------------------------------------------------------------------
 
     dependency 'info.picocli:picocli:4.5.1'
     dependency 'com.bettercloud:vault-java-driver:5.1.0'
+    dependency 'org.apache.tika:tika-core:1.24.1'
 
     // ------------------------------------------------------------------
     // Testing

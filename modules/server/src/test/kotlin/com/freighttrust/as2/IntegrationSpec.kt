@@ -22,8 +22,9 @@ import com.freighttrust.jooq.tables.pojos.Message
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.persistence.RequestRepository
-import com.freighttrust.persistence.postgres.PostgresModule
-import com.freighttrust.persistence.s3.S3Module
+import com.freighttrust.persistence.local.LocalPersistenceModule
+import com.freighttrust.persistence.postgres.PostgresPersistenceModule
+import com.freighttrust.persistence.s3.S3PersistenceModule
 import com.helger.as2lib.client.AS2ClientResponse
 import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
@@ -122,8 +123,9 @@ class IntegrationSpec : FunSpec(), KoinTest {
       IntegrationTestListener(
         listOf(
           AppConfigModule,
-          PostgresModule,
-          S3Module,
+          PostgresPersistenceModule,
+          S3PersistenceModule,
+          LocalPersistenceModule,
           VaultCryptoModule,
           As2ExchangeServerModule,
           module {
@@ -552,6 +554,9 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       // message should have been delivered
       request.deliveredAt shouldNotBe null
+
+      // should be a file reference
+      request.bodyFileId shouldNotBe null
     }
 
     with(requireNotNull(tradingChannel)) {

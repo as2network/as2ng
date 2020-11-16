@@ -85,9 +85,6 @@ interface RequestRepository : Repository<Request> {
 }
 
 
-interface FileRepository : Repository<File> {
+interface FileRepository : Repository<File>
 
-  suspend fun insert(key: String, dataHandler: DataHandler, ctx: Repository.Context? = null): File
-
-}
 

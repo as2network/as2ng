@@ -9,9 +9,9 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.freighttrust.as2.cli.json.TsTzRangeSerializer
 import com.freighttrust.common.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
-import com.freighttrust.persistence.postgres.PostgresModule
+import com.freighttrust.persistence.postgres.PostgresPersistenceModule
 import com.freighttrust.persistence.postgres.bindings.TsTzRange
-import com.freighttrust.persistence.s3.S3Module
+import com.freighttrust.persistence.s3.S3PersistenceModule
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import picocli.CommandLine
@@ -35,7 +35,7 @@ private fun koinExecutionStrategy(parseResult: CommandLine.ParseResult): Int {
   // ensure koin di has started up before command execution
   startKoin {
     modules(
-      AppConfigModule, PostgresModule, S3Module, VaultCryptoModule,
+      AppConfigModule, PostgresPersistenceModule, S3PersistenceModule, VaultCryptoModule,
       module {
         factory {
           ObjectMapper()

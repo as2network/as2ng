@@ -21,7 +21,7 @@ class LocalStackListener(
       .build();
 
     withContext(Dispatchers.IO) {
-      client.createBucket(System.getProperty("s3.bucket"));
+      client.createBucket(System.getProperty("persistence.s3.bucket"));
     }
 
   }

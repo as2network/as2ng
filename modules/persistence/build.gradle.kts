@@ -25,6 +25,19 @@ dependencies {
   api("org.jooq:jooq")
   api("com.zaxxer:HikariCP")
   api("org.flywaydb:flyway-core")
+
+  testImplementation("io.kotest:kotest-runner-junit5")
+  testImplementation("io.kotest:kotest-assertions-core")
+  testImplementation("io.kotest:kotest-property")
+  testImplementation("io.kotest:kotest-extensions-koin")
+  testImplementation("io.kotest:kotest-extensions-testcontainers")
+
+  testImplementation("org.testcontainers:testcontainers")
+  testImplementation("org.testcontainers:postgresql")
+  testImplementation("org.testcontainers:localstack")
+
+  testImplementation("com.amazonaws:aws-java-sdk-s3")
+
 }
 
 tasks {
