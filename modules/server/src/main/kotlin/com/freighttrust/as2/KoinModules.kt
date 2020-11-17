@@ -71,7 +71,17 @@ val As2ExchangeServerModule = module {
 
   single { WebClient.create(get()) }
 
-  single<FileService> { get<S3FileService>() }
+  single {
+
+    val config = get<Config>(_q("app"))
+
+    // configurable file service
+    when(val provider = config.getString("fileService")) {
+      "s3" -> get<S3FileService>()
+      "local" -> get<LocalFileService>()
+      else -> throw IllegalArgumentException("Unknown file persistence provider: $provider")
+    }
+  }
 }
 
 val HttpModule = module {
