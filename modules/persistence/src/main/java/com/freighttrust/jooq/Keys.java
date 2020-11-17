@@ -82,7 +82,9 @@ public class Keys {
     public static final ForeignKey<RequestRecord, TradingChannelRecord> REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY;
     public static final ForeignKey<RequestRecord, RequestRecord> REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY = ForeignKeys0.REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY;
     public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY = ForeignKeys0.TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY;
+    public static final ForeignKey<TradingChannelRecord, KeyPairRecord> TRADING_CHANNEL__TRADING_CHANNEL_SENDER_SIGNATURE_KEY_PAIR_ID_FKEY = ForeignKeys0.TRADING_CHANNEL__TRADING_CHANNEL_SENDER_SIGNATURE_KEY_PAIR_ID_FKEY;
     public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY = ForeignKeys0.TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY;
+    public static final ForeignKey<TradingChannelRecord, KeyPairRecord> TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ENCRYPTION_KEY_PAIR_ID_FKEY = ForeignKeys0.TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ENCRYPTION_KEY_PAIR_ID_FKEY;
     public static final ForeignKey<TradingPartnerRecord, KeyPairRecord> TRADING_PARTNER__TRADING_PARTNER_KEY_PAIR_ID_FKEY = ForeignKeys0.TRADING_PARTNER__TRADING_PARTNER_KEY_PAIR_ID_FKEY;
 
     // -------------------------------------------------------------------------
@@ -120,7 +122,9 @@ public class Keys {
         public static final ForeignKey<RequestRecord, TradingChannelRecord> REQUEST__REQUEST_TRADING_CHANNEL_ID_FKEY = Internal.createForeignKey(Keys.TRADING_CHANNEL_PKEY, Request.REQUEST, "request_trading_channel_id_fkey", new TableField[] { Request.REQUEST.TRADING_CHANNEL_ID }, true);
         public static final ForeignKey<RequestRecord, RequestRecord> REQUEST__REQUEST_ORIGINAL_REQUEST_ID_FKEY = Internal.createForeignKey(Keys.REQUEST_PKEY, Request.REQUEST, "request_original_request_id_fkey", new TableField[] { Request.REQUEST.ORIGINAL_REQUEST_ID }, true);
         public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_SENDER_ID_FKEY = Internal.createForeignKey(Keys.TRADING_PARTNER_PKEY, TradingChannel.TRADING_CHANNEL, "trading_channel_sender_id_fkey", new TableField[] { TradingChannel.TRADING_CHANNEL.SENDER_ID }, true);
+        public static final ForeignKey<TradingChannelRecord, KeyPairRecord> TRADING_CHANNEL__TRADING_CHANNEL_SENDER_SIGNATURE_KEY_PAIR_ID_FKEY = Internal.createForeignKey(Keys.KEY_PAIR_PKEY, TradingChannel.TRADING_CHANNEL, "trading_channel_sender_signature_key_pair_id_fkey", new TableField[] { TradingChannel.TRADING_CHANNEL.SENDER_SIGNATURE_KEY_PAIR_ID }, true);
         public static final ForeignKey<TradingChannelRecord, TradingPartnerRecord> TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ID_FKEY = Internal.createForeignKey(Keys.TRADING_PARTNER_PKEY, TradingChannel.TRADING_CHANNEL, "trading_channel_recipient_id_fkey", new TableField[] { TradingChannel.TRADING_CHANNEL.RECIPIENT_ID }, true);
+        public static final ForeignKey<TradingChannelRecord, KeyPairRecord> TRADING_CHANNEL__TRADING_CHANNEL_RECIPIENT_ENCRYPTION_KEY_PAIR_ID_FKEY = Internal.createForeignKey(Keys.KEY_PAIR_PKEY, TradingChannel.TRADING_CHANNEL, "trading_channel_recipient_encryption_key_pair_id_fkey", new TableField[] { TradingChannel.TRADING_CHANNEL.RECIPIENT_ENCRYPTION_KEY_PAIR_ID }, true);
         public static final ForeignKey<TradingPartnerRecord, KeyPairRecord> TRADING_PARTNER__TRADING_PARTNER_KEY_PAIR_ID_FKEY = Internal.createForeignKey(Keys.KEY_PAIR_PKEY, TradingPartner.TRADING_PARTNER, "trading_partner_key_pair_id_fkey", new TableField[] { TradingPartner.TRADING_PARTNER.KEY_PAIR_ID }, true);
     }
 }

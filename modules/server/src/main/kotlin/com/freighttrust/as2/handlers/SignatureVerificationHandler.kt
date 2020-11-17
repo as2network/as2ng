@@ -20,31 +20,40 @@ class SignatureVerificationHandler(
 
       try {
 
-        // check if there is a certificate in the request body otherwise fallback to the db configured KeyPair for the sender
-
-        var certificate = body.signatureCertificateFromBody(ctx.tempFileHelper, securityProvider)
-
-        if(certificate == null) {
-          withLogger(SignatureVerificationHandler::class) {
-            info("Certificate not found within request body, falling back to database config")
+        // check if there is a certificate in the request body
+        var certificate = body
+          .signatureCertificateFromBody(ctx.tempFileHelper, securityProvider)
+          ?.apply {
+            withLogger(SignatureVerificationHandler::class) {
+              info("Certificate found within request body")
+            }
           }
 
-          certificate = partnerRepository
-            .findById(records.tradingChannel.senderId, withKeyPair = true)
-            ?.second?.certificate?.toX509()
-            ?: throw Error("Could not load key pair for trading partner from database")
-        } else {
-          withLogger(SignatureVerificationHandler::class) {
-            info("Certificate found within request body")
+        // fallback to keypair configured for the trading channel
+        certificate = certificate ?: records.signatureKeyPair?.certificate?.toX509()
+          ?.apply {
+            withLogger(SignatureVerificationHandler::class) {
+              info("Certificate found for trading channel")
+            }
           }
-        }
+
+        // fallback to keypair configured for the trading partner
+        certificate = certificate ?: partnerRepository
+          .findById(records.tradingChannel.senderId, withKeyPair = true)
+          ?.second?.certificate?.toX509()
+          ?.apply {
+            withLogger(SignatureVerificationHandler::class) {
+              info("Certificate found for trading partner")
+            }
+          }
+
+        if (certificate == null) throw Error("Could not find a certificate to verify the signature with")
 
         ctx.as2Context = verify(certificate)
 
         withLogger(SignatureVerificationHandler::class) {
           info("Successfully verified signature of incoming AS2 message")
         }
-
 
         ctx.next()
       } catch (ex: Exception) {

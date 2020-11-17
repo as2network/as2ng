@@ -15,7 +15,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row8;
+import org.jooq.Row10;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -37,7 +37,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord> {
 
-    private static final long serialVersionUID = 1136369149;
+    private static final long serialVersionUID = 1939268048;
 
     /**
      * The reference instance of <code>public.trading_channel_history</code>
@@ -73,6 +73,11 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     public final TableField<TradingChannelHistoryRecord, String> SENDER_AS2_IDENTIFIER = createField(DSL.name("sender_as2_identifier"), org.jooq.impl.SQLDataType.VARCHAR(64), this, "");
 
     /**
+     * The column <code>public.trading_channel_history.sender_signature_key_pair_id</code>.
+     */
+    public final TableField<TradingChannelHistoryRecord, Long> SENDER_SIGNATURE_KEY_PAIR_ID = createField(DSL.name("sender_signature_key_pair_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+    /**
      * The column <code>public.trading_channel_history.recipient_id</code>.
      */
     public final TableField<TradingChannelHistoryRecord, Long> RECIPIENT_ID = createField(DSL.name("recipient_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
@@ -86,6 +91,11 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
      * The column <code>public.trading_channel_history.recipient_message_url</code>.
      */
     public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), org.jooq.impl.SQLDataType.VARCHAR(128), this, "");
+
+    /**
+     * The column <code>public.trading_channel_history.recipient_encryption_key_pair_id</code>.
+     */
+    public final TableField<TradingChannelHistoryRecord, Long> RECIPIENT_ENCRYPTION_KEY_PAIR_ID = createField(DSL.name("recipient_encryption_key_pair_id"), org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.trading_channel_history.validity</code>.
@@ -157,11 +167,11 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     }
 
     // -------------------------------------------------------------------------
-    // Row8 type methods
+    // Row10 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<Long, String, Long, String, Long, String, String, TsTzRange> fieldsRow() {
-        return (Row8) super.fieldsRow();
+    public Row10<Long, String, Long, String, Long, Long, String, String, Long, TsTzRange> fieldsRow() {
+        return (Row10) super.fieldsRow();
     }
 }

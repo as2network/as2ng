@@ -66,7 +66,7 @@ class As2RequestHandler(
         // TODO validate as2 headers before continuing
 
         // lookup trading channel
-        val tradingChannelRecord =
+        val (tradingChannelRecord, encryptionKeyPair, signatureKeyPair) =
           request.headers()
             .let { headers ->
 
@@ -86,7 +86,12 @@ class As2RequestHandler(
               }
 
               tradingChannelRepository
-                .findByAs2Identifiers(senderId, recipientId) ?: throw DispositionException(
+                .findByAs2Identifiers(
+                  senderId,
+                  recipientId,
+                  withEncryptionKeyPair = true,
+                  withSignatureKeyPair = true
+                ) ?: throw DispositionException(
                 Disposition.automaticFailure("Trading channel not found for provided AS2-From and AS2-To")
               )
             }
@@ -131,7 +136,6 @@ class As2RequestHandler(
 
         }
 
-
         // set message on the routing context
 
         As2RequestContext(
@@ -139,7 +143,7 @@ class As2RequestHandler(
           request.headers(),
           securityProvider,
           TempFileHelper(),
-          Records(requestRecord, tradingChannelRecord),
+          Records(requestRecord, tradingChannelRecord, encryptionKeyPair, signatureKeyPair),
           BodyContext(body)
         ).also { message -> ctx.put(CTX_AS2, message) }
 

@@ -50,13 +50,23 @@ interface MessageRepository : Repository<Message>
 interface DispositionNotificationRepository : Repository<DispositionNotification>
 
 interface TradingChannelRepository : Repository<TradingChannel> {
+
   suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingChannel?
-  suspend fun findByAs2Identifiers(senderId: String, recipientId: String, ctx: Repository.Context? = null): TradingChannel?
+
+  suspend fun findByAs2Identifiers(
+    senderId: String,
+    recipientId: String,
+    withEncryptionKeyPair: Boolean = false,
+    withSignatureKeyPair: Boolean = false,
+    ctx: Repository.Context? = null
+  ): Triple<TradingChannel, KeyPair?, KeyPair?>?
+
   suspend fun findBySenderId(senderId: Long, ctx: Repository.Context? = null): List<TradingChannel>
   suspend fun findByRecipientId(senderId: Long, ctx: Repository.Context? = null): List<TradingChannel>
 }
 
 interface TradingPartnerRepository : Repository<TradingPartner> {
+
   suspend fun findById(id: Long, withKeyPair: Boolean = false, ctx: Repository.Context? = null): Pair<TradingPartner, KeyPair?>?
   suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingPartner?
 }

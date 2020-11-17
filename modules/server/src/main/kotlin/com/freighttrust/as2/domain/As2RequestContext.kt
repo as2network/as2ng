@@ -46,6 +46,8 @@ enum class As2RequestType {
 data class Records(
   val request: Request,
   val tradingChannel: TradingChannel,
+  val encryptionKeyPair: KeyPair?,
+  val signatureKeyPair: KeyPair?,
   val originalMessage: MessageRecord? = null,
   val dispositionNotification: DispositionNotification? = null
 )

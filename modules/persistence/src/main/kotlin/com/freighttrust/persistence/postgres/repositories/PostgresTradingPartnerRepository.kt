@@ -35,12 +35,14 @@ class PostgresTradingPartnerRepository(
                         withKeyPair: Boolean
   ) = ctx
     .select().from(TRADING_PARTNER)
-    .let { query -> if (withKeyPair) query.rightJoin(KEY_PAIR).on(TRADING_PARTNER.KEY_PAIR_ID.eq(KEY_PAIR.ID)) else query }
+    .let { query -> if (withKeyPair) query.leftJoin(KEY_PAIR).on(TRADING_PARTNER.KEY_PAIR_ID.eq(KEY_PAIR.ID)) else query }
 
   override suspend fun findById(id: Long, withKeyPair: Boolean, ctx: Repository.Context?): Pair<TradingPartner, KeyPair?>? =
-    buildJoin(jooqContext(ctx), withKeyPair)
-      .where(KEY_PAIR.ID.eq(id))
-      .fetchOne(JoinMapper)
+    coroutineScope {
+      buildJoin(jooqContext(ctx), withKeyPair)
+        .where(KEY_PAIR.ID.eq(id))
+        .fetchOne(JoinMapper)
+    }
 
   object JoinMapper : RecordMapper<Record, Pair<TradingPartner, KeyPair?>> {
 

@@ -24,15 +24,17 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannel implements Serializable {
 
-    private static final long serialVersionUID = -677792448;
+    private static final long serialVersionUID = 27441903;
 
     private Long      id;
     private String    name;
     private Long      senderId;
     private String    senderAs2Identifier;
+    private Long      senderSignatureKeyPairId;
     private Long      recipientId;
     private String    recipientAs2Identifier;
     private String    recipientMessageUrl;
+    private Long      recipientEncryptionKeyPairId;
     private TsTzRange validity;
 
     public TradingChannel() {}
@@ -42,9 +44,11 @@ public class TradingChannel implements Serializable {
         this.name = value.name;
         this.senderId = value.senderId;
         this.senderAs2Identifier = value.senderAs2Identifier;
+        this.senderSignatureKeyPairId = value.senderSignatureKeyPairId;
         this.recipientId = value.recipientId;
         this.recipientAs2Identifier = value.recipientAs2Identifier;
         this.recipientMessageUrl = value.recipientMessageUrl;
+        this.recipientEncryptionKeyPairId = value.recipientEncryptionKeyPairId;
         this.validity = value.validity;
     }
 
@@ -53,18 +57,22 @@ public class TradingChannel implements Serializable {
         String    name,
         Long      senderId,
         String    senderAs2Identifier,
+        Long      senderSignatureKeyPairId,
         Long      recipientId,
         String    recipientAs2Identifier,
         String    recipientMessageUrl,
+        Long      recipientEncryptionKeyPairId,
         TsTzRange validity
     ) {
         this.id = id;
         this.name = name;
         this.senderId = senderId;
         this.senderAs2Identifier = senderAs2Identifier;
+        this.senderSignatureKeyPairId = senderSignatureKeyPairId;
         this.recipientId = recipientId;
         this.recipientAs2Identifier = recipientAs2Identifier;
         this.recipientMessageUrl = recipientMessageUrl;
+        this.recipientEncryptionKeyPairId = recipientEncryptionKeyPairId;
         this.validity = validity;
     }
 
@@ -104,6 +112,15 @@ public class TradingChannel implements Serializable {
         return this;
     }
 
+    public Long getSenderSignatureKeyPairId() {
+        return this.senderSignatureKeyPairId;
+    }
+
+    public TradingChannel setSenderSignatureKeyPairId(Long senderSignatureKeyPairId) {
+        this.senderSignatureKeyPairId = senderSignatureKeyPairId;
+        return this;
+    }
+
     public Long getRecipientId() {
         return this.recipientId;
     }
@@ -128,6 +145,15 @@ public class TradingChannel implements Serializable {
 
     public TradingChannel setRecipientMessageUrl(String recipientMessageUrl) {
         this.recipientMessageUrl = recipientMessageUrl;
+        return this;
+    }
+
+    public Long getRecipientEncryptionKeyPairId() {
+        return this.recipientEncryptionKeyPairId;
+    }
+
+    public TradingChannel setRecipientEncryptionKeyPairId(Long recipientEncryptionKeyPairId) {
+        this.recipientEncryptionKeyPairId = recipientEncryptionKeyPairId;
         return this;
     }
 
@@ -173,6 +199,12 @@ public class TradingChannel implements Serializable {
         }
         else if (!senderAs2Identifier.equals(other.senderAs2Identifier))
             return false;
+        if (senderSignatureKeyPairId == null) {
+            if (other.senderSignatureKeyPairId != null)
+                return false;
+        }
+        else if (!senderSignatureKeyPairId.equals(other.senderSignatureKeyPairId))
+            return false;
         if (recipientId == null) {
             if (other.recipientId != null)
                 return false;
@@ -191,6 +223,12 @@ public class TradingChannel implements Serializable {
         }
         else if (!recipientMessageUrl.equals(other.recipientMessageUrl))
             return false;
+        if (recipientEncryptionKeyPairId == null) {
+            if (other.recipientEncryptionKeyPairId != null)
+                return false;
+        }
+        else if (!recipientEncryptionKeyPairId.equals(other.recipientEncryptionKeyPairId))
+            return false;
         if (validity == null) {
             if (other.validity != null)
                 return false;
@@ -208,9 +246,11 @@ public class TradingChannel implements Serializable {
         result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
         result = prime * result + ((this.senderId == null) ? 0 : this.senderId.hashCode());
         result = prime * result + ((this.senderAs2Identifier == null) ? 0 : this.senderAs2Identifier.hashCode());
+        result = prime * result + ((this.senderSignatureKeyPairId == null) ? 0 : this.senderSignatureKeyPairId.hashCode());
         result = prime * result + ((this.recipientId == null) ? 0 : this.recipientId.hashCode());
         result = prime * result + ((this.recipientAs2Identifier == null) ? 0 : this.recipientAs2Identifier.hashCode());
         result = prime * result + ((this.recipientMessageUrl == null) ? 0 : this.recipientMessageUrl.hashCode());
+        result = prime * result + ((this.recipientEncryptionKeyPairId == null) ? 0 : this.recipientEncryptionKeyPairId.hashCode());
         result = prime * result + ((this.validity == null) ? 0 : this.validity.hashCode());
         return result;
     }
@@ -223,9 +263,11 @@ public class TradingChannel implements Serializable {
         sb.append(", ").append(name);
         sb.append(", ").append(senderId);
         sb.append(", ").append(senderAs2Identifier);
+        sb.append(", ").append(senderSignatureKeyPairId);
         sb.append(", ").append(recipientId);
         sb.append(", ").append(recipientAs2Identifier);
         sb.append(", ").append(recipientMessageUrl);
+        sb.append(", ").append(recipientEncryptionKeyPairId);
         sb.append(", ").append(validity);
 
         sb.append(")");

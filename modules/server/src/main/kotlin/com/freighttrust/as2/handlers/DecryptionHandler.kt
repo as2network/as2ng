@@ -2,19 +2,12 @@ package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.jooq.tables.pojos.KeyPair
-import com.freighttrust.jooq.tables.pojos.TradingPartner
-import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.TradingPartnerRepository
-import com.freighttrust.persistence.extensions.toPrivateKey
-import com.freighttrust.persistence.extensions.toX509
 import io.vertx.ext.web.RoutingContext
 import java.security.GeneralSecurityException
-import java.security.Provider
 
 class DecryptionHandler(
   private val partnerRepository: TradingPartnerRepository,
-  private val keyPairRepository: KeyPairRepository
 ) : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -24,22 +17,21 @@ class DecryptionHandler(
 
         if (!isBodyEncrypted) return ctx.next()
 
-        with(records.tradingChannel) {
+        var encryptionKeyPair = records.encryptionKeyPair
 
-          // todo replace with a join
+        if (encryptionKeyPair == null) {
+          // key pair has not been configured for this trading channel so we fallback to the default key pair
+          // defined for recipient
 
-          val partner = partnerRepository.findById(
-            TradingPartner().apply { id = recipientId }
+          val (_, keyPair) = partnerRepository.findById(
+            records.tradingChannel.recipientId,
+            withKeyPair = true
           ) ?: throw Error("Partner not found with id = $recipientId")
 
-          val keyPair = keyPairRepository.findById(
-            KeyPair().apply {
-              id = partner.keyPairId
-            }
-          ) ?: throw Error("Key pair not found for id = ${partner.keyPairId}")
-
-          ctx.as2Context = decrypt(keyPair)
+          encryptionKeyPair = requireNotNull(keyPair) { "Encryption keypair could not be determined" }
         }
+
+        ctx.as2Context = decrypt(encryptionKeyPair)
       }
 
       ctx.next()
