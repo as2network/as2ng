@@ -1,4 +1,4 @@
-package com.freighttrust.testing.kotest
+package com.freighttrust.testing.listeners
 
 import io.kotest.core.listeners.TestListener
 import io.kotest.core.spec.Spec

@@ -4,8 +4,8 @@
 package com.freighttrust.jooq.tables.records;
 
 
+import com.freighttrust.common.util.TsTzRange;
 import com.freighttrust.jooq.tables.TradingPartnerHistory;
-import com.freighttrust.persistence.postgres.bindings.TsTzRange;
 
 import javax.annotation.processing.Generated;
 
@@ -28,7 +28,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartnerHistoryRecord extends TableRecordImpl<TradingPartnerHistoryRecord> implements Record5<Long, String, String, Long, TsTzRange> {
 
-    private static final long serialVersionUID = -1915047712;
+    private static final long serialVersionUID = -557724297;
 
     /**
      * Setter for <code>public.trading_partner_history.id</code>.

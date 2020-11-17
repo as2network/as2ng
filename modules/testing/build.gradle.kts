@@ -28,6 +28,9 @@ dependencies {
 
   api("org.flywaydb:flyway-core")
 
+  api("com.github.javafaker:javafaker")
+  api("com.sun.mail:jakarta.mail")
+
   implementation("com.amazonaws:aws-java-sdk-s3")
 
 }

@@ -14,7 +14,7 @@ import java.io.FileOutputStream
 import javax.activation.DataHandler
 
 class LocalFileService(
-  private val baseDir: String,
+  val baseDir: String,
   private val fileRepository: FileRepository
 ) : FileService {
 
@@ -36,7 +36,7 @@ class LocalFileService(
         .let { contentLength ->
           com.freighttrust.jooq.tables.pojos.File()
             .apply {
-              provider = FileProvider.s3
+              provider = FileProvider.filesystem
               metadata = JSONB.valueOf(
                 JSONObject.toJSONString(
                   mapOf(

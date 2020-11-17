@@ -4,6 +4,7 @@ import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder
 import com.typesafe.config.Config
@@ -12,7 +13,7 @@ import org.koin.dsl.module
 
 val S3PersistenceModule = module {
 
-  single {
+  single<AmazonS3> {
 
     val config = get<Config>(named("app"))
       .getConfig("persistence.s3")

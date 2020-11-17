@@ -1,15 +1,9 @@
-package com.freighttrust.testing.kotest
+package com.freighttrust.testing.listeners
 
 import io.kotest.core.listeners.TestListener
 import io.kotest.core.spec.Spec
-import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.Wait
-import org.testcontainers.vault.VaultContainer
-import java.nio.charset.Charset
 
 class PostgresTestListener : TestListener {
 

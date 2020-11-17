@@ -21,10 +21,10 @@ import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.local.LocalPersistenceModule
 import com.freighttrust.persistence.postgres.PostgresPersistenceModule
 import com.freighttrust.persistence.s3.S3PersistenceModule
-import com.freighttrust.testing.kotest.FlywayTestListener
-import com.freighttrust.testing.kotest.PostgresTestListener
-import com.freighttrust.testing.kotest.S3TestListener
-import com.freighttrust.testing.kotest.VaultTestListener
+import com.freighttrust.testing.listeners.FlywayTestListener
+import com.freighttrust.testing.listeners.PostgresTestListener
+import com.freighttrust.testing.listeners.S3TestListener
+import com.freighttrust.testing.listeners.VaultTestListener
 import com.helger.as2lib.client.AS2ClientResponse
 import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign

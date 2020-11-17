@@ -13,6 +13,7 @@ dependencies {
   implementation(kotlin("stdlib"))
 
   implementation(project(":modules:common"))
+  implementation(project(":modules:serialisation"))
   implementation(project(":modules:crypto"))
 
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
@@ -26,17 +27,7 @@ dependencies {
   api("com.zaxxer:HikariCP")
   api("org.flywaydb:flyway-core")
 
-  testImplementation("io.kotest:kotest-runner-junit5")
-  testImplementation("io.kotest:kotest-assertions-core")
-  testImplementation("io.kotest:kotest-property")
-  testImplementation("io.kotest:kotest-extensions-koin")
-  testImplementation("io.kotest:kotest-extensions-testcontainers")
-
-  testImplementation("org.testcontainers:testcontainers")
-  testImplementation("org.testcontainers:postgresql")
-  testImplementation("org.testcontainers:localstack")
-
-  testImplementation("com.amazonaws:aws-java-sdk-s3")
+  testImplementation(project(":modules:testing"))
 
 }
 
@@ -79,7 +70,7 @@ jooqGenerator {
               .withInputSchema("public")
               .withForcedTypes(
                 ForcedType()
-                  .withUserType("com.freighttrust.persistence.postgres.bindings.TsTzRange")
+                  .withUserType("com.freighttrust.common.util.TsTzRange")
                   .withBinding("com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding")
                   .withIncludeTypes("tstzrange")
                   .withIncludeExpression(".*")

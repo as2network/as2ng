@@ -117,6 +117,9 @@ dependencyManagement {
     dependency 'com.bettercloud:vault-java-driver:5.1.0'
     dependency 'org.apache.tika:tika-core:1.24.1'
 
+    dependency 'com.sun.mail:jakarta.mail:1.6.5'
+    dependency 'com.github.javafaker:javafaker:1.0.2'
+
     // ------------------------------------------------------------------
     // Testing
     // ------------------------------------------------------------------
