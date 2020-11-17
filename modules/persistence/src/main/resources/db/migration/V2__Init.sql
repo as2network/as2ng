@@ -8,7 +8,7 @@ create table key_pair
     serial_number    varchar(60),
     certificate      varchar(4096),
     private_key      varchar(4096) null,
-    private_key_type varchar(16),
+    private_key_type varchar(16) null,
     issuing_ca       varchar(4096),
     ca_chain         varchar(4096)[],
     expires_at       timestamptz
