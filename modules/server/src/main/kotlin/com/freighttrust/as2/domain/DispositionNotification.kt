@@ -249,7 +249,7 @@ fun DispositionNotification.toMimeBodyPart(ctx: RoutingContext): MimeBodyPart =
 
         val includeHeaders = with(bodyContext) { wasEncrypted || wasSigned || wasCompressed }
 
-        signingAlgorithm?.apply {
+        signingAlgorithm.apply {
           val mic = body.calculateMic(includeHeaders, signingAlgorithm)
           setAs2Header(AS2Header.ReceivedContentMIC, mic)
         }

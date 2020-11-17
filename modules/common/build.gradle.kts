@@ -5,6 +5,7 @@ plugins {
 dependencies {
 
   api(kotlin("stdlib"))
+  api(kotlin("reflect"))
 
   api("io.arrow-kt:arrow-core")
   api("io.arrow-kt:arrow-generic")
