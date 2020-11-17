@@ -4,24 +4,19 @@ import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.client.builder.AwsClientBuilder
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder
-import com.freighttrust.persistence.s3.repositories.S3FileRepository
-import com.freighttrust.persistence.FileRepository
 import com.typesafe.config.Config
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
-val S3Module = module {
+val S3PersistenceModule = module {
 
-  single(named("s3")) {
+  single<AmazonS3> {
+
     val config = get<Config>(named("app"))
-    config.getConfig("s3")
-  }
-
-  single {
-
-    val config = get<Config>(named("s3"))
+      .getConfig("persistence.s3")
 
     AmazonS3ClientBuilder
       .standard()
@@ -56,8 +51,11 @@ val S3Module = module {
       .build()
   }
 
-  single<FileRepository> {
-    val config = get<Config>(named("s3"))
-    S3FileRepository(get(), get(), config.getString("bucket"))
+  single {
+
+    val config = get<Config>(named("app"))
+      .getConfig("persistence.s3")
+
+    S3FileService(get(), get(), config.getString("bucket"))
   }
 }

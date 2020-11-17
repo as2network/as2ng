@@ -1,5 +1,6 @@
 package com.freighttrust.persistence.postgres.bindings
 
+import com.freighttrust.common.util.TsTzRange
 import org.jooq.Binding
 import org.jooq.BindingGetResultSetContext
 import org.jooq.BindingGetSQLInputContext
@@ -16,18 +17,6 @@ import java.sql.Types
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.util.*
-
-data class TsTzRange(
-  val start: Instant? = null,
-  val end: Instant? = null,
-  val startInclusive: Boolean = true,
-  val endInclusive: Boolean = true
-) {
-
-  override fun toString(): String {
-    return super.toString()
-  }
-}
 
 fun String.fromTimestampWithZone(): Instant? =
   replace("\"", "")

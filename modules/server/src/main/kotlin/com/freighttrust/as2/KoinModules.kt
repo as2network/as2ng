@@ -15,6 +15,9 @@ import com.freighttrust.as2.handlers.mdn.MicVerificationHandler
 import com.freighttrust.as2.handlers.message.ForwardMessageHandler
 import com.freighttrust.as2.handlers.message.MessageReceivedHandler
 import com.freighttrust.as2.handlers.message.MicGenerationHandler
+import com.freighttrust.persistence.FileService
+import com.freighttrust.persistence.local.LocalFileService
+import com.freighttrust.persistence.s3.S3FileService
 import com.typesafe.config.Config
 import io.vertx.ext.web.client.WebClient
 import io.xlate.edi.stream.EDIInputFactory
@@ -67,6 +70,18 @@ val As2ExchangeServerModule = module {
   single { EDIValidationHandler(get()) }
 
   single { WebClient.create(get()) }
+
+  single {
+
+    val config = get<Config>(_q("app"))
+
+    // configurable file service
+    when(val provider = config.getString("fileService")) {
+      "s3" -> get<S3FileService>()
+      "local" -> get<LocalFileService>()
+      else -> throw IllegalArgumentException("Unknown file persistence provider: $provider")
+    }
+  }
 }
 
 val HttpModule = module {

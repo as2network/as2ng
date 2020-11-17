@@ -80,12 +80,14 @@ execute procedure versioning(
 /* File                                                                      */
 /*****************************************************************************/
 
+create type file_provider as enum ('filesystem', 's3');
+
 create table file
 (
     id     bigserial primary key,
-    bucket varchar(128),
-    key    varchar(128),
-    unique (bucket, key)
+    provider file_provider,
+    metadata jsonb,
+    unique (provider, metadata)
 );
 
 /*****************************************************************************/

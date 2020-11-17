@@ -4,11 +4,11 @@
 package com.freighttrust.jooq.tables;
 
 
+import com.freighttrust.common.util.TsTzRange;
 import com.freighttrust.jooq.Keys;
 import com.freighttrust.jooq.Public;
 import com.freighttrust.jooq.tables.records.TradingPartnerRecord;
 import com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding;
-import com.freighttrust.persistence.postgres.bindings.TsTzRange;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +43,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartner extends TableImpl<TradingPartnerRecord> {
 
-    private static final long serialVersionUID = -1038124932;
+    private static final long serialVersionUID = 1957934661;
 
     /**
      * The reference instance of <code>public.trading_partner</code>

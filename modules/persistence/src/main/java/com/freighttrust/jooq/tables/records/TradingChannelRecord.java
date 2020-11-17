@@ -4,8 +4,8 @@
 package com.freighttrust.jooq.tables.records;
 
 
+import com.freighttrust.common.util.TsTzRange;
 import com.freighttrust.jooq.tables.TradingChannel;
-import com.freighttrust.persistence.postgres.bindings.TsTzRange;
 
 import javax.annotation.processing.Generated;
 
@@ -29,7 +29,7 @@ import org.jooq.impl.UpdatableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannelRecord extends UpdatableRecordImpl<TradingChannelRecord> implements Record8<Long, String, Long, String, Long, String, String, TsTzRange> {
 
-    private static final long serialVersionUID = 734725745;
+    private static final long serialVersionUID = -1267559862;
 
     /**
      * Setter for <code>public.trading_channel.id</code>.

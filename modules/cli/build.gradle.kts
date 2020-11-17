@@ -14,6 +14,7 @@ dependencies {
   implementation("com.typesafe:config")
 
   implementation(project(":modules:common"))
+  implementation(project(":modules:serialisation"))
   implementation(project(":modules:persistence"))
   implementation(project(":modules:crypto"))
 

@@ -5,7 +5,6 @@ import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientSettings
 import com.helger.commons.io.resource.ClassPathResource
 import com.helger.security.keystore.EKeyStoreType
-import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import com.typesafe.config.Config
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -81,40 +80,5 @@ val As2LibModule = module {
         setReceiverData("OpenAS2B", "OpenAS2B", "http://localhost:8080/message")
         setPartnershipName("OpenAS2A-OpenAS2B")
       }
-  }
-}
-
-val EmbeddedPostgresModule = module(override = true) {
-
-  single(createdAtStart = true) {
-    EmbeddedPostgres.builder()
-      .start()
-      .also { db ->
-
-        // run the migrations first before anything else
-        FluentConfiguration()
-          .dataSource(db.postgresDatabase)
-          .locations("classpath:/db/migration")
-          .apply { Flyway(this).migrate() }
-      }
-  }
-
-  single<DataSource> {
-
-    val config = get<Config>(named("postgres"))
-    val embeddedPostgres = get<EmbeddedPostgres>()
-
-    val dataSourceConfig = HikariConfig()
-      .apply {
-        driverClassName = Driver::class.java.name
-        dataSource = embeddedPostgres.postgresDatabase
-        isAutoCommit = config.getBoolean("isAutoCommit")
-        maximumPoolSize = config.getInt("maximumPoolSize")
-        addDataSourceProperty("cachePrepStmts", config.getBoolean("cachePrepStmts"))
-        addDataSourceProperty("prepStmtCacheSize", config.getInt("prepStmtCacheSize"))
-        addDataSourceProperty("prepStmtCacheSqlLimit", config.getInt("prepStmtCacheSqlLimit"))
-      }
-
-    HikariDataSource(dataSourceConfig)
   }
 }

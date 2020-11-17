@@ -59,7 +59,7 @@ public class Keys {
 
     public static final UniqueKey<DispositionNotificationRecord> DISPOSITION_NOTIFICATION_PKEY = UniqueKeys0.DISPOSITION_NOTIFICATION_PKEY;
     public static final UniqueKey<FileRecord> FILE_PKEY = UniqueKeys0.FILE_PKEY;
-    public static final UniqueKey<FileRecord> FILE_BUCKET_KEY_KEY = UniqueKeys0.FILE_BUCKET_KEY_KEY;
+    public static final UniqueKey<FileRecord> FILE_PROVIDER_METADATA_KEY = UniqueKeys0.FILE_PROVIDER_METADATA_KEY;
     public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = UniqueKeys0.FLYWAY_SCHEMA_HISTORY_PK;
     public static final UniqueKey<KeyPairRecord> KEY_PAIR_PKEY = UniqueKeys0.KEY_PAIR_PKEY;
     public static final UniqueKey<MessageRecord> MESSAGE_PKEY = UniqueKeys0.MESSAGE_PKEY;
@@ -99,7 +99,7 @@ public class Keys {
     private static class UniqueKeys0 {
         public static final UniqueKey<DispositionNotificationRecord> DISPOSITION_NOTIFICATION_PKEY = Internal.createUniqueKey(DispositionNotification.DISPOSITION_NOTIFICATION, "disposition_notification_pkey", new TableField[] { DispositionNotification.DISPOSITION_NOTIFICATION.REQUEST_ID }, true);
         public static final UniqueKey<FileRecord> FILE_PKEY = Internal.createUniqueKey(File.FILE, "file_pkey", new TableField[] { File.FILE.ID }, true);
-        public static final UniqueKey<FileRecord> FILE_BUCKET_KEY_KEY = Internal.createUniqueKey(File.FILE, "file_bucket_key_key", new TableField[] { File.FILE.BUCKET, File.FILE.KEY }, true);
+        public static final UniqueKey<FileRecord> FILE_PROVIDER_METADATA_KEY = Internal.createUniqueKey(File.FILE, "file_provider_metadata_key", new TableField[] { File.FILE.PROVIDER, File.FILE.METADATA }, true);
         public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = Internal.createUniqueKey(FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, "flyway_schema_history_pk", new TableField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
         public static final UniqueKey<KeyPairRecord> KEY_PAIR_PKEY = Internal.createUniqueKey(KeyPair.KEY_PAIR, "key_pair_pkey", new TableField[] { KeyPair.KEY_PAIR.ID }, true);
         public static final UniqueKey<MessageRecord> MESSAGE_PKEY = Internal.createUniqueKey(Message.MESSAGE, "message_pkey", new TableField[] { Message.MESSAGE.REQUEST_ID }, true);

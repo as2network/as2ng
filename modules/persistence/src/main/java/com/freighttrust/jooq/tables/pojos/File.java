@@ -4,9 +4,13 @@
 package com.freighttrust.jooq.tables.pojos;
 
 
+import com.freighttrust.jooq.enums.FileProvider;
+
 import java.io.Serializable;
 
 import javax.annotation.processing.Generated;
+
+import org.jooq.JSONB;
 
 
 /**
@@ -22,28 +26,28 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class File implements Serializable {
 
-    private static final long serialVersionUID = -2109849637;
+    private static final long serialVersionUID = 111503417;
 
-    private Long   id;
-    private String bucket;
-    private String key;
+    private Long         id;
+    private FileProvider provider;
+    private JSONB        metadata;
 
     public File() {}
 
     public File(File value) {
         this.id = value.id;
-        this.bucket = value.bucket;
-        this.key = value.key;
+        this.provider = value.provider;
+        this.metadata = value.metadata;
     }
 
     public File(
-        Long   id,
-        String bucket,
-        String key
+        Long         id,
+        FileProvider provider,
+        JSONB        metadata
     ) {
         this.id = id;
-        this.bucket = bucket;
-        this.key = key;
+        this.provider = provider;
+        this.metadata = metadata;
     }
 
     public Long getId() {
@@ -55,21 +59,21 @@ public class File implements Serializable {
         return this;
     }
 
-    public String getBucket() {
-        return this.bucket;
+    public FileProvider getProvider() {
+        return this.provider;
     }
 
-    public File setBucket(String bucket) {
-        this.bucket = bucket;
+    public File setProvider(FileProvider provider) {
+        this.provider = provider;
         return this;
     }
 
-    public String getKey() {
-        return this.key;
+    public JSONB getMetadata() {
+        return this.metadata;
     }
 
-    public File setKey(String key) {
-        this.key = key;
+    public File setMetadata(JSONB metadata) {
+        this.metadata = metadata;
         return this;
     }
 
@@ -88,17 +92,17 @@ public class File implements Serializable {
         }
         else if (!id.equals(other.id))
             return false;
-        if (bucket == null) {
-            if (other.bucket != null)
+        if (provider == null) {
+            if (other.provider != null)
                 return false;
         }
-        else if (!bucket.equals(other.bucket))
+        else if (!provider.equals(other.provider))
             return false;
-        if (key == null) {
-            if (other.key != null)
+        if (metadata == null) {
+            if (other.metadata != null)
                 return false;
         }
-        else if (!key.equals(other.key))
+        else if (!metadata.equals(other.metadata))
             return false;
         return true;
     }
@@ -108,8 +112,8 @@ public class File implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
-        result = prime * result + ((this.bucket == null) ? 0 : this.bucket.hashCode());
-        result = prime * result + ((this.key == null) ? 0 : this.key.hashCode());
+        result = prime * result + ((this.provider == null) ? 0 : this.provider.hashCode());
+        result = prime * result + ((this.metadata == null) ? 0 : this.metadata.hashCode());
         return result;
     }
 
@@ -118,8 +122,8 @@ public class File implements Serializable {
         StringBuilder sb = new StringBuilder("File (");
 
         sb.append(id);
-        sb.append(", ").append(bucket);
-        sb.append(", ").append(key);
+        sb.append(", ").append(provider);
+        sb.append(", ").append(metadata);
 
         sb.append(")");
         return sb.toString();

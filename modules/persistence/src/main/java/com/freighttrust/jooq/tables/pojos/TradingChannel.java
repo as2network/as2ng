@@ -4,7 +4,7 @@
 package com.freighttrust.jooq.tables.pojos;
 
 
-import com.freighttrust.persistence.postgres.bindings.TsTzRange;
+import com.freighttrust.common.util.TsTzRange;
 
 import java.io.Serializable;
 
@@ -24,7 +24,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingChannel implements Serializable {
 
-    private static final long serialVersionUID = 1954371183;
+    private static final long serialVersionUID = -677792448;
 
     private Long      id;
     private String    name;

@@ -1,19 +1,11 @@
 package com.freighttrust.as2.cli
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.util.StdDateFormat
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.freighttrust.as2.cli.json.TsTzRangeSerializer
 import com.freighttrust.common.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
-import com.freighttrust.persistence.postgres.PostgresModule
-import com.freighttrust.persistence.postgres.bindings.TsTzRange
-import com.freighttrust.persistence.s3.S3Module
+import com.freighttrust.persistence.postgres.PostgresPersistenceModule
+import com.freighttrust.persistence.s3.S3PersistenceModule
+import com.freighttrust.serialisation.JsonModule
 import org.koin.core.context.startKoin
-import org.koin.dsl.module
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import kotlin.system.exitProcess
@@ -35,22 +27,7 @@ private fun koinExecutionStrategy(parseResult: CommandLine.ParseResult): Int {
   // ensure koin di has started up before command execution
   startKoin {
     modules(
-      AppConfigModule, PostgresModule, S3Module, VaultCryptoModule,
-      module {
-        factory {
-          ObjectMapper()
-            .registerModule(KotlinModule())
-            .registerModule(JavaTimeModule())
-            .registerModule(
-              SimpleModule()
-                .apply { addSerializer(TsTzRange::class.java, TsTzRangeSerializer())}
-            )
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .enable(SerializationFeature.INDENT_OUTPUT)
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .setDateFormat(StdDateFormat().withColonInTimeZone(true))
-        }
-      }
+      AppConfigModule, JsonModule, PostgresPersistenceModule, S3PersistenceModule, VaultCryptoModule,
     )
   }
   // default execution strategy

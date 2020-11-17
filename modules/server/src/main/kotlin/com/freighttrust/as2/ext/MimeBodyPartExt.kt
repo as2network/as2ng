@@ -125,37 +125,36 @@ fun MimeBodyPart.signatureCertificateFromBody(
 
       // SMIMESignedParser uses "7bit" as the default - AS2 wants "binary"
 
-      SMIMESignedParser(
+      val parser = SMIMESignedParser(
         JcaDigestCalculatorProviderBuilder()
           .setProvider(securityProvider)
           .build(),
         content as MimeMultipart,
         "binary",
         tempFileHelper.newFile()
-      ).let { parser ->
+      )
 
-        val signerId = parser
-          .signerInfos
-          .signers
-          .firstOrNull()
-          ?.sid
+      val signerId = parser
+        .signerInfos
+        .signers
+        .firstOrNull()
+        ?.sid
 
-        return signerId
-          ?.let { parser.certificates.getMatches(it) }
-          ?.let { certificates ->
+      return signerId
+        ?.let { parser.certificates.getMatches(it) }
+        ?.let { certificates ->
 
-            if (certificates.size > 1)
-              logger.warn("Signed part contains ${certificates.size} certificates - using the first one!")
+          if (certificates.size > 1)
+            logger.warn("Signed part contains ${certificates.size} certificates - using the first one!")
 
-            certificates.firstOrNull()
-              ?.let { it as X509CertificateHolder }
-              ?.let { certificateHolder ->
-                JcaX509CertificateConverter()
-                  .setProvider(securityProvider)
-                  .getCertificate(certificateHolder)
-              }
-          }
-      }
+          certificates.firstOrNull()
+            ?.let { it as X509CertificateHolder }
+            ?.let { certificateHolder ->
+              JcaX509CertificateConverter()
+                .setProvider(securityProvider)
+                .getCertificate(certificateHolder)
+            }
+        }
     }
 
 fun MimeBodyPart.verifiedContent(

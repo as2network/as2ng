@@ -1,4 +1,4 @@
-package com.freighttrust.as2.kotest.listeners
+package com.freighttrust.testing.listeners
 
 import io.kotest.core.listeners.TestListener
 import io.kotest.core.spec.Spec
@@ -7,7 +7,7 @@ import org.flywaydb.core.api.configuration.FluentConfiguration
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.Wait
 
-class MigrationsListener(
+class FlywayTestListener(
   private val postgres: PostgreSQLContainer<Nothing>
 ) : TestListener {
 

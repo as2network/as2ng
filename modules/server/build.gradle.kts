@@ -100,6 +100,8 @@ dependencies {
   implementation("com.fasterxml.uuid:java-uuid-generator")
   implementation("com.helger.as2:as2-server")
 
+  implementation("org.apache.tika:tika-core")
+
   implementation("com.google.guava:guava")
 
   implementation("io.vertx:vertx-core")
@@ -116,25 +118,10 @@ dependencies {
 
   implementation("com.squareup.okhttp3:okhttp")
 
+  testImplementation(project(":modules:testing"))
+
   testImplementation("io.vertx:vertx-junit5")
-  testImplementation("org.koin:koin-test")
-  testImplementation("io.mockk:mockk")
-  testImplementation("com.opentable.components:otj-pg-embedded")
   testImplementation("com.squareup.okhttp3:mockwebserver")
-
-  testImplementation("io.kotest:kotest-runner-junit5")
-  testImplementation("io.kotest:kotest-assertions-core")
-  testImplementation("io.kotest:kotest-property")
-  testImplementation("io.kotest:kotest-extensions-koin")
-  testImplementation("io.kotest:kotest-extensions-testcontainers")
-
-  testImplementation("org.testcontainers:testcontainers")
-  testImplementation("org.testcontainers:postgresql")
-  testImplementation("org.testcontainers:vault")
-  testImplementation("org.testcontainers:localstack")
-
-  testImplementation("com.amazonaws:aws-java-sdk-s3")
-
 
 }
 

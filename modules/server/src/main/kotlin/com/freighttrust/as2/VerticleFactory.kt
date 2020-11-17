@@ -1,8 +1,8 @@
 package com.freighttrust.as2
 
 import com.freighttrust.common.AppConfigModule
-import com.freighttrust.persistence.postgres.PostgresModule
-import com.freighttrust.persistence.s3.S3Module
+import com.freighttrust.persistence.postgres.PostgresPersistenceModule
+import com.freighttrust.persistence.s3.S3PersistenceModule
 import io.vertx.core.Verticle
 import io.vertx.core.Vertx
 import io.vertx.core.spi.VerticleFactory
@@ -18,8 +18,8 @@ class VerticleFactory : VerticleFactory {
 
   private val modules = listOf(
     AppConfigModule,
-    PostgresModule,
-    S3Module,
+    PostgresPersistenceModule,
+    S3PersistenceModule,
     As2ExchangeServerModule
   )
 

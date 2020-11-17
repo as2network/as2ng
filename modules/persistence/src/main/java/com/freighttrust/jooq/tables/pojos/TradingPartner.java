@@ -4,7 +4,7 @@
 package com.freighttrust.jooq.tables.pojos;
 
 
-import com.freighttrust.persistence.postgres.bindings.TsTzRange;
+import com.freighttrust.common.util.TsTzRange;
 
 import java.io.Serializable;
 
@@ -24,7 +24,7 @@ import javax.annotation.processing.Generated;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TradingPartner implements Serializable {
 
-    private static final long serialVersionUID = -773369600;
+    private static final long serialVersionUID = -1751469231;
 
     private Long      id;
     private String    name;
