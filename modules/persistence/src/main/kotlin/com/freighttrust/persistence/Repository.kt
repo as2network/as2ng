@@ -2,6 +2,7 @@ package com.freighttrust.persistence
 
 import arrow.core.Tuple3
 import arrow.core.Tuple4
+import arrow.core.Tuple5
 import com.freighttrust.crypto.CertificateFactory
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.freighttrust.jooq.tables.pojos.File
@@ -56,18 +57,33 @@ interface TradingChannelRepository : Repository<TradingChannel> {
   suspend fun findByAs2Identifiers(
     senderId: String,
     recipientId: String,
-    withEncryptionKeyPair: Boolean = false,
-    withSignatureKeyPair: Boolean = false,
+    withSender: Boolean = false,
+    withRecipient: Boolean = false,
+    withSenderKeyPair: Boolean = false,
+    withRecipientKeyPair: Boolean = false,
     ctx: Repository.Context? = null
-  ): Triple<TradingChannel, KeyPair?, KeyPair?>?
+  ): Tuple5<TradingChannel, TradingPartner?, TradingPartner?, KeyPair?, KeyPair?>?
 
-  suspend fun findBySenderId(senderId: Long, ctx: Repository.Context? = null): List<TradingChannel>
-  suspend fun findByRecipientId(senderId: Long, ctx: Repository.Context? = null): List<TradingChannel>
+  suspend fun findBySenderId(
+    senderId: Long,
+    withSenderKeyPair: Boolean = false,
+    withRecipientKeyPair: Boolean = false,
+    ctx: Repository.Context? = null
+  ): List<Triple<TradingChannel, KeyPair?, KeyPair?>>
+
+  suspend fun findByRecipientId(
+    senderId: Long,
+    withSenderKeyPair: Boolean = false,
+    withRecipientKeyPair: Boolean = false,
+    ctx: Repository.Context? = null
+  ): List<Triple<TradingChannel, KeyPair?, KeyPair?>>
 }
 
 interface TradingPartnerRepository : Repository<TradingPartner> {
 
   suspend fun findById(id: Long, withKeyPair: Boolean = false, ctx: Repository.Context? = null): Pair<TradingPartner, KeyPair?>?
+  suspend fun findByIds(ids: List<Long>, withKeyPair: Boolean = false, ctx: Repository.Context? = null): List<Pair<TradingPartner, KeyPair?>>
+
   suspend fun findByName(name: String, ctx: Repository.Context? = null): TradingPartner?
 }
 

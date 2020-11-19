@@ -28,7 +28,7 @@ class PostgresTradingPartnerRepository(
         .selectFrom(table)
         .where(TRADING_PARTNER.NAME.eq(name))
         .fetchOne()
-        .into(TradingPartner::class.java)
+        ?.into(TradingPartner::class.java)
     }
 
   private fun buildJoin(ctx: DSLContext,
@@ -38,11 +38,18 @@ class PostgresTradingPartnerRepository(
     .let { query -> if (withKeyPair) query.leftJoin(KEY_PAIR).on(TRADING_PARTNER.KEY_PAIR_ID.eq(KEY_PAIR.ID)) else query }
 
   override suspend fun findById(id: Long, withKeyPair: Boolean, ctx: Repository.Context?): Pair<TradingPartner, KeyPair?>? =
+    findByIds(listOf(id)).firstOrNull()
+
+  override suspend fun findByIds(
+    ids: List<Long>,
+    withKeyPair: Boolean,
+    ctx: Repository.Context?): List<Pair<TradingPartner, KeyPair?>> =
     coroutineScope {
       buildJoin(jooqContext(ctx), withKeyPair)
-        .where(KEY_PAIR.ID.eq(id))
-        .fetchOne(JoinMapper)
+        .where(KEY_PAIR.ID.`in`(ids))
+        .fetch(JoinMapper)
     }
+
 
   object JoinMapper : RecordMapper<Record, Pair<TradingPartner, KeyPair?>> {
 

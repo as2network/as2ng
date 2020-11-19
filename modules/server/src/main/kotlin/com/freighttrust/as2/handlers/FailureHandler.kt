@@ -49,6 +49,8 @@ class FailureHandler(
 
     try {
 
+      logger.error("Request failure", ctx.failure())
+
       if (!ctx.hasAs2Message) throw ctx.failure()
 
       // record the failure
@@ -78,7 +80,10 @@ class FailureHandler(
 
     with(ctx.as2Context) {
 
-      if (!isMdnRequested) return
+      if (!isMdnRequested) {
+        // sender may not want a receipt so we just end the response
+        return ctx.response().end()
+      }
 
       val notification = ctx
         .dispositionNotification(failure.disposition)

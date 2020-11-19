@@ -3,13 +3,15 @@ package com.freighttrust.as2.handlers
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.signatureCertificateFromBody
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import com.freighttrust.persistence.extensions.toX509
 import io.vertx.ext.web.RoutingContext
 import org.slf4j.LoggerFactory
 
 class SignatureVerificationHandler(
-  private val partnerRepository: TradingPartnerRepository
+  private val keyPairRepository: KeyPairRepository
 ) : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -30,7 +32,7 @@ class SignatureVerificationHandler(
           }
 
         // fallback to keypair configured for the trading channel
-        certificate = certificate ?: records.signatureKeyPair?.certificate?.toX509()
+        certificate = certificate ?: records.senderKeyPair?.certificate?.toX509()
           ?.apply {
             withLogger(SignatureVerificationHandler::class) {
               info("Certificate found for trading channel")
@@ -38,9 +40,9 @@ class SignatureVerificationHandler(
           }
 
         // fallback to keypair configured for the trading partner
-        certificate = certificate ?: partnerRepository
-          .findById(records.tradingChannel.senderId, withKeyPair = true)
-          ?.second?.certificate?.toX509()
+        certificate = certificate ?: keyPairRepository
+          .findById(KeyPair().apply { id = records.sender.keyPairId })
+          ?.certificate?.toX509()
           ?.apply {
             withLogger(SignatureVerificationHandler::class) {
               info("Certificate found for trading partner")

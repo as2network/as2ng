@@ -2,12 +2,13 @@ package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.persistence.TradingPartnerRepository
+import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.persistence.KeyPairRepository
 import io.vertx.ext.web.RoutingContext
 import java.security.GeneralSecurityException
 
 class DecryptionHandler(
-  private val partnerRepository: TradingPartnerRepository,
+  private val keyPairRepository: KeyPairRepository
 ) : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -17,27 +18,27 @@ class DecryptionHandler(
 
         if (!isBodyEncrypted) return ctx.next()
 
-        var encryptionKeyPair = records.encryptionKeyPair
+        var recipientKeyPair = records.recipientKeyPair
 
-        if (encryptionKeyPair == null) {
-          // key pair has not been configured for this trading channel so we fallback to the default key pair
-          // defined for recipient
+        if (recipientKeyPair == null) {
+          // a recipient key pair has not been configured for this trading channel so we fallback to the default key pair
+          // defined for the recipient trading partner
 
-          val (_, keyPair) = partnerRepository.findById(
-            records.tradingChannel.recipientId,
-            withKeyPair = true
-          ) ?: throw Error("Partner not found with id = $recipientId")
+          val keyPair = keyPairRepository.findById(
+            KeyPair().apply { id = records.recipient.keyPairId }
+          )
 
-          encryptionKeyPair = requireNotNull(keyPair) { "Encryption keypair could not be determined" }
+          recipientKeyPair = requireNotNull(keyPair) { "Recipient key pair could not be found" }
         }
 
-        ctx.as2Context = decrypt(encryptionKeyPair)
+        ctx.as2Context = decrypt(recipientKeyPair)
       }
 
       ctx.next()
     } catch (ex: GeneralSecurityException) {
       throw DispositionException(
-        Disposition.automaticError("decryption-failed")
+        Disposition.automaticError("decryption-failed"),
+        ex
       )
     }
   }

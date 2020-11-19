@@ -47,19 +47,19 @@ execute procedure versioning(
 
 create table trading_channel
 (
-    id                            bigserial primary key,
-    name                          varchar(64),
+    id                       bigserial primary key,
+    name                     varchar(64),
 
-    sender_id                     bigint references trading_partner (id),
-    sender_as2_identifier         varchar(64),
-    sender_signature_key_pair_id  bigint null references key_pair (id),
+    sender_id                bigint references trading_partner (id),
+    sender_as2_identifier    varchar(64),
+    sender_key_pair_id       bigint null references key_pair (id),
 
-    recipient_id                  bigint references trading_partner (id),
-    recipient_as2_identifier      varchar(64),
-    recipient_message_url         varchar(128),
-    recipient_encryption_key_pair_id bigint null references key_pair (id),
+    recipient_id             bigint references trading_partner (id),
+    recipient_as2_identifier varchar(64),
+    recipient_message_url    varchar(128),
+    recipient_key_pair_id    bigint null references key_pair (id),
 
-    validity                      tstzrange default tstzrange(current_timestamp, null),
+    validity                 tstzrange default tstzrange(current_timestamp, null),
     unique (sender_id, recipient_id),
     unique (sender_as2_identifier, recipient_as2_identifier)
 );
