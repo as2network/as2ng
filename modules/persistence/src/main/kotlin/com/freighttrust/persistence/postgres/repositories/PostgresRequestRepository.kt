@@ -36,7 +36,7 @@ class PostgresRequestRepository(
                          withDisposition: Boolean
   ) = ctx
     .select().from(REQUEST)
-    .let { query -> if (withTradingChannel) query.rightJoin(TRADING_CHANNEL).on(REQUEST.TRADING_CHANNEL_ID.eq(TRADING_CHANNEL.ID)) else query }
+    .let { query -> if (withTradingChannel) query.leftJoin(TRADING_CHANNEL).on(REQUEST.TRADING_CHANNEL_ID.eq(TRADING_CHANNEL.ID)) else query }
     .let { query -> if (withMessage) query.leftJoin(MESSAGE).on(REQUEST.ID.eq(MESSAGE.REQUEST_ID)) else query }
     .let { query -> if (withDisposition) query.leftJoin(DISPOSITION_NOTIFICATION).on(REQUEST.ID.eq(DISPOSITION_NOTIFICATION.REQUEST_ID)) else query }
 

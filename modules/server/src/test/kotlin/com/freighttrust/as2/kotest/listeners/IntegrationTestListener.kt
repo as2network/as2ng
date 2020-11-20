@@ -1,7 +1,10 @@
 package com.freighttrust.as2.kotest.listeners
 
 import com.freighttrust.as2.ext.toAs2Identifier
+import com.freighttrust.as2.kotest.listeners.TestPartner.Apple
 import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
+import com.freighttrust.as2.kotest.listeners.TestPartner.Dewalt
+import com.freighttrust.as2.kotest.listeners.TestPartner.Pepsi
 import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
 import com.freighttrust.as2.util.As2TestClient
 import com.freighttrust.crypto.CertificateFactory
@@ -11,7 +14,6 @@ import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.KeyStoreUtil
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.TradingPartnerRepository
-import com.helger.as2lib.client.AS2Client
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientResponse
 import com.helger.as2lib.client.AS2ClientSettings
@@ -31,7 +33,6 @@ import org.koin.core.context.stopKoin
 import org.koin.core.inject
 import org.koin.core.module.Module
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.containers.wait.strategy.Wait
@@ -43,7 +44,10 @@ import java.nio.charset.Charset
 enum class TestPartner(val resourcePath: String) {
 
   Walmart("openas2/Walmart"),
-  CocaCola("openas2/CocaCola");
+  CocaCola("openas2/CocaCola"),
+  Pepsi("openas2/Pepsi"),
+  Apple("openas2/Apple"),
+  Dewalt("openas2/Dewalt");
 
   val as2Identifier = name.toAs2Identifier()
 
@@ -53,6 +57,19 @@ enum class TestPartner(val resourcePath: String) {
       .first { it.as2Identifier == identifier }
 
   }
+
+}
+
+enum class TestTradingChannel(
+  val sender: TestPartner,
+  val recipient: TestPartner,
+  val withEncryptionKeyPair: Boolean = false,
+  val withSignatureKeyPair: Boolean = false) {
+
+  WalmartToCocaCola(Walmart, CocaCola),
+  WalmartToPepsi(Walmart, Pepsi, true, false),
+  WalmartToApple(Walmart, Apple, false, true),
+  WalmartToDewalt(Walmart, Dewalt, true, true)
 
 }
 
@@ -72,6 +89,7 @@ class IntegrationTestListener(
   private val keyStoreUtil = KeyStoreUtil()
 
   public lateinit var partnerMap: Map<TestPartner, TradingPartner>
+  public lateinit var channelMap: Map<TestTradingChannel, TradingChannel>
   public lateinit var keyStoreMap: Map<TestPartner, File>
 
   public lateinit var clientSettingsMap: Map<TestPartner, AS2ClientSettings>
@@ -103,22 +121,42 @@ class IntegrationTestListener(
         )
       }.toMap()
 
-    // add Walmart -> CocaCola trading channel
+    // create trading channels
 
-    val tradingChannels = listOf(
-      channelRepository
-        .insert(
+    channelMap = TestTradingChannel
+      .values()
+      .map { config ->
+
+        channelRepository.transaction { tx ->
+
           TradingChannel()
             .apply {
-              name = "${Walmart.name} To ${CocaCola.name}"
-              senderId = partnerMap.getValue(Walmart).id
-              senderAs2Identifier = Walmart.as2Identifier
-              recipientId = partnerMap.getValue(CocaCola).id
-              recipientAs2Identifier = CocaCola.as2Identifier
+              name = config.name
+
+              senderId = partnerMap.getValue(config.sender).id
+              senderAs2Identifier = config.sender.as2Identifier
+
+              if (config.withSignatureKeyPair) {
+                // issue a signature key pair specifically for this trading channel
+                senderKeyPairId = keyPairRepository.issue(certificateFactory).id
+              }
+
+              recipientId = partnerMap.getValue(config.recipient).id
+              recipientAs2Identifier = config.recipient.as2Identifier
               recipientMessageUrl = "http://localhost"
+
+              if (config.withEncryptionKeyPair) {
+                // issue an encryption key pair specifically for this trading channel
+                recipientKeyPairId = keyPairRepository.issue(certificateFactory, tx).id
+              }
+
             }
-        )
-    )
+            .let { Pair(config, channelRepository.insert(it, tx)) }
+
+        }
+
+      }.toMap()
+
 
     // create keystores
 
@@ -146,8 +184,8 @@ class IntegrationTestListener(
           GenericContainer<Nothing>("as2ng/as2lib-server:4.6.3")
             .apply {
               withTmpFs(mapOf("/opt/as2/data" to ""))
-              withClasspathResourceMapping(tp.resourcePath, "/opt/as2/config", BindMode.READ_ONLY)
-              // we have to copy the keystore as it's not available in the classpath at compile time
+              withCopyFileToContainer(MountableFile.forClasspathResource("openas2/config.xml"), "/opt/as2/config/config.xml")
+              withCopyFileToContainer(MountableFile.forClasspathResource("openas2/partnerships.xml"), "/opt/as2/config/partnerships.xml")
               withCopyFileToContainer(keyStorePath, "/opt/as2/config/keystore.p12")
               withExposedPorts(10101)
               withCommand("/opt/as2/config/config.xml")
@@ -165,7 +203,8 @@ class IntegrationTestListener(
 
     // update the recipient message urls now that the containers have started and we can get their mapped ports
 
-    tradingChannels
+    channelMap
+      .values
       .forEach { channel ->
 
         val container = containerMap[TestPartner.findByAs2Identifier(channel.recipientAs2Identifier)]
@@ -179,12 +218,10 @@ class IntegrationTestListener(
 
   }
 
-  fun sendingFrom(sender: TestPartner, subject: String): As2RequestBuilder =
+  fun forChannel(channel: TestTradingChannel, subject: String): As2RequestBuilder =
     As2RequestBuilder(
-      sender,
-      subject,
-      clientSettingsMap[sender]
-        ?: error("No client settings found for test partner = $sender")
+      channel,
+      subject
     )
 
   private fun createClientSettings(partner: TradingPartner): AS2ClientSettings =
@@ -233,25 +270,46 @@ class IntegrationTestListener(
   }
 
   inner class As2RequestBuilder(
-    val sender: TestPartner,
-    val subject: String,
-    val settings: AS2ClientSettings
+    private val testChannel: TestTradingChannel,
+    subject: String
   ) {
+
+    val settings = AS2ClientSettings()
+      .apply {
+
+        val keyStoreFile = keyStoreMap[testChannel.sender]
+          ?: throw Error("Key store not found")
+        setKeyStore(EKeyStoreType.PKCS12, keyStoreFile, "password")
+
+        val partnerRecord = partnerMap[testChannel.sender] ?: throw Error("Could not find sender partner record")
+
+        val channelRecord = channelMap[testChannel] ?: throw Error("Could not find channel record")
+
+        with(channelRecord) {
+
+          val senderKeyAlias = if (senderKeyPairId != null) "${senderAs2Identifier}_${recipientAs2Identifier}_Key" else senderAs2Identifier
+          val recipientKeyAlias = if (recipientKeyPairId != null) "${senderAs2Identifier}_${recipientAs2Identifier}_X509" else recipientAs2Identifier
+
+          setPartnershipName("${senderAs2Identifier}_${recipientAs2Identifier}")
+          setSenderData(senderAs2Identifier, partnerRecord.email, senderKeyAlias)
+          setReceiverData(recipientAs2Identifier, recipientKeyAlias, "http://localhost:8080/message")
+
+          messageIDFormat = "as2-lib-\$date.uuuuMMdd-HHmmssZ\$-\$rand.123456789\$@\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
+        }
+      }
 
     private val client = As2TestClient()
 
-    var recipient: TestPartner? = null
-
     var request: AS2ClientRequest = AS2ClientRequest(subject)
 
-    fun to(recipient: TestPartner): As2RequestBuilder {
-      this.recipient = recipient
-      settings.setPartnershipName("${sender.name} to ${recipient.name}")
-      settings.setReceiverData(recipient.as2Identifier, recipient.name, "http://localhost:8080/message")
-      settings.messageIDFormat =
-        "as2-lib-\$date.uuuuMMdd-HHmmssZ\$-\$rand.123456789\$@\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
-      return this
-    }
+    val subject: String
+      get() = request.subject
+
+    val sender: TestPartner
+      get() = testChannel.sender
+
+    val recipient: TestPartner
+      get() = testChannel.recipient
 
     fun withEncryptAndSign(
       cryptoAlgorithm: ECryptoAlgorithmCrypt?,
@@ -290,6 +348,6 @@ class IntegrationTestListener(
       return this
     }
 
-    fun send(): AS2ClientResponse = client.sendSynchronous(settings, requireNotNull(request))
+    fun send(): AS2ClientResponse = client.sendSynchronous(settings, request)
   }
 }

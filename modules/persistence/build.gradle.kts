@@ -1,11 +1,9 @@
-import com.rohanprabhu.gradle.plugins.kdjooq.JooqEdition
-import org.jooq.meta.jaxb.Configuration
 import org.jooq.meta.jaxb.ForcedType
 
 plugins {
   kotlin("jvm")
   id("org.flywaydb.flyway") version "6.4.2"
-  id("com.rohanprabhu.kotlin-dsl-jooq") version "0.4.6"
+  id("nu.studer.jooq") version "5.2"
 }
 
 dependencies {
@@ -19,7 +17,7 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
 
-  jooqGeneratorRuntime("org.postgresql:postgresql")
+  jooqGenerator("org.postgresql:postgresql")
 
   api("com.amazonaws:aws-java-sdk-s3")
   api("org.postgresql:postgresql")
@@ -45,51 +43,74 @@ flyway {
   url = postgresUrl
 }
 
-jooqGenerator {
-  jooqEdition = JooqEdition.OpenSource
-  jooqVersion = "3.13.5"
-  attachToCompileJava = false
 
-  configuration("primary", project.sourceSets["main"]) {
-
-    configuration = Configuration()
-      .apply {
-        jdbc = org.jooq.meta.jaxb.Jdbc()
-          .withDriver("org.postgresql.Driver")
-          .withUrl(postgresUrl)
-
-        generator = org.jooq.meta.jaxb.Generator()
-          .withName("org.jooq.codegen.DefaultGenerator")
-          .withStrategy(
-            org.jooq.meta.jaxb.Strategy()
-              .withName("org.jooq.codegen.DefaultGeneratorStrategy")
-          )
-          .withDatabase(
-            org.jooq.meta.jaxb.Database()
-              .withName("org.jooq.meta.postgres.PostgresDatabase")
-              .withInputSchema("public")
-              .withForcedTypes(
-                ForcedType()
-                  .withUserType("com.freighttrust.common.util.TsTzRange")
-                  .withBinding("com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding")
-                  .withIncludeTypes("tstzrange")
-                  .withIncludeExpression(".*")
-              )
-          )
-          .withGenerate(
-            org.jooq.meta.jaxb.Generate()
-              .withRelations(true)
-              .withDeprecated(false)
-              .withRecords(true)
-              .withPojos(true)
-              .withPojosEqualsAndHashCode(true)
-              .withFluentSetters(true)
-          )
-          .withTarget(
-            org.jooq.meta.jaxb.Target()
-              .withPackageName("com.freighttrust.jooq")
-              .withDirectory("src/main/java/")
-          )
-      }
+// this section is required to ensure the jooq plugin uses the correct xsd for the code generation
+buildscript {
+  configurations["classpath"].resolutionStrategy.eachDependency {
+    if (requested.group == "org.jooq") {
+      useVersion("3.14.3")
+    }
   }
+}
+
+jooq {
+
+  version.set("3.14.3")
+
+  configurations {
+
+    create("main") {
+
+      jooqConfiguration.apply {
+
+        jdbc.apply {
+          driver = "org.postgresql.Driver"
+          url = postgresUrl
+        }
+
+        generator.apply {
+          name = "org.jooq.codegen.DefaultGenerator"
+
+          database.apply {
+            name = "org.jooq.meta.postgres.PostgresDatabase"
+            inputSchema = "public"
+
+            forcedTypes.add(
+              ForcedType()
+                .withUserType("com.freighttrust.common.util.TsTzRange")
+                .withBinding("com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding")
+                .withIncludeTypes("tstzrange")
+                .withIncludeExpression(".*")
+            )
+
+          }
+
+          generate.apply {
+            isRelations = true
+            isDeprecated = false
+            isRecords = true
+            isPojos = true
+            isPojosEqualsAndHashCode = true
+            isFluentSetters = true
+          }
+
+          target.apply {
+            packageName = "com.freighttrust.jooq"
+            directory = "src/main/java"
+          }
+
+          strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
+        }
+
+      }
+
+    }
+
+  }
+}
+
+// enable incremental build support
+tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
+  allInputsDeclared.set(true)
+  outputs.cacheIf { true }
 }

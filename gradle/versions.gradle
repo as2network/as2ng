@@ -95,7 +95,7 @@ dependencyManagement {
     // ------------------------------------------------------------------
 
     dependency 'org.postgresql:postgresql:42.2.12'
-    dependency 'org.jooq:jooq:3.13.5'
+    dependency 'org.jooq:jooq:3.14.3'
     dependency 'com.zaxxer:HikariCP:3.4.5'
     dependency 'org.flywaydb:flyway-core:6.4.2'
 

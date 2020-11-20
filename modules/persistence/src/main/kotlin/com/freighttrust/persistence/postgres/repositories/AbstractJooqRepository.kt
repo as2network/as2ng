@@ -72,7 +72,7 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
         insertInto(table)
           .set(newRecord(table, value))
           .returning()
-          .fetchOne()
+          .fetchOne()!!
           .into(pojoClass)
       }
     }
@@ -84,7 +84,7 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
           .set(newRecord(table, value))
           .where(idQuery(value))
           .returning()
-          .fetchOne()
+          .fetchOne()!!
           .into(pojoClass)
       }
     }

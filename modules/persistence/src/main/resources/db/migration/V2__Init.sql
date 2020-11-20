@@ -8,7 +8,7 @@ create table key_pair
     serial_number    varchar(60),
     certificate      varchar(4096),
     private_key      varchar(4096) null,
-    private_key_type varchar(16),
+    private_key_type varchar(16)   null,
     issuing_ca       varchar(4096),
     ca_chain         varchar(4096)[],
     expires_at       timestamptz
@@ -52,10 +52,12 @@ create table trading_channel
 
     sender_id                bigint references trading_partner (id),
     sender_as2_identifier    varchar(64),
+    sender_key_pair_id       bigint null references key_pair (id),
 
     recipient_id             bigint references trading_partner (id),
     recipient_as2_identifier varchar(64),
     recipient_message_url    varchar(128),
+    recipient_key_pair_id    bigint null references key_pair (id),
 
     validity                 tstzrange default tstzrange(current_timestamp, null),
     unique (sender_id, recipient_id),
@@ -84,7 +86,7 @@ create type file_provider as enum ('filesystem', 's3');
 
 create table file
 (
-    id     bigserial primary key,
+    id       bigserial primary key,
     provider file_provider,
     metadata jsonb,
     unique (provider, metadata)

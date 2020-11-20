@@ -61,8 +61,4 @@ class ServerVerticle(
       .listen(port)
   }
 
-  override suspend fun stop() {
-    val dbCtx = koin.get<DSLContext>()
-    dbCtx.close()
-  }
 }

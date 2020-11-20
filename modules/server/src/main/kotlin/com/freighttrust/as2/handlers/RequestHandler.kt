@@ -47,8 +47,6 @@ class As2RequestHandler(
 
   companion object {
     const val CTX_AS2 = "As2Context"
-
-    val mimeTypes = MimeTypes.getDefaultMimeTypes()
   }
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
@@ -66,7 +64,7 @@ class As2RequestHandler(
         // TODO validate as2 headers before continuing
 
         // lookup trading channel
-        val tradingChannelRecord =
+        val (tradingChannelRecord, sender, recipient, senderKeyPair, recipientKeyPair) =
           request.headers()
             .let { headers ->
 
@@ -86,10 +84,20 @@ class As2RequestHandler(
               }
 
               tradingChannelRepository
-                .findByAs2Identifiers(senderId, recipientId) ?: throw DispositionException(
+                .findByAs2Identifiers(
+                  senderId,
+                  recipientId,
+                  withSender = true,
+                  withRecipient = true,
+                  withSenderKeyPair = true,
+                  withRecipientKeyPair = true
+                ) ?: throw DispositionException(
                 Disposition.automaticFailure("Trading channel not found for provided AS2-From and AS2-To")
               )
             }
+
+        requireNotNull(sender) { "Sender trading partner could not be found" }
+        requireNotNull(recipient) { "Recipient trading partner could not be found" }
 
         // store body
 
@@ -131,7 +139,6 @@ class As2RequestHandler(
 
         }
 
-
         // set message on the routing context
 
         As2RequestContext(
@@ -139,7 +146,7 @@ class As2RequestHandler(
           request.headers(),
           securityProvider,
           TempFileHelper(),
-          Records(requestRecord, tradingChannelRecord),
+          Records(requestRecord, tradingChannelRecord, sender, recipient, senderKeyPair, recipientKeyPair),
           BodyContext(body)
         ).also { message -> ctx.put(CTX_AS2, message) }
 

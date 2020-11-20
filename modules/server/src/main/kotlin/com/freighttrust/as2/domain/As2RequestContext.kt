@@ -1,13 +1,19 @@
 package com.freighttrust.as2.domain
 
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.*
+import com.freighttrust.as2.ext.calculateMic
+import com.freighttrust.as2.ext.get
+import com.freighttrust.as2.ext.isCompressed
+import com.freighttrust.as2.ext.isEncrypted
+import com.freighttrust.as2.ext.isSigned
+import com.freighttrust.as2.ext.verifiedContent
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.pojos.TradingChannel
+import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
 import com.helger.as2lib.disposition.DispositionOptions
@@ -29,7 +35,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.security.GeneralSecurityException
-import java.security.PrivateKey
 import java.security.Provider
 import java.security.cert.X509Certificate
 import javax.mail.MessagingException
@@ -46,6 +51,10 @@ enum class As2RequestType {
 data class Records(
   val request: Request,
   val tradingChannel: TradingChannel,
+  val sender: TradingPartner,
+  val recipient: TradingPartner,
+  val senderKeyPair: KeyPair?,
+  val recipientKeyPair: KeyPair?,
   val originalMessage: MessageRecord? = null,
   val dispositionNotification: DispositionNotification? = null
 )
@@ -128,7 +137,9 @@ data class As2RequestContext(
           logger.error("Error retrieving RecipientInformation", ex)
         }
 
-        if (recipient == null) throw GeneralSecurityException("Certificate does not match part signature")
+        if (recipient == null) {
+          throw GeneralSecurityException("Certificate does not match part signature")
+        }
 
         // try to decrypt the data
         // Custom file: see #103
