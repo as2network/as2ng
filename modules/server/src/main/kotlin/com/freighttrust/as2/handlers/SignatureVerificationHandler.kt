@@ -5,10 +5,11 @@ import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.signatureCertificateFromBody
 import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.persistence.KeyPairRepository
-import com.freighttrust.persistence.TradingPartnerRepository
+import com.freighttrust.persistence.extensions.toBase64
 import com.freighttrust.persistence.extensions.toX509
 import io.vertx.ext.web.RoutingContext
-import org.slf4j.LoggerFactory
+import java.time.OffsetDateTime
+import java.time.ZoneId
 
 class SignatureVerificationHandler(
   private val keyPairRepository: KeyPairRepository
@@ -22,18 +23,42 @@ class SignatureVerificationHandler(
 
       try {
 
-        // check if there is a certificate in the request body
-        val certificate = body
+        val signatureKeyPair = body
+          // check if there is a certificate in the request body
           .signatureCertificateFromBody(ctx.tempFileHelper, securityProvider)
-          ?.apply {
+          ?.let { bodyCertificate ->
+
             withLogger(SignatureVerificationHandler::class) {
               info("Certificate found within request body")
             }
+
+            keyPairRepository.transaction { tx ->
+
+              // look for a keypair in the database that matches the certificate provided in the body
+              keyPairRepository.findByCertificate(bodyCertificate, tx)
+              // insert a new keypair entry if needed
+                ?: keyPairRepository.insert(
+                  KeyPair()
+                    .apply {
+
+                      serialNumber = bodyCertificate.serialNumber
+                        .toString(16)
+                        .chunked(2)
+                        .joinToString(":")
+
+                      certificate = bodyCertificate.toBase64()
+                      // TODO check this data conversion logic
+                      expiresAt = OffsetDateTime.ofInstant(bodyCertificate.notAfter.toInstant(), ZoneId.systemDefault())
+                    },
+                  tx
+                )
+            }
+
           }
         // fallback to keypair configured for the trading channel or partner default
-          ?: records.senderKeyPair.certificate.toX509()
+          ?: records.senderKeyPair
 
-        ctx.as2Context = verify(certificate)
+        ctx.as2Context = verify(signatureKeyPair.certificate.toX509())
 
         withLogger(SignatureVerificationHandler::class) {
           info("Successfully verified signature of incoming AS2 message")

@@ -17,6 +17,8 @@ fun String.toX509(): X509Certificate {
   return x509Factory.generateCertificate(bytesIn) as X509Certificate
 }
 
+fun X509Certificate.toBase64(): String =Base64.encodeBytes(this.encoded).replace("\n", "")
+
 fun String.toPrivateKey(): PrivateKey {
   val keySpec = PKCS8EncodedKeySpec(Base64.decode(this))
   return rsaKeyFactory.generatePrivate(keySpec)

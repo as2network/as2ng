@@ -7,6 +7,7 @@ import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.records.KeyPairRecord
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.Repository
+import com.freighttrust.persistence.extensions.toBase64
 import kotlinx.coroutines.coroutineScope
 import org.jooq.Condition
 import org.jooq.DSLContext
@@ -22,15 +23,14 @@ class PostgresKeyPairRepository(
 
   override fun idQuery(value: KeyPair): Condition = KEY_PAIR.ID.eq(value.id)
 
-  override suspend fun findIdByCertificate(certificate: X509Certificate, ctx: Repository.Context?): Long? =
+  override suspend fun findByCertificate(certificate: X509Certificate, ctx: Repository.Context?): KeyPair? =
     coroutineScope {
       jooqContext(ctx)
-        .select(KEY_PAIR.ID)
-        .from(table)
-        .where(KEY_PAIR.CERTIFICATE.eq(certificate.toString()))
+        .selectFrom(KEY_PAIR)
+        .where(KEY_PAIR.CERTIFICATE.eq(certificate.toBase64()))
         .fetchOne()
-    }?.value1()
-
+        ?.into(KeyPair::class.java)
+    }
 
   override suspend fun issue(certificateFactory: CertificateFactory, ctx: Repository.Context?): KeyPair {
 

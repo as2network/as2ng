@@ -42,7 +42,7 @@ interface KeyPairRepository : Repository<KeyPair> {
 
   suspend fun issue(certificateFactory: CertificateFactory, ctx: Repository.Context? = null): KeyPair
 
-  suspend fun findIdByCertificate(certificate: X509Certificate, ctx: Repository.Context? = null): Long?
+  suspend fun findByCertificate(certificate: X509Certificate, ctx: Repository.Context? = null): KeyPair?
 
 }
 

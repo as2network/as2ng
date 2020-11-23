@@ -8,9 +8,9 @@ create table key_pair
     serial_number    varchar(60),
     certificate      varchar(4096),
     private_key      varchar(4096) null,
-    private_key_type varchar(16)   null,
-    issuing_ca       varchar(4096),
-    ca_chain         varchar(4096)[],
+    private_key_type varchar(16) null,
+    issuing_ca       varchar(4096) null,
+    ca_chain         varchar(4096)[] null,
     expires_at       timestamptz
 );
 
@@ -53,6 +53,8 @@ create table trading_channel
     name                     varchar(64),
     type                     trading_channel_type,
 
+    /* common options */
+
     sender_id                bigint references trading_partner (id),
     sender_as2_identifier    varchar(64),
     sender_key_pair_id       bigint null references key_pair (id),
@@ -61,6 +63,7 @@ create table trading_channel
     recipient_as2_identifier varchar(64),
     recipient_key_pair_id    bigint null references key_pair (id),
 
+    /* options for forwarding channel type */
     recipient_message_url    varchar(128) null,
 
     validity                 tstzrange default tstzrange(current_timestamp, null),
