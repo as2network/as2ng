@@ -7,9 +7,9 @@ create table key_pair
     id               bigserial primary key,
     serial_number    varchar(60) unique,
     certificate      varchar(4096) unique,
-    private_key      varchar(4096) null,
-    private_key_type varchar(16) null,
-    issuing_ca       varchar(4096) null,
+    private_key      varchar(4096)   null,
+    private_key_type varchar(16)     null,
+    issuing_ca       varchar(4096)   null,
     ca_chain         varchar(4096)[] null,
     expires_at       timestamptz
 );
@@ -49,24 +49,28 @@ create type trading_channel_type as enum ('receiving', 'forwarding');
 
 create table trading_channel
 (
-    id                       bigserial primary key,
-    name                     varchar(64) unique,
-    type                     trading_channel_type,
+    id                                      bigserial primary key,
+    name                                    varchar(64) unique,
+    type                                    trading_channel_type,
 
     /* common options */
 
-    sender_id                bigint references trading_partner (id),
-    sender_as2_identifier    varchar(64),
-    sender_key_pair_id       bigint null references key_pair (id),
+    sender_id                               bigint references trading_partner (id),
+    sender_as2_identifier                   varchar(64),
+    sender_key_pair_id                      bigint       null references key_pair (id),
 
-    recipient_id             bigint references trading_partner (id),
-    recipient_as2_identifier varchar(64),
-    recipient_key_pair_id    bigint null references key_pair (id),
+    recipient_id                            bigint references trading_partner (id),
+    recipient_as2_identifier                varchar(64),
+    recipient_key_pair_id                   bigint       null references key_pair (id),
+
+    allow_body_certificate_for_verification boolean   default false,
 
     /* options for forwarding channel type */
-    recipient_message_url    varchar(128) null,
+    recipient_message_url                   varchar(128) null,
 
-    validity                 tstzrange default tstzrange(current_timestamp, null),
+    /* options for receiving trading channel type */
+
+    validity                                tstzrange default tstzrange(current_timestamp, null),
     unique (sender_id, recipient_id),
     unique (sender_as2_identifier, recipient_as2_identifier)
 );
@@ -83,7 +87,6 @@ create trigger trading_channel_versioning_trigger
 execute procedure versioning(
         'validity', 'trading_channel_history', true
     );
-
 
 /*****************************************************************************/
 /* File                                                                      */
@@ -139,6 +142,8 @@ create table message
     encryption_algorithm    varchar(32)    null,
     encryption_key_pair_id  bigint         null,
 
+    signature_key_pair_id   bigint         null,
+
     compression_algorithm   varchar(16)    null,
 
     mics                    varchar(512)[] null,
@@ -154,13 +159,15 @@ create table message
 
 create table disposition_notification
 (
-    request_id           uuid primary key references request (id),
+    request_id            uuid primary key references request (id),
 
-    original_message_id  varchar(128) references request (message_id),
-    original_recipient   varchar(64),
-    final_recipient      varchar(64),
-    reporting_ua         varchar(64),
-    disposition          varchar(128),
-    received_content_mic varchar(512) null,
-    digest_algorithm     varchar(16)  null
+    original_message_id   varchar(128) references request (message_id),
+    original_recipient    varchar(64),
+    final_recipient       varchar(64),
+    reporting_ua          varchar(64),
+    disposition           varchar(128),
+    received_content_mic  varchar(512) null,
+    digest_algorithm      varchar(16)  null,
+
+    signature_key_pair_id bigint       null
 );

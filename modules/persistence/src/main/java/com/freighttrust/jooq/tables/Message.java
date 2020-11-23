@@ -16,7 +16,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row8;
+import org.jooq.Row9;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -62,6 +62,11 @@ public class Message extends TableImpl<MessageRecord> {
      * The column <code>public.message.encryption_key_pair_id</code>.
      */
     public final TableField<MessageRecord, Long> ENCRYPTION_KEY_PAIR_ID = createField(DSL.name("encryption_key_pair_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.message.signature_key_pair_id</code>.
+     */
+    public final TableField<MessageRecord, Long> SIGNATURE_KEY_PAIR_ID = createField(DSL.name("signature_key_pair_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.message.compression_algorithm</code>.
@@ -172,11 +177,11 @@ public class Message extends TableImpl<MessageRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row8 type methods
+    // Row9 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<UUID, String, Long, String, String[], Boolean, Boolean, String> fieldsRow() {
-        return (Row8) super.fieldsRow();
+    public Row9<UUID, String, Long, Long, String, String[], Boolean, Boolean, String> fieldsRow() {
+        return (Row9) super.fieldsRow();
     }
 }

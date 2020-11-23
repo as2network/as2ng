@@ -24,42 +24,55 @@ class SignatureVerificationHandler(
 
       try {
 
-        val signatureKeyPair = body
-          // check if there is a certificate in the request body
-          .signatureCertificateFromBody(ctx.tempFileHelper, securityProvider)
-          ?.let { bodyCertificate ->
+        val signatureKeyPair = records.tradingChannel
+          .allowBodyCertificateForVerification
+          .takeIf { it == true }
+          ?.let { allowed ->
 
-            withLogger(SignatureVerificationHandler::class) {
-              info("Certificate found within request body")
+            // check for a certificate in the request body
+            val bodyCertificate = body
+              .signatureCertificateFromBody(ctx.tempFileHelper, securityProvider)
+              ?.let { bodyCertificate ->
+
+                withLogger(SignatureVerificationHandler::class) {
+                  info("Certificate found within request body")
+                }
+
+                keyPairRepository.transaction { tx ->
+
+                  // look for a keypair in the database that matches the certificate provided in the body
+                  keyPairRepository.findBySerialNumber(bodyCertificate.formattedSerialNumber, tx)
+                  // insert a new keypair entry if needed
+                    ?: keyPairRepository.insert(
+                      KeyPair()
+                        .apply {
+
+                          serialNumber = bodyCertificate.serialNumber
+                            .toString(16)
+                            .chunked(2)
+                            .joinToString(":")
+
+                          certificate = bodyCertificate.toBase64()
+                          // TODO check this data conversion logic
+                          expiresAt = OffsetDateTime.ofInstant(bodyCertificate.notAfter.toInstant(), ZoneId.systemDefault())
+                        },
+                      tx
+                    )
+                }
+              }
+
+            if(allowed && bodyCertificate == null) {
+              withLogger(SignatureVerificationHandler::class) {
+                warn("Body certificates are enabled but no certificate was found in the request body")
+              }
             }
 
-            keyPairRepository.transaction { tx ->
-
-              // look for a keypair in the database that matches the certificate provided in the body
-              keyPairRepository.findBySerialNumber(bodyCertificate.formattedSerialNumber, tx)
-              // insert a new keypair entry if needed
-                ?: keyPairRepository.insert(
-                  KeyPair()
-                    .apply {
-
-                      serialNumber = bodyCertificate.serialNumber
-                        .toString(16)
-                        .chunked(2)
-                        .joinToString(":")
-
-                      certificate = bodyCertificate.toBase64()
-                      // TODO check this data conversion logic
-                      expiresAt = OffsetDateTime.ofInstant(bodyCertificate.notAfter.toInstant(), ZoneId.systemDefault())
-                    },
-                  tx
-                )
-            }
-
+            bodyCertificate
           }
         // fallback to keypair configured for the trading channel or partner default
           ?: records.senderKeyPair
 
-        ctx.as2Context = verify(signatureKeyPair.certificate.toX509())
+        ctx.as2Context = verify(signatureKeyPair)
 
         withLogger(SignatureVerificationHandler::class) {
           info("Successfully verified signature of incoming AS2 message")

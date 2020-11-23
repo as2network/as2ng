@@ -57,6 +57,7 @@ cli config trading-channel add \
   --sender-partner-id 1 \
   --sender-as2-id OpenAS2A \
   --recipient-partner-id 3 \
+  --allow-body-certificate-for-verification \
   --recipient-as2-id As2ng \
 
 #cli config trading-channel add \

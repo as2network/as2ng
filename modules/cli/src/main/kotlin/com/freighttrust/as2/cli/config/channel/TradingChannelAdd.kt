@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.enums.TradingChannelType
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
@@ -64,6 +62,14 @@ class TradingChannelAdd : KoinComponent, Runnable {
   lateinit var recipientAs2Id: String
 
   @Option(
+    names = ["-bcv", "--allow-body-certificate-for-verification"],
+    description = ["allow certificate provided in body of the request to be used for signature verification"],
+    required = true,
+    defaultValue = "false"
+  )
+  var allowBodyCertificateForVerification: Boolean? = null
+
+  @Option(
     names = ["-u", "--recipient-message-url"],
     description = ["recipient's url for receiving messages when forwarding"],
     required = false
@@ -105,6 +111,7 @@ class TradingChannelAdd : KoinComponent, Runnable {
               senderAs2Identifier = this@TradingChannelAdd.senderAs2Id
               recipientId = this@TradingChannelAdd.recipientPartnerId
               recipientAs2Identifier = this@TradingChannelAdd.recipientAs2Id
+              allowBodyCertificateForVerification = this@TradingChannelAdd.allowBodyCertificateForVerification
               recipientMessageUrl = this@TradingChannelAdd.recipientMessageUrl
             },
           tx

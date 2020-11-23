@@ -20,6 +20,8 @@ class MessageReceivedHandler(
           message.encryptionAlgorithm = bodyContext.encryptionAlgorithm
           message.encryptionKeyPairId = bodyContext.encryptionKeyPairId
 
+          message.signatureKeyPairId = bodyContext.signatureKeyPairId
+
           message.compressionAlgorithm = bodyContext.compressionAlgorithm
 
           if (bodyContext.mics != null) {

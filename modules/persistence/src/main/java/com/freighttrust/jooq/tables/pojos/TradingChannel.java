@@ -27,6 +27,7 @@ public class TradingChannel implements Serializable {
     private Long               recipientId;
     private String             recipientAs2Identifier;
     private Long               recipientKeyPairId;
+    private Boolean            allowBodyCertificateForVerification;
     private String             recipientMessageUrl;
     private TsTzRange          validity;
 
@@ -42,6 +43,7 @@ public class TradingChannel implements Serializable {
         this.recipientId = value.recipientId;
         this.recipientAs2Identifier = value.recipientAs2Identifier;
         this.recipientKeyPairId = value.recipientKeyPairId;
+        this.allowBodyCertificateForVerification = value.allowBodyCertificateForVerification;
         this.recipientMessageUrl = value.recipientMessageUrl;
         this.validity = value.validity;
     }
@@ -56,6 +58,7 @@ public class TradingChannel implements Serializable {
         Long               recipientId,
         String             recipientAs2Identifier,
         Long               recipientKeyPairId,
+        Boolean            allowBodyCertificateForVerification,
         String             recipientMessageUrl,
         TsTzRange          validity
     ) {
@@ -68,6 +71,7 @@ public class TradingChannel implements Serializable {
         this.recipientId = recipientId;
         this.recipientAs2Identifier = recipientAs2Identifier;
         this.recipientKeyPairId = recipientKeyPairId;
+        this.allowBodyCertificateForVerification = allowBodyCertificateForVerification;
         this.recipientMessageUrl = recipientMessageUrl;
         this.validity = validity;
     }
@@ -208,6 +212,21 @@ public class TradingChannel implements Serializable {
     }
 
     /**
+     * Getter for <code>public.trading_channel.allow_body_certificate_for_verification</code>.
+     */
+    public Boolean getAllowBodyCertificateForVerification() {
+        return this.allowBodyCertificateForVerification;
+    }
+
+    /**
+     * Setter for <code>public.trading_channel.allow_body_certificate_for_verification</code>.
+     */
+    public TradingChannel setAllowBodyCertificateForVerification(Boolean allowBodyCertificateForVerification) {
+        this.allowBodyCertificateForVerification = allowBodyCertificateForVerification;
+        return this;
+    }
+
+    /**
      * Getter for <code>public.trading_channel.recipient_message_url</code>.
      */
     public String getRecipientMessageUrl() {
@@ -300,6 +319,12 @@ public class TradingChannel implements Serializable {
         }
         else if (!recipientKeyPairId.equals(other.recipientKeyPairId))
             return false;
+        if (allowBodyCertificateForVerification == null) {
+            if (other.allowBodyCertificateForVerification != null)
+                return false;
+        }
+        else if (!allowBodyCertificateForVerification.equals(other.allowBodyCertificateForVerification))
+            return false;
         if (recipientMessageUrl == null) {
             if (other.recipientMessageUrl != null)
                 return false;
@@ -328,6 +353,7 @@ public class TradingChannel implements Serializable {
         result = prime * result + ((this.recipientId == null) ? 0 : this.recipientId.hashCode());
         result = prime * result + ((this.recipientAs2Identifier == null) ? 0 : this.recipientAs2Identifier.hashCode());
         result = prime * result + ((this.recipientKeyPairId == null) ? 0 : this.recipientKeyPairId.hashCode());
+        result = prime * result + ((this.allowBodyCertificateForVerification == null) ? 0 : this.allowBodyCertificateForVerification.hashCode());
         result = prime * result + ((this.recipientMessageUrl == null) ? 0 : this.recipientMessageUrl.hashCode());
         result = prime * result + ((this.validity == null) ? 0 : this.validity.hashCode());
         return result;
@@ -346,6 +372,7 @@ public class TradingChannel implements Serializable {
         sb.append(", ").append(recipientId);
         sb.append(", ").append(recipientAs2Identifier);
         sb.append(", ").append(recipientKeyPairId);
+        sb.append(", ").append(allowBodyCertificateForVerification);
         sb.append(", ").append(recipientMessageUrl);
         sb.append(", ").append(validity);
 

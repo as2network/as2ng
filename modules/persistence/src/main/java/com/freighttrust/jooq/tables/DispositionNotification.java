@@ -16,7 +16,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row8;
+import org.jooq.Row9;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -87,6 +87,11 @@ public class DispositionNotification extends TableImpl<DispositionNotificationRe
      * The column <code>public.disposition_notification.digest_algorithm</code>.
      */
     public final TableField<DispositionNotificationRecord, String> DIGEST_ALGORITHM = createField(DSL.name("digest_algorithm"), SQLDataType.VARCHAR(16), this, "");
+
+    /**
+     * The column <code>public.disposition_notification.signature_key_pair_id</code>.
+     */
+    public final TableField<DispositionNotificationRecord, Long> SIGNATURE_KEY_PAIR_ID = createField(DSL.name("signature_key_pair_id"), SQLDataType.BIGINT, this, "");
 
     private DispositionNotification(Name alias, Table<DispositionNotificationRecord> aliased) {
         this(alias, aliased, null);
@@ -176,11 +181,11 @@ public class DispositionNotification extends TableImpl<DispositionNotificationRe
     }
 
     // -------------------------------------------------------------------------
-    // Row8 type methods
+    // Row9 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<UUID, String, String, String, String, String, String, String> fieldsRow() {
-        return (Row8) super.fieldsRow();
+    public Row9<UUID, String, String, String, String, String, String, String, Long> fieldsRow() {
+        return (Row9) super.fieldsRow();
     }
 }

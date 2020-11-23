@@ -20,6 +20,7 @@ public class Message implements Serializable {
     private UUID     requestId;
     private String   encryptionAlgorithm;
     private Long     encryptionKeyPairId;
+    private Long     signatureKeyPairId;
     private String   compressionAlgorithm;
     private String[] mics;
     private Boolean  isMdnRequested;
@@ -32,6 +33,7 @@ public class Message implements Serializable {
         this.requestId = value.requestId;
         this.encryptionAlgorithm = value.encryptionAlgorithm;
         this.encryptionKeyPairId = value.encryptionKeyPairId;
+        this.signatureKeyPairId = value.signatureKeyPairId;
         this.compressionAlgorithm = value.compressionAlgorithm;
         this.mics = value.mics;
         this.isMdnRequested = value.isMdnRequested;
@@ -43,6 +45,7 @@ public class Message implements Serializable {
         UUID     requestId,
         String   encryptionAlgorithm,
         Long     encryptionKeyPairId,
+        Long     signatureKeyPairId,
         String   compressionAlgorithm,
         String[] mics,
         Boolean  isMdnRequested,
@@ -52,6 +55,7 @@ public class Message implements Serializable {
         this.requestId = requestId;
         this.encryptionAlgorithm = encryptionAlgorithm;
         this.encryptionKeyPairId = encryptionKeyPairId;
+        this.signatureKeyPairId = signatureKeyPairId;
         this.compressionAlgorithm = compressionAlgorithm;
         this.mics = mics;
         this.isMdnRequested = isMdnRequested;
@@ -101,6 +105,21 @@ public class Message implements Serializable {
      */
     public Message setEncryptionKeyPairId(Long encryptionKeyPairId) {
         this.encryptionKeyPairId = encryptionKeyPairId;
+        return this;
+    }
+
+    /**
+     * Getter for <code>public.message.signature_key_pair_id</code>.
+     */
+    public Long getSignatureKeyPairId() {
+        return this.signatureKeyPairId;
+    }
+
+    /**
+     * Setter for <code>public.message.signature_key_pair_id</code>.
+     */
+    public Message setSignatureKeyPairId(Long signatureKeyPairId) {
+        this.signatureKeyPairId = signatureKeyPairId;
         return this;
     }
 
@@ -206,6 +225,12 @@ public class Message implements Serializable {
         }
         else if (!encryptionKeyPairId.equals(other.encryptionKeyPairId))
             return false;
+        if (signatureKeyPairId == null) {
+            if (other.signatureKeyPairId != null)
+                return false;
+        }
+        else if (!signatureKeyPairId.equals(other.signatureKeyPairId))
+            return false;
         if (compressionAlgorithm == null) {
             if (other.compressionAlgorithm != null)
                 return false;
@@ -246,6 +271,7 @@ public class Message implements Serializable {
         result = prime * result + ((this.requestId == null) ? 0 : this.requestId.hashCode());
         result = prime * result + ((this.encryptionAlgorithm == null) ? 0 : this.encryptionAlgorithm.hashCode());
         result = prime * result + ((this.encryptionKeyPairId == null) ? 0 : this.encryptionKeyPairId.hashCode());
+        result = prime * result + ((this.signatureKeyPairId == null) ? 0 : this.signatureKeyPairId.hashCode());
         result = prime * result + ((this.compressionAlgorithm == null) ? 0 : this.compressionAlgorithm.hashCode());
         result = prime * result + ((this.mics == null) ? 0 : Arrays.hashCode(this.mics));
         result = prime * result + ((this.isMdnRequested == null) ? 0 : this.isMdnRequested.hashCode());
@@ -261,6 +287,7 @@ public class Message implements Serializable {
         sb.append(requestId);
         sb.append(", ").append(encryptionAlgorithm);
         sb.append(", ").append(encryptionKeyPairId);
+        sb.append(", ").append(signatureKeyPairId);
         sb.append(", ").append(compressionAlgorithm);
         sb.append(", ").append(Arrays.toString(mics));
         sb.append(", ").append(isMdnRequested);

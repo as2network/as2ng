@@ -24,6 +24,7 @@ public class DispositionNotification implements Serializable {
     private String disposition;
     private String receivedContentMic;
     private String digestAlgorithm;
+    private Long   signatureKeyPairId;
 
     public DispositionNotification() {}
 
@@ -36,6 +37,7 @@ public class DispositionNotification implements Serializable {
         this.disposition = value.disposition;
         this.receivedContentMic = value.receivedContentMic;
         this.digestAlgorithm = value.digestAlgorithm;
+        this.signatureKeyPairId = value.signatureKeyPairId;
     }
 
     public DispositionNotification(
@@ -46,7 +48,8 @@ public class DispositionNotification implements Serializable {
         String reportingUa,
         String disposition,
         String receivedContentMic,
-        String digestAlgorithm
+        String digestAlgorithm,
+        Long   signatureKeyPairId
     ) {
         this.requestId = requestId;
         this.originalMessageId = originalMessageId;
@@ -56,6 +59,7 @@ public class DispositionNotification implements Serializable {
         this.disposition = disposition;
         this.receivedContentMic = receivedContentMic;
         this.digestAlgorithm = digestAlgorithm;
+        this.signatureKeyPairId = signatureKeyPairId;
     }
 
     /**
@@ -178,6 +182,21 @@ public class DispositionNotification implements Serializable {
         return this;
     }
 
+    /**
+     * Getter for <code>public.disposition_notification.signature_key_pair_id</code>.
+     */
+    public Long getSignatureKeyPairId() {
+        return this.signatureKeyPairId;
+    }
+
+    /**
+     * Setter for <code>public.disposition_notification.signature_key_pair_id</code>.
+     */
+    public DispositionNotification setSignatureKeyPairId(Long signatureKeyPairId) {
+        this.signatureKeyPairId = signatureKeyPairId;
+        return this;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -235,6 +254,12 @@ public class DispositionNotification implements Serializable {
         }
         else if (!digestAlgorithm.equals(other.digestAlgorithm))
             return false;
+        if (signatureKeyPairId == null) {
+            if (other.signatureKeyPairId != null)
+                return false;
+        }
+        else if (!signatureKeyPairId.equals(other.signatureKeyPairId))
+            return false;
         return true;
     }
 
@@ -250,6 +275,7 @@ public class DispositionNotification implements Serializable {
         result = prime * result + ((this.disposition == null) ? 0 : this.disposition.hashCode());
         result = prime * result + ((this.receivedContentMic == null) ? 0 : this.receivedContentMic.hashCode());
         result = prime * result + ((this.digestAlgorithm == null) ? 0 : this.digestAlgorithm.hashCode());
+        result = prime * result + ((this.signatureKeyPairId == null) ? 0 : this.signatureKeyPairId.hashCode());
         return result;
     }
 
@@ -265,6 +291,7 @@ public class DispositionNotification implements Serializable {
         sb.append(", ").append(disposition);
         sb.append(", ").append(receivedContentMic);
         sb.append(", ").append(digestAlgorithm);
+        sb.append(", ").append(signatureKeyPairId);
 
         sb.append(")");
         return sb.toString();

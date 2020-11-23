@@ -19,7 +19,7 @@ import org.jooq.ForeignKey;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row11;
+import org.jooq.Row12;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -97,6 +97,11 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     public final TableField<TradingChannelRecord, Long> RECIPIENT_KEY_PAIR_ID = createField(DSL.name("recipient_key_pair_id"), SQLDataType.BIGINT, this, "");
 
     /**
+     * The column <code>public.trading_channel.allow_body_certificate_for_verification</code>.
+     */
+    public final TableField<TradingChannelRecord, Boolean> ALLOW_BODY_CERTIFICATE_FOR_VERIFICATION = createField(DSL.name("allow_body_certificate_for_verification"), SQLDataType.BOOLEAN.defaultValue(DSL.field("false", SQLDataType.BOOLEAN)), this, "");
+
+    /**
      * The column <code>public.trading_channel.recipient_message_url</code>.
      */
     public final TableField<TradingChannelRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), SQLDataType.VARCHAR(128), this, "");
@@ -156,7 +161,7 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
 
     @Override
     public List<UniqueKey<TradingChannelRecord>> getKeys() {
-        return Arrays.<UniqueKey<TradingChannelRecord>>asList(Keys.TRADING_CHANNEL_PKEY, Keys.TRADING_CHANNEL_SENDER_ID_RECIPIENT_ID_KEY, Keys.TRADING_CHANNEL_SENDER_AS2_IDENTIFIER_RECIPIENT_AS2_IDENTIF_KEY);
+        return Arrays.<UniqueKey<TradingChannelRecord>>asList(Keys.TRADING_CHANNEL_PKEY, Keys.TRADING_CHANNEL_NAME_KEY, Keys.TRADING_CHANNEL_SENDER_ID_RECIPIENT_ID_KEY, Keys.TRADING_CHANNEL_SENDER_AS2_IDENTIFIER_RECIPIENT_AS2_IDENTIF_KEY);
     }
 
     @Override
@@ -207,11 +212,11 @@ public class TradingChannel extends TableImpl<TradingChannelRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row11 type methods
+    // Row12 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row11<Long, String, TradingChannelType, Long, String, Long, Long, String, Long, String, TsTzRange> fieldsRow() {
-        return (Row11) super.fieldsRow();
+    public Row12<Long, String, TradingChannelType, Long, String, Long, Long, String, Long, Boolean, String, TsTzRange> fieldsRow() {
+        return (Row12) super.fieldsRow();
     }
 }

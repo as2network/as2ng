@@ -76,7 +76,7 @@ data class BodyContext(
   val currentBody: MimeBodyPart,
   val decryptedBody: Triple<MimeBodyPart, String, KeyPair>? = null,
   val decompressedBody: Pair<MimeBodyPart, String>? = null,
-  val verifiedBody: Pair<MimeBodyPart, X509Certificate>? = null,
+  val verifiedBody: Pair<MimeBodyPart, KeyPair>? = null,
   val mics: List<String>? = null
 ) {
 
@@ -88,6 +88,8 @@ data class BodyContext(
 
   val encryptionAlgorithm: String? get() = decryptedBody?.second
   val encryptionKeyPairId: Long? get() = decryptedBody?.third?.id
+
+  val signatureKeyPairId: Long? get() = verifiedBody?.second?.id
 
   val compressionAlgorithm: String? get() = decompressedBody?.second
 }
@@ -238,15 +240,15 @@ data class As2RequestContext(
       }
     }
 
-  fun verify(certificate: X509Certificate): As2RequestContext =
+  fun verify(keyPair: KeyPair): As2RequestContext =
     require(isBodySigned) { "message is not signed" }
       .let {
-        body.verifiedContent(certificate, tempFileHelper, securityProvider)
+        body.verifiedContent(keyPair.certificate.toX509(), tempFileHelper, securityProvider)
           .let { verifiedBody ->
             copy(
               bodyContext = bodyContext.copy(
                 currentBody = verifiedBody,
-                verifiedBody = Pair(verifiedBody, certificate)
+                verifiedBody = Pair(verifiedBody, keyPair)
               )
             )
           }

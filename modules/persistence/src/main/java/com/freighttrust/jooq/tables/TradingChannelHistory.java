@@ -14,7 +14,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row11;
+import org.jooq.Row12;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -91,6 +91,11 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     public final TableField<TradingChannelHistoryRecord, Long> RECIPIENT_KEY_PAIR_ID = createField(DSL.name("recipient_key_pair_id"), SQLDataType.BIGINT, this, "");
 
     /**
+     * The column <code>public.trading_channel_history.allow_body_certificate_for_verification</code>.
+     */
+    public final TableField<TradingChannelHistoryRecord, Boolean> ALLOW_BODY_CERTIFICATE_FOR_VERIFICATION = createField(DSL.name("allow_body_certificate_for_verification"), SQLDataType.BOOLEAN, this, "");
+
+    /**
      * The column <code>public.trading_channel_history.recipient_message_url</code>.
      */
     public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), SQLDataType.VARCHAR(128), this, "");
@@ -165,11 +170,11 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     }
 
     // -------------------------------------------------------------------------
-    // Row11 type methods
+    // Row12 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row11<Long, String, TradingChannelType, Long, String, Long, Long, String, Long, String, TsTzRange> fieldsRow() {
-        return (Row11) super.fieldsRow();
+    public Row12<Long, String, TradingChannelType, Long, String, Long, Long, String, Long, Boolean, String, TsTzRange> fieldsRow() {
+        return (Row12) super.fieldsRow();
     }
 }
