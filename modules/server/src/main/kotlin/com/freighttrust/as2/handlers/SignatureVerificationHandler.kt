@@ -5,6 +5,7 @@ import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.signatureCertificateFromBody
 import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.persistence.KeyPairRepository
+import com.freighttrust.persistence.extensions.formattedSerialNumber
 import com.freighttrust.persistence.extensions.toBase64
 import com.freighttrust.persistence.extensions.toX509
 import io.vertx.ext.web.RoutingContext
@@ -35,7 +36,7 @@ class SignatureVerificationHandler(
             keyPairRepository.transaction { tx ->
 
               // look for a keypair in the database that matches the certificate provided in the body
-              keyPairRepository.findByCertificate(bodyCertificate, tx)
+              keyPairRepository.findBySerialNumber(bodyCertificate.formattedSerialNumber, tx)
               // insert a new keypair entry if needed
                 ?: keyPairRepository.insert(
                   KeyPair()

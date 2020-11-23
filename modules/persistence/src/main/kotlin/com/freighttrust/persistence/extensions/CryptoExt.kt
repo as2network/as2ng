@@ -17,6 +17,9 @@ fun String.toX509(): X509Certificate {
   return x509Factory.generateCertificate(bytesIn) as X509Certificate
 }
 
+val X509Certificate.formattedSerialNumber
+  get() = serialNumber.toString(16).chunked(2).joinToString(":")
+
 fun X509Certificate.toBase64(): String =Base64.encodeBytes(this.encoded).replace("\n", "")
 
 fun String.toPrivateKey(): PrivateKey {

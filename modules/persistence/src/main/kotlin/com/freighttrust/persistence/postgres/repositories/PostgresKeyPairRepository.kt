@@ -23,17 +23,18 @@ class PostgresKeyPairRepository(
 
   override fun idQuery(value: KeyPair): Condition = KEY_PAIR.ID.eq(value.id)
 
-  override suspend fun findByCertificate(certificate: X509Certificate, ctx: Repository.Context?): KeyPair? =
+  override suspend fun findBySerialNumber(serialNumber: String, ctx: Repository.Context?): KeyPair? =
     coroutineScope {
       jooqContext(ctx)
         .selectFrom(KEY_PAIR)
-        .where(KEY_PAIR.CERTIFICATE.eq(certificate.toBase64()))
+        .where(KEY_PAIR.SERIAL_NUMBER.eq(serialNumber))
         .fetchOne()
         ?.into(KeyPair::class.java)
     }
 
   override suspend fun issue(certificateFactory: CertificateFactory, ctx: Repository.Context?): KeyPair {
 
+    // TODO better naming convention
     val commonName = "${System.currentTimeMillis()}.freighttrust.com"
 
     return when (val response = certificateFactory.issueX509(commonName)) {
