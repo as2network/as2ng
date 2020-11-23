@@ -32,21 +32,32 @@ mc mb --ignore-existing local/${AS2NG_S3_BUCKET}
 # create some key pairs
 cli config key-pair issue
 cli config key-pair issue
+cli config key-pair issue
 
 # create some trading partners
 
 cli config trading-partner add -n OpenAS2A -e openas2a@example.com -k 1
 cli config trading-partner add -n OpenAS2B -e openas2b@example.com -k 2
+cli config trading-partner add -n As2ng -e as2ng@example.com -k 3
 
 # create some trading channels
 
 cli config trading-channel add \
   --name OpenAS2A__OpenAS2B \
+  --type forwarding \
   --sender-partner-id 1 \
   --sender-as2-id OpenAS2A \
   --recipient-partner-id 2 \
   --recipient-as2-id OpenAS2B \
   --recipient-message-url http://localhost:10082
+
+cli config trading-channel add \
+  --name OpenAS2A__As2ng \
+  --type receiving \
+  --sender-partner-id 1 \
+  --sender-as2-id OpenAS2A \
+  --recipient-partner-id 3 \
+  --recipient-as2-id As2ng \
 
 #cli config trading-channel add \
 #  --name "OpenAS2B__OpenAS2A" \

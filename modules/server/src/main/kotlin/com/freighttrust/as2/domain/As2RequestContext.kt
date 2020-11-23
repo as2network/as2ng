@@ -2,10 +2,12 @@ package com.freighttrust.as2.domain
 
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.calculateMic
+import com.freighttrust.as2.ext.createMDNBodyPart
 import com.freighttrust.as2.ext.get
 import com.freighttrust.as2.ext.isCompressed
 import com.freighttrust.as2.ext.isEncrypted
 import com.freighttrust.as2.ext.isSigned
+import com.freighttrust.as2.ext.sign
 import com.freighttrust.as2.ext.verifiedContent
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.as2.util.TempFileHelper
@@ -14,12 +16,19 @@ import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
+import com.freighttrust.persistence.DispositionNotificationRepository
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
 import com.helger.as2lib.disposition.DispositionOptions
+import com.helger.mail.cte.EContentTransferEncoding
 import io.vertx.core.Handler
 import io.vertx.core.MultiMap
+import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.client.WebClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.apache.http.HttpHeaders
 import org.bouncycastle.cms.CMSException
 import org.bouncycastle.cms.RecipientId
 import org.bouncycastle.cms.RecipientInformation
@@ -41,6 +50,10 @@ import javax.mail.MessagingException
 import javax.mail.internet.MimeBodyPart
 import kotlin.reflect.KClass
 import com.freighttrust.jooq.tables.pojos.Message as MessageRecord
+import com.freighttrust.as2.ext.putHeader
+import io.vertx.kotlin.ext.web.client.sendBufferAwait
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 val encryptionAlgorithmNameFinder = DefaultAlgorithmNameFinder()
 
@@ -53,8 +66,8 @@ data class Records(
   val tradingChannel: TradingChannel,
   val sender: TradingPartner,
   val recipient: TradingPartner,
-  val senderKeyPair: KeyPair?,
-  val recipientKeyPair: KeyPair?,
+  val senderKeyPair: KeyPair,
+  val recipientKeyPair: KeyPair,
   val originalMessage: MessageRecord? = null,
   val dispositionNotification: DispositionNotification? = null
 )
@@ -85,7 +98,10 @@ data class As2RequestContext(
   val securityProvider: Provider,
   val tempFileHelper: TempFileHelper,
   val records: Records,
-  val bodyContext: BodyContext
+  val bodyContext: BodyContext,
+  val routingContext: RoutingContext,
+  val webClient: WebClient,
+  val dispositionNotificationRepository: DispositionNotificationRepository
 ) {
 
   companion object {
@@ -256,10 +272,108 @@ data class As2RequestContext(
     "AS2-To" to recipientId
   )
 
+  fun withLogger(log: Logger.() -> Unit) {
+    MDC.setContextMap(contextMap)
+    log(logger)
+    MDC.clear()
+  }
+
   fun withLogger(clazz: KClass<out Handler<RoutingContext>>, log: Logger.() -> Unit) {
     MDC.setContextMap(contextMap + ("Handler" to clazz.simpleName))
     log(logger)
     MDC.clear()
+  }
+
+
+  suspend fun sendMDN(text: String, notification: DispositionNotification) {
+
+    require(isMdnRequested) { "Attempting to send an MDN for a request which has not requested one" }
+
+    val responseBody = persistDispositionNotification(notification)
+      .let { routingContext.createMDNBodyPart(text, notification) }
+
+    val buffer = withContext(Dispatchers.IO) {
+      Buffer.buffer(responseBody.inputStream.readAllBytes())
+    }
+
+    when (isMdnAsynchronous) {
+
+      // synchronous response
+      false -> routingContext
+        .response()
+        .setStatusCode(200)
+        .end(buffer)
+
+      // async response
+      true -> {
+
+        // close the connection
+        routingContext
+          .response()
+          .setStatusCode(204)
+          .end()
+
+        withContext(Dispatchers.IO) {
+
+          // launch a new routine to do the async sending
+
+          launch {
+
+            // send the mdn separately to the async endpoint provided in the headers
+
+            val url = requireNotNull(receiptDeliveryOption) {
+              "Receipt delivery option must be specified for an async mdn"
+            }
+
+            // TODO some of these headers should be configurable
+            // TODO support compression
+
+            val response = webClient
+              .postAbs(url)
+              .putHeader(AS2Header.As2From, recipientId)
+              .putHeader(AS2Header.As2To, senderId)
+              .putHeader(AS2Header.MessageId, messageId)
+              .putHeader(AS2Header.Version, "1.1")
+              .putHeader(AS2Header.MimeVersion, "1.0")
+              .putHeader(AS2Header.Subject, "Your Requested MDN Response")
+              .putHeader(HttpHeaders.USER_AGENT, notification.reportingUa)
+              .putHeader(HttpHeaders.CONTENT_TYPE, responseBody.contentType)
+              .putHeader(HttpHeaders.CONTENT_ENCODING, responseBody.encoding)
+              .sendBufferAwait(buffer)
+
+            with(response) {
+              if(response.statusCode() != 200)
+                withLogger {
+                  // TODO improve contextual info here
+                  error("Async mdn response failed. Status code = ${response.statusCode()}")
+                }
+            }
+
+          }
+        }
+
+      }
+    }
+
+  }
+
+  private suspend fun persistDispositionNotification(notification: DispositionNotification) {
+
+    val originalRequestId = records.request.id
+
+    dispositionNotificationRepository
+      .insert(
+        DispositionNotification()
+          .apply {
+            this.requestId = originalRequestId
+            this.originalMessageId = notification.originalMessageId
+            this.originalRecipient = notification.originalRecipient
+            this.finalRecipient = notification.finalRecipient
+            this.reportingUa = notification.reportingUa
+            this.disposition = notification.disposition.toString()
+            notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
+          }
+      )
   }
 
 }

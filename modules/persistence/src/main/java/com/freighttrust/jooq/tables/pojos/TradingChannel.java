@@ -5,6 +5,7 @@ package com.freighttrust.jooq.tables.pojos;
 
 
 import com.freighttrust.common.util.TsTzRange;
+import com.freighttrust.jooq.enums.TradingChannelType;
 
 import java.io.Serializable;
 
@@ -17,53 +18,57 @@ public class TradingChannel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long      id;
-    private String    name;
-    private Long      senderId;
-    private String    senderAs2Identifier;
-    private Long      senderKeyPairId;
-    private Long      recipientId;
-    private String    recipientAs2Identifier;
-    private String    recipientMessageUrl;
-    private Long      recipientKeyPairId;
-    private TsTzRange validity;
+    private Long               id;
+    private String             name;
+    private TradingChannelType type;
+    private Long               senderId;
+    private String             senderAs2Identifier;
+    private Long               senderKeyPairId;
+    private Long               recipientId;
+    private String             recipientAs2Identifier;
+    private Long               recipientKeyPairId;
+    private String             recipientMessageUrl;
+    private TsTzRange          validity;
 
     public TradingChannel() {}
 
     public TradingChannel(TradingChannel value) {
         this.id = value.id;
         this.name = value.name;
+        this.type = value.type;
         this.senderId = value.senderId;
         this.senderAs2Identifier = value.senderAs2Identifier;
         this.senderKeyPairId = value.senderKeyPairId;
         this.recipientId = value.recipientId;
         this.recipientAs2Identifier = value.recipientAs2Identifier;
-        this.recipientMessageUrl = value.recipientMessageUrl;
         this.recipientKeyPairId = value.recipientKeyPairId;
+        this.recipientMessageUrl = value.recipientMessageUrl;
         this.validity = value.validity;
     }
 
     public TradingChannel(
-        Long      id,
-        String    name,
-        Long      senderId,
-        String    senderAs2Identifier,
-        Long      senderKeyPairId,
-        Long      recipientId,
-        String    recipientAs2Identifier,
-        String    recipientMessageUrl,
-        Long      recipientKeyPairId,
-        TsTzRange validity
+        Long               id,
+        String             name,
+        TradingChannelType type,
+        Long               senderId,
+        String             senderAs2Identifier,
+        Long               senderKeyPairId,
+        Long               recipientId,
+        String             recipientAs2Identifier,
+        Long               recipientKeyPairId,
+        String             recipientMessageUrl,
+        TsTzRange          validity
     ) {
         this.id = id;
         this.name = name;
+        this.type = type;
         this.senderId = senderId;
         this.senderAs2Identifier = senderAs2Identifier;
         this.senderKeyPairId = senderKeyPairId;
         this.recipientId = recipientId;
         this.recipientAs2Identifier = recipientAs2Identifier;
-        this.recipientMessageUrl = recipientMessageUrl;
         this.recipientKeyPairId = recipientKeyPairId;
+        this.recipientMessageUrl = recipientMessageUrl;
         this.validity = validity;
     }
 
@@ -94,6 +99,21 @@ public class TradingChannel implements Serializable {
      */
     public TradingChannel setName(String name) {
         this.name = name;
+        return this;
+    }
+
+    /**
+     * Getter for <code>public.trading_channel.type</code>.
+     */
+    public TradingChannelType getType() {
+        return this.type;
+    }
+
+    /**
+     * Setter for <code>public.trading_channel.type</code>.
+     */
+    public TradingChannel setType(TradingChannelType type) {
+        this.type = type;
         return this;
     }
 
@@ -173,21 +193,6 @@ public class TradingChannel implements Serializable {
     }
 
     /**
-     * Getter for <code>public.trading_channel.recipient_message_url</code>.
-     */
-    public String getRecipientMessageUrl() {
-        return this.recipientMessageUrl;
-    }
-
-    /**
-     * Setter for <code>public.trading_channel.recipient_message_url</code>.
-     */
-    public TradingChannel setRecipientMessageUrl(String recipientMessageUrl) {
-        this.recipientMessageUrl = recipientMessageUrl;
-        return this;
-    }
-
-    /**
      * Getter for <code>public.trading_channel.recipient_key_pair_id</code>.
      */
     public Long getRecipientKeyPairId() {
@@ -199,6 +204,21 @@ public class TradingChannel implements Serializable {
      */
     public TradingChannel setRecipientKeyPairId(Long recipientKeyPairId) {
         this.recipientKeyPairId = recipientKeyPairId;
+        return this;
+    }
+
+    /**
+     * Getter for <code>public.trading_channel.recipient_message_url</code>.
+     */
+    public String getRecipientMessageUrl() {
+        return this.recipientMessageUrl;
+    }
+
+    /**
+     * Setter for <code>public.trading_channel.recipient_message_url</code>.
+     */
+    public TradingChannel setRecipientMessageUrl(String recipientMessageUrl) {
+        this.recipientMessageUrl = recipientMessageUrl;
         return this;
     }
 
@@ -238,6 +258,12 @@ public class TradingChannel implements Serializable {
         }
         else if (!name.equals(other.name))
             return false;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        }
+        else if (!type.equals(other.type))
+            return false;
         if (senderId == null) {
             if (other.senderId != null)
                 return false;
@@ -268,17 +294,17 @@ public class TradingChannel implements Serializable {
         }
         else if (!recipientAs2Identifier.equals(other.recipientAs2Identifier))
             return false;
-        if (recipientMessageUrl == null) {
-            if (other.recipientMessageUrl != null)
-                return false;
-        }
-        else if (!recipientMessageUrl.equals(other.recipientMessageUrl))
-            return false;
         if (recipientKeyPairId == null) {
             if (other.recipientKeyPairId != null)
                 return false;
         }
         else if (!recipientKeyPairId.equals(other.recipientKeyPairId))
+            return false;
+        if (recipientMessageUrl == null) {
+            if (other.recipientMessageUrl != null)
+                return false;
+        }
+        else if (!recipientMessageUrl.equals(other.recipientMessageUrl))
             return false;
         if (validity == null) {
             if (other.validity != null)
@@ -295,13 +321,14 @@ public class TradingChannel implements Serializable {
         int result = 1;
         result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
         result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
         result = prime * result + ((this.senderId == null) ? 0 : this.senderId.hashCode());
         result = prime * result + ((this.senderAs2Identifier == null) ? 0 : this.senderAs2Identifier.hashCode());
         result = prime * result + ((this.senderKeyPairId == null) ? 0 : this.senderKeyPairId.hashCode());
         result = prime * result + ((this.recipientId == null) ? 0 : this.recipientId.hashCode());
         result = prime * result + ((this.recipientAs2Identifier == null) ? 0 : this.recipientAs2Identifier.hashCode());
-        result = prime * result + ((this.recipientMessageUrl == null) ? 0 : this.recipientMessageUrl.hashCode());
         result = prime * result + ((this.recipientKeyPairId == null) ? 0 : this.recipientKeyPairId.hashCode());
+        result = prime * result + ((this.recipientMessageUrl == null) ? 0 : this.recipientMessageUrl.hashCode());
         result = prime * result + ((this.validity == null) ? 0 : this.validity.hashCode());
         return result;
     }
@@ -312,13 +339,14 @@ public class TradingChannel implements Serializable {
 
         sb.append(id);
         sb.append(", ").append(name);
+        sb.append(", ").append(type);
         sb.append(", ").append(senderId);
         sb.append(", ").append(senderAs2Identifier);
         sb.append(", ").append(senderKeyPairId);
         sb.append(", ").append(recipientId);
         sb.append(", ").append(recipientAs2Identifier);
-        sb.append(", ").append(recipientMessageUrl);
         sb.append(", ").append(recipientKeyPairId);
+        sb.append(", ").append(recipientMessageUrl);
         sb.append(", ").append(validity);
 
         sb.append(")");

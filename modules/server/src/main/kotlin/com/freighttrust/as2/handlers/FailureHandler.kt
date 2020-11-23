@@ -1,8 +1,8 @@
 package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.as2.ext.createMDN
-import com.freighttrust.as2.ext.dispositionNotification
+import com.freighttrust.as2.ext.createMDNBodyPart
+import com.freighttrust.as2.ext.createDispositionNotification
 import com.freighttrust.as2.ext.putHeader
 import com.freighttrust.as2.ext.sign
 import com.freighttrust.as2.util.AS2Header.As2From
@@ -76,7 +76,7 @@ class FailureHandler(
 
   }
 
-  private suspend fun handleDispositionException(ctx: RoutingContext, failure: DispositionException) {
+  private suspend fun handleDispositionException(ctx: RoutingContext, exception: DispositionException) {
 
     with(ctx.as2Context) {
 
@@ -85,105 +85,10 @@ class FailureHandler(
         return ctx.response().end()
       }
 
-      val notification = ctx
-        .dispositionNotification(failure.disposition)
-        .also { storeNotification(ctx, it) }
-
-      val mdn = ctx.createMDN("A failure occurred", notification)
-
-      // response may be signed or not
-      val responseBody = dispositionNotificationOptions
-        ?.firstMICAlg
-        ?.let { algorithm ->
-
-          val partner = with(records.tradingChannel) {
-            partnerRepository.findById(
-              TradingPartner().apply { id = recipientId }
-            ) ?: throw Error("Partner not found with id = $recipientId")
-          }
-
-          val keyPair = with(partner) {
-            keyPairRepository.findById(
-              KeyPair().apply { id = keyPairId }
-            ) ?: throw Error("KeyPair not found with id = $keyPairId")
-          }
-
-          mdn.sign(
-            keyPair.privateKey.toPrivateKey(),
-            keyPair.certificate.toX509(),
-            algorithm,
-            EContentTransferEncoding.BINARY,
-            securityProvider
-          )
-        } ?: mdn
-
-      val buffer = withContext(Dispatchers.IO) {
-        Buffer.buffer(responseBody.inputStream.readAllBytes())
-      }
-
-      when (isMdnAsynchronous) {
-
-        // synchronous response
-        false -> ctx
-          .response()
-          .setStatusCode(200)
-          .end(buffer)
-
-        // async response
-        true -> {
-
-          // close the connection
-          ctx
-            .response()
-            .setStatusCode(204)
-            .end()
-
-          // send the mdn separately to the async endpoint provided in the headers
-
-          val url = requireNotNull(receiptDeliveryOption) {
-            "Receipt delivery option must be specified for an async mdn"
-          }
-
-          // TODO some of these headers should be configurable
-          // TODO support compression
-
-          val response = webClient
-            .postAbs(url)
-            .putHeader(As2From, recipientId)
-            .putHeader(As2To, senderId)
-            .putHeader(MessageId, messageId)
-            .putHeader(Version, "1.1")
-            .putHeader(MimeVersion, "1.0")
-            .putHeader(Subject, "Your Requested MDN Response")
-            .putHeader(HttpHeaders.USER_AGENT, notification.reportingUa)
-            .putHeader(HttpHeaders.CONTENT_TYPE, responseBody.contentType)
-            .putHeader(HttpHeaders.CONTENT_ENCODING, responseBody.encoding)
-            .sendBufferAwait(buffer)
-
-          with(response) {
-            require(statusCode() == 200) { "Unexpected status code in MDN response: ${statusCode()}" }
-          }
-        }
-      }
-    }
-  }
-
-  private suspend fun storeNotification(ctx: RoutingContext, notification: DispositionNotification) {
-
-    val originalRequestId = ctx.as2Context.records.request.id
-
-    dispositionNotificationRepository
-      .insert(
-        DispositionNotification()
-          .apply {
-            this.requestId = originalRequestId
-            this.originalMessageId = notification.originalMessageId
-            this.originalRecipient = notification.originalRecipient
-            this.finalRecipient = notification.finalRecipient
-            this.reportingUa = notification.reportingUa
-            this.disposition = notification.disposition.toString()
-            notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
-          }
+      sendMDN(
+        "An internal server error occurred",
+        ctx.createDispositionNotification(exception.disposition)
       )
+    }
   }
 }

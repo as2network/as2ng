@@ -10,10 +10,8 @@ import com.freighttrust.as2.handlers.CoroutineRouteHandler
 import com.freighttrust.as2.handlers.as2Context
 import com.freighttrust.as2.handlers.tempFileHelper
 import com.freighttrust.as2.util.AS2Header
+import com.freighttrust.jooq.enums.TradingChannelType
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
-import com.freighttrust.jooq.tables.pojos.KeyPair
-import com.freighttrust.jooq.tables.pojos.TradingPartner
-import com.freighttrust.persistence.DispositionNotificationRepository
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingPartnerRepository
@@ -22,7 +20,6 @@ import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.commons.http.CHttpHeader
 import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.web.RoutingContext
-import io.vertx.ext.web.client.WebClient
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,13 +31,15 @@ class ForwardMessageHandler(
   private val baseUrl: String,
   private val requestRepository: RequestRepository,
   private val partnerRepository: TradingPartnerRepository,
-  private val keyPairRepository: KeyPairRepository,
-  private val dispositionNotificationRepository: DispositionNotificationRepository,
-  private val webClient: WebClient
+  private val keyPairRepository: KeyPairRepository
 ) : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext): Unit =
     with(ctx.as2Context) {
+
+      if(records.tradingChannel.type != TradingChannelType.forwarding)
+        // forward to next handler and exit as the trading channel is not a forwarding type
+        return ctx.next()
 
       val url = records.tradingChannel.recipientMessageUrl
 
@@ -73,7 +72,7 @@ class ForwardMessageHandler(
 
       if (isMdnRequested && !isMdnAsynchronous) {
 
-        //
+        // synchronouse MDN handling
 
         var bodyPart = MimeBodyPart()
           .apply {
@@ -92,19 +91,11 @@ class ForwardMessageHandler(
             setHeader(CHttpHeader.CONTENT_TYPE, receivedContentType)
           }
 
-        // response may be signed
+        // response may be signed so we need to extract the verified content
 
         if (bodyPart.isSigned()) {
-
-          val partner = partnerRepository.findById(
-            TradingPartner().apply { id = ctx.as2Context.records.tradingChannel.recipientId }
-          ) ?: throw Error("Could not find recipient trading partner in database")
-
-          val keyPair = keyPairRepository.findById(
-            KeyPair().apply { id = partner.keyPairId }
-          ) ?: throw Error("Could not find key pair for partner in database")
-
-          bodyPart = bodyPart.verifiedContent(keyPair.certificate.toX509(), ctx.tempFileHelper, securityProvider)
+          val certificate = records.recipientKeyPair.certificate.toX509()
+          bodyPart = bodyPart.verifiedContent(certificate, ctx.tempFileHelper, securityProvider)
         }
 
         // store the notification
@@ -128,7 +119,7 @@ class ForwardMessageHandler(
               )
           }
 
-        // return the mdn
+        // forward the mdn response
 
         response
           .headers()

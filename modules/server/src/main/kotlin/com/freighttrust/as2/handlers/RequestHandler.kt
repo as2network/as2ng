@@ -16,13 +16,17 @@ import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.jooq.enums.RequestType.mdn
 import com.freighttrust.jooq.enums.RequestType.message
+import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.pojos.Request
+import com.freighttrust.persistence.DispositionNotificationRepository
 import com.freighttrust.persistence.FileService
+import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.extensions.toJSONB
 import com.helger.as2lib.message.AS2Message
 import io.vertx.ext.web.RoutingContext
+import io.vertx.ext.web.client.WebClient
 import org.apache.tika.mime.MimeTypes
 import org.jooq.tools.json.JSONObject
 import java.security.Provider
@@ -40,9 +44,12 @@ var RoutingContext.as2Context: As2RequestContext
 class As2RequestHandler(
   private val uuidGenerator: TimeBasedGenerator,
   private val tradingChannelRepository: TradingChannelRepository,
+  private val dispositionNotificationRepository: DispositionNotificationRepository,
   private val requestRepository: RequestRepository,
+  private val keyPairRepository: KeyPairRepository,
   private val fileService: FileService,
-  private val securityProvider: Provider
+  private val securityProvider: Provider,
+  private val webClient: WebClient
 ) : CoroutineRouteHandler() {
 
   companion object {
@@ -64,7 +71,7 @@ class As2RequestHandler(
         // TODO validate as2 headers before continuing
 
         // lookup trading channel
-        val (tradingChannelRecord, sender, recipient, senderKeyPair, recipientKeyPair) =
+        var (tradingChannelRecord, sender, recipient, senderKeyPair, recipientKeyPair) =
           request.headers()
             .let { headers ->
 
@@ -98,6 +105,20 @@ class As2RequestHandler(
 
         requireNotNull(sender) { "Sender trading partner could not be found" }
         requireNotNull(recipient) { "Recipient trading partner could not be found" }
+
+        if (senderKeyPair == null) {
+          // a key pair has not been specified for the trading channel so we fall back to the partner default
+          senderKeyPair = keyPairRepository.findById(
+            KeyPair().apply { id = sender.keyPairId }
+          ) ?: throw Error("Could not determine a key pair for the sender")
+        }
+
+        if (recipientKeyPair == null) {
+          // a key pair has not been specified for the trading channel so we fall back to the partner default
+          recipientKeyPair = keyPairRepository.findById(
+            KeyPair().apply { id = recipient.keyPairId }
+          ) ?: throw Error("Could not determine a key pair for the recipient")
+        }
 
         // store body
 
@@ -147,7 +168,10 @@ class As2RequestHandler(
           securityProvider,
           TempFileHelper(),
           Records(requestRecord, tradingChannelRecord, sender, recipient, senderKeyPair, recipientKeyPair),
-          BodyContext(body)
+          BodyContext(body),
+          ctx,
+          webClient,
+          dispositionNotificationRepository
         ).also { message -> ctx.put(CTX_AS2, message) }
 
         ctx.next()

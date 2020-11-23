@@ -23,33 +23,15 @@ class SignatureVerificationHandler(
       try {
 
         // check if there is a certificate in the request body
-        var certificate = body
+        val certificate = body
           .signatureCertificateFromBody(ctx.tempFileHelper, securityProvider)
           ?.apply {
             withLogger(SignatureVerificationHandler::class) {
               info("Certificate found within request body")
             }
           }
-
-        // fallback to keypair configured for the trading channel
-        certificate = certificate ?: records.senderKeyPair?.certificate?.toX509()
-          ?.apply {
-            withLogger(SignatureVerificationHandler::class) {
-              info("Certificate found for trading channel")
-            }
-          }
-
-        // fallback to keypair configured for the trading partner
-        certificate = certificate ?: keyPairRepository
-          .findById(KeyPair().apply { id = records.sender.keyPairId })
-          ?.certificate?.toX509()
-          ?.apply {
-            withLogger(SignatureVerificationHandler::class) {
-              info("Certificate found for trading partner")
-            }
-          }
-
-        if (certificate == null) throw Error("Could not find a certificate to verify the signature with")
+        // fallback to keypair configured for the trading channel or partner default
+          ?: records.senderKeyPair.certificate.toX509()
 
         ctx.as2Context = verify(certificate)
 

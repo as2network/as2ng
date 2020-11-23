@@ -61,6 +61,5 @@
             resenddir="%home%/../../data/OpenAS2B/resend"
             errordir="%home%/../../data/OpenAS2B/resend/error"
             resenddelay="60"/>
-    <module classname="com.helger.as2lib.processor.sender.AsynchMDNSenderModule"/>
   </processor>
 </openas2>

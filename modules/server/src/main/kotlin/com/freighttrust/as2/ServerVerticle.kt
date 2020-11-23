@@ -9,6 +9,7 @@ import com.freighttrust.as2.handlers.mdn.MicVerificationHandler
 import com.freighttrust.as2.handlers.message.ForwardMessageHandler
 import com.freighttrust.as2.handlers.message.MessageReceivedHandler
 import com.freighttrust.as2.handlers.message.MicGenerationHandler
+import com.freighttrust.as2.handlers.message.ReceiveMessageHandler
 import com.typesafe.config.Config
 import io.vertx.ext.web.Router
 import io.vertx.kotlin.coroutines.CoroutineVerticle
@@ -45,6 +46,7 @@ class ServerVerticle(
       .handler(koin.get<MicGenerationHandler>())
       .handler(koin.get<MessageReceivedHandler>())
       .handler(koin.get<ForwardMessageHandler>())
+      .handler(koin.get<ReceiveMessageHandler>())
 
     router.post("/mdn")
       .handler(koin.get<MdnReceivedHandler>())

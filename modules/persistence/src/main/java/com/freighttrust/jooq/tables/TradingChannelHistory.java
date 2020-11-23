@@ -6,6 +6,7 @@ package com.freighttrust.jooq.tables;
 
 import com.freighttrust.common.util.TsTzRange;
 import com.freighttrust.jooq.Public;
+import com.freighttrust.jooq.enums.TradingChannelType;
 import com.freighttrust.jooq.tables.records.TradingChannelHistoryRecord;
 import com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding;
 
@@ -13,7 +14,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row10;
+import org.jooq.Row11;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -55,6 +56,11 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     public final TableField<TradingChannelHistoryRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(64), this, "");
 
     /**
+     * The column <code>public.trading_channel_history.type</code>.
+     */
+    public final TableField<TradingChannelHistoryRecord, TradingChannelType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.asEnumDataType(com.freighttrust.jooq.enums.TradingChannelType.class), this, "");
+
+    /**
      * The column <code>public.trading_channel_history.sender_id</code>.
      */
     public final TableField<TradingChannelHistoryRecord, Long> SENDER_ID = createField(DSL.name("sender_id"), SQLDataType.BIGINT, this, "");
@@ -80,14 +86,14 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_AS2_IDENTIFIER = createField(DSL.name("recipient_as2_identifier"), SQLDataType.VARCHAR(64), this, "");
 
     /**
-     * The column <code>public.trading_channel_history.recipient_message_url</code>.
-     */
-    public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), SQLDataType.VARCHAR(128), this, "");
-
-    /**
      * The column <code>public.trading_channel_history.recipient_key_pair_id</code>.
      */
     public final TableField<TradingChannelHistoryRecord, Long> RECIPIENT_KEY_PAIR_ID = createField(DSL.name("recipient_key_pair_id"), SQLDataType.BIGINT, this, "");
+
+    /**
+     * The column <code>public.trading_channel_history.recipient_message_url</code>.
+     */
+    public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_MESSAGE_URL = createField(DSL.name("recipient_message_url"), SQLDataType.VARCHAR(128), this, "");
 
     /**
      * The column <code>public.trading_channel_history.validity</code>.
@@ -159,11 +165,11 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     }
 
     // -------------------------------------------------------------------------
-    // Row10 type methods
+    // Row11 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row10<Long, String, Long, String, Long, Long, String, String, Long, TsTzRange> fieldsRow() {
-        return (Row10) super.fieldsRow();
+    public Row11<Long, String, TradingChannelType, Long, String, Long, Long, String, Long, String, TsTzRange> fieldsRow() {
+        return (Row11) super.fieldsRow();
     }
 }

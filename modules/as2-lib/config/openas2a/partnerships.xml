@@ -4,6 +4,8 @@
   <partner name="OpenAS2B" as2_id="OpenAS2B" x509_alias="OpenAS2B" email="openas2b@email.com"/>
   <partner name="OpenAS2C" as2_id="OpenAS2C" x509_alias="OpenAS2C" email="openas2c@email.com"/>
 
+  <partner name="As2ng" as2_id="As2ng" x509_alias="As2ng" email="as2ng@email.com"/>
+
   <partnership name="OpenAS2A-OpenAS2B">
     <sender name="OpenAS2A"/>
     <receiver name="OpenAS2B"/>
@@ -16,6 +18,34 @@
                value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5"/>
     <attribute name="encrypt" value="3des"/>
     <attribute name="sign" value="md5"/>
+  </partnership>
+
+  <partnership name="OpenAS2A-As2ng">
+    <sender name="OpenAS2A"/>
+    <receiver name="As2ng"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="subject" value="From OpenAS2A to As2ng"/>
+    <attribute name="as2_url" value="http://localhost:8080/message"/>
+    <attribute name="as2_mdn_to" value="http://localhost:10081"/>
+    <attribute name="as2_receipt_option" value="http://localhost:10081"/>
+    <attribute name="as2_mdn_options"
+               value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5"/>
+    <attribute name="encrypt" value="3des"/>
+    <attribute name="sign" value="md5"/>
+  </partnership>
+
+  <partnership name="As2ng-OpenAS2A">
+    <sender name="As2ng"/>
+    <receiver name="OpenAS2A"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="subject" value="From OpenAS2A to As2ng"/>
+    <attribute name="as2_url" value="http://localhost:10080"/>
+    <attribute name="as2_mdn_to" value="http://localhost:8080/mdn"/>
+    <attribute name="as2_receipt_option" value="http://localhost:8080/mdn"/>
+    <attribute name="as2_mdn_options"
+               value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, sha1"/>
+    <attribute name="encrypt" value="3des"/>
+    <attribute name="sign" value="sha1"/>
   </partnership>
 
   <partnership name="OpenAS2B-OpenAS2A">

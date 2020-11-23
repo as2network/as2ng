@@ -45,10 +45,13 @@ execute procedure versioning(
 /* Trading Channel                                                           */
 /*****************************************************************************/
 
+create type trading_channel_type as enum ('receiving', 'forwarding');
+
 create table trading_channel
 (
     id                       bigserial primary key,
     name                     varchar(64),
+    type                     trading_channel_type,
 
     sender_id                bigint references trading_partner (id),
     sender_as2_identifier    varchar(64),
@@ -56,8 +59,9 @@ create table trading_channel
 
     recipient_id             bigint references trading_partner (id),
     recipient_as2_identifier varchar(64),
-    recipient_message_url    varchar(128),
     recipient_key_pair_id    bigint null references key_pair (id),
+
+    recipient_message_url    varchar(128) null,
 
     validity                 tstzrange default tstzrange(current_timestamp, null),
     unique (sender_id, recipient_id),

@@ -19,13 +19,13 @@
 
     <!-- This will parse the filename to get a sender and receiver. For instance a file
       named OpenAS2A-OpenAS2B.1234 would be sent from OpenAS2A to OpenAS2B. -->
-    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
-            outboxdir="%home%/../../data/OpenAS2A/toAny"
-            errordir="%home%/../../data/OpenAS2A/toAny/error"
-            interval="5"
-            delimiters="-."
-            format="sender.as2_id, receiver.as2_id, attributes.fileid"
-            mimetype="text/plain"/>
+<!--    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"-->
+<!--            outboxdir="%home%/../../data/OpenAS2A/toAny"-->
+<!--            errordir="%home%/../../data/OpenAS2A/toAny/error"-->
+<!--            interval="5"-->
+<!--            delimiters="-."-->
+<!--            format="sender.as2_id, receiver.as2_id, attributes.fileid"-->
+<!--            mimetype="text/plain"/>-->
 
     <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
             outboxdir="%home%/../../data/text/OpenAS2A/toOpenAS2B"
@@ -36,10 +36,26 @@
             mimetype="text/plain"/>
 
     <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
+            outboxdir="%home%/../../data/text/OpenAS2A/toAs2ng"
+            errordir="%home%/../../data/text/OpenAS2A/toAs2ng/error"
+            interval="5"
+            defaults="sender.as2_id=OpenAS2A, receiver.as2_id=As2ng"
+            sendFilename="true"
+            mimetype="text/plain"/>
+
+    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
             outboxdir="%home%/../../data/edi-x12/OpenAS2A/toOpenAS2B"
             errordir="%home%/../../data/edi-x12/OpenAS2A/toOpenAS2B/error"
             interval="5"
             defaults="sender.as2_id=OpenAS2A, receiver.as2_id=OpenAS2B"
+            sendFilename="true"
+            mimetype="application/edi-x12"/>
+
+    <module classname="com.helger.as2lib.processor.receiver.AS2DirectoryPollingModule"
+            outboxdir="%home%/../../data/edi-x12/OpenAS2A/toAs2ng"
+            errordir="%home%/../../data/edi-x12/OpenAS2A/toAs2ng/error"
+            interval="5"
+            defaults="sender.as2_id=OpenAS2A, receiver.as2_id=As2ng"
             sendFilename="true"
             mimetype="application/edi-x12"/>
 
@@ -68,8 +84,6 @@
             resenddir="%home%/../../data/OpenAS2A/resend"
             errordir="%home%/../../data/OpenAS2A/resend/error"
             resenddelay="60"/>
-
-    <module classname="com.helger.as2lib.processor.sender.AsynchMDNSenderModule"/>
 
   </processor>
 </openas2>
