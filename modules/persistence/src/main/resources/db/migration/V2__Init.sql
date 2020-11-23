@@ -50,7 +50,7 @@ create type trading_channel_type as enum ('receiving', 'forwarding');
 create table trading_channel
 (
     id                       bigserial primary key,
-    name                     varchar(64),
+    name                     varchar(64) unique,
     type                     trading_channel_type,
 
     /* common options */
