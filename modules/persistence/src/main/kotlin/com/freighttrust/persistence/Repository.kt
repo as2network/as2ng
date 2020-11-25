@@ -92,10 +92,11 @@ interface RequestRepository : Repository<Request> {
   suspend fun findByMessageId(
     messageId: String,
     withTradingChannel: Boolean = false,
+    withBodyFile: Boolean = false,
     withMessage: Boolean = false,
     withDisposition: Boolean = false,
     ctx: Repository.Context? = null
-  ): Tuple4<Request, TradingChannel?, Message?, DispositionNotification?>?
+  ): Tuple5<Request, TradingChannel?, File?, Message?, DispositionNotification?>?
 
   suspend fun findByOriginalRequestId(
     originalRequestId: UUID,
@@ -103,6 +104,15 @@ interface RequestRepository : Repository<Request> {
     withDisposition: Boolean = false,
     ctx: Repository.Context? = null
   ): Tuple3<Request, TradingChannel?, DispositionNotification?>?
+
+  suspend fun findById(
+    id: UUID,
+    withTradingChannel: Boolean = false,
+    withBodyFile: Boolean = false,
+    withMessage: Boolean = false,
+    withDispositionNotification: Boolean = false,
+    ctx: Repository.Context? = null
+  ): Tuple5<Request, TradingChannel?, File?, Message?, DispositionNotification?>?
 
   suspend fun findRequestId(messageId: String, ctx: Repository.Context? = null): UUID?
 

@@ -455,14 +455,12 @@ class ForwardingIntegrationSpec : FunSpec(), KoinTest {
       // message should have been delivered
       request.deliveredAt shouldNotBe null
 
-      // should be a valid file reference
+      // there should be a valid body file reference
       request.bodyFileId shouldBe bodyFile!!.id
-
       val fileDataHandler = fileService.read(bodyFile.id)
 
       fileDataHandler shouldNotBe null
       fileDataHandler!!.inputStream.readAllBytes().size shouldBeGreaterThan 0
-
     }
 
     with(requireNotNull(tradingChannel)) {
