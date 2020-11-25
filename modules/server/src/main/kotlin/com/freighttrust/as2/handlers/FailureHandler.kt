@@ -49,7 +49,9 @@ class FailureHandler(
 
     try {
 
-      logger.error("Request failure", ctx.failure())
+      with(ctx.request()) {
+        logger.error("Request failure, method = ${method()}, path = ${path()}", ctx.failure())
+      }
 
       if (!ctx.hasAs2Message) throw ctx.failure()
 

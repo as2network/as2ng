@@ -6,19 +6,23 @@
       <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
     </Console>
     <Console name="Handlers" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%X{MessageId}] [%X{AS2-From} -> %X{AS2-To}] [%X{Handler}] - %msg%n"/>
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%X{Method} %X{Path}] [%X{MessageId}] [%X{AS2-From} -> %X{AS2-To}] [%X{Handler}] - %msg%n"/>
     </Console>
   </Appenders>
 
   <Loggers>
 
-    <Logger name="com.freighttrust.as2" level="DEBUG" additivity="false">
+    <Logger name="com.freighttrust" level="DEBUG" additivity="false">
       <AppenderRef ref="Default"/>
     </Logger>
 
 
     <Logger name="com.freighttrust.as2.domain.As2RequestContext" level="DEBUG" additivity="false">
       <AppenderRef ref="Handlers"/>
+    </Logger>
+
+    <Logger name="com.helger.as2lib" level="TRACE" additivity="false">
+      <AppenderRef ref="Default"/>
     </Logger>
 
     <Root level="${env:LOG_LEVEL:-INFO}">

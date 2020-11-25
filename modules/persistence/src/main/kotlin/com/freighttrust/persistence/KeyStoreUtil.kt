@@ -1,14 +1,19 @@
 package com.freighttrust.persistence
 
 import com.freighttrust.jooq.tables.pojos.KeyPair
+import com.freighttrust.persistence.extensions.formattedSerialNumber
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import java.lang.IllegalStateException
+import org.slf4j.LoggerFactory
 import java.security.KeyStore
 
 class KeyStoreUtil : KoinComponent {
+
+  companion object {
+    val logger = LoggerFactory.getLogger(KeyStoreUtil::class.java)
+  }
 
   private val partnerRepository: TradingPartnerRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
@@ -50,78 +55,52 @@ class KeyStoreUtil : KoinComponent {
         // and the keys for itself for all the times it will be signing exchanges
 
         channels
-          .filter { (channel, _, _) -> channel.senderId == partnerId }
-          .forEach { (channel, senderKeyPair, recipientKeyPair) ->
+          .map { (channel, senderKeyPair, recipientKeyPair) ->
+
+            // there may not be a sender or recipient key pair specified for the channel so we default to the partner key pair
 
             val (_, defaultSenderKeyPair) = partnersById[channel.senderId]
               ?: throw Error("Could not find sender partner with id = ${channel.senderId}")
             val (_, defaultRecipientKeyPair) = partnersById[channel.recipientId]
               ?: throw Error("Could not find recipient partner with id = ${channel.recipientId}")
 
-            certificatesByAlias =
-              if (recipientKeyPair != null) {
-                certificatesByAlias +
-                  Pair("${channel.senderAs2Identifier}_${channel.recipientAs2Identifier}_X509", recipientKeyPair)
-              } else {
-                // fall back to the default key pair configured for the recipient
-                certificatesByAlias +
-                  Pair(channel.recipientAs2Identifier, defaultRecipientKeyPair!!)
-              }
-
-            privateKeysByAlias =
-              if (senderKeyPair != null) {
-                privateKeysByAlias +
-                  Pair("${channel.senderAs2Identifier}_${channel.recipientAs2Identifier}_Key", senderKeyPair)
-              } else {
-                // fall back to the default key pair configured for the sender
-                privateKeysByAlias +
-                  Pair(channel.senderAs2Identifier, defaultSenderKeyPair!!)
-              }
-
-
+            Triple(
+              channel,
+              senderKeyPair ?: defaultSenderKeyPair ?: throw Error("Could not determine a sender key pair"),
+              recipientKeyPair ?: defaultRecipientKeyPair ?: throw Error("Could not determine a recipient key pair")
+            )
           }
-
-        // when the specified partner is a recipient in a trading channel it requires the certificates of the senders to verify any signed messages
-        // and the keys for itself to decrypt any encrypted messages
-
-        channels
-          .filter { (channel, _, _) -> channel.recipientId == partnerId }
           .forEach { (channel, senderKeyPair, recipientKeyPair) ->
 
-            val (_, defaultSenderKeyPair) = partnersById[channel.senderId]
-              ?: throw Error("Could not find sender partner with id = ${channel.senderId}")
-            val (_, defaultRecipientKeyPair) = partnersById[channel.recipientId]
-              ?: throw Error("Could not find recipient partner with id = ${channel.recipientId}")
+            val senderAlias = "${channel.senderAs2Identifier}->${channel.recipientAs2Identifier}"
+            val recipientAlias = "${channel.recipientAs2Identifier}->${channel.senderAs2Identifier}"
 
-            certificatesByAlias =
-              if (senderKeyPair != null) {
-                certificatesByAlias +
-                  Pair(
-                    "${channel.senderAs2Identifier}_${channel.recipientAs2Identifier}_X509", senderKeyPair
-                  )
-              } else {
-                // fall back to the default key pair configured for the sender
-                certificatesByAlias +
-                  Pair(channel.senderAs2Identifier, defaultSenderKeyPair!!)
-              }
+            if (channel.senderId == partnerId) {
+              // configured partner is the sender
+              privateKeysByAlias = privateKeysByAlias + (senderAlias to senderKeyPair)
 
-            privateKeysByAlias =
-              if (recipientKeyPair != null) {
-                privateKeysByAlias +
-                  Pair("${channel.senderAs2Identifier}_${channel.recipientAs2Identifier}_Key", recipientKeyPair)
-              } else {
-                privateKeysByAlias +
-                  Pair(channel.recipientAs2Identifier, defaultRecipientKeyPair!!)
-              }
+              certificatesByAlias = certificatesByAlias + (senderAlias to recipientKeyPair)
+              certificatesByAlias = certificatesByAlias + (recipientAlias to recipientKeyPair)
+            } else {
+              // configured partner is the recipient
+              certificatesByAlias = certificatesByAlias + (senderAlias to senderKeyPair)
+              privateKeysByAlias = privateKeysByAlias + (recipientAlias to recipientKeyPair)
 
+            }
           }
 
-        println("Exporting key store for partner = ${partnersById[partnerId]?.first?.name}")
+        val partnerName = partnersById[partnerId]?.first?.name
+
+        logger.info("Exporting key store for partner = {}", partnerName)
 
         certificatesByAlias
           .forEach { (alias, keyPair) ->
-            println("Setting certificate entry for alias = $alias, keyPair id = ${keyPair.id}")
-            setCertificateEntry(alias, keyPair.certificate.toX509())
+
+            with(keyPair.certificate.toX509()) {
+              logger.info("Setting certificate entry for alias = {}, keyPair id = {}, serialNumber = {}, Subject Alternative Names = {}}", alias, keyPair.id, this.formattedSerialNumber, this.subjectAlternativeNames)
+              setCertificateEntry(alias, this)
+            }
+
           }
 
         privateKeysByAlias
@@ -130,11 +109,12 @@ class KeyStoreUtil : KoinComponent {
             with(keyPair) {
               val privateKey = privateKey.toPrivateKey()
               val chain = (listOf(certificate.toX509()) + caChain.map { it.toX509() }).toTypedArray()
-              println("Setting key entry for alias = $alias, keyPair id = ${keyPair.id}")
+              logger.info("Setting key entry for alias = {}, keyPair id = {}", alias, keyPair.id)
               setKeyEntry(alias, privateKey, passwordBytes, chain)
             }
           }
 
+        logger.info("Finished exporting key store for partner = {}", partnerName)
       }
 
   }

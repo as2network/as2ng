@@ -101,6 +101,7 @@ class As2RequestHandler(
                 ) ?: throw DispositionException(
                 Disposition.automaticFailure("Trading channel not found for provided AS2-From and AS2-To")
               )
+
             }
 
         requireNotNull(sender) { "Sender trading partner could not be found" }

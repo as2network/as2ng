@@ -139,7 +139,7 @@ public class KeyPair extends TableImpl<KeyPairRecord> {
 
     @Override
     public List<UniqueKey<KeyPairRecord>> getKeys() {
-        return Arrays.<UniqueKey<KeyPairRecord>>asList(Keys.KEY_PAIR_PKEY, Keys.KEY_PAIR_SERIAL_NUMBER_KEY, Keys.KEY_PAIR_CERTIFICATE_KEY);
+        return Arrays.<UniqueKey<KeyPairRecord>>asList(Keys.KEY_PAIR_PKEY, Keys.KEY_PAIR_CERTIFICATE_KEY, Keys.KEY_PAIR_PRIVATE_KEY_KEY);
     }
 
     @Override

@@ -5,9 +5,9 @@
 create table key_pair
 (
     id               bigserial primary key,
-    serial_number    varchar(60) unique,
+    serial_number    varchar(60),
     certificate      varchar(4096) unique,
-    private_key      varchar(4096)   null,
+    private_key      varchar(4096) unique,
     private_key_type varchar(16)     null,
     issuing_ca       varchar(4096)   null,
     ca_chain         varchar(4096)[] null,

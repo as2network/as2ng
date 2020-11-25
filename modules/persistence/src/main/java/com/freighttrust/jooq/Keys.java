@@ -45,7 +45,7 @@ public class Keys {
     public static final UniqueKey<FlywaySchemaHistoryRecord> FLYWAY_SCHEMA_HISTORY_PK = Internal.createUniqueKey(FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY, DSL.name("flyway_schema_history_pk"), new TableField[] { FlywaySchemaHistory.FLYWAY_SCHEMA_HISTORY.INSTALLED_RANK }, true);
     public static final UniqueKey<KeyPairRecord> KEY_PAIR_CERTIFICATE_KEY = Internal.createUniqueKey(KeyPair.KEY_PAIR, DSL.name("key_pair_certificate_key"), new TableField[] { KeyPair.KEY_PAIR.CERTIFICATE }, true);
     public static final UniqueKey<KeyPairRecord> KEY_PAIR_PKEY = Internal.createUniqueKey(KeyPair.KEY_PAIR, DSL.name("key_pair_pkey"), new TableField[] { KeyPair.KEY_PAIR.ID }, true);
-    public static final UniqueKey<KeyPairRecord> KEY_PAIR_SERIAL_NUMBER_KEY = Internal.createUniqueKey(KeyPair.KEY_PAIR, DSL.name("key_pair_serial_number_key"), new TableField[] { KeyPair.KEY_PAIR.SERIAL_NUMBER }, true);
+    public static final UniqueKey<KeyPairRecord> KEY_PAIR_PRIVATE_KEY_KEY = Internal.createUniqueKey(KeyPair.KEY_PAIR, DSL.name("key_pair_private_key_key"), new TableField[] { KeyPair.KEY_PAIR.PRIVATE_KEY }, true);
     public static final UniqueKey<MessageRecord> MESSAGE_PKEY = Internal.createUniqueKey(Message.MESSAGE, DSL.name("message_pkey"), new TableField[] { Message.MESSAGE.REQUEST_ID }, true);
     public static final UniqueKey<RequestRecord> REQUEST_MESSAGE_ID_KEY = Internal.createUniqueKey(Request.REQUEST, DSL.name("request_message_id_key"), new TableField[] { Request.REQUEST.MESSAGE_ID }, true);
     public static final UniqueKey<RequestRecord> REQUEST_PKEY = Internal.createUniqueKey(Request.REQUEST, DSL.name("request_pkey"), new TableField[] { Request.REQUEST.ID }, true);

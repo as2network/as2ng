@@ -1,37 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <partnerships>
 
-  <partner name="Walmart" as2_id="Walmart" x509_alias="Walmart" email="walmart@partners.com"/>
-  <partner name="CocaCola" as2_id="CocaCola" x509_alias="CocaCola" email="cocacola@partners.com"/>
-  <partner name="Pepsi" as2_id="Pepsi" x509_alias="Pepsi" email="pepsi@partners.com"/>
-  <partner name="Apple" as2_id="Apple" x509_alias="Apple" email="apple@partners.com"/>
-  <partner name="Dewalt" as2_id="Dewalt" x509_alias="Dewalt" email="dewalt@partners.com"/>
-  <partner name="Hikoki" as2_id="Hikoki" x509_alias="Hikoki" email="hikoki@partners.com"/>
-q
-  <partnership name="Walmart-CocaCola">
-    <sender name="Walmart"/>
-    <receiver name="CocaCola"/>
+  <partner name="Walmart_CocaCola" as2_id="Walmart" x509_alias="Walmart->CocaCola" email="walmart@partners.com"/>
+  <partner name="CocaCola_Walmart" as2_id="CocaCola" x509_alias="CocaCola->Walmart" email="cocacola@partners.com"/>
+
+  <partner name="Walmart_Pepsi" as2_id="Walmart" x509_alias="Walmart->Pepsi" email="walmart@partners.com"/>
+  <partner name="Pepsi_Walmart" as2_id="Pepsi" x509_alias="Pepsi->Walmart" email="pepsi@partners.com"/>
+
+  <partner name="Walmart_Apple" as2_id="Walmart" x509_alias="Walmart->Apple" email="walmart@partners.com"/>
+  <partner name="Apple_Walmart" as2_id="Apple" x509_alias="Apple->Walmart" email="apple@partners.com"/>
+
+  <partner name="Walmart_Dewalt" as2_id="Walmart" x509_alias="Walmart->Dewalt" email="walmart@partners.com"/>
+  <partner name="Dewalt_Walmart" as2_id="Dewalt" x509_alias="Dewalt->Walmart" email="dewalt@partners.com"/>
+
+  <partnership name="Walmart->CocaCola">
+    <sender name="Walmart_CocaCola"/>
+    <receiver name="CocaCola_Walmart"/>
     <attribute name="protocol" value="as2"/>
     <attribute name="sign" value="sha-512"/>
   </partnership>
 
-  <partnership name="Walmart-Pepsi">
-    <sender name="Walmart"/>
-    <receiver name="Pepsi"/>
+  <partnership name="CocaCola->Walmart">
+    <sender name="CocaCola_Walmart"/>
+    <receiver name="Walmart_CocaCola"/>
     <attribute name="protocol" value="as2"/>
     <attribute name="sign" value="sha-512"/>
   </partnership>
 
-  <partnership name="Walmart-Apple">
-    <sender name="Walmart"/>
-    <receiver name="Apple"/>
+  <partnership name="Walmart->Pepsi">
+    <sender name="Walmart_Pepsi"/>
+    <receiver name="Pepsi_Walmart"/>
     <attribute name="protocol" value="as2"/>
     <attribute name="sign" value="sha-512"/>
   </partnership>
 
-  <partnership name="Walmart-Dewalt">
-    <sender name="Walmart"/>
-    <receiver name="Dewalt"/>
+  <partnership name="Pepsi->Walmart">
+    <sender name="Pepsi_Walmart"/>
+    <receiver name="Walmart_Pepsi"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="sign" value="sha-512"/>
+  </partnership>
+
+  <partnership name="Walmart->Apple">
+    <sender name="Walmart_Apple"/>
+    <receiver name="Apple_Walmart"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="sign" value="sha-512"/>
+  </partnership>
+
+  <partnership name="Apple->Walmart">
+    <sender name="Apple_Walmart"/>
+    <receiver name="Walmart_Apple"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="sign" value="sha-512"/>
+  </partnership>
+
+  <partnership name="Walmart->Dewalt">
+    <sender name="Walmart_Dewalt"/>
+    <receiver name="Dewalt_Walmart"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="sign" value="sha-512"/>
+  </partnership>
+
+  <partnership name="Dewalt->Walmart">
+    <sender name="Dewalt_Walmart"/>
+    <receiver name="Walmart_Dewalt"/>
     <attribute name="protocol" value="as2"/>
     <attribute name="sign" value="sha-512"/>
   </partnership>

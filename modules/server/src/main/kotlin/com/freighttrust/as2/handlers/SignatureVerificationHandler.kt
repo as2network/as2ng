@@ -1,5 +1,6 @@
 package com.freighttrust.as2.handlers
 
+import com.freighttrust.as2.domain.As2RequestType
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.exceptions.DispositionException
 import com.freighttrust.as2.ext.signatureCertificateFromBody
@@ -7,7 +8,6 @@ import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.extensions.formattedSerialNumber
 import com.freighttrust.persistence.extensions.toBase64
-import com.freighttrust.persistence.extensions.toX509
 import io.vertx.ext.web.RoutingContext
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -22,6 +22,14 @@ class SignatureVerificationHandler(
 
       if (!isBodySigned) return ctx.next()
 
+      val path = ctx.request().path()
+
+      val messageType = when {
+        path.endsWith("message") -> As2RequestType.Message
+        path.endsWith("mdn") -> As2RequestType.DispositionNotification
+        else -> throw IllegalStateException()
+      }
+
       try {
 
         val signatureKeyPair = records.tradingChannel
@@ -34,34 +42,40 @@ class SignatureVerificationHandler(
               .signatureCertificateFromBody(ctx.tempFileHelper, securityProvider)
               ?.let { bodyCertificate ->
 
+                val formattedSerialNumber = bodyCertificate.formattedSerialNumber
+
                 withLogger(SignatureVerificationHandler::class) {
-                  info("Certificate found within request body")
+                  debug(
+                    "Certificate found within request body, serial = {}",
+                    formattedSerialNumber
+                  )
                 }
 
                 keyPairRepository.transaction { tx ->
 
                   // look for a keypair in the database that matches the certificate provided in the body
-                  keyPairRepository.findBySerialNumber(bodyCertificate.formattedSerialNumber, tx)
+                  keyPairRepository.findByCertificate(bodyCertificate, tx) ?:
                   // insert a new keypair entry if needed
-                    ?: keyPairRepository.insert(
-                      KeyPair()
-                        .apply {
+                  keyPairRepository.insert(
+                    KeyPair()
+                      .apply {
 
-                          serialNumber = bodyCertificate.serialNumber
-                            .toString(16)
-                            .chunked(2)
-                            .joinToString(":")
+                        serialNumber = formattedSerialNumber
 
-                          certificate = bodyCertificate.toBase64()
-                          // TODO check this data conversion logic
-                          expiresAt = OffsetDateTime.ofInstant(bodyCertificate.notAfter.toInstant(), ZoneId.systemDefault())
-                        },
-                      tx
-                    )
+                        certificate = bodyCertificate.toBase64()
+                        // TODO check this data conversion logic
+                        expiresAt = OffsetDateTime.ofInstant(bodyCertificate.notAfter.toInstant(), ZoneId.systemDefault())
+                      },
+                    tx
+                  ).also { keyPair ->
+                    withLogger(SignatureVerificationHandler::class) {
+                      debug("Inserted a new key pair with id = {}", keyPair.id)
+                    }
+                  }
                 }
               }
 
-            if(allowed && bodyCertificate == null) {
+            if (allowed && bodyCertificate == null) {
               withLogger(SignatureVerificationHandler::class) {
                 warn("Body certificates are enabled but no certificate was found in the request body")
               }
@@ -70,12 +84,19 @@ class SignatureVerificationHandler(
             bodyCertificate
           }
         // fallback to keypair configured for the trading channel or partner default
-          ?: records.senderKeyPair
+          ?: when (messageType) {
+            As2RequestType.Message -> records.senderKeyPair
+            As2RequestType.DispositionNotification -> records.recipientKeyPair
+          }
+
+        withLogger(SignatureVerificationHandler::class) {
+          debug("Using keypair with id = {}", signatureKeyPair.id)
+        }
 
         ctx.as2Context = verify(signatureKeyPair)
 
         withLogger(SignatureVerificationHandler::class) {
-          info("Successfully verified signature of incoming AS2 message")
+          debug("Successfully verified signature of incoming AS2 message")
         }
 
         ctx.next()

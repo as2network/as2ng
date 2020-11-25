@@ -51,6 +51,7 @@ import javax.mail.internet.MimeBodyPart
 import kotlin.reflect.KClass
 import com.freighttrust.jooq.tables.pojos.Message as MessageRecord
 import com.freighttrust.as2.ext.putHeader
+import com.freighttrust.persistence.extensions.formattedSerialNumber
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -243,7 +244,11 @@ data class As2RequestContext(
   fun verify(keyPair: KeyPair): As2RequestContext =
     require(isBodySigned) { "message is not signed" }
       .let {
-        body.verifiedContent(keyPair.certificate.toX509(), tempFileHelper, securityProvider)
+        keyPair.certificate.toX509()
+          .let { certificate ->
+            withLogger { debug("Verifying with certificate serial number = {}, names = {}", certificate.formattedSerialNumber, certificate.subjectAlternativeNames) }
+            body.verifiedContent(certificate, tempFileHelper, securityProvider)
+          }
           .let { verifiedBody ->
             copy(
               bodyContext = bodyContext.copy(
@@ -266,6 +271,8 @@ data class As2RequestContext(
     }
 
   private val contextMap = mapOf(
+    "Path" to routingContext.request().path(),
+    "Method" to routingContext.request().method().name,
     "MessageId" to messageId,
     "RequestId" to records.request.id.toString(),
     "TradingChannel" to records.tradingChannel.name,
@@ -344,7 +351,7 @@ data class As2RequestContext(
               .sendBufferAwait(buffer)
 
             with(response) {
-              if(response.statusCode() != 200)
+              if (response.statusCode() != 200)
                 withLogger {
                   // TODO improve contextual info here
                   error("Async mdn response failed. Status code = ${response.statusCode()}")

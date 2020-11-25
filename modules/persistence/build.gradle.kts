@@ -110,7 +110,7 @@ jooq {
 }
 
 // enable incremental build support
-//tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
-//  allInputsDeclared.set(true)
-//  outputs.cacheIf { true }
-//}
+tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
+  allInputsDeclared.set(true)
+  outputs.cacheIf { true }
+}

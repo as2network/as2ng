@@ -1,14 +1,11 @@
 package com.freighttrust.as2
 
 import arrow.core.Tuple4
-import com.freighttrust.as2.RequestStyle.Async
 import com.freighttrust.as2.domain.fromMimeBodyPart
 import com.freighttrust.as2.ext.isSigned
 import com.freighttrust.as2.ext.verifiedContent
 import com.freighttrust.as2.kotest.listeners.IntegrationTestListener
 import com.freighttrust.as2.kotest.listeners.IntegrationTestListener.As2RequestBuilder
-import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
-import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
 import com.freighttrust.as2.kotest.listeners.TestTradingChannel
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.common.AppConfigModule
@@ -37,13 +34,9 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.property.Arb
-import io.kotest.property.Exhaustive
 import io.kotest.property.arbitrary.bool
 import io.kotest.property.arbitrary.enum
 import io.kotest.property.checkAll
-import io.kotest.property.exhaustive.boolean
-import io.kotest.property.exhaustive.enum
-import io.kotest.property.exhaustive.exhaustive
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.deployVerticleAwait
 import kotlinx.coroutines.Dispatchers
@@ -58,11 +51,7 @@ import org.koin.test.KoinTest
 import org.testcontainers.Testcontainers
 import java.util.concurrent.TimeUnit
 
-enum class RequestStyle {
-  Sync, Async
-}
-
-class IntegrationSpec : FunSpec(), KoinTest {
+class ForwardingIntegrationSpec : FunSpec(), KoinTest {
 
   val mdnServer = MockWebServer()
     .apply {
@@ -126,7 +115,6 @@ class IntegrationSpec : FunSpec(), KoinTest {
       )
     )
 
-    val requestStyles = Exhaustive.enum<RequestStyle>()
     val cryptoAlgorithms = Arb.enum<ECryptoAlgorithmCrypt>()
     val signingAlgorithms = Arb.enum<ECryptoAlgorithmSign>()
 
@@ -185,6 +173,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
               .withMdn(true)
               .withAsyncMdn(if (async) asyncMdnUrl else null)
               .withEncryptAndSign(null, signingAlgorithm)
+              .withIncludeSigningCertificateInBody(false)
               .withDispositionOptions(
                 DispositionOptions()
                   .setMICAlg(signingAlgorithm)
@@ -222,14 +211,12 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       test("5. Send encrypted data and request an un-signed receipt") {
 
-        checkAll(requestStyles) { style ->
-
-          checkAll(100, cryptoAlgorithms, signingAlgorithms, tradingChannels) { cryptoAlgorithm, signingAlgorithm, channel ->
+          checkAll(100, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels) { async, cryptoAlgorithm, signingAlgorithm, channel ->
 
             val requestBuilder =
               forChannel(channel, testCase.displayName)
                 .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withAsyncMdn(if (async) asyncMdnUrl else null)
                 .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
                 .withDispositionOptions(
                   DispositionOptions()
@@ -244,19 +231,16 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
           }
 
-        }
       }
 
       test("6. Send encrypted data and request a signed receipt") {
 
-        checkAll(requestStyles) { style ->
-
-          checkAll(100, cryptoAlgorithms, signingAlgorithms, tradingChannels) { cryptoAlgorithm, signingAlgorithm, channel ->
+          checkAll(100, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels) { async, cryptoAlgorithm, signingAlgorithm, channel ->
 
             val requestBuilder =
               forChannel(channel, testCase.displayName)
                 .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withAsyncMdn(if (async) asyncMdnUrl else null)
                 .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
                 .withDispositionOptions(
                   DispositionOptions()
@@ -273,19 +257,16 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
           }
 
-        }
       }
 
       test("7. Send signed data and do not request a receipt") {
 
-        checkAll(requestStyles) { style ->
-
-          checkAll(50, signingAlgorithms, tradingChannels, Arb.bool()) { signingAlgorithm, channel, includeSigningCertificateInBody ->
+          checkAll(50, Arb.bool(), signingAlgorithms, tradingChannels, Arb.bool()) { async, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
             val requestBuilder =
               forChannel(channel, testCase.displayName)
                 .withMdn(false)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withAsyncMdn(if (async) asyncMdnUrl else null)
                 .withEncryptAndSign(null, signingAlgorithm)
                 .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
                 .withTextData(testCase.displayName)
@@ -295,21 +276,17 @@ class IntegrationSpec : FunSpec(), KoinTest {
             verify(requestBuilder, response)
 
           }
-
-        }
 
       }
 
       test("8. Send signed data and request an un-signed receipt") {
 
-        checkAll(requestStyles) { style ->
-
-          checkAll(50, signingAlgorithms, tradingChannels, Arb.bool()) { signingAlgorithm, channel, includeSigningCertificateInBody ->
+          checkAll(50, Arb.bool(), signingAlgorithms, tradingChannels, Arb.bool()) { async, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
             val requestBuilder =
               forChannel(channel, testCase.displayName)
                 .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withAsyncMdn(if (async) asyncMdnUrl else null)
                 .withEncryptAndSign(null, signingAlgorithm)
                 .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
                 .withDispositionOptions(
@@ -324,20 +301,16 @@ class IntegrationSpec : FunSpec(), KoinTest {
             verify(requestBuilder, response)
 
           }
-
-        }
       }
 
       test("9. Send signed data and request a signed receipt") {
 
-        checkAll(requestStyles) { style ->
-
-          checkAll(50, signingAlgorithms, tradingChannels, Arb.bool()) { signingAlgorithm, channel, includeSigningCertificateInBody ->
+          checkAll(50, Arb.bool(), signingAlgorithms, tradingChannels, Arb.bool()) { async, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
             val requestBuilder =
               forChannel(channel, testCase.displayName)
                 .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withAsyncMdn(if (async) asyncMdnUrl else null)
                 .withEncryptAndSign(null, signingAlgorithm)
                 .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
                 .withDispositionOptions(
@@ -353,22 +326,18 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
             verify(requestBuilder, response)
 
-
           }
 
-        }
       }
 
       test("10. Send encrypted and signed data and do not request a receipt") {
 
-        checkAll(requestStyles) { style ->
-
-          checkAll(100, cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
+          checkAll(100, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { async, cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
             val requestBuilder =
               forChannel(channel, testCase.displayName)
                 .withMdn(false)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withAsyncMdn(if (async) asyncMdnUrl else null)
                 .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
                 .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
                 .withTextData(testCase.displayName)
@@ -376,21 +345,18 @@ class IntegrationSpec : FunSpec(), KoinTest {
             val response = requestBuilder.send()
 
             verify(requestBuilder, response)
-
           }
-        }
+
       }
 
       test("11. Send encrypted and signed data and request an un-signed receipt") {
 
-        checkAll(requestStyles) { style ->
-
-          checkAll(200, cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
+          checkAll(200, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { async, cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
             val requestBuilder =
               forChannel(channel, testCase.displayName)
                 .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withAsyncMdn(if (async) asyncMdnUrl else null)
                 .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
                 .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
                 .withDispositionOptions(
@@ -405,21 +371,16 @@ class IntegrationSpec : FunSpec(), KoinTest {
             verify(requestBuilder, response)
 
           }
-
-        }
-
       }
 
       test("12. Send encrypted and signed data and request a signed receipt") {
 
-        checkAll(requestStyles) { style ->
-
-          checkAll(200, cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
+          checkAll(200, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { async, cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
             val requestBuilder =
               forChannel(channel, testCase.displayName)
                 .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
+                .withAsyncMdn(if (async) asyncMdnUrl else null)
                 .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
                 .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
                 .withDispositionOptions(
@@ -435,13 +396,8 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
             verify(requestBuilder, response)
 
-
           }
-
-        }
-
       }
-
     }
   }
 

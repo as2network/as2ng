@@ -23,11 +23,11 @@ class PostgresKeyPairRepository(
 
   override fun idQuery(value: KeyPair): Condition = KEY_PAIR.ID.eq(value.id)
 
-  override suspend fun findBySerialNumber(serialNumber: String, ctx: Repository.Context?): KeyPair? =
+  override suspend fun findByCertificate(certificate: X509Certificate, ctx: Repository.Context?): KeyPair? =
     coroutineScope {
       jooqContext(ctx)
         .selectFrom(KEY_PAIR)
-        .where(KEY_PAIR.SERIAL_NUMBER.eq(serialNumber))
+        .where(KEY_PAIR.CERTIFICATE.eq(certificate.toBase64()))
         .fetchOne()
         ?.into(KeyPair::class.java)
     }
