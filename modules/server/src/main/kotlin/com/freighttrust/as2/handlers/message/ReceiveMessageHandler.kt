@@ -27,7 +27,7 @@ class ReceiveMessageHandler(
 
       val path = "${pathPrefix}/${recipientId}/${senderId}/$messageId$extension"
 
-      fileService.writeToFile(path, body.dataHandler)
+      fileService.write(path, body.dataHandler)
 
       // send an MDN to acknowledge receipt and close the connection
 

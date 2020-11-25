@@ -27,7 +27,6 @@ import com.freighttrust.persistence.extensions.toJSONB
 import com.helger.as2lib.message.AS2Message
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.client.WebClient
-import org.apache.tika.mime.MimeTypes
 import org.jooq.tools.json.JSONObject
 import java.security.Provider
 import java.time.OffsetDateTime
@@ -129,7 +128,7 @@ class As2RequestHandler(
         val messageId = request.getAS2Header(AS2Header.MessageId)
 
         val bodyPath = "request_body/${uuidGenerator.generate()}"
-        val fileRecord = fileService.writeToFile(bodyPath, dataHandler)
+        val fileRecord = fileService.write(bodyPath, dataHandler)
 
         val requestRecord = requestRepository.transaction { tx ->
 

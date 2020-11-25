@@ -2,14 +2,9 @@ package com.freighttrust.persistence.postgres.repositories
 
 import arrow.core.Tuple3
 import arrow.core.Tuple4
-import com.freighttrust.jooq.Tables.DISPOSITION_NOTIFICATION
-import com.freighttrust.jooq.Tables.MESSAGE
-import com.freighttrust.jooq.Tables.REQUEST
-import com.freighttrust.jooq.Tables.TRADING_CHANNEL
-import com.freighttrust.jooq.tables.pojos.DispositionNotification
-import com.freighttrust.jooq.tables.pojos.Message
-import com.freighttrust.jooq.tables.pojos.Request
-import com.freighttrust.jooq.tables.pojos.TradingChannel
+import arrow.core.Tuple5
+import com.freighttrust.jooq.Tables.*
+import com.freighttrust.jooq.tables.pojos.*
 import com.freighttrust.jooq.tables.records.RequestRecord
 import com.freighttrust.persistence.Repository
 import com.freighttrust.persistence.RequestRepository
@@ -31,14 +26,34 @@ class PostgresRequestRepository(
   override fun idQuery(value: Request): Condition = REQUEST.ID.eq(value.id)
 
   private fun buildJoin(ctx: DSLContext,
-                         withTradingChannel: Boolean,
-                         withMessage: Boolean,
-                         withDisposition: Boolean
+                        withTradingChannel: Boolean,
+                        withBodyFile: Boolean,
+                        withMessage: Boolean,
+                        withDispositionNotification: Boolean
   ) = ctx
     .select().from(REQUEST)
     .let { query -> if (withTradingChannel) query.leftJoin(TRADING_CHANNEL).on(REQUEST.TRADING_CHANNEL_ID.eq(TRADING_CHANNEL.ID)) else query }
+    .let { query -> if (withBodyFile) query.leftJoin(FILE).on(REQUEST.BODY_FILE_ID.eq(FILE.ID)) else query }
     .let { query -> if (withMessage) query.leftJoin(MESSAGE).on(REQUEST.ID.eq(MESSAGE.REQUEST_ID)) else query }
-    .let { query -> if (withDisposition) query.leftJoin(DISPOSITION_NOTIFICATION).on(REQUEST.ID.eq(DISPOSITION_NOTIFICATION.REQUEST_ID)) else query }
+    .let { query -> if (withDispositionNotification) query.leftJoin(DISPOSITION_NOTIFICATION).on(REQUEST.ID.eq(DISPOSITION_NOTIFICATION.REQUEST_ID)) else query }
+
+  override suspend fun findById(
+    id: UUID,
+    withTradingChannel: Boolean,
+    withBodyFile: Boolean,
+    withMessage: Boolean,
+    withDispositionNotification: Boolean,
+    ctx: Repository.Context?
+  ): Tuple5<Request, TradingChannel?, File?, Message?, DispositionNotification?>? =
+    buildJoin(
+      jooqContext(ctx),
+      withTradingChannel,
+      withBodyFile,
+      withMessage,
+      withDispositionNotification
+    ).where(REQUEST.ID.eq(id))
+      .fetchOne(JoinMapper)
+
 
   override suspend fun findByOriginalRequestId(
     originalRequestId: UUID,
@@ -46,21 +61,28 @@ class PostgresRequestRepository(
     withDisposition: Boolean,
     ctx: Repository.Context?
   ): Tuple3<Request, TradingChannel?, DispositionNotification?>? =
-    buildJoin(jooqContext(ctx), withTradingChannel, false, withDisposition)
+    buildJoin(
+      jooqContext(ctx),
+      withTradingChannel,
+      withBodyFile = false,
+      withMessage = false,
+      withDispositionNotification = withDisposition
+    )
       .where(REQUEST.ORIGINAL_REQUEST_ID.eq(originalRequestId))
       .fetchOne(JoinMapper)
-      ?.let { (request, tradingChannel, _, disposition) -> Tuple3(request, tradingChannel, disposition) }
+      ?.let { (request, tradingChannel, _, _, disposition) -> Tuple3(request, tradingChannel, disposition) }
 
 
   override suspend fun findByMessageId(
     messageId: String,
     withTradingChannel: Boolean,
+    withBodyFile: Boolean,
     withMessage: Boolean,
     withDisposition: Boolean,
     ctx: Repository.Context?
-  ): Tuple4<Request, TradingChannel?, Message?, DispositionNotification?>? =
+  ): Tuple5<Request, TradingChannel?, File?, Message?, DispositionNotification?>? =
     coroutineScope {
-      buildJoin(jooqContext(ctx), withTradingChannel, withMessage, withDisposition)
+      buildJoin(jooqContext(ctx), withTradingChannel, withBodyFile, withMessage, withDisposition)
         .where(REQUEST.MESSAGE_ID.eq(messageId))
         .fetchOne(JoinMapper)
     }
@@ -98,7 +120,7 @@ class PostgresRequestRepository(
     }
   }
 
-  object JoinMapper : RecordMapper<Record, Tuple4<Request, TradingChannel?, Message?, DispositionNotification?>> {
+  object JoinMapper : RecordMapper<Record, Tuple5<Request, TradingChannel?, File?, Message?, DispositionNotification?>> {
 
     override fun map(record: Record) = run {
       val request = record.into(REQUEST).into(Request::class.java)
@@ -106,6 +128,10 @@ class PostgresRequestRepository(
       val tradingChannel = record.into(TRADING_CHANNEL)
         .takeIf { it.value1() != null }
         ?.into(TradingChannel::class.java)
+
+      val bodyFile = record.into(FILE)
+        .takeIf { it.value1() != null }
+        ?.into(File::class.java)
 
       val message = record.into(MESSAGE)
         .takeIf { it.value1() != null }
@@ -115,7 +141,7 @@ class PostgresRequestRepository(
         .takeIf { it.value1() != null }
         ?.into(DispositionNotification::class.java)
 
-      Tuple4(request, tradingChannel, message, disposition)
+      Tuple5(request, tradingChannel, bodyFile, message, disposition)
     }
   }
 

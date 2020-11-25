@@ -1,6 +1,5 @@
 package com.freighttrust.as2
 
-import arrow.core.Tuple4
 import com.freighttrust.as2.domain.fromMimeBodyPart
 import com.freighttrust.as2.ext.isSigned
 import com.freighttrust.as2.ext.verifiedContent
@@ -15,10 +14,14 @@ import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.freighttrust.jooq.tables.pojos.Message
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.pojos.TradingChannel
+import com.freighttrust.persistence.FileService
 import com.freighttrust.persistence.RequestRepository
+import com.freighttrust.persistence.TradingChannelRepository
+import com.freighttrust.persistence.TradingPartnerRepository
 import com.freighttrust.persistence.local.LocalPersistenceModule
 import com.freighttrust.persistence.postgres.PostgresPersistenceModule
 import com.freighttrust.persistence.s3.S3PersistenceModule
+import com.freighttrust.serialisation.JsonModule
 import com.freighttrust.testing.listeners.FlywayTestListener
 import com.freighttrust.testing.listeners.PostgresTestListener
 import com.freighttrust.testing.listeners.S3TestListener
@@ -31,6 +34,7 @@ import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.disposition.DispositionOptions.IMPORTANCE_REQUIRED
 import io.kotest.core.spec.Spec
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.property.Arb
@@ -48,7 +52,9 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.koin.dsl.module
 import org.koin.test.KoinTest
+import org.koin.test.inject
 import org.testcontainers.Testcontainers
+import java.security.Provider
 import java.util.concurrent.TimeUnit
 
 class ForwardingIntegrationSpec : FunSpec(), KoinTest {
@@ -72,7 +78,12 @@ class ForwardingIntegrationSpec : FunSpec(), KoinTest {
 
   val tempFileHelper = TempFileHelper()
 
-  private val k by lazy { getKoin() }
+  private val fileService: FileService by inject()
+  private val requestRepository: RequestRepository by inject()
+  private val channelRepository: TradingChannelRepository by inject()
+  private val partnerRepository: TradingPartnerRepository by inject()
+
+  private val securityProvider: Provider by inject()
 
   init {
 
@@ -97,6 +108,7 @@ class ForwardingIntegrationSpec : FunSpec(), KoinTest {
       IntegrationTestListener(
         listOf(
           AppConfigModule,
+          JsonModule,
           PostgresPersistenceModule,
           S3PersistenceModule,
           LocalPersistenceModule,
@@ -404,25 +416,27 @@ class ForwardingIntegrationSpec : FunSpec(), KoinTest {
   private suspend fun verify(
     requestBuilder: As2RequestBuilder,
     response: AS2ClientResponse
-  ): Tuple4<Request, TradingChannel?, Message?, DispositionNotification?> {
+  ) {
 
     // should be no exceptions in the response from the client call
     response.hasException() shouldBe false
 
     // lookup the exchange in the database
-    val persisted = k.get<RequestRepository>()
+    val persisted = requestRepository
       .findByMessageId(
         requireNotNull(response.originalMessageID),
         withTradingChannel = true,
+        withBodyFile = true,
         withMessage = true,
         withDisposition = true
       )
 
     persisted shouldNotBe null
 
-    val (request, tradingChannel, message, dispositionNotification) = requireNotNull(persisted)
+    val (request, tradingChannel, bodyFile, message, dispositionNotification) = requireNotNull(persisted)
 
     tradingChannel shouldNotBe null
+    bodyFile shouldNotBe null
     message shouldNotBe null
 
     // verify request
@@ -441,8 +455,14 @@ class ForwardingIntegrationSpec : FunSpec(), KoinTest {
       // message should have been delivered
       request.deliveredAt shouldNotBe null
 
-      // should be a file reference
-      request.bodyFileId shouldNotBe null
+      // should be a valid file reference
+      request.bodyFileId shouldBe bodyFile!!.id
+
+      val fileDataHandler = fileService.read(bodyFile.id)
+
+      fileDataHandler shouldNotBe null
+      fileDataHandler!!.inputStream.readAllBytes().size shouldBeGreaterThan 0
+
     }
 
     with(requireNotNull(tradingChannel)) {
@@ -508,7 +528,7 @@ class ForwardingIntegrationSpec : FunSpec(), KoinTest {
             ?.verifiedContent(
               requireNotNull(response.mdnVerificationCertificate),
               tempFileHelper,
-              k.get()
+              securityProvider
             ) ?: data
 
           val receivedDispositionNotification = DispositionNotification()
@@ -527,8 +547,6 @@ class ForwardingIntegrationSpec : FunSpec(), KoinTest {
 
 
     }
-
-    return persisted
   }
 
   @Suppress("BlockingMethodInNonBlockingContext")
@@ -545,8 +563,8 @@ class ForwardingIntegrationSpec : FunSpec(), KoinTest {
 
     capturedRequest shouldNotBe null
 
-    val persisted = k.get<RequestRepository>()
-      .findByOriginalRequestId(originalRequest.id, false, true)
+    val persisted = requestRepository
+      .findByOriginalRequestId(originalRequest.id, withTradingChannel = false, withDisposition = true)
 
     persisted shouldNotBe null
 

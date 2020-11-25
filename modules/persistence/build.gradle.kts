@@ -10,9 +10,9 @@ dependencies {
 
   implementation(kotlin("stdlib"))
 
-  implementation(project(":modules:common"))
-  implementation(project(":modules:serialisation"))
-  implementation(project(":modules:crypto"))
+  api(project(":modules:common"))
+  api(project(":modules:serialisation"))
+  api(project(":modules:crypto"))
 
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")

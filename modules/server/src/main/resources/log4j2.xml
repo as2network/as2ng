@@ -21,10 +21,6 @@
       <AppenderRef ref="Handlers"/>
     </Logger>
 
-    <Logger name="com.helger.as2lib" level="TRACE" additivity="false">
-      <AppenderRef ref="Default"/>
-    </Logger>
-
     <Root level="${env:LOG_LEVEL:-INFO}">
       <AppenderRef ref="Default"/>
     </Root>

@@ -179,8 +179,6 @@ class IntegrationTestListener(
           ?.let { MountableFile.forHostPath(it) }
           ?: throw Error("Keystore not found")
 
-        val resourcePath = tp.configPath
-
         Pair(tp,
           GenericContainer<Nothing>("docker.pkg.github.com/freight-trust/as2ng/as2lib-server:4.6.3")
             .apply {
