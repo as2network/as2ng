@@ -11,7 +11,7 @@ import org.jooq.DSLContext
 class PostgresDispositionNotificationRepository(
   dbCtx: DSLContext
 ) : DispositionNotificationRepository, AbstractJooqRepository<DispositionNotificationRecord, DispositionNotification>(
-  dbCtx, DISPOSITION_NOTIFICATION, DispositionNotification::class.java
+  dbCtx, DISPOSITION_NOTIFICATION, DispositionNotification::class.java, { DispositionNotification() }
 ) {
 
   override fun idQuery(value: DispositionNotification): Condition =

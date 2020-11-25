@@ -20,7 +20,7 @@ import java.util.*
 class PostgresRequestRepository(
   dbCtx: DSLContext
 ) : RequestRepository, AbstractJooqRepository<RequestRecord, Request>(
-  dbCtx, REQUEST, Request::class.java
+  dbCtx, REQUEST, Request::class.java, { Request() }
 ) {
 
   override fun idQuery(value: Request): Condition = REQUEST.ID.eq(value.id)
@@ -123,23 +123,23 @@ class PostgresRequestRepository(
   object JoinMapper : RecordMapper<Record, Tuple5<Request, TradingChannel?, File?, Message?, DispositionNotification?>> {
 
     override fun map(record: Record) = run {
-      val request = record.into(REQUEST).into(Request::class.java)
+      val request = record.into(REQUEST).into(Request())
 
       val tradingChannel = record.into(TRADING_CHANNEL)
         .takeIf { it.value1() != null }
-        ?.into(TradingChannel::class.java)
+        ?.into(TradingChannel())
 
       val bodyFile = record.into(FILE)
         .takeIf { it.value1() != null }
-        ?.into(File::class.java)
+        ?.into(File())
 
       val message = record.into(MESSAGE)
         .takeIf { it.value1() != null }
-        ?.into(Message::class.java)
+        ?.into(Message())
 
       val disposition = record.into(DISPOSITION_NOTIFICATION)
         .takeIf { it.value1() != null }
-        ?.into(DispositionNotification::class.java)
+        ?.into(DispositionNotification())
 
       Tuple5(request, tradingChannel, bodyFile, message, disposition)
     }

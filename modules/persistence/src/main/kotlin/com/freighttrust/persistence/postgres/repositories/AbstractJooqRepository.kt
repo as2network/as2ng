@@ -17,6 +17,7 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
   private val dbCtx: DSLContext,
   protected val table: Table<R>,
   protected val pojoClass: Class<Pojo>,
+  protected val pojoFactory: () -> Pojo,
   override val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : Repository<Pojo>, CoroutineScope {
 
@@ -53,8 +54,8 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
     coroutineScope {
       jooqContext(ctx)
         .selectFrom(table)
-        .fetchInto(pojoClass)
-        .toList()
+        .fetch()
+        .map { it.into(pojoFactory()) }
     }
 
   override suspend fun findById(value: Pojo, ctx: Repository.Context?): Pojo? =
@@ -63,7 +64,7 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
         .selectFrom(table)
         .where(idQuery(value))
         .fetchOne()
-        ?.into(pojoClass)
+        ?.into(pojoFactory())
     }
 
   override suspend fun insert(value: Pojo, ctx: Repository.Context?): Pojo =
@@ -72,8 +73,8 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
         insertInto(table)
           .set(newRecord(table, value))
           .returning()
-          .fetchOne()!!
-          .into(pojoClass)
+          .fetchOne()
+          ?.into(pojoFactory())!!
       }
     }
 
@@ -84,8 +85,8 @@ abstract class AbstractJooqRepository<R : Record, Pojo>(
           .set(newRecord(table, value))
           .where(idQuery(value))
           .returning()
-          .fetchOne()!!
-          .into(pojoClass)
+          .fetchOne()
+          ?.into(pojoFactory())!!
       }
     }
 

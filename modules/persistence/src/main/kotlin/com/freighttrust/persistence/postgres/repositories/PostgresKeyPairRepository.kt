@@ -18,7 +18,7 @@ import java.time.ZoneOffset
 class PostgresKeyPairRepository(
   dbCtx: DSLContext
 ) : KeyPairRepository, AbstractJooqRepository<KeyPairRecord, KeyPair>(
-  dbCtx, KEY_PAIR, KeyPair::class.java
+  dbCtx, KEY_PAIR, KeyPair::class.java, { KeyPair() }
 ) {
 
   override fun idQuery(value: KeyPair): Condition = KEY_PAIR.ID.eq(value.id)
@@ -29,7 +29,7 @@ class PostgresKeyPairRepository(
         .selectFrom(KEY_PAIR)
         .where(KEY_PAIR.CERTIFICATE.eq(certificate.toBase64()))
         .fetchOne()
-        ?.into(KeyPair::class.java)
+        ?.into(KeyPair())
     }
 
   override suspend fun issue(certificateFactory: CertificateFactory, ctx: Repository.Context?): KeyPair {

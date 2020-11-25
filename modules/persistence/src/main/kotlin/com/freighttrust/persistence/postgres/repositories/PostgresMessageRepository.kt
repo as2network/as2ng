@@ -11,7 +11,7 @@ import org.jooq.DSLContext
 class PostgresMessageRepository(
   dbCtx: DSLContext
 ) : MessageRepository, AbstractJooqRepository<MessageRecord, Message>(
-  dbCtx, MESSAGE, Message::class.java
+  dbCtx, MESSAGE, Message::class.java, { Message() }
 ) {
 
   override fun idQuery(value: Message): Condition =
