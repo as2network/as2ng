@@ -27,16 +27,24 @@ class ReceiveMessageHandler(
 
       val path = "${pathPrefix}/${recipientId}/${senderId}/$messageId$extension"
 
+      // TODO add a reference to the decrypted and verified body file in the db
       fileService.write(path, body.dataHandler)
 
       // send an MDN to acknowledge receipt and close the connection
 
-      sendMDN(
-        "Message has been successfully received",
-        ctx.createDispositionNotification(Disposition.automaticProcessed)
-      )
+      if(isMdnRequested) {
+
+        sendMDN(
+          "Message has been successfully received",
+          ctx.createDispositionNotification(Disposition.automaticProcessed)
+        )
+
+      } else {
+        ctx.response()
+          .setStatusCode(204)
+          .end()
+      }
 
     }
-
 
 }

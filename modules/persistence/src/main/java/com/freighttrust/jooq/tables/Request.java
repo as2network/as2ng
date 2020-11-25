@@ -59,12 +59,12 @@ public class Request extends TableImpl<RequestRecord> {
     /**
      * The column <code>public.request.type</code>.
      */
-    public final TableField<RequestRecord, RequestType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.asEnumDataType(com.freighttrust.jooq.enums.RequestType.class), this, "");
+    public final TableField<RequestRecord, RequestType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.freighttrust.jooq.enums.RequestType.class), this, "");
 
     /**
      * The column <code>public.request.headers</code>.
      */
-    public final TableField<RequestRecord, JSONB> HEADERS = createField(DSL.name("headers"), SQLDataType.JSONB, this, "");
+    public final TableField<RequestRecord, JSONB> HEADERS = createField(DSL.name("headers"), SQLDataType.JSONB.nullable(false), this, "");
 
     /**
      * The column <code>public.request.body_file_id</code>.
@@ -74,17 +74,17 @@ public class Request extends TableImpl<RequestRecord> {
     /**
      * The column <code>public.request.message_id</code>.
      */
-    public final TableField<RequestRecord, String> MESSAGE_ID = createField(DSL.name("message_id"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<RequestRecord, String> MESSAGE_ID = createField(DSL.name("message_id"), SQLDataType.VARCHAR(128).nullable(false), this, "");
 
     /**
      * The column <code>public.request.subject</code>.
      */
-    public final TableField<RequestRecord, String> SUBJECT = createField(DSL.name("subject"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<RequestRecord, String> SUBJECT = createField(DSL.name("subject"), SQLDataType.VARCHAR(128).nullable(false), this, "");
 
     /**
      * The column <code>public.request.trading_channel_id</code>.
      */
-    public final TableField<RequestRecord, Long> TRADING_CHANNEL_ID = createField(DSL.name("trading_channel_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<RequestRecord, Long> TRADING_CHANNEL_ID = createField(DSL.name("trading_channel_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.request.original_request_id</code>.
@@ -94,7 +94,7 @@ public class Request extends TableImpl<RequestRecord> {
     /**
      * The column <code>public.request.received_at</code>.
      */
-    public final TableField<RequestRecord, OffsetDateTime> RECEIVED_AT = createField(DSL.name("received_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).defaultValue(DSL.field("CURRENT_TIMESTAMP", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<RequestRecord, OffsetDateTime> RECEIVED_AT = createField(DSL.name("received_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("CURRENT_TIMESTAMP", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>public.request.delivered_at</code>.

@@ -58,17 +58,17 @@ public class TradingPartner extends TableImpl<TradingPartnerRecord> {
     /**
      * The column <code>public.trading_partner.name</code>.
      */
-    public final TableField<TradingPartnerRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<TradingPartnerRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(128).nullable(false), this, "");
 
     /**
      * The column <code>public.trading_partner.email</code>.
      */
-    public final TableField<TradingPartnerRecord, String> EMAIL = createField(DSL.name("email"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<TradingPartnerRecord, String> EMAIL = createField(DSL.name("email"), SQLDataType.VARCHAR(128).nullable(false), this, "");
 
     /**
      * The column <code>public.trading_partner.key_pair_id</code>.
      */
-    public final TableField<TradingPartnerRecord, Long> KEY_PAIR_ID = createField(DSL.name("key_pair_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<TradingPartnerRecord, Long> KEY_PAIR_ID = createField(DSL.name("key_pair_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.trading_partner.validity</code>.

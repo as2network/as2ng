@@ -56,27 +56,27 @@ public class DispositionNotification extends TableImpl<DispositionNotificationRe
     /**
      * The column <code>public.disposition_notification.original_message_id</code>.
      */
-    public final TableField<DispositionNotificationRecord, String> ORIGINAL_MESSAGE_ID = createField(DSL.name("original_message_id"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<DispositionNotificationRecord, String> ORIGINAL_MESSAGE_ID = createField(DSL.name("original_message_id"), SQLDataType.VARCHAR(128).nullable(false), this, "");
 
     /**
      * The column <code>public.disposition_notification.original_recipient</code>.
      */
-    public final TableField<DispositionNotificationRecord, String> ORIGINAL_RECIPIENT = createField(DSL.name("original_recipient"), SQLDataType.VARCHAR(64), this, "");
+    public final TableField<DispositionNotificationRecord, String> ORIGINAL_RECIPIENT = createField(DSL.name("original_recipient"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
      * The column <code>public.disposition_notification.final_recipient</code>.
      */
-    public final TableField<DispositionNotificationRecord, String> FINAL_RECIPIENT = createField(DSL.name("final_recipient"), SQLDataType.VARCHAR(64), this, "");
+    public final TableField<DispositionNotificationRecord, String> FINAL_RECIPIENT = createField(DSL.name("final_recipient"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
      * The column <code>public.disposition_notification.reporting_ua</code>.
      */
-    public final TableField<DispositionNotificationRecord, String> REPORTING_UA = createField(DSL.name("reporting_ua"), SQLDataType.VARCHAR(64), this, "");
+    public final TableField<DispositionNotificationRecord, String> REPORTING_UA = createField(DSL.name("reporting_ua"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
      * The column <code>public.disposition_notification.disposition</code>.
      */
-    public final TableField<DispositionNotificationRecord, String> DISPOSITION = createField(DSL.name("disposition"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<DispositionNotificationRecord, String> DISPOSITION = createField(DSL.name("disposition"), SQLDataType.VARCHAR(128).nullable(false), this, "");
 
     /**
      * The column <code>public.disposition_notification.received_content_mic</code>.

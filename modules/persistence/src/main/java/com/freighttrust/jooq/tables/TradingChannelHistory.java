@@ -53,22 +53,22 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     /**
      * The column <code>public.trading_channel_history.name</code>.
      */
-    public final TableField<TradingChannelHistoryRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(64), this, "");
+    public final TableField<TradingChannelHistoryRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
      * The column <code>public.trading_channel_history.type</code>.
      */
-    public final TableField<TradingChannelHistoryRecord, TradingChannelType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.asEnumDataType(com.freighttrust.jooq.enums.TradingChannelType.class), this, "");
+    public final TableField<TradingChannelHistoryRecord, TradingChannelType> TYPE = createField(DSL.name("type"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.freighttrust.jooq.enums.TradingChannelType.class), this, "");
 
     /**
      * The column <code>public.trading_channel_history.sender_id</code>.
      */
-    public final TableField<TradingChannelHistoryRecord, Long> SENDER_ID = createField(DSL.name("sender_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<TradingChannelHistoryRecord, Long> SENDER_ID = createField(DSL.name("sender_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.trading_channel_history.sender_as2_identifier</code>.
      */
-    public final TableField<TradingChannelHistoryRecord, String> SENDER_AS2_IDENTIFIER = createField(DSL.name("sender_as2_identifier"), SQLDataType.VARCHAR(64), this, "");
+    public final TableField<TradingChannelHistoryRecord, String> SENDER_AS2_IDENTIFIER = createField(DSL.name("sender_as2_identifier"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
      * The column <code>public.trading_channel_history.sender_key_pair_id</code>.
@@ -78,12 +78,12 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     /**
      * The column <code>public.trading_channel_history.recipient_id</code>.
      */
-    public final TableField<TradingChannelHistoryRecord, Long> RECIPIENT_ID = createField(DSL.name("recipient_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<TradingChannelHistoryRecord, Long> RECIPIENT_ID = createField(DSL.name("recipient_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.trading_channel_history.recipient_as2_identifier</code>.
      */
-    public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_AS2_IDENTIFIER = createField(DSL.name("recipient_as2_identifier"), SQLDataType.VARCHAR(64), this, "");
+    public final TableField<TradingChannelHistoryRecord, String> RECIPIENT_AS2_IDENTIFIER = createField(DSL.name("recipient_as2_identifier"), SQLDataType.VARCHAR(64).nullable(false), this, "");
 
     /**
      * The column <code>public.trading_channel_history.recipient_key_pair_id</code>.
@@ -93,7 +93,7 @@ public class TradingChannelHistory extends TableImpl<TradingChannelHistoryRecord
     /**
      * The column <code>public.trading_channel_history.allow_body_certificate_for_verification</code>.
      */
-    public final TableField<TradingChannelHistoryRecord, Boolean> ALLOW_BODY_CERTIFICATE_FOR_VERIFICATION = createField(DSL.name("allow_body_certificate_for_verification"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<TradingChannelHistoryRecord, Boolean> ALLOW_BODY_CERTIFICATE_FOR_VERIFICATION = createField(DSL.name("allow_body_certificate_for_verification"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
     /**
      * The column <code>public.trading_channel_history.recipient_message_url</code>.

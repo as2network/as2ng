@@ -81,12 +81,12 @@ public class Message extends TableImpl<MessageRecord> {
     /**
      * The column <code>public.message.is_mdn_requested</code>.
      */
-    public final TableField<MessageRecord, Boolean> IS_MDN_REQUESTED = createField(DSL.name("is_mdn_requested"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<MessageRecord, Boolean> IS_MDN_REQUESTED = createField(DSL.name("is_mdn_requested"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
     /**
      * The column <code>public.message.is_mdn_async</code>.
      */
-    public final TableField<MessageRecord, Boolean> IS_MDN_ASYNC = createField(DSL.name("is_mdn_async"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<MessageRecord, Boolean> IS_MDN_ASYNC = createField(DSL.name("is_mdn_async"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
     /**
      * The column <code>public.message.receipt_delivery_option</code>.

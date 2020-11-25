@@ -52,17 +52,17 @@ public class TradingPartnerHistory extends TableImpl<TradingPartnerHistoryRecord
     /**
      * The column <code>public.trading_partner_history.name</code>.
      */
-    public final TableField<TradingPartnerHistoryRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<TradingPartnerHistoryRecord, String> NAME = createField(DSL.name("name"), SQLDataType.VARCHAR(128).nullable(false), this, "");
 
     /**
      * The column <code>public.trading_partner_history.email</code>.
      */
-    public final TableField<TradingPartnerHistoryRecord, String> EMAIL = createField(DSL.name("email"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<TradingPartnerHistoryRecord, String> EMAIL = createField(DSL.name("email"), SQLDataType.VARCHAR(128).nullable(false), this, "");
 
     /**
      * The column <code>public.trading_partner_history.key_pair_id</code>.
      */
-    public final TableField<TradingPartnerHistoryRecord, Long> KEY_PAIR_ID = createField(DSL.name("key_pair_id"), SQLDataType.BIGINT, this, "");
+    public final TableField<TradingPartnerHistoryRecord, Long> KEY_PAIR_ID = createField(DSL.name("key_pair_id"), SQLDataType.BIGINT.nullable(false), this, "");
 
     /**
      * The column <code>public.trading_partner_history.validity</code>.

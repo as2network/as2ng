@@ -2,6 +2,7 @@ package com.freighttrust.as2.kotest.listeners
 
 import com.freighttrust.as2.ext.toAs2Identifier
 import com.freighttrust.as2.kotest.listeners.TestPartner.Apple
+import com.freighttrust.as2.kotest.listeners.TestPartner.As2ng
 
 import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
 import com.freighttrust.as2.kotest.listeners.TestPartner.Dewalt
@@ -43,13 +44,19 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.charset.Charset
 
-enum class TestPartner(val configPath: String) {
+enum class TestPartnerType {
+  OpenAS2,
+  As2ng
+}
 
-  Walmart("openas2/Walmart"),
-  CocaCola("openas2/CocaCola"),
-  Pepsi("openas2/Pepsi"),
-  Apple("openas2/Apple"),
-  Dewalt("openas2/Dewalt");
+enum class TestPartner(val type: TestPartnerType, val openAs2ConfigPath: String? = null) {
+
+  Walmart(TestPartnerType.OpenAS2, "openas2/Walmart"),
+  CocaCola(TestPartnerType.OpenAS2, "openas2/CocaCola"),
+  Pepsi(TestPartnerType.OpenAS2, "openas2/Pepsi"),
+  Apple(TestPartnerType.OpenAS2, "openas2/Apple"),
+  Dewalt(TestPartnerType.OpenAS2, "openas2/Dewalt"),
+  As2ng(TestPartnerType.As2ng);
 
   val as2Identifier = name.toAs2Identifier()
 
@@ -72,7 +79,9 @@ enum class TestTradingChannel(
   WalmartToCocaCola(Walmart, CocaCola),
   WalmartToPepsi(Walmart, Pepsi, false, true, false),
   WalmartToApple(Walmart, Apple, true, false, true),
-  WalmartToDewalt(Walmart, Dewalt, false, true, true);
+  WalmartToDewalt(Walmart, Dewalt, false, true, true),
+  WalmartToAs2ng(Walmart, As2ng, false, true, true);
+
 }
 
 class IntegrationTestListener(
@@ -133,7 +142,18 @@ class IntegrationTestListener(
             .apply {
 
               name = config.name
-              type = TradingChannelType.forwarding
+
+              when (config.recipient.type) {
+
+                TestPartnerType.OpenAS2 -> {
+                  type = TradingChannelType.forwarding
+                  recipientMessageUrl = "http://localhost"
+                }
+
+                TestPartnerType.As2ng -> {
+                  type = TradingChannelType.receiving
+                }
+              }
 
               allowBodyCertificateForVerification = config.allowBodyCertificateForVerification
 
@@ -147,7 +167,7 @@ class IntegrationTestListener(
 
               recipientId = partnerMap.getValue(config.recipient).id
               recipientAs2Identifier = config.recipient.as2Identifier
-              recipientMessageUrl = "http://localhost"
+
 
               if (config.withCustomSenderKeyPair) {
                 // issue an encryption key pair specifically for this trading channel
@@ -164,14 +184,17 @@ class IntegrationTestListener(
 
     // create keystores
 
-    keyStoreMap = partnerMap.mapValues { (key, value) ->
-      val path = "src/test/resources/${key.configPath}/keystore.p12"
+    keyStoreMap = partnerMap
+      .filter { (key, _) -> key.type == TestPartnerType.OpenAS2}
+      .mapValues { (key, value) ->
+      val path = "src/test/resources/${key.openAs2ConfigPath}/keystore.p12"
       createKeyStore(value, "password", path)
     }
 
     // create as2 server containers
 
     containerMap = TestPartner.values()
+      .filter { it.type == TestPartnerType.OpenAS2 }
       .map { tp ->
 
         val keyStorePath = keyStoreMap[tp]
@@ -183,8 +206,8 @@ class IntegrationTestListener(
           GenericContainer<Nothing>("docker.pkg.github.com/freight-trust/as2ng/as2lib-server:4.6.3")
             .apply {
               withTmpFs(mapOf("/opt/as2/data" to ""))
-              withCopyFileToContainer(MountableFile.forClasspathResource("${tp.configPath}/config.xml"), "/opt/as2/config/config.xml")
-              withCopyFileToContainer(MountableFile.forClasspathResource("${tp.configPath}/partnerships.xml"), "/opt/as2/config/partnerships.xml")
+              withCopyFileToContainer(MountableFile.forClasspathResource("${tp.openAs2ConfigPath}/config.xml"), "/opt/as2/config/config.xml")
+              withCopyFileToContainer(MountableFile.forClasspathResource("${tp.openAs2ConfigPath}/partnerships.xml"), "/opt/as2/config/partnerships.xml")
               withCopyFileToContainer(keyStorePath, "/opt/as2/config/keystore.p12")
               withExposedPorts(10101)
               withCommand("/opt/as2/config/config.xml")
@@ -204,6 +227,7 @@ class IntegrationTestListener(
 
     channelMap
       .values
+      .filter { it.type == TradingChannelType.forwarding }
       .forEach { channel ->
 
         val container = containerMap[TestPartner.findByAs2Identifier(channel.recipientAs2Identifier)]

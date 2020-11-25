@@ -13,6 +13,9 @@
   <partner name="Walmart_Dewalt" as2_id="Walmart" x509_alias="Walmart->Dewalt" email="walmart@partners.com"/>
   <partner name="Dewalt_Walmart" as2_id="Dewalt" x509_alias="Dewalt->Walmart" email="dewalt@partners.com"/>
 
+  <partner name="Walmart_As2ng" as2_id="Walmart" x509_alias="Walmart->As2ng" email="walmart@partners.com"/>
+  <partner name="As2ng_Walmart" as2_id="As2ng" x509_alias="As2ng->Walmart" email="as2ng@partners.com"/>
+
   <partnership name="Walmart->CocaCola">
     <sender name="Walmart_CocaCola"/>
     <receiver name="CocaCola_Walmart"/>
@@ -68,5 +71,20 @@
     <attribute name="protocol" value="as2"/>
     <attribute name="sign" value="sha-512"/>
   </partnership>
+
+  <partnership name="Walmart->As2ng">
+    <sender name="Walmart_As2ng"/>
+    <receiver name="As2ng_Walmart"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="sign" value="sha-512"/>
+  </partnership>
+
+  <partnership name="As2ng->Walmart">
+    <sender name="As2ng_Walmart"/>
+    <receiver name="Walmart_As2ng"/>
+    <attribute name="protocol" value="as2"/>
+    <attribute name="sign" value="sha-512"/>
+  </partnership>
+
 
 </partnerships>

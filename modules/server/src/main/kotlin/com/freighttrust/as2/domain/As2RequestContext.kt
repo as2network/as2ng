@@ -52,6 +52,8 @@ import kotlin.reflect.KClass
 import com.freighttrust.jooq.tables.pojos.Message as MessageRecord
 import com.freighttrust.as2.ext.putHeader
 import com.freighttrust.persistence.extensions.formattedSerialNumber
+import io.vertx.core.http.HttpHeaders.CONTENT_ENCODING
+import io.vertx.core.http.HttpHeaders.CONTENT_TYPE
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -310,6 +312,8 @@ data class As2RequestContext(
       // synchronous response
       false -> routingContext
         .response()
+        .putHeader(CONTENT_TYPE, responseBody.contentType)
+        .putHeader(CONTENT_ENCODING, responseBody.encoding)
         .setStatusCode(200)
         .end(buffer)
 

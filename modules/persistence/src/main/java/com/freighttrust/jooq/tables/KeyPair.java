@@ -57,12 +57,12 @@ public class KeyPair extends TableImpl<KeyPairRecord> {
     /**
      * The column <code>public.key_pair.serial_number</code>.
      */
-    public final TableField<KeyPairRecord, String> SERIAL_NUMBER = createField(DSL.name("serial_number"), SQLDataType.VARCHAR(60), this, "");
+    public final TableField<KeyPairRecord, String> SERIAL_NUMBER = createField(DSL.name("serial_number"), SQLDataType.VARCHAR(60).nullable(false), this, "");
 
     /**
      * The column <code>public.key_pair.certificate</code>.
      */
-    public final TableField<KeyPairRecord, String> CERTIFICATE = createField(DSL.name("certificate"), SQLDataType.VARCHAR(4096), this, "");
+    public final TableField<KeyPairRecord, String> CERTIFICATE = createField(DSL.name("certificate"), SQLDataType.VARCHAR(4096).nullable(false), this, "");
 
     /**
      * The column <code>public.key_pair.private_key</code>.
