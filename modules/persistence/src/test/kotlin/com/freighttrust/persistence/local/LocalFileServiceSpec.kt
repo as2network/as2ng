@@ -69,7 +69,7 @@ class LocalFileServiceSpec : BehaviorSpec(), KoinTest {
       `when`("it is written to the file service") {
 
         val filePath = faker.file().fileName()
-        val record = fileService.writeToFile(filePath, dataHandler)
+        val record = fileService.write(filePath, dataHandler)
 
         val dataBytes = withContext(Dispatchers.IO) {
           dataHandler.inputStream.readAllBytes()
@@ -102,6 +102,16 @@ class LocalFileServiceSpec : BehaviorSpec(), KoinTest {
             .use { it.readAllBytes() }
 
           localFileBytes shouldBe dataBytes
+        }
+
+        then("we should be able to read the file back") {
+
+          val readDataHandler = fileService.read(record.id)
+
+          readDataHandler shouldNotBe null
+          readDataHandler!!.contentType shouldBe dataHandler.contentType
+          readDataHandler.inputStream.readAllBytes() shouldBe dataHandler.inputStream.readAllBytes()
+
         }
 
       }

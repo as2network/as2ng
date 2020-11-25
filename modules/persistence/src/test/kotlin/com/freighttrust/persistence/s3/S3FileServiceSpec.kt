@@ -32,7 +32,6 @@ class S3FileServiceSpec : BehaviorSpec(), KoinTest {
 
   private val bucket = "s3-file-service-spec"
 
-
   override fun listeners(): List<TestListener> =
     listOf(
       listOf(
@@ -78,7 +77,7 @@ class S3FileServiceSpec : BehaviorSpec(), KoinTest {
       `when`("it is written to the file service") {
 
         val path = faker.file().fileName()
-        val record = fileService.writeToFile(path, dataHandler)
+        val record = fileService.write(path, dataHandler)
 
         val dataBytes = withContext(Dispatchers.IO) {
           dataHandler.inputStream.readAllBytes()
@@ -113,6 +112,16 @@ class S3FileServiceSpec : BehaviorSpec(), KoinTest {
           }
 
           s3Object.objectContent.readAllBytes() shouldBe dataBytes
+        }
+
+        then("we should be able to read the file back") {
+
+          val readDataHandler = fileService.read(record.id)
+
+          readDataHandler shouldNotBe null
+          readDataHandler!!.contentType shouldBe dataHandler.contentType
+          readDataHandler.inputStream.readAllBytes() shouldBe dataHandler.inputStream.readAllBytes()
+
         }
 
       }

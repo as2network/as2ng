@@ -19,6 +19,7 @@ dependencies {
 
   jooqGenerator("org.postgresql:postgresql")
 
+  api("com.helger.web:ph-mail")
   api("com.amazonaws:aws-java-sdk-s3")
   api("org.postgresql:postgresql")
   api("org.jooq:jooq")

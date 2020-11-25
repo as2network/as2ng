@@ -3,18 +3,17 @@ package com.freighttrust.persistence.s3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.services.s3.model.PutObjectRequest
 import com.amazonaws.services.s3.transfer.TransferManager
-import com.freighttrust.jooq.Tables.FILE
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.enums.FileProvider
 import com.freighttrust.jooq.tables.pojos.File
 import com.freighttrust.persistence.FileRepository
 import com.freighttrust.persistence.FileService
 import com.freighttrust.persistence.Repository
+import com.freighttrust.persistence.extensions.metadataForS3
+import com.helger.mail.datasource.InputStreamDataSource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.jooq.JSONB
-import org.jooq.impl.DSL.jsonEntry
-import org.jooq.impl.DSL.jsonObject
 import org.jooq.tools.json.JSONObject
 import org.jooq.tools.json.JSONObject.toJSONString
 import java.io.BufferedInputStream
@@ -28,10 +27,11 @@ class S3FileService(
   private val fileRepository: FileRepository,
   private val transferManager: TransferManager,
   private val bucket: String,
+  private val objectMapper: ObjectMapper
 ) : FileService {
 
   @Suppress("BlockingMethodInNonBlockingContext")
-  override suspend fun writeToFile(path: String, dataHandler: DataHandler, ctx: Repository.Context?): File =
+  override suspend fun write(path: String, dataHandler: DataHandler, ctx: Repository.Context?): File =
     withContext(Dispatchers.IO) {
 
       // create a temp file
@@ -89,4 +89,19 @@ class S3FileService(
 
     }
 
+  override suspend fun read(fileId: Long, ctx: Repository.Context?): DataHandler? =
+    withContext(Dispatchers.IO) {
+      fileRepository.findById(File().apply { id = fileId })?.let { file ->
+        val metadata = file.metadataForS3(objectMapper)
+        DataHandler(
+          InputStreamDataSource(
+            transferManager.amazonS3Client
+              .getObject(metadata.bucket, metadata.key)
+              .objectContent,
+            "S3FileServiceDataHandler",
+            metadata.contentType
+          )
+        )
+      }
+    }
 }
