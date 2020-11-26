@@ -16,7 +16,7 @@ WORKDIR /opt/cli
 
 COPY --from=build  /opt/build/modules/cli/build/libs/*.jar libs/
 
-ENTRYPOINT ["java", "-classpath", "libs/*", "-Xms512m", "-Xmx512m", "com.freighttrust.as2.cli.MainKt"]
+ENTRYPOINT ["java", "-classpath", "libs/*", "-Xms512m", "-Xmx512m", "network.as2.cli.MainKt"]
 
 VOLUME /opt/cli/data
 

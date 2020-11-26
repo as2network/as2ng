@@ -72,12 +72,12 @@ tasks {
     }
   }
 
-  create<JavaExec>("runAs2ng") { verticleTask(verticle = "as2ng:com.freighttrust.as2.ServerVerticle", debugPort = "10000") }
+  create<JavaExec>("runAs2ng") { verticleTask(verticle = "as2ng:network.as2.server.ServerVerticle", debugPort = "10000") }
 }
 
 buildConfigKotlin {
   sourceSet("main") {
-    packageName = "com.freighttrust.as2"
+    packageName = "network.as2.server"
     buildConfig(name = "group", value = project.group.toString())
     buildConfig(name = "name", value = project.name)
     buildConfig(name = "version", value = project.version.toString())

@@ -18,7 +18,7 @@ COPY --from=build  /opt/build/modules/server/build/libs/*.jar libs/
 COPY docker/server/entrypoint.sh entrypoint.sh
 
 ENTRYPOINT ["/opt/as2ng/entrypoint.sh"]
-CMD ["run", "as2ng:com.freighttrust.as2.ServerVerticle"]
+CMD ["run", "as2ng:network.as2.server.ServerVerticle"]
 
 EXPOSE 8080
 

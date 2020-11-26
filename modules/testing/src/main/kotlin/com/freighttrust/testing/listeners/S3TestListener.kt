@@ -34,7 +34,7 @@ class S3TestListener(
         .standard()
         .withEndpointConfiguration(getEndpointConfiguration(S3))
         .withCredentials(defaultCredentialsProvider)
-        .build();
+        .build()
 
       // create the test bucket
       withContext(Dispatchers.IO) {

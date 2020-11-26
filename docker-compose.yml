@@ -19,12 +19,12 @@ volumes:
 
 services:
 
-#  activemq:
-#    image: rmohr/activemq:5.15.9-alpine
-#    restart: unless-stopped
-#    network_mode: host
-#    volumes:
-#      - activemq-data:/opt/activemq/data
+  #  activemq:
+  #    image: rmohr/activemq:5.15.9-alpine
+  #    restart: unless-stopped
+  #    network_mode: host
+  #    volumes:
+  #      - activemq-data:/opt/activemq/data
 
   postgres:
     image: postgres:12
