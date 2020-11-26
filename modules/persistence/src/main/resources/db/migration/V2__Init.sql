@@ -124,8 +124,8 @@ create table request
 
     received_at         timestamptz default current_timestamp  not null,
 
-    delivered_at        timestamptz                            null,
-    delivered_to        varchar(128)                           null,
+    forwarded_at        timestamptz                            null,
+    forwarded_to        varchar(128)                           null,
 
     error_message       varchar(512)                           null,
     error_stack_trace   text                                   null

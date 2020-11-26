@@ -98,12 +98,12 @@ class PostgresRequestRepository(
         ?.value1()
     }
 
-  override suspend fun setAsDeliveredTo(id: UUID, url: String, timestamp: Instant, ctx: Repository.Context?) {
+  override suspend fun setAsForwardedTo(id: UUID, url: String, timestamp: Instant, ctx: Repository.Context?) {
     coroutineScope {
       jooqContext(ctx)
         .update(REQUEST)
-        .set(REQUEST.DELIVERED_TO, url)
-        .set(REQUEST.DELIVERED_AT, timestamp.atOffset(ZoneOffset.UTC))
+        .set(REQUEST.FORWARDED_TO, url)
+        .set(REQUEST.FORWARDED_AT, timestamp.atOffset(ZoneOffset.UTC))
         .where(REQUEST.ID.eq(id))
         .execute()
     }

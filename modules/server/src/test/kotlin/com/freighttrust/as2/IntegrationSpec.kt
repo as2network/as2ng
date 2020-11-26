@@ -464,7 +464,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       if (channel!!.type == TradingChannelType.forwarding) {
         // message should have been delivered
-        request.deliveredAt shouldNotBe null
+        request.forwardedAt shouldNotBe null
       }
 
       request.receivedAt shouldNotBe null
@@ -476,7 +476,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
       requestBuilder.recipient.as2Identifier shouldBe recipientAs2Identifier
 
       // delivery url should match the configured url for the trading channel
-      request.deliveredTo shouldBe recipientMessageUrl
+      request.forwardedTo shouldBe recipientMessageUrl
     }
 
     val (mdnRequested, asyncMdnRequested) =

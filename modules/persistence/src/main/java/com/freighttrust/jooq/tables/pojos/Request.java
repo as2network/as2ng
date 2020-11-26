@@ -30,8 +30,8 @@ public class Request implements Serializable {
     private Long           tradingChannelId;
     private UUID           originalRequestId;
     private OffsetDateTime receivedAt;
-    private OffsetDateTime deliveredAt;
-    private String         deliveredTo;
+    private OffsetDateTime forwardedAt;
+    private String         forwardedTo;
     private String         errorMessage;
     private String         errorStackTrace;
 
@@ -47,8 +47,8 @@ public class Request implements Serializable {
         this.tradingChannelId = value.tradingChannelId;
         this.originalRequestId = value.originalRequestId;
         this.receivedAt = value.receivedAt;
-        this.deliveredAt = value.deliveredAt;
-        this.deliveredTo = value.deliveredTo;
+        this.forwardedAt = value.forwardedAt;
+        this.forwardedTo = value.forwardedTo;
         this.errorMessage = value.errorMessage;
         this.errorStackTrace = value.errorStackTrace;
     }
@@ -63,8 +63,8 @@ public class Request implements Serializable {
         Long           tradingChannelId,
         UUID           originalRequestId,
         OffsetDateTime receivedAt,
-        OffsetDateTime deliveredAt,
-        String         deliveredTo,
+        OffsetDateTime forwardedAt,
+        String         forwardedTo,
         String         errorMessage,
         String         errorStackTrace
     ) {
@@ -77,8 +77,8 @@ public class Request implements Serializable {
         this.tradingChannelId = tradingChannelId;
         this.originalRequestId = originalRequestId;
         this.receivedAt = receivedAt;
-        this.deliveredAt = deliveredAt;
-        this.deliveredTo = deliveredTo;
+        this.forwardedAt = forwardedAt;
+        this.forwardedTo = forwardedTo;
         this.errorMessage = errorMessage;
         this.errorStackTrace = errorStackTrace;
     }
@@ -219,32 +219,32 @@ public class Request implements Serializable {
     }
 
     /**
-     * Getter for <code>public.request.delivered_at</code>.
+     * Getter for <code>public.request.forwarded_at</code>.
      */
-    public OffsetDateTime getDeliveredAt() {
-        return this.deliveredAt;
+    public OffsetDateTime getForwardedAt() {
+        return this.forwardedAt;
     }
 
     /**
-     * Setter for <code>public.request.delivered_at</code>.
+     * Setter for <code>public.request.forwarded_at</code>.
      */
-    public Request setDeliveredAt(OffsetDateTime deliveredAt) {
-        this.deliveredAt = deliveredAt;
+    public Request setForwardedAt(OffsetDateTime forwardedAt) {
+        this.forwardedAt = forwardedAt;
         return this;
     }
 
     /**
-     * Getter for <code>public.request.delivered_to</code>.
+     * Getter for <code>public.request.forwarded_to</code>.
      */
-    public String getDeliveredTo() {
-        return this.deliveredTo;
+    public String getForwardedTo() {
+        return this.forwardedTo;
     }
 
     /**
-     * Setter for <code>public.request.delivered_to</code>.
+     * Setter for <code>public.request.forwarded_to</code>.
      */
-    public Request setDeliveredTo(String deliveredTo) {
-        this.deliveredTo = deliveredTo;
+    public Request setForwardedTo(String forwardedTo) {
+        this.forwardedTo = forwardedTo;
         return this;
     }
 
@@ -341,17 +341,17 @@ public class Request implements Serializable {
         }
         else if (!receivedAt.equals(other.receivedAt))
             return false;
-        if (deliveredAt == null) {
-            if (other.deliveredAt != null)
+        if (forwardedAt == null) {
+            if (other.forwardedAt != null)
                 return false;
         }
-        else if (!deliveredAt.equals(other.deliveredAt))
+        else if (!forwardedAt.equals(other.forwardedAt))
             return false;
-        if (deliveredTo == null) {
-            if (other.deliveredTo != null)
+        if (forwardedTo == null) {
+            if (other.forwardedTo != null)
                 return false;
         }
-        else if (!deliveredTo.equals(other.deliveredTo))
+        else if (!forwardedTo.equals(other.forwardedTo))
             return false;
         if (errorMessage == null) {
             if (other.errorMessage != null)
@@ -381,8 +381,8 @@ public class Request implements Serializable {
         result = prime * result + ((this.tradingChannelId == null) ? 0 : this.tradingChannelId.hashCode());
         result = prime * result + ((this.originalRequestId == null) ? 0 : this.originalRequestId.hashCode());
         result = prime * result + ((this.receivedAt == null) ? 0 : this.receivedAt.hashCode());
-        result = prime * result + ((this.deliveredAt == null) ? 0 : this.deliveredAt.hashCode());
-        result = prime * result + ((this.deliveredTo == null) ? 0 : this.deliveredTo.hashCode());
+        result = prime * result + ((this.forwardedAt == null) ? 0 : this.forwardedAt.hashCode());
+        result = prime * result + ((this.forwardedTo == null) ? 0 : this.forwardedTo.hashCode());
         result = prime * result + ((this.errorMessage == null) ? 0 : this.errorMessage.hashCode());
         result = prime * result + ((this.errorStackTrace == null) ? 0 : this.errorStackTrace.hashCode());
         return result;
@@ -401,8 +401,8 @@ public class Request implements Serializable {
         sb.append(", ").append(tradingChannelId);
         sb.append(", ").append(originalRequestId);
         sb.append(", ").append(receivedAt);
-        sb.append(", ").append(deliveredAt);
-        sb.append(", ").append(deliveredTo);
+        sb.append(", ").append(forwardedAt);
+        sb.append(", ").append(forwardedTo);
         sb.append(", ").append(errorMessage);
         sb.append(", ").append(errorStackTrace);
 

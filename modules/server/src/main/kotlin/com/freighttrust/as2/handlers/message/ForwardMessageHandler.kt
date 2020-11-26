@@ -68,7 +68,7 @@ class ForwardMessageHandler(
       }
 
       // mark the request as delivered
-      requestRepository.setAsDeliveredTo(records.request.id, url, Instant.now())
+      requestRepository.setAsForwardedTo(records.request.id, url, Instant.now())
 
       if (isMdnRequested && !isMdnAsynchronous) {
 

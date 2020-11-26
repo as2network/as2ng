@@ -97,14 +97,14 @@ public class Request extends TableImpl<RequestRecord> {
     public final TableField<RequestRecord, OffsetDateTime> RECEIVED_AT = createField(DSL.name("received_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("CURRENT_TIMESTAMP", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
-     * The column <code>public.request.delivered_at</code>.
+     * The column <code>public.request.forwarded_at</code>.
      */
-    public final TableField<RequestRecord, OffsetDateTime> DELIVERED_AT = createField(DSL.name("delivered_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
+    public final TableField<RequestRecord, OffsetDateTime> FORWARDED_AT = createField(DSL.name("forwarded_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
-     * The column <code>public.request.delivered_to</code>.
+     * The column <code>public.request.forwarded_to</code>.
      */
-    public final TableField<RequestRecord, String> DELIVERED_TO = createField(DSL.name("delivered_to"), SQLDataType.VARCHAR(128), this, "");
+    public final TableField<RequestRecord, String> FORWARDED_TO = createField(DSL.name("forwarded_to"), SQLDataType.VARCHAR(128), this, "");
 
     /**
      * The column <code>public.request.error_message</code>.
