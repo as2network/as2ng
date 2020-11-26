@@ -33,7 +33,7 @@ fun JavaExec.runTask() {
 
   classpath = sourceSets["main"].runtimeClasspath
 
-  main = "com.freighttrust.as2.cli.MainKt"
+  main = "network.as2.cli.MainKt"
   jvmArgs = listOf("-Xms512m", "-Xmx512m")
 }
 

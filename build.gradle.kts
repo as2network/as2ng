@@ -61,7 +61,7 @@ allprojects {
   apply(from = "$rootDir/gradle/versions.gradle")
   apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
-  group = "com.freighttrust"
+  group = "network.as2"
 
   repositories {
     jcenter()

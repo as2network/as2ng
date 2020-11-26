@@ -78,8 +78,8 @@ jooq {
 
             forcedTypes.add(
               ForcedType()
-                .withUserType("com.freighttrust.common.util.TsTzRange")
-                .withBinding("com.freighttrust.persistence.postgres.bindings.TimestampTimezoneRangeBinding")
+                .withUserType("network.as2.common.util.TsTzRange")
+                .withBinding("network.as2.persistence.postgres.bindings.TimestampTimezoneRangeBinding")
                 .withIncludeTypes("tstzrange")
                 .withIncludeExpression(".*")
             )
@@ -96,7 +96,7 @@ jooq {
           }
 
           target.apply {
-            packageName = "com.freighttrust.jooq"
+            packageName = "network.as2.jooq"
             directory = "src/main/java"
           }
 

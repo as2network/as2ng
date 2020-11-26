@@ -153,7 +153,7 @@ create table message
     receipt_delivery_option varchar(128)   null,
 
     /* set in the case of a receiving trading channel */
-    file_id bigint references file(id)
+    file_id                 bigint references file (id)
 );
 
 /*****************************************************************************/

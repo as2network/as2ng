@@ -7,7 +7,7 @@
   </Appenders>
   <Loggers>
 
-    <Logger name="com.freighttrust" level="info" additivity="false">
+    <Logger name="network.as2" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
 

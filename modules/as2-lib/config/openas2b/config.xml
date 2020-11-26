@@ -55,7 +55,7 @@
             port="10082"
             errordir="%home%/../../data/OpenAS2B/inbox/error"
             errorformat="$msg.sender.as2_id$, $msg.receiver.as2_id$, $msg.headers.message-id$"/>
-    <module classname="com.freighttrust.as2.receiver.net.AS2MDNReceiverModule"
+    <module classname="network.as2.receiver.net.AS2MDNReceiverModule"
             port="10083"/>
     <module classname="com.helger.as2lib.processor.resender.DirectoryResenderModule"
             resenddir="%home%/../../data/OpenAS2B/resend"
