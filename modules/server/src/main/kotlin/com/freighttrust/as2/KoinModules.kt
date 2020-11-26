@@ -15,9 +15,10 @@ import com.freighttrust.as2.handlers.mdn.MicVerificationHandler
 import com.freighttrust.as2.handlers.message.ForwardMessageHandler
 import com.freighttrust.as2.handlers.message.MessageReceivedHandler
 import com.freighttrust.as2.handlers.message.MicGenerationHandler
-import com.freighttrust.persistence.FileService
-import com.freighttrust.persistence.local.LocalFileService
-import com.freighttrust.persistence.s3.S3FileService
+import com.freighttrust.as2.handlers.message.ReceiveMessageHandler
+import com.freighttrust.persistence.StorageService
+import com.freighttrust.persistence.local.LocalStorageService
+import com.freighttrust.persistence.s3.S3StorageService
 import com.typesafe.config.Config
 import io.vertx.ext.web.client.WebClient
 import io.xlate.edi.stream.EDIInputFactory
@@ -53,19 +54,20 @@ val As2ExchangeServerModule = module {
 
   single { BodyHandler() }
   single { As2TempFileHandler() }
-  single { As2RequestHandler(get(), get(), get(), get(), get()) }
+  single { As2RequestHandler(get(), get(), get(), get(), get(), get(), get(), get()) }
   single { DecompressionHandler() }
   single { DecryptionHandler(get()) }
   single { MdnReceivedHandler(get(), get(), get()) }
   single { MessageReceivedHandler(get()) }
-  single { FailureHandler(get(), get(), get(), get(), get(), get()) }
+  single { FailureHandler(get()) }
   single { SignatureVerificationHandler(get()) }
   single { MicVerificationHandler() }
   single { MicGenerationHandler() }
 
+  single { ReceiveMessageHandler("received", get(), get()) }
   single { ForwardMdnHandler(get(), get()) }
 
-  single { ForwardMessageHandler(get(_q("baseUrl")), get(), get(), get(), get(), get()) }
+  single { ForwardMessageHandler(get(_q("baseUrl")), get(), get(), get()) }
 
   single { EDIValidationHandler(get()) }
 
@@ -77,11 +79,13 @@ val As2ExchangeServerModule = module {
 
     // configurable file service
     when(val provider = config.getString("fileService")) {
-      "s3" -> get<S3FileService>()
-      "local" -> get<LocalFileService>()
+      "s3" -> get<S3StorageService>()
+      "local" -> get<LocalStorageService>()
       else -> throw IllegalArgumentException("Unknown file persistence provider: $provider")
     }
-  }
+
+
+  }.bind(StorageService::class)
 }
 
 val HttpModule = module {

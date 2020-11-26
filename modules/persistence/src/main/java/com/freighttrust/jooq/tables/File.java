@@ -58,12 +58,12 @@ public class File extends TableImpl<FileRecord> {
     /**
      * The column <code>public.file.provider</code>.
      */
-    public final TableField<FileRecord, FileProvider> PROVIDER = createField(DSL.name("provider"), SQLDataType.VARCHAR.asEnumDataType(com.freighttrust.jooq.enums.FileProvider.class), this, "");
+    public final TableField<FileRecord, FileProvider> PROVIDER = createField(DSL.name("provider"), SQLDataType.VARCHAR.nullable(false).asEnumDataType(com.freighttrust.jooq.enums.FileProvider.class), this, "");
 
     /**
      * The column <code>public.file.metadata</code>.
      */
-    public final TableField<FileRecord, JSONB> METADATA = createField(DSL.name("metadata"), SQLDataType.JSONB, this, "");
+    public final TableField<FileRecord, JSONB> METADATA = createField(DSL.name("metadata"), SQLDataType.JSONB.nullable(false), this, "");
 
     private File(Name alias, Table<FileRecord> aliased) {
         this(alias, aliased, null);

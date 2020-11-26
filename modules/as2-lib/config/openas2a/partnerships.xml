@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <partnerships>
-  <partner name="OpenAS2A" as2_id="OpenAS2A" x509_alias="OpenAS2A" email="openas2a@email.com"/>
+
   <partner name="OpenAS2B" as2_id="OpenAS2B" x509_alias="OpenAS2B" email="openas2b@email.com"/>
   <partner name="OpenAS2C" as2_id="OpenAS2C" x509_alias="OpenAS2C" email="openas2c@email.com"/>
 
-  <partnership name="OpenAS2A-OpenAS2B">
-    <sender name="OpenAS2A"/>
-    <receiver name="OpenAS2B"/>
+  <partner name="OpenAS2A_As2ng" as2_id="OpenAS2A" x509_alias="OpenAS2A->As2ng" email="openas2a@email.com"/>
+  <partner name="As2ng_OpenAS2A" as2_id="As2ng" x509_alias="As2ng->OpenAS2A" email="as2ng@email.com"/>
+
+<!--  <partnership name="OpenAS2A-OpenAS2B">-->
+<!--    <sender name="OpenAS2A"/>-->
+<!--    <receiver name="OpenAS2B"/>-->
+<!--    <attribute name="protocol" value="as2"/>-->
+<!--    <attribute name="subject" value="From OpenAS2A to OpenAS2B"/>-->
+<!--    <attribute name="as2_url" value="http://localhost:8080/message"/>-->
+<!--    <attribute name="as2_mdn_to" value="http://localhost:10081"/>-->
+<!--    <attribute name="as2_receipt_option" value="http://localhost:10081"/>-->
+<!--    <attribute name="as2_mdn_options"-->
+<!--               value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, md5"/>-->
+<!--    <attribute name="encrypt" value="3des"/>-->
+<!--    <attribute name="sign" value="md5"/>-->
+<!--  </partnership>-->
+
+  <partnership name="OpenAS2A-As2ng">
+    <sender name="OpenAS2A_As2ng"/>
+    <receiver name="As2ng_OpenAS2A"/>
     <attribute name="protocol" value="as2"/>
-    <attribute name="subject" value="From OpenAS2A to OpenAS2B"/>
+    <attribute name="subject" value="From OpenAS2A to As2ng"/>
     <attribute name="as2_url" value="http://localhost:8080/message"/>
     <attribute name="as2_mdn_to" value="http://localhost:10081"/>
     <attribute name="as2_receipt_option" value="http://localhost:10081"/>
@@ -18,30 +35,44 @@
     <attribute name="sign" value="md5"/>
   </partnership>
 
-  <partnership name="OpenAS2B-OpenAS2A">
-    <sender name="OpenAS2B"/>
-    <receiver name="OpenAS2A"/>
+  <partnership name="As2ng-OpenAS2A">
+    <sender name="As2ng_OpenAS2A"/>
+    <receiver name="OpenAS2A_As2ng"/>
     <attribute name="protocol" value="as2"/>
-    <attribute name="subject" value="From OpenAS2B to OpenAS2A"/>
-    <!--    <attribute name="as2_url" value="http://localhost:10080"/>-->
-    <attribute name="as2_url" value="http://localhost:10085"/>
-    <attribute name="as2_mdn_to" value="http://localhost:10083"/>
-    <!--    <attribute name="as2_receipt_option" value="http://localhost:10083"/>-->
+    <attribute name="subject" value="From OpenAS2A to As2ng"/>
+    <attribute name="as2_url" value="http://localhost:10080"/>
+    <attribute name="as2_mdn_to" value="http://localhost:8080/mdn"/>
+    <attribute name="as2_receipt_option" value="http://localhost:8080/mdn"/>
     <attribute name="as2_mdn_options"
                value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, sha1"/>
     <attribute name="encrypt" value="3des"/>
     <attribute name="sign" value="sha1"/>
   </partnership>
 
-  <partnership name="OpenAS2C-OpenAS2A">
-    <sender name="OpenAS2C"/>
-    <receiver name="OpenAS2A"/>
-    <attribute name="protocol" value="as2"/>
-    <attribute name="subject" value="From OpenAS2C to OpenAS2A"/>
-    <attribute name="as2_url" value="http://localhost:10090"/>
-    <attribute name="as2_mdn_to" value="http://localhost:10083"/>
-    <attribute name="encrypt" value="3des"/>
-    <attribute name="sign" value="sha1"/>
-    <attribute name="verify_use_cert_in_body_part" value="true"/>
-  </partnership>
+<!--  <partnership name="OpenAS2B-OpenAS2A">-->
+<!--    <sender name="OpenAS2B"/>-->
+<!--    <receiver name="OpenAS2A"/>-->
+<!--    <attribute name="protocol" value="as2"/>-->
+<!--    <attribute name="subject" value="From OpenAS2B to OpenAS2A"/>-->
+<!--    &lt;!&ndash;    <attribute name="as2_url" value="http://localhost:10080"/>&ndash;&gt;-->
+<!--    <attribute name="as2_url" value="http://localhost:10085"/>-->
+<!--    <attribute name="as2_mdn_to" value="http://localhost:10083"/>-->
+<!--    &lt;!&ndash;    <attribute name="as2_receipt_option" value="http://localhost:10083"/>&ndash;&gt;-->
+<!--    <attribute name="as2_mdn_options"-->
+<!--               value="signed-receipt-protocol=optional, pkcs7-signature; signed-receipt-micalg=optional, sha1"/>-->
+<!--    <attribute name="encrypt" value="3des"/>-->
+<!--    <attribute name="sign" value="sha1"/>-->
+<!--  </partnership>-->
+
+<!--  <partnership name="OpenAS2C-OpenAS2A">-->
+<!--    <sender name="OpenAS2C"/>-->
+<!--    <receiver name="OpenAS2A"/>-->
+<!--    <attribute name="protocol" value="as2"/>-->
+<!--    <attribute name="subject" value="From OpenAS2C to OpenAS2A"/>-->
+<!--    <attribute name="as2_url" value="http://localhost:10090"/>-->
+<!--    <attribute name="as2_mdn_to" value="http://localhost:10083"/>-->
+<!--    <attribute name="encrypt" value="3des"/>-->
+<!--    <attribute name="sign" value="sha1"/>-->
+<!--    <attribute name="verify_use_cert_in_body_part" value="true"/>-->
+<!--  </partnership>-->
 </partnerships>

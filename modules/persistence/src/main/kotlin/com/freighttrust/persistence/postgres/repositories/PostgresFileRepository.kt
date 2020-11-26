@@ -10,7 +10,7 @@ import org.jooq.DSLContext
 class PostgresFileRepository(
   dbCtx: DSLContext,
 ) : AbstractJooqRepository<FileRecord, File>(
-  dbCtx, FILE, File::class.java
+  dbCtx, FILE, File::class.java, { File() }
 ), FileRepository {
 
   override fun idQuery(value: File): Condition = FILE.ID.eq(value.id)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openas2 _CryptoVerifyUseCertificateInBodyPart="false"
-         _CryptoSignIncludeCertificateInBodyPart="false">
+         CryptoSignIncludeCertificateInBodyPart="false">
 
   <certificates classname="com.helger.as2.app.cert.ServerCertificateFactory"
                 type="pkcs12"

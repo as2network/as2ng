@@ -11,7 +11,7 @@ val LocalPersistenceModule = module {
     val config = get<Config>(named("app"))
       .getConfig("persistence.local")
 
-    LocalFileService(config.getString("baseDirectory"), get())
+    LocalStorageService(config.getString("baseDirectory"), get(), get())
   }
 
 }

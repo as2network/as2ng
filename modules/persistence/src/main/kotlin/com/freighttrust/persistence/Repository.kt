@@ -42,7 +42,7 @@ interface KeyPairRepository : Repository<KeyPair> {
 
   suspend fun issue(certificateFactory: CertificateFactory, ctx: Repository.Context? = null): KeyPair
 
-  suspend fun findIdByCertificate(certificate: X509Certificate, ctx: Repository.Context? = null): Long?
+  suspend fun findByCertificate(serialNumber: X509Certificate, ctx: Repository.Context? = null): KeyPair?
 
 }
 
@@ -92,10 +92,11 @@ interface RequestRepository : Repository<Request> {
   suspend fun findByMessageId(
     messageId: String,
     withTradingChannel: Boolean = false,
+    withBodyFile: Boolean = false,
     withMessage: Boolean = false,
     withDisposition: Boolean = false,
     ctx: Repository.Context? = null
-  ): Tuple4<Request, TradingChannel?, Message?, DispositionNotification?>?
+  ): Tuple5<Request, TradingChannel?, File?, Message?, DispositionNotification?>?
 
   suspend fun findByOriginalRequestId(
     originalRequestId: UUID,
@@ -104,9 +105,18 @@ interface RequestRepository : Repository<Request> {
     ctx: Repository.Context? = null
   ): Tuple3<Request, TradingChannel?, DispositionNotification?>?
 
+  suspend fun findById(
+    id: UUID,
+    withTradingChannel: Boolean = false,
+    withBodyFile: Boolean = false,
+    withMessage: Boolean = false,
+    withDispositionNotification: Boolean = false,
+    ctx: Repository.Context? = null
+  ): Tuple5<Request, TradingChannel?, File?, Message?, DispositionNotification?>?
+
   suspend fun findRequestId(messageId: String, ctx: Repository.Context? = null): UUID?
 
-  suspend fun setAsDeliveredTo(id: UUID, url: String, timestamp: Instant, ctx: Repository.Context? = null)
+  suspend fun setAsForwardedTo(id: UUID, url: String, timestamp: Instant, ctx: Repository.Context? = null)
   suspend fun setAsFailed(id: UUID, message: String?, stackTrace: String, ctx: Repository.Context? = null)
 }
 

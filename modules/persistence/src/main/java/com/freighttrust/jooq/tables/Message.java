@@ -16,7 +16,7 @@ import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Name;
 import org.jooq.Record;
-import org.jooq.Row8;
+import org.jooq.Row10;
 import org.jooq.Schema;
 import org.jooq.Table;
 import org.jooq.TableField;
@@ -64,6 +64,11 @@ public class Message extends TableImpl<MessageRecord> {
     public final TableField<MessageRecord, Long> ENCRYPTION_KEY_PAIR_ID = createField(DSL.name("encryption_key_pair_id"), SQLDataType.BIGINT, this, "");
 
     /**
+     * The column <code>public.message.signature_key_pair_id</code>.
+     */
+    public final TableField<MessageRecord, Long> SIGNATURE_KEY_PAIR_ID = createField(DSL.name("signature_key_pair_id"), SQLDataType.BIGINT, this, "");
+
+    /**
      * The column <code>public.message.compression_algorithm</code>.
      */
     public final TableField<MessageRecord, String> COMPRESSION_ALGORITHM = createField(DSL.name("compression_algorithm"), SQLDataType.VARCHAR(16), this, "");
@@ -76,17 +81,22 @@ public class Message extends TableImpl<MessageRecord> {
     /**
      * The column <code>public.message.is_mdn_requested</code>.
      */
-    public final TableField<MessageRecord, Boolean> IS_MDN_REQUESTED = createField(DSL.name("is_mdn_requested"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<MessageRecord, Boolean> IS_MDN_REQUESTED = createField(DSL.name("is_mdn_requested"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
     /**
      * The column <code>public.message.is_mdn_async</code>.
      */
-    public final TableField<MessageRecord, Boolean> IS_MDN_ASYNC = createField(DSL.name("is_mdn_async"), SQLDataType.BOOLEAN, this, "");
+    public final TableField<MessageRecord, Boolean> IS_MDN_ASYNC = createField(DSL.name("is_mdn_async"), SQLDataType.BOOLEAN.nullable(false), this, "");
 
     /**
      * The column <code>public.message.receipt_delivery_option</code>.
      */
     public final TableField<MessageRecord, String> RECEIPT_DELIVERY_OPTION = createField(DSL.name("receipt_delivery_option"), SQLDataType.VARCHAR(128), this, "");
+
+    /**
+     * The column <code>public.message.file_id</code>.
+     */
+    public final TableField<MessageRecord, Long> FILE_ID = createField(DSL.name("file_id"), SQLDataType.BIGINT, this, "");
 
     private Message(Name alias, Table<MessageRecord> aliased) {
         this(alias, aliased, null);
@@ -138,11 +148,15 @@ public class Message extends TableImpl<MessageRecord> {
 
     @Override
     public List<ForeignKey<MessageRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<MessageRecord, ?>>asList(Keys.MESSAGE__MESSAGE_REQUEST_ID_FKEY);
+        return Arrays.<ForeignKey<MessageRecord, ?>>asList(Keys.MESSAGE__MESSAGE_REQUEST_ID_FKEY, Keys.MESSAGE__MESSAGE_FILE_ID_FKEY);
     }
 
     public Request request() {
         return new Request(this, Keys.MESSAGE__MESSAGE_REQUEST_ID_FKEY);
+    }
+
+    public File file() {
+        return new File(this, Keys.MESSAGE__MESSAGE_FILE_ID_FKEY);
     }
 
     @Override
@@ -172,11 +186,11 @@ public class Message extends TableImpl<MessageRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row8 type methods
+    // Row10 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row8<UUID, String, Long, String, String[], Boolean, Boolean, String> fieldsRow() {
-        return (Row8) super.fieldsRow();
+    public Row10<UUID, String, Long, Long, String, String[], Boolean, Boolean, String, Long> fieldsRow() {
+        return (Row10) super.fieldsRow();
     }
 }

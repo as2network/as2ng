@@ -2,12 +2,15 @@ package com.freighttrust.as2.kotest.listeners
 
 import com.freighttrust.as2.ext.toAs2Identifier
 import com.freighttrust.as2.kotest.listeners.TestPartner.Apple
+import com.freighttrust.as2.kotest.listeners.TestPartner.As2ng
+
 import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
 import com.freighttrust.as2.kotest.listeners.TestPartner.Dewalt
 import com.freighttrust.as2.kotest.listeners.TestPartner.Pepsi
 import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
 import com.freighttrust.as2.util.As2TestClient
 import com.freighttrust.crypto.CertificateFactory
+import com.freighttrust.jooq.enums.TradingChannelType
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.KeyPairRepository
@@ -41,13 +44,19 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.charset.Charset
 
-enum class TestPartner(val resourcePath: String) {
+enum class TestPartnerType {
+  OpenAS2,
+  As2ng
+}
 
-  Walmart("openas2/Walmart"),
-  CocaCola("openas2/CocaCola"),
-  Pepsi("openas2/Pepsi"),
-  Apple("openas2/Apple"),
-  Dewalt("openas2/Dewalt");
+enum class TestPartner(val type: TestPartnerType, val openAs2ConfigPath: String? = null) {
+
+  Walmart(TestPartnerType.OpenAS2, "openas2/Walmart"),
+  CocaCola(TestPartnerType.OpenAS2, "openas2/CocaCola"),
+  Pepsi(TestPartnerType.OpenAS2, "openas2/Pepsi"),
+  Apple(TestPartnerType.OpenAS2, "openas2/Apple"),
+  Dewalt(TestPartnerType.OpenAS2, "openas2/Dewalt"),
+  As2ng(TestPartnerType.As2ng);
 
   val as2Identifier = name.toAs2Identifier()
 
@@ -63,13 +72,15 @@ enum class TestPartner(val resourcePath: String) {
 enum class TestTradingChannel(
   val sender: TestPartner,
   val recipient: TestPartner,
-  val withEncryptionKeyPair: Boolean = false,
-  val withSignatureKeyPair: Boolean = false) {
+  val allowBodyCertificateForVerification: Boolean = false,
+  val withCustomSenderKeyPair: Boolean = false,
+  val withCustomRecipientKeyPair: Boolean = false) {
 
   WalmartToCocaCola(Walmart, CocaCola),
-  WalmartToPepsi(Walmart, Pepsi, true, false),
-  WalmartToApple(Walmart, Apple, false, true),
-  WalmartToDewalt(Walmart, Dewalt, true, true)
+  WalmartToPepsi(Walmart, Pepsi, false, true, false),
+  WalmartToApple(Walmart, Apple, true, false, true),
+  WalmartToDewalt(Walmart, Dewalt, false, true, true),
+  WalmartToAs2ng(Walmart, As2ng, false, true, true);
 
 }
 
@@ -91,8 +102,6 @@ class IntegrationTestListener(
   public lateinit var partnerMap: Map<TestPartner, TradingPartner>
   public lateinit var channelMap: Map<TestTradingChannel, TradingChannel>
   public lateinit var keyStoreMap: Map<TestPartner, File>
-
-  public lateinit var clientSettingsMap: Map<TestPartner, AS2ClientSettings>
 
   private lateinit var containerMap: Map<TestPartner, GenericContainer<Nothing>>
 
@@ -131,21 +140,36 @@ class IntegrationTestListener(
 
           TradingChannel()
             .apply {
+
               name = config.name
+
+              when (config.recipient.type) {
+
+                TestPartnerType.OpenAS2 -> {
+                  type = TradingChannelType.forwarding
+                  recipientMessageUrl = "http://localhost"
+                }
+
+                TestPartnerType.As2ng -> {
+                  type = TradingChannelType.receiving
+                }
+              }
+
+              allowBodyCertificateForVerification = config.allowBodyCertificateForVerification
 
               senderId = partnerMap.getValue(config.sender).id
               senderAs2Identifier = config.sender.as2Identifier
 
-              if (config.withSignatureKeyPair) {
+              if (config.withCustomRecipientKeyPair) {
                 // issue a signature key pair specifically for this trading channel
                 senderKeyPairId = keyPairRepository.issue(certificateFactory).id
               }
 
               recipientId = partnerMap.getValue(config.recipient).id
               recipientAs2Identifier = config.recipient.as2Identifier
-              recipientMessageUrl = "http://localhost"
 
-              if (config.withEncryptionKeyPair) {
+
+              if (config.withCustomSenderKeyPair) {
                 // issue an encryption key pair specifically for this trading channel
                 recipientKeyPairId = keyPairRepository.issue(certificateFactory, tx).id
               }
@@ -160,19 +184,17 @@ class IntegrationTestListener(
 
     // create keystores
 
-    keyStoreMap = partnerMap.mapValues { (key, value) ->
-      val path = "src/test/resources/openas2/${key.as2Identifier}/keystore.p12"
+    keyStoreMap = partnerMap
+      .filter { (key, _) -> key.type == TestPartnerType.OpenAS2}
+      .mapValues { (key, value) ->
+      val path = "src/test/resources/${key.openAs2ConfigPath}/keystore.p12"
       createKeyStore(value, "password", path)
     }
-
-    // generate as2 client settings
-
-    clientSettingsMap = partnerMap
-      .mapValues { (_, partner) -> createClientSettings(partner) }
 
     // create as2 server containers
 
     containerMap = TestPartner.values()
+      .filter { it.type == TestPartnerType.OpenAS2 }
       .map { tp ->
 
         val keyStorePath = keyStoreMap[tp]
@@ -181,11 +203,11 @@ class IntegrationTestListener(
           ?: throw Error("Keystore not found")
 
         Pair(tp,
-          GenericContainer<Nothing>("as2ng/as2lib-server:4.6.3")
+          GenericContainer<Nothing>("docker.pkg.github.com/freight-trust/as2ng/as2lib-server:4.6.3")
             .apply {
               withTmpFs(mapOf("/opt/as2/data" to ""))
-              withCopyFileToContainer(MountableFile.forClasspathResource("openas2/config.xml"), "/opt/as2/config/config.xml")
-              withCopyFileToContainer(MountableFile.forClasspathResource("openas2/partnerships.xml"), "/opt/as2/config/partnerships.xml")
+              withCopyFileToContainer(MountableFile.forClasspathResource("${tp.openAs2ConfigPath}/config.xml"), "/opt/as2/config/config.xml")
+              withCopyFileToContainer(MountableFile.forClasspathResource("${tp.openAs2ConfigPath}/partnerships.xml"), "/opt/as2/config/partnerships.xml")
               withCopyFileToContainer(keyStorePath, "/opt/as2/config/keystore.p12")
               withExposedPorts(10101)
               withCommand("/opt/as2/config/config.xml")
@@ -205,6 +227,7 @@ class IntegrationTestListener(
 
     channelMap
       .values
+      .filter { it.type == TradingChannelType.forwarding }
       .forEach { channel ->
 
         val container = containerMap[TestPartner.findByAs2Identifier(channel.recipientAs2Identifier)]
@@ -223,22 +246,6 @@ class IntegrationTestListener(
       channel,
       subject
     )
-
-  private fun createClientSettings(partner: TradingPartner): AS2ClientSettings =
-    AS2ClientSettings()
-      .apply {
-
-        val keyStoreFile = keyStoreMap[TestPartner.valueOf(partner.name)] ?: throw Error("Key store not found")
-
-        setKeyStore(EKeyStoreType.PKCS12, keyStoreFile, "password")
-
-        // for the purposes of testing we follow the convention where the partner name is the as2 identifier and key alias
-        setSenderData(
-          partner.name.toAs2Identifier(),
-          partner.email,
-          partner.name
-        )
-      }
 
   @Suppress("BlockingMethodInNonBlockingContext")
   private suspend fun createKeyStore(partner: TradingPartner, password: String, path: String): File =
@@ -279,6 +286,7 @@ class IntegrationTestListener(
 
         val keyStoreFile = keyStoreMap[testChannel.sender]
           ?: throw Error("Key store not found")
+
         setKeyStore(EKeyStoreType.PKCS12, keyStoreFile, "password")
 
         val partnerRecord = partnerMap[testChannel.sender] ?: throw Error("Could not find sender partner record")
@@ -286,14 +294,9 @@ class IntegrationTestListener(
         val channelRecord = channelMap[testChannel] ?: throw Error("Could not find channel record")
 
         with(channelRecord) {
-
-          val senderKeyAlias = if (senderKeyPairId != null) "${senderAs2Identifier}_${recipientAs2Identifier}_Key" else senderAs2Identifier
-          val recipientKeyAlias = if (recipientKeyPairId != null) "${senderAs2Identifier}_${recipientAs2Identifier}_X509" else recipientAs2Identifier
-
-          setPartnershipName("${senderAs2Identifier}_${recipientAs2Identifier}")
-          setSenderData(senderAs2Identifier, partnerRecord.email, senderKeyAlias)
-          setReceiverData(recipientAs2Identifier, recipientKeyAlias, "http://localhost:8080/message")
-
+          setPartnershipName("${senderAs2Identifier}->${recipientAs2Identifier}")
+          setSenderData(senderAs2Identifier, partnerRecord.email, "${senderAs2Identifier}->${recipientAs2Identifier}")
+          setReceiverData(recipientAs2Identifier, "${recipientAs2Identifier}->${senderAs2Identifier}", "http://localhost:8080/message")
           messageIDFormat = "as2-lib-\$date.uuuuMMdd-HHmmssZ\$-\$rand.123456789\$@\$msg.sender.as2_id\$_\$msg.receiver.as2_id\$"
         }
       }
@@ -310,6 +313,8 @@ class IntegrationTestListener(
 
     val recipient: TestPartner
       get() = testChannel.recipient
+
+    var textData: String? = null
 
     fun withEncryptAndSign(
       cryptoAlgorithm: ECryptoAlgorithmCrypt?,
@@ -339,6 +344,7 @@ class IntegrationTestListener(
         setData(text, Charset.defaultCharset())
         contentType = CMimeType.TEXT_PLAIN.asString
         contentTransferEncoding = EContentTransferEncoding.BINARY
+        textData = text
       }
       return this;
     }
@@ -348,6 +354,8 @@ class IntegrationTestListener(
       return this
     }
 
-    fun send(): AS2ClientResponse = client.sendSynchronous(settings, request)
+    fun send(): AS2ClientResponse {
+      return client.sendSynchronous(settings, request)
+    }
   }
 }

@@ -17,7 +17,7 @@ import org.jooq.RecordMapper
 class PostgresTradingPartnerRepository(
   dbCtx: DSLContext
 ) : TradingPartnerRepository, AbstractJooqRepository<TradingPartnerRecord, TradingPartner>(
-  dbCtx, TRADING_PARTNER, TradingPartner::class.java
+  dbCtx, TRADING_PARTNER, TradingPartner::class.java, { TradingPartner() }
 ) {
 
   override fun idQuery(value: TradingPartner): Condition = TRADING_PARTNER.ID.eq(value.id)
@@ -28,7 +28,7 @@ class PostgresTradingPartnerRepository(
         .selectFrom(table)
         .where(TRADING_PARTNER.NAME.eq(name))
         .fetchOne()
-        ?.into(TradingPartner::class.java)
+        ?.into(TradingPartner())
     }
 
   private fun buildJoin(ctx: DSLContext,
@@ -46,7 +46,7 @@ class PostgresTradingPartnerRepository(
     ctx: Repository.Context?): List<Pair<TradingPartner, KeyPair?>> =
     coroutineScope {
       buildJoin(jooqContext(ctx), withKeyPair)
-        .where(KEY_PAIR.ID.`in`(ids))
+        .where(TRADING_PARTNER.ID.`in`(ids))
         .fetch(JoinMapper)
     }
 
@@ -54,11 +54,11 @@ class PostgresTradingPartnerRepository(
   object JoinMapper : RecordMapper<Record, Pair<TradingPartner, KeyPair?>> {
 
     override fun map(record: Record) = run {
-      val partner = record.into(TRADING_PARTNER).into(TradingPartner::class.java)
+      val partner = record.into(TRADING_PARTNER).into(TradingPartner())
 
       val keyPair = record.into(KEY_PAIR)
         .takeIf { it.value1() != null }
-        ?.into(KeyPair::class.java)
+        ?.into(KeyPair())
 
       Pair(partner, keyPair)
     }

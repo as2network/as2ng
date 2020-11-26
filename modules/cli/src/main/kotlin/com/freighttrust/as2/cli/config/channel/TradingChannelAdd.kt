@@ -1,10 +1,9 @@
 package com.freighttrust.as2.cli.config.channel
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.freighttrust.jooq.enums.TradingChannelType
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
-import com.freighttrust.jooq.tables.records.TradingChannelRecord
-import com.freighttrust.jooq.tables.records.TradingPartnerRecord
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.TradingPartnerRepository
 import kotlinx.coroutines.runBlocking
@@ -26,6 +25,13 @@ class TradingChannelAdd : KoinComponent, Runnable {
     required = true
   )
   lateinit var name: String
+
+  @Option(
+    names = ["-t", "--type"],
+    description = ["Valid values: \${COMPLETION-CANDIDATES}"],
+    required = true,
+  )
+  lateinit var type: TradingChannelType
 
   @Option(
     names = ["-spi", "--sender-partner-id"],
@@ -56,11 +62,19 @@ class TradingChannelAdd : KoinComponent, Runnable {
   lateinit var recipientAs2Id: String
 
   @Option(
-    names = ["-u", "--recipient-message-url"],
-    description = ["recipient's url for receiving messages"],
-    required = true
+    names = ["-bcv", "--allow-body-certificate-for-verification"],
+    description = ["allow certificate provided in body of the request to be used for signature verification"],
+    required = true,
+    defaultValue = "false"
   )
-  lateinit var recipientMessageUrl: String
+  var allowBodyCertificateForVerification: Boolean? = null
+
+  @Option(
+    names = ["-u", "--recipient-message-url"],
+    description = ["recipient's url for receiving messages when forwarding"],
+    required = false
+  )
+  var recipientMessageUrl: String? = null
 
   private val partnerRepository: TradingPartnerRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
@@ -92,10 +106,12 @@ class TradingChannelAdd : KoinComponent, Runnable {
           TradingChannel()
             .apply {
               name = this@TradingChannelAdd.name
+              type = this@TradingChannelAdd.type
               senderId = this@TradingChannelAdd.senderPartnerId
               senderAs2Identifier = this@TradingChannelAdd.senderAs2Id
               recipientId = this@TradingChannelAdd.recipientPartnerId
               recipientAs2Identifier = this@TradingChannelAdd.recipientAs2Id
+              allowBodyCertificateForVerification = this@TradingChannelAdd.allowBodyCertificateForVerification
               recipientMessageUrl = this@TradingChannelAdd.recipientMessageUrl
             },
           tx

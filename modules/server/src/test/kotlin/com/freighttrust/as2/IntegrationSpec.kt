@@ -1,27 +1,29 @@
 package com.freighttrust.as2
 
-import arrow.core.Tuple4
-import com.freighttrust.as2.RequestStyle.Async
 import com.freighttrust.as2.domain.fromMimeBodyPart
 import com.freighttrust.as2.ext.isSigned
 import com.freighttrust.as2.ext.verifiedContent
 import com.freighttrust.as2.kotest.listeners.IntegrationTestListener
 import com.freighttrust.as2.kotest.listeners.IntegrationTestListener.As2RequestBuilder
-import com.freighttrust.as2.kotest.listeners.TestPartner.CocaCola
-import com.freighttrust.as2.kotest.listeners.TestPartner.Walmart
 import com.freighttrust.as2.kotest.listeners.TestTradingChannel
 import com.freighttrust.as2.util.TempFileHelper
 import com.freighttrust.common.AppConfigModule
 import com.freighttrust.crypto.VaultCryptoModule
 import com.freighttrust.jooq.enums.RequestType
+import com.freighttrust.jooq.enums.TradingChannelType
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
 import com.freighttrust.jooq.tables.pojos.Message
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.pojos.TradingChannel
+import com.freighttrust.persistence.DispositionNotificationRepository
+import com.freighttrust.persistence.StorageService
 import com.freighttrust.persistence.RequestRepository
+import com.freighttrust.persistence.TradingChannelRepository
+import com.freighttrust.persistence.TradingPartnerRepository
 import com.freighttrust.persistence.local.LocalPersistenceModule
 import com.freighttrust.persistence.postgres.PostgresPersistenceModule
 import com.freighttrust.persistence.s3.S3PersistenceModule
+import com.freighttrust.serialisation.JsonModule
 import com.freighttrust.testing.listeners.FlywayTestListener
 import com.freighttrust.testing.listeners.PostgresTestListener
 import com.freighttrust.testing.listeners.S3TestListener
@@ -34,16 +36,13 @@ import com.helger.as2lib.disposition.DispositionOptions
 import com.helger.as2lib.disposition.DispositionOptions.IMPORTANCE_REQUIRED
 import io.kotest.core.spec.Spec
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.property.Arb
-import io.kotest.property.Exhaustive
 import io.kotest.property.arbitrary.bool
 import io.kotest.property.arbitrary.enum
 import io.kotest.property.checkAll
-import io.kotest.property.exhaustive.boolean
-import io.kotest.property.exhaustive.enum
-import io.kotest.property.exhaustive.exhaustive
 import io.vertx.core.Vertx
 import io.vertx.kotlin.core.deployVerticleAwait
 import kotlinx.coroutines.Dispatchers
@@ -55,12 +54,10 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.koin.dsl.module
 import org.koin.test.KoinTest
+import org.koin.test.inject
 import org.testcontainers.Testcontainers
+import java.security.Provider
 import java.util.concurrent.TimeUnit
-
-enum class RequestStyle {
-  Sync, Async
-}
 
 class IntegrationSpec : FunSpec(), KoinTest {
 
@@ -83,7 +80,13 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
   val tempFileHelper = TempFileHelper()
 
-  private val k by lazy { getKoin() }
+  private val storageService: StorageService by inject()
+  private val requestRepository: RequestRepository by inject()
+  private val channelRepository: TradingChannelRepository by inject()
+  private val partnerRepository: TradingPartnerRepository by inject()
+  private val dispositionNotificationRepository: DispositionNotificationRepository by inject()
+
+  private val securityProvider: Provider by inject()
 
   init {
 
@@ -108,6 +111,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
       IntegrationTestListener(
         listOf(
           AppConfigModule,
+          JsonModule,
           PostgresPersistenceModule,
           S3PersistenceModule,
           LocalPersistenceModule,
@@ -126,7 +130,6 @@ class IntegrationSpec : FunSpec(), KoinTest {
       )
     )
 
-    val requestStyles = Exhaustive.enum<RequestStyle>()
     val cryptoAlgorithms = Arb.enum<ECryptoAlgorithmCrypt>()
     val signingAlgorithms = Arb.enum<ECryptoAlgorithmSign>()
 
@@ -136,7 +139,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       test("1. Send un-encrypted data and do not request a receipt") {
 
-        checkAll(20, Arb.bool(), tradingChannels) { async, channel ->
+        checkAll(40, Arb.bool(), tradingChannels) { async, channel ->
 
           val requestBuilder =
             forChannel(channel, testCase.displayName)
@@ -154,7 +157,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       test("2. Send un-encrypted data and request an unsigned receipt") {
 
-        checkAll(100, Arb.bool(), signingAlgorithms, tradingChannels) { async, signingAlgorithm, channel ->
+        checkAll(200, Arb.bool(), signingAlgorithms, tradingChannels) { async, signingAlgorithm, channel ->
 
           val requestBuilder =
             forChannel(channel, testCase.displayName)
@@ -178,13 +181,14 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       test("3. Send un-encrypted data and request a signed receipt") {
 
-        checkAll(100, Arb.bool(), signingAlgorithms, tradingChannels) { async, signingAlgorithm, channel ->
+        checkAll(200, Arb.bool(), signingAlgorithms, tradingChannels) { async, signingAlgorithm, channel ->
 
           val requestBuilder =
             forChannel(channel, testCase.displayName)
               .withMdn(true)
               .withAsyncMdn(if (async) asyncMdnUrl else null)
               .withEncryptAndSign(null, signingAlgorithm)
+              .withIncludeSigningCertificateInBody(false)
               .withDispositionOptions(
                 DispositionOptions()
                   .setMICAlg(signingAlgorithm)
@@ -204,7 +208,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       test("4. Send encrypted data and do not request a receipt") {
 
-        checkAll(100, cryptoAlgorithms, tradingChannels) { cryptoAlgorithm, channel ->
+        checkAll(200, cryptoAlgorithms, tradingChannels) { cryptoAlgorithm, channel ->
 
           val requestBuilder =
             forChannel(channel, testCase.displayName)
@@ -222,79 +226,69 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       test("5. Send encrypted data and request an un-signed receipt") {
 
-        checkAll(requestStyles) { style ->
+        checkAll(200, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels) { async, cryptoAlgorithm, signingAlgorithm, channel ->
 
-          checkAll(100, cryptoAlgorithms, signingAlgorithms, tradingChannels) { cryptoAlgorithm, signingAlgorithm, channel ->
+          val requestBuilder =
+            forChannel(channel, testCase.displayName)
+              .withMdn(true)
+              .withAsyncMdn(if (async) asyncMdnUrl else null)
+              .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+              .withDispositionOptions(
+                DispositionOptions()
+                  .setMICAlg(signingAlgorithm)
+                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
+              )
+              .withTextData(testCase.displayName)
 
-            val requestBuilder =
-              forChannel(channel, testCase.displayName)
-                .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
-                .withDispositionOptions(
-                  DispositionOptions()
-                    .setMICAlg(signingAlgorithm)
-                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                )
-                .withTextData(testCase.displayName)
+          val response = requestBuilder.send()
 
-            val response = requestBuilder.send()
-
-            verify(requestBuilder, response)
-
-          }
+          verify(requestBuilder, response)
 
         }
+
       }
 
       test("6. Send encrypted data and request a signed receipt") {
 
-        checkAll(requestStyles) { style ->
+        checkAll(200, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels) { async, cryptoAlgorithm, signingAlgorithm, channel ->
 
-          checkAll(100, cryptoAlgorithms, signingAlgorithms, tradingChannels) { cryptoAlgorithm, signingAlgorithm, channel ->
+          val requestBuilder =
+            forChannel(channel, testCase.displayName)
+              .withMdn(true)
+              .withAsyncMdn(if (async) asyncMdnUrl else null)
+              .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+              .withDispositionOptions(
+                DispositionOptions()
+                  .setMICAlg(signingAlgorithm)
+                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                  .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                  .setProtocolImportance(IMPORTANCE_REQUIRED)
+              )
+              .withTextData(testCase.displayName)
 
-            val requestBuilder =
-              forChannel(channel, testCase.displayName)
-                .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
-                .withDispositionOptions(
-                  DispositionOptions()
-                    .setMICAlg(signingAlgorithm)
-                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                    .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                    .setProtocolImportance(IMPORTANCE_REQUIRED)
-                )
-                .withTextData(testCase.displayName)
+          val response = requestBuilder.send()
 
-            val response = requestBuilder.send()
-
-            verify(requestBuilder, response)
-
-          }
+          verify(requestBuilder, response)
 
         }
+
       }
 
       test("7. Send signed data and do not request a receipt") {
 
-        checkAll(requestStyles) { style ->
+        checkAll(50, Arb.bool(), signingAlgorithms, tradingChannels, Arb.bool()) { async, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
-          checkAll(50, signingAlgorithms, tradingChannels, Arb.bool()) { signingAlgorithm, channel, includeSigningCertificateInBody ->
+          val requestBuilder =
+            forChannel(channel, testCase.displayName)
+              .withMdn(false)
+              .withAsyncMdn(if (async) asyncMdnUrl else null)
+              .withEncryptAndSign(null, signingAlgorithm)
+              .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+              .withTextData(testCase.displayName)
 
-            val requestBuilder =
-              forChannel(channel, testCase.displayName)
-                .withMdn(false)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(null, signingAlgorithm)
-                .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
-                .withTextData(testCase.displayName)
+          val response = requestBuilder.send()
 
-            val response = requestBuilder.send()
-
-            verify(requestBuilder, response)
-
-          }
+          verify(requestBuilder, response)
 
         }
 
@@ -302,171 +296,151 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       test("8. Send signed data and request an un-signed receipt") {
 
-        checkAll(requestStyles) { style ->
+        checkAll(50, Arb.bool(), signingAlgorithms, tradingChannels, Arb.bool()) { async, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
-          checkAll(50, signingAlgorithms, tradingChannels, Arb.bool()) { signingAlgorithm, channel, includeSigningCertificateInBody ->
+          val requestBuilder =
+            forChannel(channel, testCase.displayName)
+              .withMdn(true)
+              .withAsyncMdn(if (async) asyncMdnUrl else null)
+              .withEncryptAndSign(null, signingAlgorithm)
+              .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+              .withDispositionOptions(
+                DispositionOptions()
+                  .setMICAlg(DIGEST_SHA_512)
+                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
+              )
+              .withTextData(testCase.displayName)
 
-            val requestBuilder =
-              forChannel(channel, testCase.displayName)
-                .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(null, signingAlgorithm)
-                .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
-                .withDispositionOptions(
-                  DispositionOptions()
-                    .setMICAlg(DIGEST_SHA_512)
-                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                )
-                .withTextData(testCase.displayName)
+          val response = requestBuilder.send()
 
-            val response = requestBuilder.send()
-
-            verify(requestBuilder, response)
-
-          }
+          verify(requestBuilder, response)
 
         }
       }
 
       test("9. Send signed data and request a signed receipt") {
 
-        checkAll(requestStyles) { style ->
+        checkAll(50, Arb.bool(), signingAlgorithms, tradingChannels, Arb.bool()) { async, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
-          checkAll(50, signingAlgorithms, tradingChannels, Arb.bool()) { signingAlgorithm, channel, includeSigningCertificateInBody ->
+          val requestBuilder =
+            forChannel(channel, testCase.displayName)
+              .withMdn(true)
+              .withAsyncMdn(if (async) asyncMdnUrl else null)
+              .withEncryptAndSign(null, signingAlgorithm)
+              .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+              .withDispositionOptions(
+                DispositionOptions()
+                  .setMICAlg(DIGEST_SHA_512)
+                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                  .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                  .setProtocolImportance(IMPORTANCE_REQUIRED)
+              )
+              .withTextData(testCase.displayName)
 
-            val requestBuilder =
-              forChannel(channel, testCase.displayName)
-                .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(null, signingAlgorithm)
-                .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
-                .withDispositionOptions(
-                  DispositionOptions()
-                    .setMICAlg(DIGEST_SHA_512)
-                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                    .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                    .setProtocolImportance(IMPORTANCE_REQUIRED)
-                )
-                .withTextData(testCase.displayName)
+          val response = requestBuilder.send()
 
-            val response = requestBuilder.send()
-
-            verify(requestBuilder, response)
-
-
-          }
+          verify(requestBuilder, response)
 
         }
+
       }
 
       test("10. Send encrypted and signed data and do not request a receipt") {
 
-        checkAll(requestStyles) { style ->
+        checkAll(200, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { async, cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
-          checkAll(100, cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
+          val requestBuilder =
+            forChannel(channel, testCase.displayName)
+              .withMdn(false)
+              .withAsyncMdn(if (async) asyncMdnUrl else null)
+              .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+              .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+              .withTextData(testCase.displayName)
 
-            val requestBuilder =
-              forChannel(channel, testCase.displayName)
-                .withMdn(false)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
-                .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
-                .withTextData(testCase.displayName)
+          val response = requestBuilder.send()
 
-            val response = requestBuilder.send()
-
-            verify(requestBuilder, response)
-
-          }
+          verify(requestBuilder, response)
         }
+
       }
 
       test("11. Send encrypted and signed data and request an un-signed receipt") {
 
-        checkAll(requestStyles) { style ->
+        checkAll(200, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { async, cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
-          checkAll(200, cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
+          val requestBuilder =
+            forChannel(channel, testCase.displayName)
+              .withMdn(true)
+              .withAsyncMdn(if (async) asyncMdnUrl else null)
+              .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+              .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+              .withDispositionOptions(
+                DispositionOptions()
+                  .setMICAlg(DIGEST_SHA_512)
+                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
+              )
+              .withTextData(testCase.displayName)
 
-            val requestBuilder =
-              forChannel(channel, testCase.displayName)
-                .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
-                .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
-                .withDispositionOptions(
-                  DispositionOptions()
-                    .setMICAlg(DIGEST_SHA_512)
-                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                )
-                .withTextData(testCase.displayName)
+          val response = requestBuilder.send()
 
-            val response = requestBuilder.send()
-
-            verify(requestBuilder, response)
-
-          }
+          verify(requestBuilder, response)
 
         }
-
       }
 
       test("12. Send encrypted and signed data and request a signed receipt") {
 
-        checkAll(requestStyles) { style ->
+        checkAll(200, Arb.bool(), cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { async, cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
 
-          checkAll(200, cryptoAlgorithms, signingAlgorithms, tradingChannels, Arb.bool()) { cryptoAlgorithm, signingAlgorithm, channel, includeSigningCertificateInBody ->
+          val requestBuilder =
+            forChannel(channel, testCase.displayName)
+              .withMdn(true)
+              .withAsyncMdn(if (async) asyncMdnUrl else null)
+              .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
+              .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
+              .withDispositionOptions(
+                DispositionOptions()
+                  .setMICAlg(DIGEST_SHA_512)
+                  .setMICAlgImportance(IMPORTANCE_REQUIRED)
+                  .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
+                  .setProtocolImportance(IMPORTANCE_REQUIRED)
+              )
+              .withTextData(testCase.displayName)
 
-            val requestBuilder =
-              forChannel(channel, testCase.displayName)
-                .withMdn(true)
-                .withAsyncMdn(if (style == Async) asyncMdnUrl else null)
-                .withEncryptAndSign(cryptoAlgorithm, signingAlgorithm)
-                .withIncludeSigningCertificateInBody(includeSigningCertificateInBody)
-                .withDispositionOptions(
-                  DispositionOptions()
-                    .setMICAlg(DIGEST_SHA_512)
-                    .setMICAlgImportance(IMPORTANCE_REQUIRED)
-                    .setProtocol(DispositionOptions.SIGNED_RECEIPT_PROTOCOL)
-                    .setProtocolImportance(IMPORTANCE_REQUIRED)
-                )
-                .withTextData(testCase.displayName)
+          val response = requestBuilder.send()
 
-            val response = requestBuilder.send()
-
-            verify(requestBuilder, response)
-
-
-          }
+          verify(requestBuilder, response)
 
         }
-
       }
-
     }
   }
 
+  @Suppress("BlockingMethodInNonBlockingContext")
   private suspend fun verify(
     requestBuilder: As2RequestBuilder,
     response: AS2ClientResponse
-  ): Tuple4<Request, TradingChannel?, Message?, DispositionNotification?> {
+  ) {
 
     // should be no exceptions in the response from the client call
     response.hasException() shouldBe false
 
     // lookup the exchange in the database
-    val persisted = k.get<RequestRepository>()
+    val persisted = requestRepository
       .findByMessageId(
         requireNotNull(response.originalMessageID),
         withTradingChannel = true,
+        withBodyFile = true,
         withMessage = true,
         withDisposition = true
       )
 
     persisted shouldNotBe null
 
-    val (request, tradingChannel, message, dispositionNotification) = requireNotNull(persisted)
+    val (request, channel, bodyFile, message, dispositionNotification) = requireNotNull(persisted)
 
-    tradingChannel shouldNotBe null
+    channel shouldNotBe null
+    bodyFile shouldNotBe null
     message shouldNotBe null
 
     // verify request
@@ -482,20 +456,28 @@ class IntegrationSpec : FunSpec(), KoinTest {
       request.errorMessage shouldBe null
       request.errorStackTrace shouldBe null
 
-      // message should have been delivered
-      request.deliveredAt shouldNotBe null
+      // there should be a valid body file reference
+      request.bodyFileId shouldBe bodyFile!!.id
+      val fileDataHandler = storageService.read(bodyFile.id)
 
-      // should be a file reference
-      request.bodyFileId shouldNotBe null
+      fileDataHandler shouldNotBe null
+      fileDataHandler!!.inputStream.readAllBytes().size shouldBeGreaterThan 0
+
+      if (channel!!.type == TradingChannelType.forwarding) {
+        // message should have been delivered
+        request.forwardedAt shouldNotBe null
+      }
+
+      request.receivedAt shouldNotBe null
     }
 
-    with(requireNotNull(tradingChannel)) {
+    with(requireNotNull(channel)) {
       // sender/recipient as2 identifiers should match the request
       requestBuilder.sender.as2Identifier shouldBe senderAs2Identifier
       requestBuilder.recipient.as2Identifier shouldBe recipientAs2Identifier
 
       // delivery url should match the configured url for the trading channel
-      request.deliveredTo shouldBe recipientMessageUrl
+      request.forwardedTo shouldBe recipientMessageUrl
     }
 
     val (mdnRequested, asyncMdnRequested) =
@@ -507,22 +489,37 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
     with(requireNotNull(message)) {
 
-      // we remove the - and / in the algo name to account for differences in representation between
-      // as2-lib and bouncycastle
+      val (_, defaultSenderKeyPair) = partnerRepository
+        .findById(channel.senderId, withKeyPair = true)
+        ?: throw Error("Could not load sending partner")
 
-      if (requestBuilder.settings.cryptAlgoID != null) {
-        // should be the receivers keypair id which in this case should be 2
-        encryptionKeyPairId shouldNotBe null
+      val (_, defaultRecipientKeyPair) = partnerRepository
+        .findById(channel.recipientId, withKeyPair = true)
+        ?: throw Error("Could not load recipient partner")
+
+      val configuredSenderKeyPairId = channel.senderKeyPairId ?: defaultSenderKeyPair!!.id
+      val configuredRecipientKeyPairId = channel.recipientKeyPairId ?: defaultRecipientKeyPair!!.id
+
+      val requestSettings = requestBuilder.settings
+
+      if (request.type == RequestType.message && requestSettings.cryptAlgoID != null) {
+        // if the request was encrypted we check that the correct key pair was used
+        // TODO verify the encryption algorithm matches the request
+        encryptionAlgorithm shouldNotBe null
+        encryptionKeyPairId shouldBe configuredRecipientKeyPairId
       } else {
+        // otherwise no key pair should have been recorded for the message
         encryptionKeyPairId shouldBe null
       }
 
-      // TODO encryption algo
-//      encryptionAlgorithm
-//        ?.replace("-", "")
-//        ?.replace("/", "") shouldBe
-//        requestBuilder.settings.cryptAlgoID
-//          ?.replace("-", "")
+      if (requestSettings.signAlgoID != null) {
+        // if
+        // the request was signed we check that the correct key pair was used
+        signatureKeyPairId shouldBe configuredSenderKeyPairId
+      } else {
+        // otherwise no key pair should have been recorded
+        signatureKeyPairId shouldBe null
+      }
 
       compressionAlgorithm shouldBe requestBuilder.settings.compressionType?.name
 
@@ -533,6 +530,15 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       // TODO receipt delivery option
 
+      if(channel.type == TradingChannelType.receiving) {
+        // check for a file entry that corresponds to the body of the received message
+        message.fileId shouldNotBe null
+
+        val receivedDataHandler = storageService.read(message.fileId!!)!!
+        receivedDataHandler.contentType shouldBe requestBuilder.request.contentType
+        receivedDataHandler.inputStream.readAllBytes() shouldBe requestBuilder.textData!!.toByteArray()
+      }
+
     }
 
     // verify MDN if one was requested
@@ -540,7 +546,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
     if (mdnRequested) {
 
       if (asyncMdnRequested) {
-        verifyAsyncMdn(requestBuilder, tradingChannel, request, message)
+        verifyAsyncMdn(requestBuilder, channel, request, message)
       } else {
 
         response.hasMDN() shouldBe true
@@ -552,7 +558,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
             ?.verifiedContent(
               requireNotNull(response.mdnVerificationCertificate),
               tempFileHelper,
-              k.get()
+              securityProvider
             ) ?: data
 
           val receivedDispositionNotification = DispositionNotification()
@@ -571,8 +577,6 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
 
     }
-
-    return persisted
   }
 
   @Suppress("BlockingMethodInNonBlockingContext")
@@ -589,22 +593,40 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
     capturedRequest shouldNotBe null
 
-    val persisted = k.get<RequestRepository>()
-      .findByOriginalRequestId(originalRequest.id, false, true)
+    when (tradingChannel.type!!) {
 
-    persisted shouldNotBe null
+      TradingChannelType.forwarding -> {
 
-    val (mdnRequest, _, persistedNotification) = requireNotNull(persisted)
+        val persisted = requestRepository
+          .findByOriginalRequestId(originalRequest.id, withTradingChannel = false, withDisposition = true)
 
-    persistedNotification shouldNotBe null
+        persisted shouldNotBe null
 
-    with(requireNotNull(capturedRequest)) {
+        val (mdnRequest, _, persistedNotification) = requireNotNull(persisted)
+        persistedNotification shouldNotBe null
 
-//      val capturedDisposition = DispositionNotification()
-//        .fromMimeBodyPart(capturedRequest.bodyAsMimeBodyPart())
-//        .apply { requestId = persistedNotification!!.requestId }
+      }
+
+      TradingChannelType.receiving -> {
+
+        val notification = dispositionNotificationRepository.findById(
+          DispositionNotification().apply { requestId = originalRequest.id }
+        )
+
+        notification shouldNotBe null
+      }
 
     }
+
+    // TODO more verification of MDN
+
+//    with(requireNotNull(capturedRequest)) {
+//
+////      val capturedDisposition = DispositionNotification()
+////        .fromMimeBodyPart(capturedRequest.bodyAsMimeBodyPart())
+////        .apply { requestId = persistedNotification!!.requestId }
+//
+//    }
   }
 
 

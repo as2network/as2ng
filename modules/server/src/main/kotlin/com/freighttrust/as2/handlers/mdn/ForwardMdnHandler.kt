@@ -38,7 +38,7 @@ class ForwardMdnHandler(
       }
 
       // mark the request as delivered
-      requestRepository.setAsDeliveredTo(records.request.id, url, Instant.now())
+      requestRepository.setAsForwardedTo(records.request.id, url, Instant.now())
 
       // close the connection
       ctx.response()

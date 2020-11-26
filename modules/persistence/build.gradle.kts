@@ -10,15 +10,16 @@ dependencies {
 
   implementation(kotlin("stdlib"))
 
-  implementation(project(":modules:common"))
-  implementation(project(":modules:serialisation"))
-  implementation(project(":modules:crypto"))
+  api(project(":modules:common"))
+  api(project(":modules:serialisation"))
+  api(project(":modules:crypto"))
 
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8")
 
   jooqGenerator("org.postgresql:postgresql")
 
+  api("com.helger.web:ph-mail")
   api("com.amazonaws:aws-java-sdk-s3")
   api("org.postgresql:postgresql")
   api("org.jooq:jooq")
@@ -110,7 +111,7 @@ jooq {
 }
 
 // enable incremental build support
-tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
-  allInputsDeclared.set(true)
-  outputs.cacheIf { true }
-}
+//tasks.named<nu.studer.gradle.jooq.JooqGenerate>("generateJooq") {
+//  allInputsDeclared.set(true)
+//  outputs.cacheIf { true }
+//}

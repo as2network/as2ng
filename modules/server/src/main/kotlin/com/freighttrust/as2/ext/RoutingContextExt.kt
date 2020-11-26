@@ -5,9 +5,12 @@ import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.domain.toMimeBodyPart
 import com.freighttrust.as2.handlers.as2Context
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
+import com.freighttrust.persistence.extensions.toPrivateKey
+import com.freighttrust.persistence.extensions.toX509
 import com.helger.as2lib.util.AS2HttpHelper
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
+import com.helger.mail.cte.EContentTransferEncoding
 import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.web.RoutingContext
 
@@ -40,7 +43,7 @@ fun RoutingContext.bodyAsMimeBodyPart() =
       bodyPart
     }
 
-fun RoutingContext.createMDN(text: String, notification: DispositionNotification): MimeBodyPart =
+fun RoutingContext.createMDNBodyPart(text: String, notification: DispositionNotification): MimeBodyPart =
   MimeMultipart()
     .apply {
 
@@ -50,26 +53,51 @@ fun RoutingContext.createMDN(text: String, notification: DispositionNotification
           setHeader(HttpHeaders.CONTENT_TYPE.toString(), "text/plain")
         }
 
-      val reportPart = notification.toMimeBodyPart(this@createMDN)
+      val reportPart = notification.toMimeBodyPart(this@createMDNBodyPart)
 
       addBodyPart(textPart)
       addBodyPart(reportPart)
 
       setSubType("report; report-type=disposition-notification")
     }
-    .let { multipart ->
+    .let { reportParts ->
 
       MimeBodyPart()
         .apply {
-          setContent(multipart)
-          setHeader(HttpHeaders.CONTENT_TYPE.toString(), multipart.contentType)
+          setContent(reportParts)
+          setHeader(HttpHeaders.CONTENT_TYPE.toString(), reportParts.contentType)
         }
+
+    }
+    .let { reportBodyPart ->
+
+      with(as2Context) {
+
+        // response may be signed or not
+        dispositionNotificationOptions
+          ?.firstMICAlg
+          ?.let { algorithm ->
+
+            val keyPair = records.recipientKeyPair
+
+            reportBodyPart.sign(
+              keyPair.privateKey.toPrivateKey(),
+              keyPair.certificate.toX509(),
+              algorithm,
+              EContentTransferEncoding.BASE64,
+              securityProvider
+            )
+          } ?: reportBodyPart
+      }
+
     }
 
 val RoutingContext.reportingUserAgent: String
-  get() = "FreightTrust AS2 ${BuildConfig.version}@${request().host()}"
+  get() = BuildConfig.version.take(16)
+    // version can be quite long when developing locally with feature branches so we truncate it
+    .let { version -> "FreightTrust AS2 $version@${request().host()}" }
 
-fun RoutingContext.dispositionNotification(disposition: Disposition): DispositionNotification =
+fun RoutingContext.createDispositionNotification(disposition: Disposition): DispositionNotification =
   with(as2Context) {
     DispositionNotification()
       .apply {

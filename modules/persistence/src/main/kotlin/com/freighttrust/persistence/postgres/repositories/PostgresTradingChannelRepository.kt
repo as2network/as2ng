@@ -20,7 +20,7 @@ import org.jooq.RecordMapper
 class PostgresTradingChannelRepository(
   dbCtx: DSLContext
 ) : TradingChannelRepository, AbstractJooqRepository<TradingChannelRecord, TradingChannel>(
-  dbCtx, TRADING_CHANNEL, TradingChannel::class.java
+  dbCtx, TRADING_CHANNEL, TradingChannel::class.java, { TradingChannel() }
 ) {
 
   companion object {
@@ -55,7 +55,7 @@ class PostgresTradingChannelRepository(
         .selectFrom(table)
         .where(TRADING_CHANNEL.NAME.eq(name))
         .fetchOne()
-        ?.into(TradingChannel::class.java)
+        ?.into(TradingChannel())
     }
 
   override suspend fun findByAs2Identifiers(
@@ -128,14 +128,14 @@ class PostgresTradingChannelRepository(
 
     override fun map(record: Record) = run {
 
-      val partner = record.into(TRADING_CHANNEL).into(TradingChannel::class.java)
+      val partner = record.into(TRADING_CHANNEL).into(TradingChannel())
 
       val senderPartner =
         if (withSender)
           record
             .into(senderPartnerAlias)
             .takeIf { it.value1() != null }
-            ?.into(TradingPartner::class.java)
+            ?.into(TradingPartner())
         else null
 
       val recipientPartner =
@@ -143,7 +143,7 @@ class PostgresTradingChannelRepository(
           record
             .into(recipientPartnerAlias)
             .takeIf { it.value1() != null }
-            ?.into(TradingPartner::class.java)
+            ?.into(TradingPartner())
         else null
 
       val senderKeyPair =
@@ -151,7 +151,7 @@ class PostgresTradingChannelRepository(
           record
             .into(senderKeyPairAlias)
             .takeIf { it.value1() != null }
-            ?.into(KeyPair::class.java)
+            ?.into(KeyPair())
         else null
 
       val recipientKeyPair =
@@ -159,7 +159,7 @@ class PostgresTradingChannelRepository(
           record
             .into(recipientKeyPairAlias)
             .takeIf { it.value1() != null }
-            ?.into(KeyPair::class.java)
+            ?.into(KeyPair())
         else null
 
       Tuple5(partner, senderPartner, recipientPartner, senderKeyPair, recipientKeyPair)

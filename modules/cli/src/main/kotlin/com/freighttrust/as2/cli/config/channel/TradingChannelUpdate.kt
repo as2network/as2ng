@@ -1,6 +1,5 @@
 package com.freighttrust.as2.cli.config.channel
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.jooq.tables.pojos.TradingPartner
 import com.freighttrust.persistence.TradingChannelRepository
@@ -56,6 +55,14 @@ class TradingChannelUpdate : KoinComponent, Runnable {
   var recipientAs2Id: String? = null
 
   @Option(
+    names = ["-bcv", "--allow-body-certificate-for-verification"],
+    description = ["allow certificate provided in body of the request to be used for signature verification"],
+    required = true,
+    defaultValue = "false"
+  )
+  var allowBodyCertificateForVerification: Boolean? = null
+
+  @Option(
     names = ["-u", "--recipient-message-url"],
     description = ["recipient's url for receiving messages"]
   )
@@ -63,7 +70,6 @@ class TradingChannelUpdate : KoinComponent, Runnable {
 
   private val partnerRepository: TradingPartnerRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
-  private val objectMapper: ObjectMapper by inject()
 
   override fun run() {
 
@@ -104,6 +110,7 @@ class TradingChannelUpdate : KoinComponent, Runnable {
               senderAs2Identifier = this@TradingChannelUpdate.senderAs2Id ?: record.senderAs2Identifier
               recipientId = this@TradingChannelUpdate.recipientPartnerId ?: record.recipientId
               recipientAs2Identifier = this@TradingChannelUpdate.recipientAs2Id ?: record.recipientAs2Identifier
+              allowBodyCertificateForVerification = this@TradingChannelUpdate.allowBodyCertificateForVerification ?: record.allowBodyCertificateForVerification
               recipientMessageUrl = this@TradingChannelUpdate.recipientMessageUrl ?: record.recipientMessageUrl
             },
           tx

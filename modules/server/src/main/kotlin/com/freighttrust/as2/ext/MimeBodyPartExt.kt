@@ -104,6 +104,8 @@ fun MimeBodyPart.sign(
           .setSignedAttributeGenerator(AttributeTable(signedAttributes))
           .build(algorithm.signAlgorithmName, privateKey, certificate)
       )
+
+      // include certificate in response body
       addCertificates(certificateStore)
     }
 

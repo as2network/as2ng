@@ -17,21 +17,8 @@ class DecryptionHandler(
       with(ctx.as2Context) {
 
         if (!isBodyEncrypted) return ctx.next()
-
-        var recipientKeyPair = records.recipientKeyPair
-
-        if (recipientKeyPair == null) {
-          // a recipient key pair has not been configured for this trading channel so we fallback to the default key pair
-          // defined for the recipient trading partner
-
-          val keyPair = keyPairRepository.findById(
-            KeyPair().apply { id = records.recipient.keyPairId }
-          )
-
-          recipientKeyPair = requireNotNull(keyPair) { "Recipient key pair could not be found" }
-        }
-
-        ctx.as2Context = decrypt(recipientKeyPair)
+        // TODO allow use of certificate in body part?
+        ctx.as2Context = decrypt(records.recipientKeyPair)
       }
 
       ctx.next()

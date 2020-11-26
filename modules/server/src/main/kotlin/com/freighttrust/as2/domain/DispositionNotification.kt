@@ -3,12 +3,16 @@ package com.freighttrust.as2.domain
 import com.freighttrust.as2.ext.calculateMic
 import com.freighttrust.as2.ext.getAs2Header
 import com.freighttrust.as2.ext.setAs2Header
+import com.freighttrust.as2.ext.sign
 import com.freighttrust.as2.handlers.as2Context
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
+import com.freighttrust.persistence.extensions.toPrivateKey
+import com.freighttrust.persistence.extensions.toX509
 import com.helger.as2lib.util.AS2IOHelper
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
+import com.helger.mail.cte.EContentTransferEncoding
 import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.web.RoutingContext
 import java.text.ParseException
@@ -117,6 +121,12 @@ data class Disposition(
           return Disposition(actionMode, sendingMode, type, modifier, modifierText)
         }
     }
+
+    val automaticProcessed = Disposition(
+      DispositionActionMode.AutomaticAction,
+      DispositionSendingMode.SentAutomatically,
+      DispositionType.Processed
+    )
 
     /**
      * The "failed" AS2-disposition-type MUST be used when a failure occurs
@@ -236,6 +246,7 @@ fun DispositionNotification.fromMimeBodyPart(bodyPart: MimeBodyPart): Dispositio
 
 fun DispositionNotification.toMimeBodyPart(ctx: RoutingContext): MimeBodyPart =
   with(ctx.as2Context) {
+
     InternetHeaders()
       .apply {
         setAs2Header(AS2Header.ReportingUA, reportingUa)
@@ -262,6 +273,7 @@ fun DispositionNotification.toMimeBodyPart(ctx: RoutingContext): MimeBodyPart =
             .append(CHttp.EOL)
         }
         val content = builder.append(CHttp.EOL).toString()
+
         MimeBodyPart()
           .apply {
             setContent(content, "message/disposition-notification")

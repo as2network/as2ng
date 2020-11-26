@@ -162,32 +162,32 @@ public class RequestRecord extends UpdatableRecordImpl<RequestRecord> implements
     }
 
     /**
-     * Setter for <code>public.request.delivered_at</code>.
+     * Setter for <code>public.request.forwarded_at</code>.
      */
-    public RequestRecord setDeliveredAt(OffsetDateTime value) {
+    public RequestRecord setForwardedAt(OffsetDateTime value) {
         set(9, value);
         return this;
     }
 
     /**
-     * Getter for <code>public.request.delivered_at</code>.
+     * Getter for <code>public.request.forwarded_at</code>.
      */
-    public OffsetDateTime getDeliveredAt() {
+    public OffsetDateTime getForwardedAt() {
         return (OffsetDateTime) get(9);
     }
 
     /**
-     * Setter for <code>public.request.delivered_to</code>.
+     * Setter for <code>public.request.forwarded_to</code>.
      */
-    public RequestRecord setDeliveredTo(String value) {
+    public RequestRecord setForwardedTo(String value) {
         set(10, value);
         return this;
     }
 
     /**
-     * Getter for <code>public.request.delivered_to</code>.
+     * Getter for <code>public.request.forwarded_to</code>.
      */
-    public String getDeliveredTo() {
+    public String getForwardedTo() {
         return (String) get(10);
     }
 
@@ -291,12 +291,12 @@ public class RequestRecord extends UpdatableRecordImpl<RequestRecord> implements
 
     @Override
     public Field<OffsetDateTime> field10() {
-        return Request.REQUEST.DELIVERED_AT;
+        return Request.REQUEST.FORWARDED_AT;
     }
 
     @Override
     public Field<String> field11() {
-        return Request.REQUEST.DELIVERED_TO;
+        return Request.REQUEST.FORWARDED_TO;
     }
 
     @Override
@@ -356,12 +356,12 @@ public class RequestRecord extends UpdatableRecordImpl<RequestRecord> implements
 
     @Override
     public OffsetDateTime component10() {
-        return getDeliveredAt();
+        return getForwardedAt();
     }
 
     @Override
     public String component11() {
-        return getDeliveredTo();
+        return getForwardedTo();
     }
 
     @Override
@@ -421,12 +421,12 @@ public class RequestRecord extends UpdatableRecordImpl<RequestRecord> implements
 
     @Override
     public OffsetDateTime value10() {
-        return getDeliveredAt();
+        return getForwardedAt();
     }
 
     @Override
     public String value11() {
-        return getDeliveredTo();
+        return getForwardedTo();
     }
 
     @Override
@@ -495,13 +495,13 @@ public class RequestRecord extends UpdatableRecordImpl<RequestRecord> implements
 
     @Override
     public RequestRecord value10(OffsetDateTime value) {
-        setDeliveredAt(value);
+        setForwardedAt(value);
         return this;
     }
 
     @Override
     public RequestRecord value11(String value) {
-        setDeliveredTo(value);
+        setForwardedTo(value);
         return this;
     }
 
@@ -549,7 +549,7 @@ public class RequestRecord extends UpdatableRecordImpl<RequestRecord> implements
     /**
      * Create a detached, initialised RequestRecord
      */
-    public RequestRecord(UUID id, RequestType type, JSONB headers, Long bodyFileId, String messageId, String subject, Long tradingChannelId, UUID originalRequestId, OffsetDateTime receivedAt, OffsetDateTime deliveredAt, String deliveredTo, String errorMessage, String errorStackTrace) {
+    public RequestRecord(UUID id, RequestType type, JSONB headers, Long bodyFileId, String messageId, String subject, Long tradingChannelId, UUID originalRequestId, OffsetDateTime receivedAt, OffsetDateTime forwardedAt, String forwardedTo, String errorMessage, String errorStackTrace) {
         super(Request.REQUEST);
 
         setId(id);
@@ -561,8 +561,8 @@ public class RequestRecord extends UpdatableRecordImpl<RequestRecord> implements
         setTradingChannelId(tradingChannelId);
         setOriginalRequestId(originalRequestId);
         setReceivedAt(receivedAt);
-        setDeliveredAt(deliveredAt);
-        setDeliveredTo(deliveredTo);
+        setForwardedAt(forwardedAt);
+        setForwardedTo(forwardedTo);
         setErrorMessage(errorMessage);
         setErrorStackTrace(errorStackTrace);
     }
