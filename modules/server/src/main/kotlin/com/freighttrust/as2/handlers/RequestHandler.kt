@@ -19,7 +19,7 @@ import com.freighttrust.jooq.enums.RequestType.message
 import com.freighttrust.jooq.tables.pojos.KeyPair
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.persistence.DispositionNotificationRepository
-import com.freighttrust.persistence.FileService
+import com.freighttrust.persistence.StorageService
 import com.freighttrust.persistence.KeyPairRepository
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingChannelRepository
@@ -46,7 +46,7 @@ class As2RequestHandler(
   private val dispositionNotificationRepository: DispositionNotificationRepository,
   private val requestRepository: RequestRepository,
   private val keyPairRepository: KeyPairRepository,
-  private val fileService: FileService,
+  private val storageService: StorageService,
   private val securityProvider: Provider,
   private val webClient: WebClient
 ) : CoroutineRouteHandler() {
@@ -128,7 +128,7 @@ class As2RequestHandler(
         val messageId = request.getAS2Header(AS2Header.MessageId)
 
         val bodyPath = "request_body/${uuidGenerator.generate()}"
-        val fileRecord = fileService.write(bodyPath, dataHandler)
+        val fileRecord = storageService.write(bodyPath, dataHandler)
 
         val requestRecord = requestRepository.transaction { tx ->
 

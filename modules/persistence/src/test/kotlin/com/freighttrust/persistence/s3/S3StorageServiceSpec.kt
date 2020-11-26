@@ -28,7 +28,7 @@ import org.koin.test.inject
 import kotlin.random.asJavaRandom
 
 @Suppress("BlockingMethodInNonBlockingContext")
-class S3FileServiceSpec : BehaviorSpec(), KoinTest {
+class S3StorageServiceSpec : BehaviorSpec(), KoinTest {
 
   private val bucket = "s3-file-service-spec"
 
@@ -62,7 +62,7 @@ class S3FileServiceSpec : BehaviorSpec(), KoinTest {
   private val s3 by inject<AmazonS3>()
 
   private val objectMapper by inject<ObjectMapper>()
-  private val fileService by inject<S3FileService>()
+  private val storageService by inject<S3StorageService>()
 
   private val faker = Faker(RandomSource.Default.random.asJavaRandom())
 
@@ -77,7 +77,7 @@ class S3FileServiceSpec : BehaviorSpec(), KoinTest {
       `when`("it is written to the file service") {
 
         val path = faker.file().fileName()
-        val record = fileService.write(path, dataHandler)
+        val record = storageService.write(path, dataHandler)
 
         val dataBytes = withContext(Dispatchers.IO) {
           dataHandler.inputStream.readAllBytes()
@@ -89,7 +89,7 @@ class S3FileServiceSpec : BehaviorSpec(), KoinTest {
           record.provider shouldBe FileProvider.s3
 
           with(record.metadataForS3(objectMapper)) {
-            bucket shouldBe this@S3FileServiceSpec.bucket
+            bucket shouldBe this@S3StorageServiceSpec.bucket
             key shouldBe path
             contentType shouldBe dataHandler.contentType
             contentLength shouldBe dataBytes.size
@@ -116,7 +116,7 @@ class S3FileServiceSpec : BehaviorSpec(), KoinTest {
 
         then("we should be able to read the file back") {
 
-          val readDataHandler = fileService.read(record.id)
+          val readDataHandler = storageService.read(record.id)
 
           readDataHandler shouldNotBe null
           readDataHandler!!.contentType shouldBe dataHandler.contentType

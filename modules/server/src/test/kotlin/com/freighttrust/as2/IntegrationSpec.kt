@@ -16,7 +16,7 @@ import com.freighttrust.jooq.tables.pojos.Message
 import com.freighttrust.jooq.tables.pojos.Request
 import com.freighttrust.jooq.tables.pojos.TradingChannel
 import com.freighttrust.persistence.DispositionNotificationRepository
-import com.freighttrust.persistence.FileService
+import com.freighttrust.persistence.StorageService
 import com.freighttrust.persistence.RequestRepository
 import com.freighttrust.persistence.TradingChannelRepository
 import com.freighttrust.persistence.TradingPartnerRepository
@@ -80,7 +80,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
   val tempFileHelper = TempFileHelper()
 
-  private val fileService: FileService by inject()
+  private val storageService: StorageService by inject()
   private val requestRepository: RequestRepository by inject()
   private val channelRepository: TradingChannelRepository by inject()
   private val partnerRepository: TradingPartnerRepository by inject()
@@ -457,7 +457,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       // there should be a valid body file reference
       request.bodyFileId shouldBe bodyFile!!.id
-      val fileDataHandler = fileService.read(bodyFile.id)
+      val fileDataHandler = storageService.read(bodyFile.id)
 
       fileDataHandler shouldNotBe null
       fileDataHandler!!.inputStream.readAllBytes().size shouldBeGreaterThan 0

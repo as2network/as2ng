@@ -3,7 +3,7 @@ package com.freighttrust.persistence.local
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.enums.FileProvider
 import com.freighttrust.persistence.FileRepository
-import com.freighttrust.persistence.FileService
+import com.freighttrust.persistence.StorageService
 import com.freighttrust.persistence.Repository
 import com.freighttrust.persistence.extensions.metadataForLocal
 import com.helger.mail.datasource.InputStreamDataSource
@@ -17,11 +17,11 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import javax.activation.DataHandler
 
-class LocalFileService(
+class LocalStorageService(
   val baseDir: String,
   private val fileRepository: FileRepository,
   private val objectMapper: ObjectMapper
-) : FileService {
+) : StorageService {
 
   private val basePath = File(baseDir)
     .apply {

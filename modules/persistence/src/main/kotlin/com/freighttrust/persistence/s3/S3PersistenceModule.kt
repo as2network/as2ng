@@ -56,6 +56,6 @@ val S3PersistenceModule = module {
     val config = get<Config>(named("app"))
       .getConfig("persistence.s3")
 
-    S3FileService(get(), get(), config.getString("bucket"), get())
+    S3StorageService(get(), get(), config.getString("bucket"), get())
   }
 }

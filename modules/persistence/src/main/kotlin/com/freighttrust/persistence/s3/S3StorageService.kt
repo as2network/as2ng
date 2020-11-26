@@ -7,28 +7,26 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.freighttrust.jooq.enums.FileProvider
 import com.freighttrust.jooq.tables.pojos.File
 import com.freighttrust.persistence.FileRepository
-import com.freighttrust.persistence.FileService
+import com.freighttrust.persistence.StorageService
 import com.freighttrust.persistence.Repository
 import com.freighttrust.persistence.extensions.metadataForS3
 import com.helger.mail.datasource.InputStreamDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jooq.JSONB
-import org.jooq.tools.json.JSONObject
 import org.jooq.tools.json.JSONObject.toJSONString
-import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
 import javax.activation.DataHandler
 
-class S3FileService(
+class S3StorageService(
   private val fileRepository: FileRepository,
   private val transferManager: TransferManager,
   private val bucket: String,
   private val objectMapper: ObjectMapper
-) : FileService {
+) : StorageService {
 
   @Suppress("BlockingMethodInNonBlockingContext")
   override suspend fun write(path: String, dataHandler: DataHandler, ctx: Repository.Context?): File =

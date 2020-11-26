@@ -28,7 +28,7 @@ import java.io.FileInputStream
 import kotlin.random.asJavaRandom
 
 @Suppress("BlockingMethodInNonBlockingContext")
-class LocalFileServiceSpec : BehaviorSpec(), KoinTest {
+class LocalStorageServiceSpec : BehaviorSpec(), KoinTest {
 
   override fun listeners(): List<TestListener> =
     listOf(
@@ -54,7 +54,7 @@ class LocalFileServiceSpec : BehaviorSpec(), KoinTest {
     ).flatten()
 
   private val objectMapper by inject<ObjectMapper>()
-  private val fileService by inject<LocalFileService>()
+  private val storageService by inject<LocalStorageService>()
 
   private val faker = Faker(RandomSource.Default.random.asJavaRandom())
 
@@ -69,7 +69,7 @@ class LocalFileServiceSpec : BehaviorSpec(), KoinTest {
       `when`("it is written to the file service") {
 
         val filePath = faker.file().fileName()
-        val record = fileService.write(filePath, dataHandler)
+        val record = storageService.write(filePath, dataHandler)
 
         val dataBytes = withContext(Dispatchers.IO) {
           dataHandler.inputStream.readAllBytes()
@@ -91,7 +91,7 @@ class LocalFileServiceSpec : BehaviorSpec(), KoinTest {
 
           // check file location is correct
 
-          val localFilePath = "${fileService.baseDir}/${filePath}"
+          val localFilePath = "${storageService.baseDir}/${filePath}"
           val localFile = java.io.File(localFilePath)
 
           localFile.isFile shouldBe true
@@ -106,7 +106,7 @@ class LocalFileServiceSpec : BehaviorSpec(), KoinTest {
 
         then("we should be able to read the file back") {
 
-          val readDataHandler = fileService.read(record.id)
+          val readDataHandler = storageService.read(record.id)
 
           readDataHandler shouldNotBe null
           readDataHandler!!.contentType shouldBe dataHandler.contentType
