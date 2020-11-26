@@ -7,7 +7,6 @@ import com.freighttrust.as2.ext.get
 import com.freighttrust.as2.ext.isCompressed
 import com.freighttrust.as2.ext.isEncrypted
 import com.freighttrust.as2.ext.isSigned
-import com.freighttrust.as2.ext.sign
 import com.freighttrust.as2.ext.verifiedContent
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.as2.util.TempFileHelper
@@ -20,7 +19,6 @@ import com.freighttrust.persistence.DispositionNotificationRepository
 import com.freighttrust.persistence.extensions.toPrivateKey
 import com.freighttrust.persistence.extensions.toX509
 import com.helger.as2lib.disposition.DispositionOptions
-import com.helger.mail.cte.EContentTransferEncoding
 import io.vertx.core.Handler
 import io.vertx.core.MultiMap
 import io.vertx.core.buffer.Buffer
@@ -45,7 +43,6 @@ import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import java.security.GeneralSecurityException
 import java.security.Provider
-import java.security.cert.X509Certificate
 import javax.mail.MessagingException
 import javax.mail.internet.MimeBodyPart
 import kotlin.reflect.KClass
@@ -55,7 +52,6 @@ import com.freighttrust.persistence.extensions.formattedSerialNumber
 import io.vertx.core.http.HttpHeaders.CONTENT_ENCODING
 import io.vertx.core.http.HttpHeaders.CONTENT_TYPE
 import io.vertx.kotlin.ext.web.client.sendBufferAwait
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 val encryptionAlgorithmNameFinder = DefaultAlgorithmNameFinder()
@@ -86,9 +82,9 @@ data class BodyContext(
 
   val contentType: String get() = currentBody.contentType
 
-  val wasEncrypted: Boolean get() = decryptedBody != null
-  val wasCompressed: Boolean get() = decompressedBody != null
-  val wasSigned: Boolean get() = verifiedBody != null
+  val hasBeenDecrypted: Boolean get() = decryptedBody != null
+  val hasBeenDecompressed: Boolean get() = decompressedBody != null
+  val hasBeenVerified: Boolean get() = verifiedBody != null
 
   val encryptionAlgorithm: String? get() = decryptedBody?.second
   val encryptionKeyPairId: Long? get() = decryptedBody?.third?.id
@@ -194,7 +190,7 @@ data class As2RequestContext(
       true -> {
         try {
 
-          logger.debug("Decompressing a compressed AS2 message")
+          withLogger { debug("Decompressing a compressed message") }
 
           // Compress using stream
           if (logger.isDebugEnabled) {
@@ -217,7 +213,7 @@ data class As2RequestContext(
               .getContent(ZlibExpanderProvider())
               .let { typedStream -> SMIMEUtil.toMimeBodyPart(typedStream, tempFileHelper.newFile()) }
               .also {
-                logger.info("Successfully decompressed incoming AS2 message")
+                withLogger { debug("Successfully decompressed message") }
               }
 
           copy(
@@ -234,7 +230,8 @@ data class As2RequestContext(
             is MessagingException -> {
               logger.error("Error decompressing received message", ex)
               throw DispositionException(
-                Disposition.automaticError("decompression-failed"),
+                "Could not decompress message",
+                Disposition.automaticDecompressionFailedError,
                 ex
               )
             }
@@ -264,7 +261,7 @@ data class As2RequestContext(
 
   fun withMics(): As2RequestContext =
     with(bodyContext) {
-      val includeHeaders = wasEncrypted || wasSigned || wasCompressed
+      val includeHeaders = hasBeenDecrypted || hasBeenVerified || hasBeenDecompressed
 
       val mics = dispositionNotificationOptions
         ?.allMICAlgs?.map { algorithm -> body.calculateMic(includeHeaders, algorithm) }

@@ -30,6 +30,7 @@ class EDIValidationHandler(
                   }
                 } catch (ex: EDIStreamException) {
                   throw DispositionException(
+                    "Invalid EDI content found",
                     Disposition.automaticError("invalid-edi"),
                     ex
                   )

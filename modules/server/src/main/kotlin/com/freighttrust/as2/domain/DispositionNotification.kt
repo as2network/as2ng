@@ -3,16 +3,12 @@ package com.freighttrust.as2.domain
 import com.freighttrust.as2.ext.calculateMic
 import com.freighttrust.as2.ext.getAs2Header
 import com.freighttrust.as2.ext.setAs2Header
-import com.freighttrust.as2.ext.sign
 import com.freighttrust.as2.handlers.as2Context
 import com.freighttrust.as2.util.AS2Header
 import com.freighttrust.jooq.tables.pojos.DispositionNotification
-import com.freighttrust.persistence.extensions.toPrivateKey
-import com.freighttrust.persistence.extensions.toX509
 import com.helger.as2lib.util.AS2IOHelper
 import com.helger.commons.http.CHttp
 import com.helger.commons.http.CHttpHeader
-import com.helger.mail.cte.EContentTransferEncoding
 import io.vertx.core.http.HttpHeaders
 import io.vertx.ext.web.RoutingContext
 import java.text.ParseException
@@ -187,6 +183,13 @@ data class Disposition(
       DispositionModifier.Error,
       reason
     )
+
+    val automaticAuthenticationFailedError = automaticError("authentication-failed")
+    val automaticDecompressionFailedError = automaticError("decompress-failed")
+    val automaticDecryptionFailedError = automaticError("decryption-failed")
+    val automaticInsufficientMessageSecurityError = automaticError("insufficient-message-security")
+    val automaticIntegrityCheckFailedError = automaticError("integrity-check-failed")
+    val automaticUnexpectedProcessingError = automaticError("unexpected-processing-error")
   }
 
   override fun toString(): String = StringBuilder()
@@ -258,7 +261,7 @@ fun DispositionNotification.toMimeBodyPart(ctx: RoutingContext): MimeBodyPart =
         val signingAlgorithm =
           dispositionNotificationOptions?.firstMICAlg ?: throw Error("Disposition notification options not set")
 
-        val includeHeaders = with(bodyContext) { wasEncrypted || wasSigned || wasCompressed }
+        val includeHeaders = with(bodyContext) { hasBeenDecrypted || hasBeenVerified || hasBeenDecompressed }
 
         signingAlgorithm.apply {
           val mic = body.calculateMic(includeHeaders, signingAlgorithm)

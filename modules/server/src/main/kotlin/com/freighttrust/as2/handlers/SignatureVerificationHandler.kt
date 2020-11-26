@@ -105,7 +105,8 @@ class SignatureVerificationHandler(
           error("Error verifying signature: ${ex.message}")
         }
         throw DispositionException(
-          Disposition.automaticError("integrity-check-failed"),
+          "Could not verify signature",
+          Disposition.automaticIntegrityCheckFailedError,
           ex
         )
       }

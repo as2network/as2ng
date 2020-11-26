@@ -98,7 +98,8 @@ class As2RequestHandler(
                   withSenderKeyPair = true,
                   withRecipientKeyPair = true
                 ) ?: throw DispositionException(
-                Disposition.automaticFailure("Trading channel not found for provided AS2-From and AS2-To")
+                "Trading channel not found for provided AS2-From and AS2-To",
+                Disposition.automaticAuthenticationFailedError
               )
 
             }
@@ -137,7 +138,8 @@ class As2RequestHandler(
 
           val existingRequestId = requestRepository.findRequestId(messageId, tx)
           if (existingRequestId != null) throw DispositionException(
-            Disposition.automaticError("Message id is not unique and has already been received")
+            "Message id is not unique and has already been received",
+            Disposition.automaticAuthenticationFailedError
           )
 
           requestRepository.insert(

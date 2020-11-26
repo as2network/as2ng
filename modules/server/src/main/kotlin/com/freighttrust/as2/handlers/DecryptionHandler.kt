@@ -2,14 +2,10 @@ package com.freighttrust.as2.handlers
 
 import com.freighttrust.as2.domain.Disposition
 import com.freighttrust.as2.exceptions.DispositionException
-import com.freighttrust.jooq.tables.pojos.KeyPair
-import com.freighttrust.persistence.KeyPairRepository
 import io.vertx.ext.web.RoutingContext
 import java.security.GeneralSecurityException
 
-class DecryptionHandler(
-  private val keyPairRepository: KeyPairRepository
-) : CoroutineRouteHandler() {
+class DecryptionHandler() : CoroutineRouteHandler() {
 
   override suspend fun coroutineHandle(ctx: RoutingContext) {
 
@@ -24,7 +20,8 @@ class DecryptionHandler(
       ctx.next()
     } catch (ex: GeneralSecurityException) {
       throw DispositionException(
-        Disposition.automaticError("decryption-failed"),
+        "Could not decrypt message",
+        Disposition.automaticDecryptionFailedError,
         ex
       )
     }

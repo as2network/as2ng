@@ -40,6 +40,7 @@ class ServerVerticle(
       .handler(koin.get<DecryptionHandler>())
       .handler(koin.get<DecompressionHandler>())
       .handler(koin.get<SignatureVerificationHandler>())
+      .handler(koin.get<DecompressionHandler>())
 
     router.post("/message")
       .handler(koin.get<EDIValidationHandler>())
