@@ -27,7 +27,6 @@ fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   jvmArgs = appJvmArgs
 
   args("run", verticle)
-  args("--cluster")
   args("--launcher-class", vertxLauncher)
   args("--redeploy", "src/**/*")
   args("--on-redeploy", "../../gradlew :modules:http:classes")
@@ -108,7 +107,6 @@ dependencies {
   implementation("io.vertx:vertx-config")
   implementation("io.vertx:vertx-lang-kotlin")
   implementation("io.vertx:vertx-lang-kotlin-coroutines")
-  implementation("io.vertx:vertx-hazelcast")
   implementation("io.vertx:vertx-web")
   implementation("io.vertx:vertx-web-client")
   implementation("io.vertx:vertx-web-api-contract")
