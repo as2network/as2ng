@@ -12,28 +12,32 @@ class MessageReceivedHandler(
 
   override suspend fun coroutineHandle(ctx: RoutingContext): Unit =
     with(ctx.as2Context) {
-      Message()
-        .also { message ->
 
-          message.requestId = records.request.id
+      ctx.as2Context =
+        Message()
+          .also { message ->
 
-          message.encryptionAlgorithm = bodyContext.encryptionAlgorithm
-          message.encryptionKeyPairId = bodyContext.encryptionKeyPairId
+            message.requestId = records.request.id
 
-          message.signatureKeyPairId = bodyContext.signatureKeyPairId
+            message.encryptionAlgorithm = bodyContext.encryptionAlgorithm
+            message.encryptionKeyPairId = bodyContext.encryptionKeyPairId
 
-          message.compressionAlgorithm = bodyContext.compressionAlgorithm
+            message.signatureKeyPairId = bodyContext.signatureKeyPairId
 
-          if (bodyContext.mics != null) {
-            message.setMics(*bodyContext.mics.toTypedArray())
+            message.compressionAlgorithm = bodyContext.compressionAlgorithm
+
+            if (bodyContext.mics != null) {
+              message.setMics(*bodyContext.mics.toTypedArray())
+            }
+
+            message.isMdnRequested = isMdnRequested
+            message.isMdnAsync = isMdnAsynchronous
+            message.receiptDeliveryOption = receiptDeliveryOption
+
+            messageRepository.insert(message)
+          }.let { message ->
+            copy(records = records.copy(message = message))
           }
-
-          message.isMdnRequested = isMdnRequested
-          message.isMdnAsync = isMdnAsynchronous
-          message.receiptDeliveryOption = receiptDeliveryOption
-
-          messageRepository.insert(message)
-        }
 
       ctx.next()
     }

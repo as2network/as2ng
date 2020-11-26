@@ -25,11 +25,10 @@ class MdnReceivedHandler(
       .fromMimeBodyPart(message.body)
 
     // TODO handle error better
-
     val originalRequestId = requestRepository.findRequestId(notification.originalMessageId)
       ?: throw Error("Could not find original request id")
 
-    val originalMessageRecord = requestRepository.transaction { tx ->
+    val (dispositionNotification, originalMessage) = requestRepository.transaction { tx ->
 
       requestRepository.update(
         Request()
@@ -40,29 +39,31 @@ class MdnReceivedHandler(
         tx
       )
 
-      dispositionNotificationRepository
-        .insert(
-          DispositionNotification()
-            .apply {
-              this.requestId = message.records.request.id
-              this.originalMessageId = notification.originalMessageId
-              this.originalRecipient = notification.originalRecipient
-              this.finalRecipient = notification.finalRecipient
-              this.reportingUa = notification.reportingUa
-              this.disposition = notification.disposition.toString()
-              notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
-            },
-          tx
-        )
+      Pair(
+        dispositionNotificationRepository
+          .insert(
+            DispositionNotification()
+              .apply {
+                this.requestId = message.records.request.id
+                this.originalMessageId = notification.originalMessageId
+                this.originalRecipient = notification.originalRecipient
+                this.finalRecipient = notification.finalRecipient
+                this.reportingUa = notification.reportingUa
+                this.disposition = notification.disposition.toString()
+                notification.receivedContentMic?.also { mic -> this.receivedContentMic = mic }
+              },
+            tx
+          ),
 
-      messageRepository
-        .findById(Message().apply { requestId = originalRequestId })
+        messageRepository
+          .findById(Message().apply { requestId = originalRequestId }, tx)
+      )
     }
 
     ctx.as2Context = message.copy(
       records = message.records.copy(
-        originalMessage = originalMessageRecord,
-        dispositionNotification = notification
+        originalMessage = originalMessage,
+        dispositionNotification = dispositionNotification
       )
     )
 

@@ -314,6 +314,8 @@ class IntegrationTestListener(
     val recipient: TestPartner
       get() = testChannel.recipient
 
+    var textData: String? = null
+
     fun withEncryptAndSign(
       cryptoAlgorithm: ECryptoAlgorithmCrypt?,
       signingAlgorithm: ECryptoAlgorithmSign?
@@ -342,6 +344,7 @@ class IntegrationTestListener(
         setData(text, Charset.defaultCharset())
         contentType = CMimeType.TEXT_PLAIN.asString
         contentTransferEncoding = EContentTransferEncoding.BINARY
+        textData = text
       }
       return this;
     }

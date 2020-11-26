@@ -26,6 +26,7 @@ public class Message implements Serializable {
     private Boolean  isMdnRequested;
     private Boolean  isMdnAsync;
     private String   receiptDeliveryOption;
+    private Long     fileId;
 
     public Message() {}
 
@@ -39,6 +40,7 @@ public class Message implements Serializable {
         this.isMdnRequested = value.isMdnRequested;
         this.isMdnAsync = value.isMdnAsync;
         this.receiptDeliveryOption = value.receiptDeliveryOption;
+        this.fileId = value.fileId;
     }
 
     public Message(
@@ -50,7 +52,8 @@ public class Message implements Serializable {
         String[] mics,
         Boolean  isMdnRequested,
         Boolean  isMdnAsync,
-        String   receiptDeliveryOption
+        String   receiptDeliveryOption,
+        Long     fileId
     ) {
         this.requestId = requestId;
         this.encryptionAlgorithm = encryptionAlgorithm;
@@ -61,6 +64,7 @@ public class Message implements Serializable {
         this.isMdnRequested = isMdnRequested;
         this.isMdnAsync = isMdnAsync;
         this.receiptDeliveryOption = receiptDeliveryOption;
+        this.fileId = fileId;
     }
 
     /**
@@ -198,6 +202,21 @@ public class Message implements Serializable {
         return this;
     }
 
+    /**
+     * Getter for <code>public.message.file_id</code>.
+     */
+    public Long getFileId() {
+        return this.fileId;
+    }
+
+    /**
+     * Setter for <code>public.message.file_id</code>.
+     */
+    public Message setFileId(Long fileId) {
+        this.fileId = fileId;
+        return this;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -261,6 +280,12 @@ public class Message implements Serializable {
         }
         else if (!receiptDeliveryOption.equals(other.receiptDeliveryOption))
             return false;
+        if (fileId == null) {
+            if (other.fileId != null)
+                return false;
+        }
+        else if (!fileId.equals(other.fileId))
+            return false;
         return true;
     }
 
@@ -277,6 +302,7 @@ public class Message implements Serializable {
         result = prime * result + ((this.isMdnRequested == null) ? 0 : this.isMdnRequested.hashCode());
         result = prime * result + ((this.isMdnAsync == null) ? 0 : this.isMdnAsync.hashCode());
         result = prime * result + ((this.receiptDeliveryOption == null) ? 0 : this.receiptDeliveryOption.hashCode());
+        result = prime * result + ((this.fileId == null) ? 0 : this.fileId.hashCode());
         return result;
     }
 
@@ -293,6 +319,7 @@ public class Message implements Serializable {
         sb.append(", ").append(isMdnRequested);
         sb.append(", ").append(isMdnAsync);
         sb.append(", ").append(receiptDeliveryOption);
+        sb.append(", ").append(fileId);
 
         sb.append(")");
         return sb.toString();

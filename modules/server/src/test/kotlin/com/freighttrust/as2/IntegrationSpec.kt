@@ -416,6 +416,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
     }
   }
 
+  @Suppress("BlockingMethodInNonBlockingContext")
   private suspend fun verify(
     requestBuilder: As2RequestBuilder,
     response: AS2ClientResponse
@@ -501,7 +502,7 @@ class IntegrationSpec : FunSpec(), KoinTest {
 
       val requestSettings = requestBuilder.settings
 
-      if (requestSettings.cryptAlgoID != null) {
+      if (request.type == RequestType.message && requestSettings.cryptAlgoID != null) {
         // if the request was encrypted we check that the correct key pair was used
         // TODO verify the encryption algorithm matches the request
         encryptionAlgorithm shouldNotBe null
@@ -528,6 +529,15 @@ class IntegrationSpec : FunSpec(), KoinTest {
       isMdnAsync shouldBe (isMdnRequested && asyncMdnRequested)
 
       // TODO receipt delivery option
+
+      if(channel.type == TradingChannelType.receiving) {
+        // check for a file entry that corresponds to the body of the received message
+        message.fileId shouldNotBe null
+
+        val receivedDataHandler = storageService.read(message.fileId!!)!!
+        receivedDataHandler.contentType shouldBe requestBuilder.request.contentType
+        receivedDataHandler.inputStream.readAllBytes() shouldBe requestBuilder.textData!!.toByteArray()
+      }
 
     }
 

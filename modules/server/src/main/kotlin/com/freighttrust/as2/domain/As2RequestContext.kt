@@ -71,6 +71,7 @@ data class Records(
   val recipient: TradingPartner,
   val senderKeyPair: KeyPair,
   val recipientKeyPair: KeyPair,
+  val message: MessageRecord? = null,
   val originalMessage: MessageRecord? = null,
   val dispositionNotification: DispositionNotification? = null
 )

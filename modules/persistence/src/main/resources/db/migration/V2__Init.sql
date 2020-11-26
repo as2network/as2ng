@@ -150,7 +150,10 @@ create table message
 
     is_mdn_requested        bool           not null,
     is_mdn_async            bool           not null,
-    receipt_delivery_option varchar(128)   null
+    receipt_delivery_option varchar(128)   null,
+
+    /* set in the case of a receiving trading channel */
+    file_id bigint references file(id)
 );
 
 /*****************************************************************************/

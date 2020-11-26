@@ -72,7 +72,7 @@ class ForwardMessageHandler(
 
       if (isMdnRequested && !isMdnAsynchronous) {
 
-        // synchronouse MDN handling
+        // synchronous MDN handling
 
         var bodyPart = MimeBodyPart()
           .apply {
