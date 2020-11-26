@@ -20,6 +20,7 @@ import com.freighttrust.persistence.TradingPartnerRepository
 import com.helger.as2lib.client.AS2ClientRequest
 import com.helger.as2lib.client.AS2ClientResponse
 import com.helger.as2lib.client.AS2ClientSettings
+import com.helger.as2lib.crypto.ECompressionType
 import com.helger.as2lib.crypto.ECryptoAlgorithmCrypt
 import com.helger.as2lib.crypto.ECryptoAlgorithmSign
 import com.helger.as2lib.disposition.DispositionOptions
@@ -331,6 +332,15 @@ class IntegrationTestListener(
 
     fun withAsyncMdn(url: String?): As2RequestBuilder {
       settings.asyncMDNUrl = url
+      return this
+    }
+
+    fun withCompression(enabled: Boolean, beforeSigning: Boolean = false): As2RequestBuilder {
+      if(enabled)
+        // only one form of compression is supported as per the spec
+        settings.setCompress(ECompressionType.ZLIB, beforeSigning)
+      else
+        settings.setCompress(null, false)
       return this
     }
 

@@ -63,7 +63,8 @@ class ForwardMessageHandler(
 
       if (response.statusCode() != 200) {
         throw DispositionException(
-          Disposition.automaticFailure("non-200-response")
+          "Recipient of forwarded message failed to response successfully",
+          Disposition.automaticUnexpectedProcessingError
         )
       }
 

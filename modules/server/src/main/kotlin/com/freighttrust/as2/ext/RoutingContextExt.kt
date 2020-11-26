@@ -113,7 +113,7 @@ fun RoutingContext.createDispositionNotification(disposition: Disposition): Disp
           ?.let { signingAlgorithm ->
 
             val includeHeaders = with(bodyContext) {
-              wasEncrypted || wasSigned || wasCompressed
+              hasBeenDecrypted || hasBeenVerified || hasBeenDecompressed
             }
 
             body.calculateMic(includeHeaders, signingAlgorithm)
