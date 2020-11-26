@@ -4,6 +4,7 @@ import com.freighttrust.common.AppConfigModule
 import com.freighttrust.persistence.local.LocalPersistenceModule
 import com.freighttrust.persistence.postgres.PostgresPersistenceModule
 import com.freighttrust.persistence.s3.S3PersistenceModule
+import com.freighttrust.serialisation.JsonModule
 import io.vertx.core.Verticle
 import io.vertx.core.Vertx
 import io.vertx.core.spi.VerticleFactory
@@ -19,6 +20,7 @@ class VerticleFactory : VerticleFactory {
 
   private val modules = listOf(
     AppConfigModule,
+    JsonModule,
     PostgresPersistenceModule,
     LocalPersistenceModule,
     S3PersistenceModule,
