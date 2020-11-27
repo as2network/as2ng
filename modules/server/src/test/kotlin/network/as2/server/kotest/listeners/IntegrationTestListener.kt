@@ -42,6 +42,8 @@ import org.testcontainers.utility.MountableFile
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.charset.Charset
+import javax.activation.DataHandler
+import javax.mail.util.ByteArrayDataSource
 
 enum class TestPartnerType {
   OpenAS2,
@@ -309,7 +311,7 @@ class IntegrationTestListener(
     val recipient: TestPartner
       get() = testChannel.recipient
 
-    var textData: String? = null
+    var data: DataHandler? = null
 
     fun withEncryptAndSign(
       cryptoAlgorithm: ECryptoAlgorithmCrypt?,
@@ -344,12 +346,18 @@ class IntegrationTestListener(
       return this
     }
 
+    fun withData(dataHandler: DataHandler): As2RequestBuilder {
+      request.setData(dataHandler)
+      request.contentTransferEncoding = EContentTransferEncoding.BINARY
+      this.data = dataHandler
+      return this
+    }
+
     fun withTextData(text: String): As2RequestBuilder {
       with(request) {
-        setData(text, Charset.defaultCharset())
-        contentType = CMimeType.TEXT_PLAIN.asString
+        data = DataHandler(ByteArrayDataSource(text, "application/text"))
+        setData(data!!)
         contentTransferEncoding = EContentTransferEncoding.BINARY
-        textData = text
       }
       return this
     }

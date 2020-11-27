@@ -62,9 +62,10 @@ tasks {
     // default service files merge
     mergeServiceFiles()
 
-    // some specific service file merging for smime data handling
+    // some specific service file merging for JavaBeans Activation framework etc.
     mergeServiceFiles("META-INF/javamail.*")
-    mergeServiceFiles("META-INF/mailcap*")
+    mergeServiceFiles("META-INF/mailcap")
+    mergeServiceFiles("META-INF/mailcap.default")
     mergeServiceFiles("META-INF/mime.types")
     mergeServiceFiles("META-INF/mimetypes.default")
 
