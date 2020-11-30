@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+  <Appenders>
+    <Console name="Default" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </Console>
+    <Console name="Handlers" target="SYSTEM_OUT">
+      <PatternLayout
+        pattern="%d{HH:mm:ss.SSS} %-5level [%X{Method} %X{Path}] [%X{MessageId}] [%X{AS2-From} -> %X{AS2-To}] [%X{Handler}] - %msg%n"/>
+    </Console>
+  </Appenders>
+
+  <Loggers>
+
+    <Logger name="network.as2" level="DEBUG" additivity="false">
+      <AppenderRef ref="Default"/>
+    </Logger>
+
+    <Root level="${env:LOG_LEVEL:-INFO}">
+      <AppenderRef ref="Default"/>
+    </Root>
+
+  </Loggers>
+</Configuration>
