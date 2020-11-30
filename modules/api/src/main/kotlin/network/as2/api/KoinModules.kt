@@ -4,6 +4,7 @@ import com.fasterxml.uuid.Generators
 
 import com.typesafe.config.Config
 import io.vertx.ext.web.client.WebClient
+import network.as2.api.handlers.metrics.GetStatusHandler
 import network.as2.persistence.StorageService
 import network.as2.persistence.local.LocalStorageService
 import network.as2.persistence.s3.S3StorageService
@@ -45,4 +46,9 @@ val ApiModule = module {
 
 
   }.bind(StorageService::class)
+
+  single { GetStatusHandler() }
+
+
+
 }
