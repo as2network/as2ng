@@ -1,0 +1,9 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: As2ng API
+servers:
+  - url: 'http://localhost:9090'
+paths:
+components:
+  schemas:
