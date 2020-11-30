@@ -29,7 +29,7 @@ fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   args("run", verticle)
   args("--launcher-class", vertxLauncher)
   args("--redeploy", "src/**/*")
-  args("--on-redeploy", "../../gradlew :modules:http:classes")
+  args("--on-redeploy", "../../gradlew :modules:server:classes")
 
   if (vertxDebug) {
     val javaOpts = listOf(
