@@ -29,7 +29,7 @@ fun JavaExec.verticleTask(verticle: String, debugPort: String) {
   args("run", verticle)
   args("--launcher-class", vertxLauncher)
   args("--redeploy", "src/**/*")
-  args("--on-redeploy", "../../gradlew :modules:server:classes")
+  args("--on-redeploy", "../../gradlew :modules:api:classes")
 
   if (vertxDebug) {
     val javaOpts = listOf(
@@ -53,12 +53,6 @@ tasks {
     // default service files merge
     mergeServiceFiles()
 
-    // some specific service file merging for JavaBeans Activation framework etc.
-    mergeServiceFiles("META-INF/javamail.*")
-    mergeServiceFiles("META-INF/mailcap.*")
-    mergeServiceFiles("META-INF/mime.types")
-    mergeServiceFiles("META-INF/mimetypes.default")
-
     manifest {
       attributes(
         mapOf(
@@ -70,12 +64,12 @@ tasks {
     }
   }
 
-  create<JavaExec>("runAs2ng") { verticleTask(verticle = "as2ng:network.as2.server.ServerVerticle", debugPort = "10000") }
+  create<JavaExec>("runApi") { verticleTask(verticle = "as2ng-api:network.as2.api.ApiVerticle", debugPort = "10000") }
 }
 
 buildConfigKotlin {
   sourceSet("main") {
-    packageName = "network.as2.server"
+    packageName = "network.as2.api"
     buildConfig(name = "group", value = project.group.toString())
     buildConfig(name = "name", value = project.name)
     buildConfig(name = "version", value = project.version.toString())
@@ -95,10 +89,7 @@ dependencies {
   implementation(project(":modules:crypto"))
 
   implementation("com.fasterxml.uuid:java-uuid-generator")
-  implementation("com.helger.as2:as2-server")
-
   implementation("org.apache.tika:tika-core")
-
   implementation("com.google.guava:guava")
 
   implementation("io.vertx:vertx-core")
@@ -109,10 +100,6 @@ dependencies {
   implementation("io.vertx:vertx-web-client")
   implementation("io.vertx:vertx-web-api-contract")
   implementation("io.vertx:vertx-reactive-streams")
-
-  implementation("io.xlate:staedi")
-
-  implementation("com.squareup.okhttp3:okhttp")
 
   testImplementation(project(":modules:testing"))
 

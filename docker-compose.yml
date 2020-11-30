@@ -19,12 +19,9 @@ volumes:
 
 services:
 
-  #  activemq:
-  #    image: rmohr/activemq:5.15.9-alpine
-  #    restart: unless-stopped
-  #    network_mode: host
-  #    volumes:
-  #      - activemq-data:/opt/activemq/data
+  swagger-editor:
+    image: swaggerapi/swagger-editor
+    network_mode: host
 
   postgres:
     image: postgres:12
