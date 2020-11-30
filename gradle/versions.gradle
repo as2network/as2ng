@@ -43,16 +43,16 @@ dependencyManagement {
     // Vertx
     // ------------------------------------------------------------------
 
-    dependency 'io.vertx:vertx-core:3.9.1'
-    dependency 'io.vertx:vertx-config:3.9.1'
-    dependency 'io.vertx:vertx-lang-kotlin:3.9.1'
-    dependency 'io.vertx:vertx-lang-kotlin-coroutines:3.9.1'
-    dependency 'io.vertx:vertx-hazelcast:3.9.1'
-    dependency 'io.vertx:vertx-web:3.9.1'
-    dependency 'io.vertx:vertx-web-api-contract:3.9.1'
-    dependency 'io.vertx:vertx-web-client:3.9.1'
-    dependency 'io.vertx:vertx-reactive-streams:3.9.1'
-    dependency 'io.vertx:vertx-junit5:3.9.1'
+    dependency 'io.vertx:vertx-core:3.9.4'
+    dependency 'io.vertx:vertx-config:3.9.4'
+    dependency 'io.vertx:vertx-lang-kotlin:3.9.4'
+    dependency 'io.vertx:vertx-lang-kotlin-coroutines:3.9.4'
+    dependency 'io.vertx:vertx-hazelcast:3.9.4'
+    dependency 'io.vertx:vertx-web:3.9.4'
+    dependency 'io.vertx:vertx-web-api-contract:3.9.4'
+    dependency 'io.vertx:vertx-web-client:3.9.4'
+    dependency 'io.vertx:vertx-reactive-streams:3.9.4'
+    dependency 'io.vertx:vertx-junit5:3.9.4'
 
     // ------------------------------------------------------------------
     // Web Clients
