@@ -2,13 +2,13 @@
 
 ## Table of Contents
 
-* [Development Guide](#development-guide)
-    * [Prerequisites](#prerequisites)   
-    * [Code Organization](#code-organization)
-    * [Starting a Dev Environment](#starting-a-dev-environment)       
-    * [Running Migrations](#running-migrations)
-    * [Updating JOOQ Entities](#updating-jooq-entities)    
-    * [Formatting source](#formatting-source)
+- [Development Guide](#development-guide)
+  - [Prerequisites](#prerequisites)
+  - [Code Organization](#code-organization)
+  - [Starting a Dev Environment](#starting-a-dev-environment)
+  - [Running Migrations](#running-migrations)
+  - [Updating JOOQ Entities](#updating-jooq-entities)
+  - [Formatting source](#formatting-source)
 
 ## Prerequisites
 
@@ -24,9 +24,9 @@ The codebase is organized as follows:
 
 ```text
 ├── bin                 # various utility scripts
-│   ├── cli             # calls the cli module for running admin tasks on a local environment       
+│   ├── cli             # calls the cli module for running admin tasks on a local environment
 │   ├── flyway          # run database migrations
-│   ├── initialize      # initialize a local development environment 
+│   ├── initialize      # initialize a local development environment
 │   ├── mc              # utility script for local minio
 │   └── vault           # utility script for local vault
 ├── docker
@@ -55,39 +55,39 @@ $ direnv allow                                  # as and when prompted to do so
 
 $ docker-compose up -d                          # starts the various services such as vault, minio, postgres etc
 $ docker-compose tail -f                        # watch the logs for successful services startup
-$ bin/initialize                                # this will generate some initial state   
+$ bin/initialize                                # this will generate some initial state
 ```
 
 The `initialize` script will do the following:
 
-* Enable the [Public Key Infrastructure (PKI)](https://www.vaultproject.io/docs/secrets/pki) secrets engine within Vault and generate an initial certificate authority
-* Apply the database migrations located in `modules/persistence/src/main/resources/db/migration` to the Postgres database
-* Create a S3 bucket within the Minio service as configured by the `AS2NG_S3_BUCKET` environment variable
-* Generate some encryption key pairs 
-* Generate some example trading partners
-* Generate some example trading channels
-* Export some keystores based on the configured trading channels and partners for use within local testing as2-lib based servers
+- Enable the [Public Key Infrastructure (PKI)](https://www.vaultproject.io/docs/secrets/pki) secrets engine within Vault and generate an initial certificate authority
+- Apply the database migrations located in `modules/persistence/src/main/resources/db/migration` to the Postgres database
+- Create a S3 bucket within the Minio service as configured by the `AS2NG_S3_BUCKET` environment variable
+- Generate some encryption key pairs
+- Generate some example trading partners
+- Generate some example trading channels
+- Export some keystores based on the configured trading channels and partners for use within local testing as2-lib based servers
 
 After the `initialize` script has successfully completed run the following:
 
 ```sh
 $ ./gradlew :modules:as2-lib:runOpenAS2A        # as2-lib based test server configured with one of the exported keystores and trading channels
 $ ./gradlew :modules:as2-lib:runOpenAS2B        # as2-lib based test server configured with one of the exported keystores and trading channels
-$ ./gradlew :modules:server:runAS2Server        # starts the vert.x based as2 exchange server 
+$ ./gradlew :modules:server:runAS2Server        # starts the vert.x based as2 exchange server
 ```
 
 You can now send a test message from `OpenAS2A` to `OpenAS2B` by running the following:
 
 ```sh
 $ echo "Hello world" > modules/as2-lib/data/text/OpenAS2A/toOpenAS2B/test.txt
-``` 
+```
 
 ## Running Migrations
 
 After making changes to the database structure you can run the migrations against the local Postgres database as follows:
 
 ```sh
-$ ./gradlew :persistence:flywayMigrate 
+$ ./gradlew :persistence:flywayMigrate
 ```
 
 To drop all data and structure in the DB you can use:
@@ -99,7 +99,7 @@ $ ./gradlew :persistence:flywayClean
 Or you can use the utility script:
 
 ```sh
-$ bin/flyway migrate                   
+$ bin/flyway migrate
 $ bin/flyway clean
 ```
 
@@ -119,7 +119,7 @@ Then in the terminal run:
 $ ./gradlew :persistence:jooq-codegen-primary
 ```
 
-For more information about JOOQ please consult the [official docs](https://www.jooq.org/). 
+For more information about JOOQ please consult the [official docs](https://www.jooq.org/).
 
 ## Formatting source
 

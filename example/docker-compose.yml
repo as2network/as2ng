@@ -1,13 +1,11 @@
 version: "3.7"
 
 networks:
-
   internal:
 
   external:
 
 volumes:
-
   postgres:
     driver: local
 
@@ -20,9 +18,7 @@ volumes:
   minio:
     driver: local
 
-
 services:
-
   traefik:
     image: "traefik:v2.3"
     command:
@@ -44,7 +40,7 @@ services:
     image: postgres:12
     restart: unless-stopped
     shm_size: 4g
-    command: [ "postgres", "-c", "max_wal_size=512MB" ]
+    command: ["postgres", "-c", "max_wal_size=512MB"]
     networks:
       - internal
     volumes:

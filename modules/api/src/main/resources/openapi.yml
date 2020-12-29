@@ -3,9 +3,8 @@ info:
   version: 0.0.1
   title: As2ng API
 servers:
-  - url: 'http://localhost:9090'
+  - url: "http://localhost:9090"
 paths:
-
   /status:
     get:
       tags:
@@ -13,24 +12,18 @@ paths:
       operationId: getStatus
 
       responses:
-        '200':
-          description: 'Basic summary of the API server status'
+        "200":
+          description: "Basic summary of the API server status"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiStatus'
-
+                $ref: "#/components/schemas/ApiStatus"
 
 components:
-
   schemas:
-
     ApiStatus:
       type: object
       properties:
         uptime:
           type: integer
           minimum: 1
-
-
-
