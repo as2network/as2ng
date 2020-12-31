@@ -1,0 +1,81 @@
+version: 2.1
+
+executors:
+  docker_builder:
+    docker:
+      - image: circleci/buildpack-deps:stable-scm
+
+jobs:
+
+  notify_kotlin_releases:
+    docker:
+      - image: circleci/node:9
+    steps:
+      - checkout
+      - run: curl https://api.github.com/repos/JetBrains/kotlin/releases > notify_kotlin_releases/current.json
+      - run: node notify_kotlin_releases/filter-project
+      - run: node notify_kotlin_releases/notify
+      - run: cp notify_kotlin_releases/current.json notify_kotlin_releases/previous.json
+      - run: "git diff --exit-code --quiet -- notify_kotlin_releases/previous.json || (git add notify_kotlin_releases/previous.json && git config user.name $GITHUB_ACCOUNT && git config user.email $GITHUB_EMAIL && git commit -m \":pushpin: Update Kotlin previous releases\" && git push origin HEAD)"
+  
+  build:
+    parameters:
+      tag:
+        type: string
+      build_context:
+        type: string
+      source:
+        type: string
+      compiler_url:
+        type: string
+      additional_tags:
+        type: string
+    executor: docker_builder
+    environment:
+      TAG: << parameters.tag >>
+      BUILD_CONTEXT: << parameters.build_context >>
+      SOURCE: << parameters.source >>
+      COMPILER_URL: << parameters.compiler_url >>
+      ADDITIONAL_TAGS: << parameters.additional_tags >>
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: Build image << parameters.tag >>
+          command: ./scripts/build.sh
+      - run:
+          name: Tag image << parameters.tag >>
+          command: ./scripts/tag.sh
+      - run:
+          name: Push image << parameters.tag >>
+          command: ./scripts/push.sh
+
+only-deploy: &only-deploy
+  branches:
+    only:
+      - deploy
+
+workflows:
+  version: 2
+
+  notify_kotlin_releases:
+    jobs:
+      - notify_kotlin_releases
+    triggers:
+      - schedule:
+          cron: "0 * * * *"
+          filters:
+            branches:
+              only:
+                - master
+
+
+      - build:
+          name: build_1_4_jdk11
+          tag: as2ng/kotlin:1.4-jdk11
+          build_context: debian
+          source: openjdk:11-jdk
+          compiler_url: https://github.com/JetBrains/kotlin/releases/download/v1.4.0/kotlin-compiler-1.4.0.zip
+          additional_tags: as2ng/kotlin:1.4 as2ng/kotlin:1.4.0 as2ng/kotlin:1.4-jdk11 as2ng/kotlin:1.4.0-jdk11
+          filters: *only-deploy
