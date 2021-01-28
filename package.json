@@ -1,23 +1,23 @@
 {
-  "name": "as2protocol",
+  "name": "as2ng",
   "version": "1.0.0",
-  "description": "For getting started as a developer please consult the [Development Guide](/.github/DEVELOPMENT.md).",
-  "main": "index.js",
+  "description": "AS2NG Protocol enables AS2/EDINT messaging over both private, permissioned, or public blockchains",
   "directories": {
-    "example": "example"
+    "source": "modules/"
+    "example": "example/"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "./gradlew "
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/freight-trust/as2ng.git"
+    "url": "git+https://github.com/as2network/as2ng.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["as2", "as2 messages", "edi", "edi messages", "edint", "b2b messaging", "ethereum", "blockchain" ],
+  "author": "SEE CONTRIBUTORS",
   "license": "SSPL-1.0",
   "bugs": {
-    "url": "https://github.com/freight-trust/as2ng/issues"
+    "url": "https://github.com/as2network/as2ng/issues"
   },
-  "homepage": "https://github.com/freight-trust/as2ng#readme"
+  "homepage": "https://github.com/as2network/as2ng#readme"
 }
