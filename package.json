@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "AS2NG Protocol enables AS2/EDINT messaging over both private, permissioned, or public blockchains",
   "directories": {
-    "source": "modules/"
+    "source": "modules/",
     "example": "example/"
   },
   "scripts": {
