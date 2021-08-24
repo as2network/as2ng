@@ -1,9 +1,10 @@
-pluginManagement {
+enableFeaturePreview("VERSION_CATALOGS")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+pluginManagement {
   repositories {
     gradlePluginPortal()
-    jcenter()
-    maven(url = "https://dl.bintray.com/gradle/gradle-plugins")
+    mavenCentral()
   }
 }
 
