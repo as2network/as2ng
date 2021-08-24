@@ -67,8 +67,8 @@ allprojects {
     jcenter()
     maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://repo.spring.io/libs-release")
-    maven(url = "https://kotlin.bintray.com/kotlinx")
-    maven(url = "http://dl.bintray.com/kotlin/kotlin-dev")
+    maven(url = "https://plugins.gradle.org/m2/" )
+    maven(url = "https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev" )
   }
 
   tasks {
