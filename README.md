@@ -44,11 +44,11 @@ Protocol->Shippment Information: Success
 
 #### Main Document
 
-![image alt](https://raw.githubusercontent.com/freight-trust/tdocs/master/src/images/StandardDoc_StandardDocument.png "title" =800x500)
+![](https://raw.githubusercontent.com/freight-trust/tdocs/master/src/images/StandardDoc_StandardDocument.png)
 
 ####     Sections
 
-![image alt](https://raw.githubusercontent.com/freight-trust/tdocs/master/src/images/StandardDoc_Sections.png "title" =500x300)
+![](https://raw.githubusercontent.com/freight-trust/tdocs/master/src/images/StandardDoc_Sections.png)
 
 
 
