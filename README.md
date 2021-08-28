@@ -20,7 +20,38 @@ For getting started as a developer please consult the [Development Guide](/.gith
 
 For information on how to run AS2NG please consult our [Usage Guide](/.github/USAGE.md)
 
-For all other information please consult the [Wiki](https://github.com/freight-trust/as2ng/wiki).
+For all other information please consult the [Wiki](https://github.com/as2network/as2ng/wiki).
+
+### Example Workflow
+
+```sequence
+Shippment Information->Protocol Pipe: Necessary Information
+Note right of Protocol: Protocol Parses raw EDI
+Protocol Pipe-->Shippment Information: Validates
+Protocol Pipe -->Protocol Service: Sends JSON Object
+Protocol Service -->Network Service: Generates Contract from JSON Object 
+Network Service -->Protocol Service: Contract Deployed
+Protocol Service --> Protocol: Instrument Created at 0x....
+Note right of Protocol: ABI.json and TDOC.json match and verify
+Note left of Shippment Information: Shippment Information Polling (async)
+Shippment Information->Protocol: Polling Job Status
+Protocol->Shippment Information: Success
+```
+
+### Data Models
+
+> TradeDoc Format
+
+#### Main Document
+
+![image alt](https://raw.githubusercontent.com/freight-trust/tdocs/master/src/images/StandardDoc_StandardDocument.png "title" =800x500)
+
+####     Sections
+
+![image alt](https://raw.githubusercontent.com/freight-trust/tdocs/master/src/images/StandardDoc_Sections.png "title" =500x300)
+
+
+
 
 ## License
 
